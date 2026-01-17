@@ -9,210 +9,348 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'SolaimanLipi', 'Siyam Rupali', Arial, sans-serif;
+            font-family: 'Kalpurush', 'SolaimanLipi', 'Siyam Rupali', Arial, sans-serif;
         }
         
         body {
-            background-color: #f5f5f5;
-            padding: 20px;
+            background-color: #f0f8ff;
+            padding: 15px;
             color: #333;
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        
-        .header {
-            background-color: #1a5a9a;
-            color: white;
-            padding: 25px 30px;
-            text-align: center;
-            border-bottom: 5px solid #ffc107;
-        }
-        
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-        
-        .header p {
-            font-size: 18px;
-            opacity: 0.9;
-        }
-        
-        .content {
-            padding: 30px;
-        }
-        
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-            border: 1px solid #ddd;
-        }
-        
-        .info-table td {
-            padding: 15px 20px;
-            border-bottom: 1px solid #eaeaea;
-            font-size: 18px;
-        }
-        
-        .info-table td:first-child {
-            width: 30%;
-            font-weight: bold;
-            background-color: #f8f9fa;
-            border-right: 1px solid #eaeaea;
-        }
-        
-        .info-table tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .facebook-link {
-            color: #1877F2;
-            text-decoration: none;
+            line-height: 1.4;
+            min-height: 100vh;
             display: flex;
+            justify-content: center;
             align-items: center;
         }
         
-        .facebook-link:hover {
+        .id-card {
+            width: 100%;
+            max-width: 400px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+            position: relative;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #1a5a9a 0%, #2a6bb0 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 8px solid #ffc107;
+        }
+        
+        .card-header h1 {
+            font-size: 20px;
+            margin-bottom: 5px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        
+        .card-header p {
+            font-size: 14px;
+            opacity: 0.95;
+            letter-spacing: 0.5px;
+        }
+        
+        .card-content {
+            padding: 25px;
+        }
+        
+        .info-item {
+            display: flex;
+            margin-bottom: 18px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .info-label {
+            width: 35%;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a5a9a;
+            padding-right: 10px;
+            line-height: 1.3;
+        }
+        
+        .info-value {
+            width: 65%;
+            font-size: 14px;
+            color: #333;
+            line-height: 1.3;
+        }
+        
+        .info-value a {
+            color: #1877F2;
+            text-decoration: none;
+            font-size: 13px;
+            display: inline-block;
+            word-break: break-all;
+        }
+        
+        .info-value a:hover {
             text-decoration: underline;
+        }
+        
+        .contact-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+        
+        .contact-item {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        .contact-label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .contact-number {
+            font-size: 13px;
+            color: #1a5a9a;
+            font-weight: 600;
+            direction: ltr;
+            display: block;
+        }
+        
+        .telegram-link {
+            color: #0088cc;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .telegram-icon {
+            margin-right: 5px;
+            font-size: 14px;
         }
         
         .signature-section {
             text-align: center;
-            margin-top: 40px;
-            padding-top: 30px;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px dashed #ddd;
         }
         
         .signature-img {
-            max-width: 300px;
+            max-width: 180px;
             height: auto;
-            margin: 20px auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-            background-color: #f9f9f9;
-        }
-        
-        .download-btn {
-            display: inline-block;
-            background-color: #1a5a9a;
-            color: white;
-            padding: 14px 28px;
-            text-decoration: none;
-            font-size: 20px;
-            font-weight: bold;
+            margin: 0 auto;
+            border: 1px solid #ddd;
             border-radius: 5px;
-            margin-top: 20px;
-            transition: background-color 0.3s;
-        }
-        
-        .download-btn:hover {
-            background-color: #0d4477;
+            padding: 5px;
+            background-color: white;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
         }
         
         .footer {
+            padding: 15px;
+            background-color: #f8f9fa;
             text-align: center;
-            padding: 20px;
-            background-color: #f1f1f1;
+            font-size: 12px;
             color: #666;
-            font-size: 16px;
-            margin-top: 30px;
+            border-top: 1px solid #e9ecef;
         }
         
-        @media (max-width: 768px) {
-            .info-table td {
-                display: block;
+        /* টেলিগ্রাম বাটন স্টাইল */
+        .telegram-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #0088cc;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            margin-top: 5px;
+            transition: background 0.3s;
+        }
+        
+        .telegram-btn:hover {
+            background: #006699;
+        }
+        
+        .telegram-btn-icon {
+            margin-right: 5px;
+            font-size: 14px;
+        }
+        
+        /* ফেসবুক বাটন স্টাইল */
+        .facebook-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #1877F2;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            margin-top: 5px;
+            transition: background 0.3s;
+        }
+        
+        .facebook-btn:hover {
+            background: #0d5fd1;
+        }
+        
+        .facebook-btn-icon {
+            margin-right: 5px;
+            font-size: 14px;
+        }
+        
+        /* ছোট আইকন */
+        .contact-icon {
+            font-size: 12px;
+            margin-right: 5px;
+            opacity: 0.7;
+        }
+        
+        @media (max-width: 480px) {
+            .id-card {
+                max-width: 95%;
+                border-radius: 15px;
+            }
+            
+            .card-header {
+                padding: 15px;
+            }
+            
+            .card-header h1 {
+                font-size: 18px;
+            }
+            
+            .card-content {
+                padding: 20px;
+            }
+            
+            .info-item {
+                flex-direction: column;
+                margin-bottom: 15px;
+            }
+            
+            .info-label {
                 width: 100%;
-                border-right: none;
+                margin-bottom: 5px;
             }
             
-            .info-table td:first-child {
+            .info-value {
                 width: 100%;
-                border-bottom: none;
-                padding-bottom: 5px;
             }
             
-            .header h1 {
-                font-size: 24px;
-            }
-            
-            .header p {
-                font-size: 16px;
+            .contact-row {
+                flex-direction: column;
+                gap: 10px;
             }
         }
     </style>
+    <link href="https://fonts.maateen.me/kalpurush/font.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <div class="id-card">
+        <div class="card-header">
             <h1>মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড, দিনাজপুর</h1>
             <p>বাংলাদেশ সরকার</p>
         </div>
         
-        <div class="content">
-            <table class="info-table">
-                <tr>
-                    <td>নাম</td>
-                    <td>প্রকাশের মহাঃ জৌহিদুল ইসলাম (বিসিএস-১৪)</td>
-                </tr>
-                <tr>
-                    <td>পদবী</td>
-                    <td>চেয়ারম্যান</td>
-                </tr>
-                <tr>
-                    <td>অফিস</td>
-                    <td>মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড, দিনাজপুর।</td>
-                </tr>
-                <tr>
-                    <td>ওয়েব পোর্টাল</td>
-                    <td>www.dinajpureducationboard.gov.bd</td>
-                </tr>
-                <tr>
-                    <td>ইমেইল</td>
-                    <td>dinajpureducationboard@gmail.com</td>
-                </tr>
-                <tr>
-                    <td>ফোন (অফিস)</td>
-                    <td>০২৫৮৮৮৭৫৮০</td>
-                </tr>
-                <tr>
-                    <td>ফেসবুক</td>
-                    <td>
-                        <a href="https://facebook.com/dinajpureducationboard" target="_blank" class="facebook-link">
-                            facebook.com/dinajpureducationboard
-                        </a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>ক্রিয়া নম্বর</td>
-                    <td>B-1201</td>
-                </tr>
-                <tr>
-                    <td>মোবাইল</td>
-                    <td>০১৭০০০৮৯৫৪০</td>
-                </tr>
-                <tr>
-                    <td>ফ্যাক্স</td>
-                    <td>০২৫৮৮৮৭৫৮১</td>
-                </tr>
-            </table>
+        <div class="card-content">
+            <div class="info-item">
+                <div class="info-label">নাম</div>
+                <div class="info-value">প্রকাশের মহাঃ জৌলিয়ুল ইসলাম (বিসিএস-১৪)</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-label">পদবী</div>
+                <div class="info-value">চেয়ারম্যান</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-label">অফিস</div>
+                <div class="info-value">মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড, দিনাজপুর</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-label">ওয়েব পোর্টাল</div>
+                <div class="info-value">
+                    <a href="http://www.dinajpureducationboard.gov.bd" target="_blank">
+                        www.dinajpureducationboard.gov.bd
+                    </a>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-label">ইমেইল</div>
+                <div class="info-value">
+                    <a href="mailto:dinajpureducationboard@gmail.com">
+                        dinajpureducationboard@gmail.com
+                    </a>
+                </div>
+            </div>
+            
+            <div class="contact-row">
+                <div class="contact-item">
+                    <div class="contact-label">ফোন (অফিস)</div>
+                    <div class="contact-number">
+                        <span class="contact-icon">📞</span> ০২৫৮৮৮৭৫৮০
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-label">মোবাইল</div>
+                    <div class="contact-number">
+                        <span class="contact-icon">📱</span> ০১৭০০০৮৯৫৪০
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-label">ফেসবুক</div>
+                <div class="info-value">
+                    <a href="https://facebook.com/dinajpureducationboard" target="_blank" class="facebook-btn">
+                        <span class="facebook-btn-icon">📘</span> Facebook Page
+                    </a>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-label">টেলিগ্রাম</div>
+                <div class="info-value">
+                    <a href="tg://resolve?phone=01700089540" class="telegram-btn">
+                        <span class="telegram-btn-icon">✈️</span> Telegram Chat
+                    </a>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-label">ফ্যাক্স</div>
+                <div class="info-value">০২৫৮৮৮৭৫৮১</div>
+            </div>
             
             <div class="signature-section">
-                <img src="YOUR_GOOGLE_DRIVE_IMAGE_LINK_HERE" alt="সই" class="signature-img">
-                
-                <a href="#" class="download-btn">ডাউনলোড করুন</a>
+                <img src="YOUR_GOOGLE_DRIVE_IMAGE_LINK_HERE" alt="স্বাক্ষর" class="signature-img">
             </div>
         </div>
         
         <div class="footer">
-            <p>© মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড, দিনাজপুর | সর্বস্বত্ব সংরক্ষিত</p>
+            <!-- ফুটার খালি রাখা হয়েছে -->
         </div>
     </div>
     
@@ -222,14 +360,52 @@
             const signatureImg = document.querySelector('.signature-img');
             if (signatureImg && googleDriveLink !== "YOUR_GOOGLE_DRIVE_IMAGE_LINK_HERE") {
                 signatureImg.src = googleDriveLink;
+            } else {
+                signatureImg.src = "https://via.placeholder.com/180x80/1a5a9a/ffffff?text=স্বাক্ষর";
             }
         }
         
-        document.addEventListener('DOMContentLoaded', setImageLink);
+        function setupTelegramLinks() {
+            const telegramLink = document.querySelector('.telegram-btn');
+            if (telegramLink) {
+                telegramLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const phoneNumber = '01700089540';
+                    const tgAppUrl = `tg://resolve?phone=${phoneNumber}`;
+                    const tgWebUrl = `https://web.telegram.org/k/#@${phoneNumber}`;
+                    
+                    window.location.href = tgAppUrl;
+                    
+                    setTimeout(function() {
+                        if (document.hasFocus()) {
+                            window.open(tgWebUrl, '_blank');
+                        }
+                    }, 2000);
+                });
+            }
+        }
         
-        document.querySelector('.download-btn').addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('ডাউনলোড শুরু হচ্ছে...');
+        function setupContactLinks() {
+            const mobileNumbers = document.querySelectorAll('.contact-number');
+            mobileNumbers.forEach(number => {
+                number.addEventListener('click', function() {
+                    const phoneText = this.textContent.replace(/[^\d]/g, '');
+                    if (phoneText) {
+                        window.location.href = `tel:${phoneText}`;
+                    }
+                });
+                
+                number.style.cursor = 'pointer';
+                number.title = 'কল করতে ক্লিক করুন';
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            setImageLink();
+            setupTelegramLinks();
+            setupContactLinks();
+            
+            console.log('শিক্ষা বোর্ড আইডি কার্ড লোড সম্পন্ন');
         });
     </script>
 </body>
