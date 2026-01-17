@@ -82,8 +82,14 @@
             font-size: 11px;
         }
         
-        .telegram-number {
+        .telegram-link {
             color: #0088cc;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .telegram-link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -121,7 +127,9 @@
             </tr>
             <tr>
                 <td>টেলিগ্রাম</td>
-                <td class="telegram-number">০১৭০০০৮৯৫৪০</td>
+                <td>
+                    <a href="tg://resolve?phone=01700089540" class="telegram-link">০১৭০০০৮৯৫৪০</a>
+                </td>
             </tr>
         </table>
         
@@ -129,5 +137,30 @@
             <!-- ফুটারে কোন লেখা নেই -->
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const telegramLink = document.querySelector('.telegram-link');
+            
+            if (telegramLink) {
+                telegramLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // টেলিগ্রাম অ্যাপে খোলার লিংক
+                    const tgAppUrl = 'tg://resolve?phone=01700089540';
+                    // টেলিগ্রাম ওয়েব ভার্সন (যদি অ্যাপ না থাকে)
+                    const tgWebUrl = 'https://web.telegram.org/k/#@01700089540';
+                    
+                    // প্রথমে অ্যাপে খুলতে চেষ্টা করুন
+                    window.location.href = tgAppUrl;
+                    
+                    // যদি অ্যাপ না থাকে, 2 সেকেন্ড পর ওয়েব ভার্সনে রিডাইরেক্ট করুন
+                    setTimeout(function() {
+                        window.open(tgWebUrl, '_blank');
+                    }, 2000);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
