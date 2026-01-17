@@ -2,394 +2,177 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>শিক্ষা বোর্ড, দিনাজপুর</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            font-family: Arial, sans-serif;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-            background-color: #f8f9fa;
-            color: #333;
-            line-height: 1.5;
+            background-color: #ffffff;
+            color: #000000;
+            line-height: 1.6;
             padding: 10px;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
         
         .container {
             width: 100%;
             max-width: 100%;
             margin: 0 auto;
-        }
-        
-        .id-card {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            border: 1px solid #e0e0e0;
         }
         
-        .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 20px 15px;
-            text-align: center;
-            position: relative;
-        }
-        
-        .header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: #ffc107;
-        }
-        
-        .header h1 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 5px;
-            line-height: 1.3;
-        }
-        
-        .header p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        .content {
-            padding: 15px;
-        }
-        
-        .info-table {
+        table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 16px;
+            border: 1px solid #cccccc;
         }
         
-        .info-table tr {
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .info-table tr:last-child {
-            border-bottom: none;
-        }
-        
-        .info-table td {
-            padding: 12px 8px;
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dddddd;
             vertical-align: top;
         }
         
-        .info-table td:first-child {
-            width: 35%;
-            font-weight: 600;
-            color: #1e3c72;
-            white-space: nowrap;
+        td:first-child {
+            width: 30%;
+            font-weight: bold;
+            background-color: #f5f5f5;
+            border-right: 1px solid #dddddd;
         }
         
-        .info-table td:last-child {
-            width: 65%;
-            color: #444;
-            word-break: break-word;
-        }
-        
-        .contact-info {
-            margin-top: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            border: 1px solid #e9ecef;
-        }
-        
-        .contact-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px dashed #dee2e6;
-        }
-        
-        .contact-item:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
+        tr:last-child td {
             border-bottom: none;
         }
         
-        .contact-label {
-            font-size: 13px;
-            color: #666;
-            font-weight: 500;
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #ffffff;
+            border-bottom: 2px solid #cccccc;
         }
         
-        .contact-value {
-            font-size: 13px;
-            color: #1e3c72;
-            font-weight: 600;
-            text-align: right;
+        .header h1 {
+            font-size: 24px;
+            color: #000000;
+            margin-bottom: 5px;
         }
         
-        .contact-value a {
-            color: #1e3c72;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-        }
-        
-        .contact-value a:hover {
-            text-decoration: underline;
-        }
-        
-        .email-link {
-            color: #d93025;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .email-link:hover {
-            text-decoration: underline;
+        .header p {
+            font-size: 18px;
+            color: #000000;
         }
         
         .footer {
-            padding: 15px;
             text-align: center;
-            font-size: 12px;
-            color: #666;
-            border-top: 1px solid #f0f0f0;
-            background: #f8f9fa;
+            margin-top: 20px;
+            padding: 10px;
+            color: #666666;
+            font-size: 14px;
         }
         
-        /* মোবাইল অপ্টিমাইজেশন */
-        @media (max-width: 480px) {
-            body {
-                padding: 8px;
-            }
-            
-            .id-card {
-                border-radius: 10px;
-            }
-            
-            .header {
-                padding: 18px 12px;
+        @media (max-width: 768px) {
+            td {
+                padding: 10px;
+                font-size: 14px;
             }
             
             .header h1 {
-                font-size: 16px;
+                font-size: 20px;
             }
             
             .header p {
-                font-size: 13px;
-            }
-            
-            .content {
-                padding: 12px;
-            }
-            
-            .info-table {
-                font-size: 13px;
-            }
-            
-            .info-table td {
-                padding: 10px 6px;
-            }
-            
-            .info-table td:first-child {
-                width: 40%;
-            }
-            
-            .info-table td:last-child {
-                width: 60%;
-            }
-            
-            .contact-info {
-                padding: 12px;
-            }
-            
-            .contact-item {
-                flex-direction: column;
-                gap: 3px;
-            }
-            
-            .contact-value {
-                text-align: left;
+                font-size: 16px;
             }
         }
         
-        @media (max-width: 360px) {
-            .header h1 {
-                font-size: 15px;
+        @media (max-width: 480px) {
+            td {
+                padding: 8px;
+                font-size: 13px;
+                display: block;
+                width: 100%;
+                border-right: none;
             }
             
-            .info-table {
-                font-size: 12px;
+            td:first-child {
+                width: 100%;
+                border-bottom: none;
+                padding-bottom: 5px;
+                background-color: #f5f5f5;
             }
             
-            .info-table td {
-                padding: 8px 5px;
-            }
-        }
-        
-        /* ডার্ক মোড সাপোর্ট */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background-color: #121212;
-                color: #e0e0e0;
+            tr {
+                border-bottom: 1px solid #dddddd;
+                padding: 10px 0;
+                display: block;
             }
             
-            .id-card {
-                background: #1e1e1e;
-                border-color: #333;
-            }
-            
-            .header {
-                background: linear-gradient(135deg, #0d1b3e 0%, #1a3a7a 100%);
-            }
-            
-            .info-table td:first-child {
-                color: #8bb4ff;
-            }
-            
-            .info-table td:last-child {
-                color: #ccc;
-            }
-            
-            .info-table tr {
-                border-color: #333;
-            }
-            
-            .contact-info {
-                background: #2d2d2d;
-                border-color: #333;
-            }
-            
-            .contact-item {
-                border-color: #444;
-            }
-            
-            .contact-label {
-                color: #aaa;
-            }
-            
-            .contact-value {
-                color: #8bb4ff;
-            }
-            
-            .footer {
-                background: #2d2d2d;
-                border-color: #333;
-                color: #aaa;
+            table {
+                border: none;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="id-card">
-            <div class="header">
-                <h1>মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড, দিনাজপুর</h1>
-                <p>বাংলাদেশ সরকার</p>
-            </div>
-            
-            <div class="content">
-                <table class="info-table">
-                    <tr>
-                        <td>নাম</td>
-                        <td>প্রকাশের মহাঃ জৈহিদুল ইসলাম (বিসিএস-১৪)</td>
-                    </tr>
-                    <tr>
-                        <td>পদবী</td>
-                        <td>চেয়ারম্যান</td>
-                    </tr>
-                    <tr>
-                        <td>অফিস</td>
-                        <td>মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড, দিনাজপুর</td>
-                    </tr>
-                    <tr>
-                        <td>ওয়েব পোর্টাল</td>
-                        <td>dinajpureducationboard.gov.bd</td>
-                    </tr>
-                    <tr>
-                        <td>ইমেইল</td>
-                        <td>
-                            <a href="mailto:dinajpureducationboard@gmail.com" class="email-link">
-                                dinajpureducationboard@gmail.com
-                            </a>
-                        </td>
-                    </tr>
-                </table>
-                
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <div class="contact-label">ফোন (অফিস)</div>
-                        <div class="contact-value">
-                            <a href="tel:0258887560">০২৫৮৮৮৭৫৬০</a>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-label">মোবাইল</div>
-                        <div class="contact-value">
-                            <a href="tel:01700089540">০১৭০০০৮৯৫৪০</a>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-label">কক্ষ নম্বর</div>
-                        <div class="contact-value">০১৭০০০৮৯৫৪০</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="footer">
-                <!-- ফুটার খালি -->
-            </div>
+        <div class="header">
+            <h1>মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড, দিনাজপুর</h1>
+            <p>বাংলাদেশ সরকার</p>
+        </div>
+        
+        <table>
+            <tr>
+                <td>নাম</td>
+                <td>প্রকাশের মহাঃ জৈহিদুল ইসলাম (বিসিএস-১৪)</td>
+            </tr>
+            <tr>
+                <td>পদবী</td>
+                <td>চেয়ারম্যান</td>
+            </tr>
+            <tr>
+                <td>অফিস</td>
+                <td>মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড, দিনাজপুর।</td>
+            </tr>
+            <tr>
+                <td>ওয়েব পোর্টাল</td>
+                <td>dinajpureducationboard@gmail.com</td>
+            </tr>
+            <tr>
+                <td>ইমেইল</td>
+                <td>dinajpureducationboard@gmail.com</td>
+            </tr>
+            <tr>
+                <td>ফোন (অফিস)</td>
+                <td>০২৫৮৮৮৭৫৬০</td>
+            </tr>
+            <tr>
+                <td>ইন্টারকম</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>কক্ষ নম্বর</td>
+                <td>০১৭০০০৮৯৫৪০</td>
+            </tr>
+            <tr>
+                <td>মোবাইল</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Fax</td>
+                <td></td>
+            </tr>
+        </table>
+        
+        <div class="footer">
+            <!-- ফুটারে কোন লেখা নেই -->
         </div>
     </div>
-
-    <script>
-        // মোবাইল অপ্টিমাইজেশন স্ক্রিপ্ট
-        document.addEventListener('DOMContentLoaded', function() {
-            // ফোন নম্বরগুলিকে ক্লিকযোগ্য করে তোলে
-            const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
-            phoneLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // মোবাইলে কল করার অপশন দেখাবে
-                    console.log('কলিং:', this.textContent);
-                });
-            });
-            
-            // ইমেইল লিঙ্ক
-            const emailLinks = document.querySelectorAll('a[href^="mailto:"]');
-            emailLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // মোবাইলে ইমেইল ক্লায়েন্ট খুলবে
-                    console.log('ইমেইল:', this.textContent);
-                });
-            });
-            
-            // টাচ ইভেন্টের জন্য অপ্টিমাইজেশন
-            document.body.addEventListener('touchstart', function() {}, {passive: true});
-            
-            // ভিউপোর্ট হাইট ঠিক রাখা
-            function setViewportHeight() {
-                let vh = window.innerHeight * 0.01;
-                document.documentElement.style.setProperty('--vh', `${vh}px`);
-            }
-            
-            setViewportHeight();
-            window.addEventListener('resize', setViewportHeight);
-            window.addEventListener('orientationchange', setViewportHeight);
-            
-            console.log('মোবাইল আইডি কার্ড লোডেড');
-        });
-    </script>
 </body>
 </html>
