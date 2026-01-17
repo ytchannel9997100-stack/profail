@@ -78,7 +78,6 @@
             text-align: center;
             margin-top: 40px;
             padding-top: 30px;
-            border-top: 2px dashed #ddd;
         }
         
         .signature-img {
@@ -191,44 +190,31 @@
             </table>
             
             <div class="signature-section">
-                <h2>ডিকেডর ডাউনলোড করুন</h2>
-                <p>নিচের বাটনে ক্লিক করে অফিসিয়াল ডিকেডর ডাউনলোড করুন</p>
+                <img src="YOUR_GOOGLE_DRIVE_IMAGE_LINK_HERE" alt="সই" class="signature-img">
                 
-                <!-- এখানে আপনার গুগল ড্রাইভ থেকে ছবির লিংক দিন -->
-                <img src="YOUR_GOOGLE_DRIVE_IMAGE_LINK_HERE" alt="ডিকেডর ডাউনলোড" class="signature-img">
-                
-                <a href="#" class="download-btn">ডিকেডর ডাউনলোড করুন</a>
+                <a href="#" class="download-btn">ডাউনলোড করুন</a>
             </div>
         </div>
         
         <div class="footer">
             <p>© মাধ্যমিক ও উচ্চ মাধ্যমিক শিক্ষা বোর্ড, দিনাজপুর | সর্বস্বত্ব সংরক্ষিত</p>
-            <p>পরিদর্শনের সময়: রবি থেকে বৃহস্পতিবার, সকাল ৯:০০টা থেকে বিকাল ৫:০০টা পর্যন্ত</p>
         </div>
     </div>
     
     <script>
-        // গুগল ড্রাইভ লিংক সেট করার জন্য সহজ ফাংশন
         function setImageLink() {
-            // এখানে আপনার গুগল ড্রাইভ ছবির সরাসরি লিংক দিন
             const googleDriveLink = "YOUR_GOOGLE_DRIVE_IMAGE_LINK_HERE";
-            
-            // সকল ছবি এলিমেন্টে লিংক সেট করা
             const signatureImg = document.querySelector('.signature-img');
             if (signatureImg && googleDriveLink !== "YOUR_GOOGLE_DRIVE_IMAGE_LINK_HERE") {
                 signatureImg.src = googleDriveLink;
             }
         }
         
-        // পেজ লোড হলে ফাংশন কল করুন
         document.addEventListener('DOMContentLoaded', setImageLink);
         
-        // ডাউনলোড বাটনে ক্লিক ইভেন্ট
         document.querySelector('.download-btn').addEventListener('click', function(e) {
             e.preventDefault();
-            alert('ডাউনলোড শুরু হচ্ছে... আপনার গুগল ড্রাইভ লিংকটি এখানে সংযুক্ত করুন।');
-            // এখানে আপনার ডাউনলোড লিংক যোগ করুন
-            // window.location.href = "YOUR_DOWNLOAD_LINK_HERE";
+            alert('ডাউনলোড শুরু হচ্ছে...');
         });
     </script>
 </body>
