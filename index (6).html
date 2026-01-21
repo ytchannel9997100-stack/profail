@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Denz Arena | Wallet & Matches</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body { 
+            background-color: #0f172a; 
+            color: white; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .app-container { 
+            max-width: 400px; 
+            margin: 0 auto; 
+            min-height: 100vh; 
+            background: #0f172a;
+            position: relative;
+            padding-bottom: 70px;
+        }
+        
+        .hidden { display: none !important; }
+        
+        /* Header */
+        .header {
+            background: #1e293b;
+            padding: 16px;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f59e0b;
+            font-style: italic;
+            cursor: pointer;
+        }
+        
+        .balance-badge {
+            background-color: #f59e0b;
+            color: black;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Wallet Section */
+        .wallet-section {
+            padding: 20px 16px;
+        }
+        
+        .wallet-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .action-btn {
+            padding: 18px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .add-money {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .withdraw {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        /* History Section */
+        .history-section {
+            padding: 0 16px;
+        }
+        
+        .section-title {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        
+        .history-card {
+            background: #1e293b;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .history-type {
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+        }
+        
+        .history-amount {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .add-color {
+            color: #10b981;
+        }
+        
+        .withdraw-color {
+            color: #ef4444;
+        }
+        
+        .history-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #64748b;
+        }
+        
+        .history-status {
+            font-weight: 700;
+        }
+        
+        .pending { color: #f59e0b; }
+        .approved { color: #10b981; }
+        .rejected { color: #ef4444; }
+        
+        /* Matches Section */
+        .matches-section {
+            padding: 20px 16px;
+        }
+        
+        .matches-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 8px;
+        }
+        
+        .matches-subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 24px;
+        }
+        
+        .game-mode-tabs {
+            display: flex;
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 6px;
+            margin-bottom: 20px;
+            gap: 6px;
+        }
+        
+        .game-tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            text-transform: uppercase;
+        }
+        
+        .game-tab.active {
+            background: #f59e0b;
+            color: black;
+            border-color: #f59e0b;
+        }
+        
+        /* Match Card */
+        .match-card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 2px solid #334155;
+            position: relative;
+        }
+        
+        .match-title {
+            font-size: 18px;
+            font-weight: 900;
+            color: #f59e0b;
+            margin-bottom: 8px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        
+        .match-time {
+            font-size: 12px;
+            color: #94a3b8;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        
+        .match-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .match-item {
+            background: rgba(245, 158, 11, 0.1);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .item-label { font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+        .item-value { font-size: 16px; font-weight: 800; color: #f59e0b; }
+        
+        .match-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+            background: rgba(30, 41, 59, 0.8);
+            padding: 12px;
+            border-radius: 10px;
+        }
+        
+        .detail-item { text-align: center; }
+        .detail-label { font-size: 10px; color: #94a3b8; margin-bottom: 4px; }
+        .detail-value { font-size: 13px; font-weight: 700; color: white; }
+        
+        .players-info {
+            font-size: 14px;
+            color: #f59e0b;
+            text-align: center;
+            margin: 12px 0;
+            font-weight: 700;
+        }
+        
+        .purchase-status {
+            font-size: 12px;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-weight: 700;
+        }
+        
+        .purchased { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .not-purchased { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        
+        .match-actions { display: flex; gap: 12px; margin-top: 16px; }
+        
+        .match-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .details-btn { background: #0ea5e9; color: white; }
+        .purchase-btn { background: #f59e0b; color: black; }
+        .purchase-btn:disabled { background: #64748b; cursor: not-allowed; }
+        
+        .link-btn {
+            background: #8b5cf6;
+            color: white;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            margin-top: 12px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .link-btn.show { display: flex; }
+        
+        /* Joined Users Section */
+        .joined-users-section {
+            margin-top: 12px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+            padding: 12px;
+            display: none;
+        }
+        
+        .joined-users-section.show { display: block; }
+        
+        .joined-users-title {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .joined-users-list {
+            max-height: 150px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        
+        .joined-user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+        
+        .user-email {
+            color: #94a3b8;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+        
+        .user-time {
+            color: #f59e0b;
+            font-size: 10px;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+        
+        /* Hidden Match Badge */
+        .hidden-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 340px;
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header { padding: 20px; text-align: center; color: white; font-weight: 900; font-size: 18px; font-style: italic; }
+        .modal-body { padding: 20px; }
+        .modal-title { text-align: center; color: #334155; font-weight: 700; font-size: 14px; margin-bottom: 16px; }
+        
+        .method-buttons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        .method-btn { padding: 16px; border-radius: 12px; color: white; font-weight: 700; font-size: 14px; border: none; cursor: pointer; }
+        .bkash-btn { background: #d12053; }
+        .nagad-btn { background: #f6921e; }
+        
+        .info-box { background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 16px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .info-text { color: #334155 !important; margin-bottom: 8px; line-height: 1.5; }
+        .copy-number { background: #f59e0b20; padding: 12px; border-radius: 8px; border: 1px solid #f59e0b40; margin: 12px 0; font-weight: 700; color: #f59e0b !important; text-align: center; font-size: 18px; letter-spacing: 1px; }
+        
+        .input-field { 
+            width: 100%; padding: 14px; margin-bottom: 12px; 
+            border: 2px solid #e2e8f0; border-radius: 10px; 
+            color: #334155 !important; background-color: #ffffff;
+            font-weight: 500; font-size: 14px; outline: none;
+        }
+        
+        .verify-btn { width: 100%; padding: 16px; background: #f59e0b; color: black; border: none; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; text-transform: uppercase; margin-top: 8px; }
+        .cancel-btn { width: 100%; text-align: center; padding: 12px; color: #64748b; font-weight: 600; font-size: 12px; cursor: pointer; margin-top: 8px; }
+        
+        /* States */
+        .empty-state { text-align: center; padding: 60px 20px; color: #64748b; }
+        .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+        .loading { display: flex; justify-content: center; padding: 40px; }
+        .spinner { width: 40px; height: 40px; border: 4px solid rgba(245, 158, 11, 0.2); border-top: 4px solid #f59e0b; border-radius: 50%; animation: spin 1s linear infinite; }
+        
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Bottom Nav */
+        .bottom-nav { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            max-width: 400px; 
+            margin: 0 auto; 
+            background: #1e293b; 
+            border-top: 1px solid #334155; 
+            padding: 10px 0; 
+            z-index: 100; 
+            display: flex; 
+            justify-content: space-around; 
+        }
+        .nav-btn { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            color: #94a3b8; 
+            font-size: 11px; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            cursor: pointer; 
+            flex: 1; 
+            padding: 8px 0; 
+        }
+        .nav-btn i { font-size: 20px; margin-bottom: 4px; }
+        .nav-btn.active { color: #f59e0b; }
+        
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+        
+        /* Login Screen Styles */
+        .login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: #0f172a;
+        }
+        
+        .login-logo {
+            font-size: 36px;
+            font-weight: 900;
+            color: #f59e0b;
+            font-style: italic;
+            margin-bottom: 40px;
+            cursor: pointer;
+        }
+        
+        .login-card {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 350px;
+            border: 2px solid #334155;
+            text-align: center;
+        }
+        
+        .login-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 10px;
+        }
+        
+        .login-subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+        
+        .google-login-btn {
+            background: white;
+            color: #334155;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .google-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .google-icon {
+            font-size: 20px;
+            color: #4285F4;
+        }
+        
+        .user-email-display {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 20px;
+            padding: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            word-break: break-all;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            background: rgba(239,68,68,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="loginScreen" class="login-screen">
+    <div class="login-card">
+        <div class="login-logo" onclick="openProfile()">DENZ ARENA</div>
+        <h2 class="login-title">Welcome to Denz Arena</h2>
+        <p class="login-subtitle">Join tournaments and win real money</p>
+        
+        <div id="loadingSection" class="loading" style="display: none;">
+            <div class="spinner"></div>
+        </div>
+        
+        <div id="loginSection">
+            <button id="googleLoginBtn" class="google-login-btn" onclick="signInWithGoogle()">
+                <i class="fab fa-google google-icon"></i>
+                Sign in with Google
+            </button>
+            
+            <div class="user-email-display" id="userEmailDisplay" style="display: none;"></div>
+            
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Main App (Hidden initially) -->
+<div class="app-container hidden" id="mainContainer">
+    <div class="header">
+        <div class="logo" onclick="openProfile()">DENZ ARENA</div>
+        <div class="balance-badge">
+            <i class="fas fa-wallet mr-1"></i>
+            ৳ <span id="balanceVal">0</span>
+        </div>
+    </div>
+    
+    <div class="page-section active" id="walletPage">
+        <div class="wallet-section">
+            <h1 class="wallet-title">MY WALLET</h1>
+            <div class="action-buttons">
+                <button class="action-btn add-money" onclick="openModal('add')">ADD MONEY</button>
+                <button class="action-btn withdraw" onclick="openModal('withdraw')">WITHDRAW</button>
+            </div>
+            <div class="history-section">
+                <div class="section-title">HISTORY</div>
+                <div id="historyItems"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="page-section" id="matchesPage">
+        <div class="matches-section">
+            <h1 class="matches-title">GAME MATCHES</h1>
+            <p class="matches-subtitle">Join tournaments and win real money</p>
+            <div class="game-mode-tabs">
+                <div class="game-tab active" onclick="changeGameMode('solo')">Solo</div>
+                <div class="game-tab" onclick="changeGameMode('duo')">Duo</div>
+                <div class="game-tab" onclick="changeGameMode('squad')">Squad</div>
+                <div class="game-tab" onclick="changeGameMode('clash')">Clash</div>
+            </div>
+            <div id="matchListContainer"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Nav (Initially Hidden) -->
+<div class="bottom-nav hidden" id="bottomNav">
+    <div class="nav-btn active" onclick="switchPage('wallet')">
+        <i class="fas fa-wallet"></i>
+        <span>WALLET</span>
+    </div>
+    <div class="nav-btn" onclick="switchPage('matches')">
+        <i class="fas fa-trophy"></i>
+        <span>MATCHES</span>
+    </div>
+    <div class="nav-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>LOGOUT</span>
+    </div>
+</div>
+
+<div id="payModal" class="hidden modal-overlay">
+    <div class="modal-content">
+        <div id="modalHeader" class="modal-header">
+            <span id="headerTitle">ADD MONEY</span>
+        </div>
+        <div class="modal-body">
+            <div id="methodStep">
+                <div class="modal-title">Select Payment Method</div>
+                <div class="method-buttons">
+                    <button class="method-btn bkash-btn" onclick="showForm('bkash')">BKASH</button>
+                    <button class="method-btn nagad-btn" onclick="showForm('nagad')">NAGAD</button>
+                </div>
+                <button onclick="closeModal()" class="cancel-btn">CANCEL</button>
+            </div>
+            <div id="formStep" class="hidden">
+                <div id="infoBox" class="info-box">
+                    <p id="instr1" class="info-text font-bold"></p>
+                    <div id="copyNumberDisplay" class="copy-number"></div>
+                    <p id="instr2" class="info-text"></p>
+                </div>
+                <div>
+                    <input type="number" id="inpAmount" class="input-field" placeholder="Enter Amount">
+                    <input type="text" id="inpInfo" class="input-field" placeholder="Transaction ID / Number">
+                    <button onclick="submitReq()" id="submitBtn" class="verify-btn">VERIFY</button>
+                </div>
+                <button onclick="goBackToMethod()" class="cancel-btn">BACK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
+        authDomain: "top-up-4db01.firebaseapp.com",
+        projectId: "top-up-4db01",
+        databaseURL: "https://top-up-4db01-default-rtdb.asia-southeast1.firebasedatabase.app",
+        storageBucket: "top-up-4db01.appspot.com",
+        appId: "1:264548197473:android:4c986618c48182125d7620"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
+    
+    let currentMode = 'add', currentMethod = 'bkash', currentGameMode = 'solo';
+    let userId = null, userBalance = 0, userPurchasedMatches = [];
+    let currentUser = null;
+    let historyListener = null;
+    let balanceListener = null;
+    let purchasedMatchesListener = null;
+    let matchListeners = {};
+
+    // Auth State Observer - FIXED
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            // User is signed in
+            currentUser = user;
+            userId = user.uid;
+            showLoading(false);
+            showMainApp();
+            initializeUserData();
+        } else {
+            // User is signed out - SHOW LOGIN SCREEN IMMEDIATELY
+            removeAllListeners();
+            showLoginScreen();
+            showLoading(false); // Hide loading when not logged in
+        }
+    });
+
+    // Remove all listeners when user logs out
+    function removeAllListeners() {
+        if (historyListener) {
+            historyListener();
+            historyListener = null;
+        }
+        if (balanceListener) {
+            balanceListener();
+            balanceListener = null;
+        }
+        if (purchasedMatchesListener) {
+            purchasedMatchesListener();
+            purchasedMatchesListener = null;
+        }
+        
+        // Remove all match listeners
+        Object.values(matchListeners).forEach(off => off());
+        matchListeners = {};
+    }
+
+    // Show Loading
+    function showLoading(show) {
+        const loadingSection = document.getElementById('loadingSection');
+        const loginSection = document.getElementById('loginSection');
+        
+        if (show) {
+            loadingSection.style.display = 'flex';
+            loginSection.style.display = 'none';
+        } else {
+            loadingSection.style.display = 'none';
+            loginSection.style.display = 'block';
+        }
+    }
+
+    // Show Error Message
+    function showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    // Show Login Screen - FIXED
+    function showLoginScreen() {
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('mainContainer').classList.add('hidden');
+        document.getElementById('bottomNav').classList.add('hidden');
+        document.getElementById('userEmailDisplay').style.display = 'none';
+        showLoading(false); // Ensure loading is hidden
+    }
+
+    // Show Main App
+    function showMainApp() {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('mainContainer').classList.remove('hidden');
+        document.getElementById('bottomNav').classList.remove('hidden');
+        
+        if (currentUser) {
+            const userEmail = document.getElementById('userEmailDisplay');
+            userEmail.textContent = currentUser.email;
+            userEmail.style.display = 'block';
+        }
+    }
+
+    // Google Sign In
+    function signInWithGoogle() {
+        showLoading(true);
+        
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        
+        auth.signInWithPopup(provider)
+            .then((result) => {
+                // User signed in successfully
+                const user = result.user;
+                console.log('User signed in:', user.uid, user.email);
+                
+                // Initialize user data in database if first time
+                initializeUserInDatabase(user.uid, user.email);
+            })
+            .catch((error) => {
+                showLoading(false);
+                showError('Login failed: ' + error.message);
+                console.error('Login error:', error);
+            });
+    }
+
+    // Initialize User in Database
+    function initializeUserInDatabase(uid, email) {
+        const userRef = db.ref('users/' + uid);
+        
+        userRef.once('value').then((snapshot) => {
+            if (!snapshot.exists()) {
+                // First time user - create initial data
+                userRef.set({
+                    email: email,
+                    balance: 0,
+                    createdAt: new Date().toISOString(),
+                    lastLogin: new Date().toISOString()
+                });
+            } else {
+                // Update last login time
+                userRef.update({
+                    lastLogin: new Date().toISOString()
+                });
+            }
+        });
+    }
+
+    // Initialize User Data
+    function initializeUserData() {
+        if (!userId) return;
+        
+        loadUserData();
+    }
+
+    // Load User Data
+    function loadUserData() {
+        if (!userId) return;
+        
+        // Balance listener
+        balanceListener = db.ref('users/' + userId + '/balance').on('value', s => {
+            userBalance = parseInt(s.val()) || 0;
+            document.getElementById('balanceVal').textContent = userBalance;
+        });
+        
+        // Purchased matches listener
+        purchasedMatchesListener = db.ref('users/' + userId + '/purchasedMatches').on('value', s => {
+            userPurchasedMatches = [];
+            s.forEach(child => { 
+                if(child.val().matchId) userPurchasedMatches.push(child.val().matchId); 
+            });
+            loadMatches();
+        });
+        
+        // History listener
+        loadHistory();
+    }
+
+    // Load History - Fixed with single listener
+    function loadHistory() {
+        if (!userId) return;
+        
+        // Remove previous history listener if exists
+        if (historyListener) {
+            historyListener();
+        }
+        
+        // Attach new listener
+        historyListener = db.ref('users/' + userId + '/history').on('value', s => {
+            const div = document.getElementById('historyItems');
+            div.innerHTML = "";
+            
+            if (!s.exists()) {
+                div.innerHTML = `<div class="empty-state"><div class="empty-text">No transaction history</div></div>`;
+                return;
+            }
+            
+            let history = [];
+            s.forEach(c => {
+                const data = c.val();
+                history.push({
+                    key: c.key,
+                    type: data.type || '',
+                    method: data.method || '',
+                    amount: data.amount || 0,
+                    status: data.status || 'pending',
+                    date: data.date || new Date().toLocaleString(),
+                    info: data.info || ''
+                });
+            });
+            
+            // Sort by date (newest first)
+            history.sort((a,b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return dateB - dateA;
+            });
+            
+            if (history.length === 0) {
+                div.innerHTML = `<div class="empty-state"><div class="empty-text">No transaction history</div></div>`;
+                return;
+            }
+            
+            // Display all history items
+            history.forEach(d => {
+                const amountColor = d.type === 'add' ? 'add-color' : 'withdraw-color';
+                const statusClass = d.status === 'pending' ? 'pending' : d.status === 'approved' ? 'approved' : 'rejected';
+                const displayDate = d.date ? d.date : 'Date not available';
+                
+                div.innerHTML += `
+                    <div class="history-card">
+                        <div class="history-header">
+                            <span class="history-type">${d.type.toUpperCase()} - ${d.method.toUpperCase()}</span>
+                            <span class="history-amount ${amountColor}">${d.type === 'add' ? '+' : '-'}৳${d.amount}</span>
+                        </div>
+                        <div class="history-footer">
+                            <span>${displayDate}</span>
+                            <span class="history-status ${statusClass}">${d.status.toUpperCase()}</span>
+                        </div>
+                    </div>`;
+            });
+        });
+    }
+
+    // Switch Page
+    function switchPage(page) {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        
+        if (page === 'wallet') {
+            document.querySelector('.nav-btn:nth-child(1)').classList.add('active');
+            document.getElementById('walletPage').classList.add('active');
+        } else {
+            document.querySelector('.nav-btn:nth-child(2)').classList.add('active');
+            document.getElementById('matchesPage').classList.add('active');
+            loadMatches();
+        }
+    }
+
+    // Change Game Mode
+    function changeGameMode(mode) {
+        currentGameMode = mode;
+        document.querySelectorAll('.game-tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        loadMatches();
+    }
+
+    // Load Matches with visibility check
+    function loadMatches() {
+        if (!userId) return;
+        
+        const container = document.getElementById('matchListContainer');
+        container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+        
+        // Remove previous match listener for this game mode
+        if (matchListeners[currentGameMode]) {
+            matchListeners[currentGameMode]();
+        }
+        
+        // Attach new match listener
+        matchListeners[currentGameMode] = db.ref('matches/' + currentGameMode).on('value', snapshot => {
+            container.innerHTML = '';
+            if (!snapshot.exists()) {
+                container.innerHTML = `<div class="empty-state"><div class="empty-text">No matches available</div></div>`;
+                return;
+            }
+            
+            // Create an array to store visible matches
+            const matchesPromises = [];
+            snapshot.forEach(child => {
+                const matchId = child.key;
+                const matchData = child.val();
+                
+                // Check if match is visible for this user
+                const promise = checkMatchVisibility(matchId, matchData).then(isVisible => {
+                    if (isVisible) {
+                        // Get joined users for this match
+                        return getJoinedUsersForMatch(matchId).then(joinedUsers => {
+                            return {
+                                id: matchId,
+                                ...matchData,
+                                joinedUsers: joinedUsers
+                            };
+                        });
+                    } else {
+                        return null; // Match not visible for this user
+                    }
+                });
+                matchesPromises.push(promise);
+            });
+            
+            // Wait for all promises to resolve
+            Promise.all(matchesPromises).then(matchesWithUsers => {
+                container.innerHTML = '';
+                const visibleMatches = matchesWithUsers.filter(match => match !== null);
+                
+                if (visibleMatches.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><div class="empty-text">No matches available</div></div>`;
+                    return;
+                }
+                
+                visibleMatches.forEach(match => {
+                    container.appendChild(createMatchCard(match));
+                });
+            });
+        });
+    }
+
+    // Check if match is visible for the current user
+    async function checkMatchVisibility(matchId, matchData) {
+        // Default visibility is true (visible)
+        const isVisible = matchData.visible !== undefined ? matchData.visible : true;
+        
+        // If match is visible, show to everyone
+        if (isVisible) {
+            return true;
+        }
+        
+        // If match is invisible, only show to users who have purchased it
+        if (!isVisible) {
+            // Check if current user has purchased this match
+            const hasPurchased = userPurchasedMatches.includes(matchId);
+            return hasPurchased;
+        }
+        
+        return false;
+    }
+
+    // Get joined users for a match
+    async function getJoinedUsersForMatch(matchId) {
+        try {
+            // First, get all users who purchased this match
+            const snapshot = await db.ref('matchJoins/' + matchId).once('value');
+            
+            if (!snapshot.exists()) {
+                return [];
+            }
+            
+            const joinedUsers = [];
+            const promises = [];
+            
+            snapshot.forEach(child => {
+                const joinData = child.val();
+                const userId = joinData.userId;
+                
+                // Get user email/name for each user
+                const promise = db.ref('users/' + userId + '/email').once('value').then(userSnapshot => {
+                    joinedUsers.push({
+                        userId: userId,
+                        email: userSnapshot.val() || 'Unknown User',
+                        joinTime: joinData.joinTime || joinData.purchaseTime || 'Unknown Time',
+                        purchaseId: child.key
+                    });
+                });
+                promises.push(promise);
+            });
+            
+            await Promise.all(promises);
+            
+            // Sort by join time (newest first)
+            joinedUsers.sort((a, b) => new Date(b.joinTime) - new Date(a.joinTime));
+            
+            return joinedUsers;
+        } catch (error) {
+            console.error('Error getting joined users:', error);
+            return [];
+        }
+    }
+
+    // Create Match Card with joined users and visibility badge
+    function createMatchCard(match) {
+        const card = document.createElement('div');
+        card.className = 'match-card';
+        const hasPurchased = userPurchasedMatches.includes(match.id);
+        const canJoin = userBalance >= parseInt(match.entryFee || 0);
+        const isFull = (match.currentPlayers || 0) >= (match.maxPlayers || 20);
+        const joinedUsers = match.joinedUsers || [];
+        const isVisible = match.visible !== undefined ? match.visible : true;
+        
+        // Add hidden badge if match is invisible
+        let hiddenBadge = '';
+        if (!isVisible && hasPurchased) {
+            hiddenBadge = '<div class="hidden-badge">HIDDEN</div>';
+        }
+        
+        card.innerHTML = `
+            ${hiddenBadge}
+            <div class="match-title">${match.title || 'MATCH'}</div>
+            <div class="match-time">${match.date || ''} • ${match.time || ''}</div>
+            <div class="match-grid">
+                <div class="match-item"><div class="item-label">PRIZE</div><div class="item-value">৳${match.totalPrize || '0'}</div></div>
+                <div class="match-item"><div class="item-label">KILL</div><div class="item-value">৳${match.perKill || '0'}</div></div>
+                <div class="match-item"><div class="item-label">FEE</div><div class="item-value">৳${match.entryFee || '0'}</div></div>
+            </div>
+            <div class="match-details">
+                <div class="detail-item"><div class="detail-label">TYPE</div><div class="detail-value">${match.type || ''}</div></div>
+                <div class="detail-item"><div class="detail-label">VER</div><div class="detail-value">${match.version || ''}</div></div>
+                <div class="detail-item"><div class="detail-label">MAP</div><div class="detail-value">${match.map || ''}</div></div>
+            </div>
+            <div class="players-info">${match.currentPlayers || 0}/${match.maxPlayers || 20} Players</div>
+            <div class="purchase-status ${hasPurchased ? 'purchased' : 'not-purchased'}">${hasPurchased ? 'Purchased' : 'Purchase Required'}</div>
+            
+            <!-- Joined Users Section -->
+            ${joinedUsers.length > 0 ? `
+                <div class="joined-users-section" id="joinedUsers-${match.id}">
+                    <div class="joined-users-title" onclick="toggleJoinedUsers('${match.id}')">
+                        <span>Joined Players (${joinedUsers.length})</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="joined-users-list" id="joinedUsersList-${match.id}" style="display: none;">
+                        ${joinedUsers.map(user => `
+                            <div class="joined-user-item">
+                                <span class="user-email">${user.email}</span>
+                                <span class="user-time">${formatTime(user.joinTime)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+            
+            ${hasPurchased ? 
+                `<button class="link-btn show" onclick="openPlayPage('${match.id}')">ENTER MATCH LINK</button>` : 
+                `<div class="match-actions">
+                    <button class="match-btn details-btn" onclick="showMatchDetails('${match.id}')">DETAILS</button>
+                    <button class="match-btn purchase-btn" onclick="purchaseMatch('${match.id}')" ${!canJoin || isFull ? 'disabled' : ''}>
+                        ${isFull ? 'FULL' : (canJoin ? 'PURCHASE' : 'LOW BALANCE')}
+                    </button>
+                </div>`
+            }
+        `;
+        
+        // Show joined users section if there are any
+        if (joinedUsers.length > 0) {
+            setTimeout(() => {
+                const joinedSection = card.querySelector('.joined-users-section');
+                if (joinedSection) {
+                    joinedSection.classList.add('show');
+                }
+            }, 100);
+        }
+        
+        return card;
+    }
+
+    // Toggle joined users visibility
+    function toggleJoinedUsers(matchId) {
+        const usersList = document.getElementById('joinedUsersList-' + matchId);
+        const toggleIcon = document.querySelector(`#joinedUsers-${matchId} .joined-users-title i`);
+        
+        if (usersList.style.display === 'none') {
+            usersList.style.display = 'block';
+            toggleIcon.classList.remove('fa-chevron-down');
+            toggleIcon.classList.add('fa-chevron-up');
+        } else {
+            usersList.style.display = 'none';
+            toggleIcon.classList.remove('fa-chevron-up');
+            toggleIcon.classList.add('fa-chevron-down');
+        }
+    }
+
+    // Format time for display
+    function formatTime(timeString) {
+        if (!timeString || timeString === 'Unknown Time') return 'Recently';
+        
+        try {
+            const time = new Date(timeString);
+            if (isNaN(time.getTime())) return 'Recently';
+            
+            const now = new Date();
+            const diffMs = now - time;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffDays > 0) return `${diffDays}d ago`;
+            if (diffHours > 0) return `${diffHours}h ago`;
+            if (diffMins > 0) return `${diffMins}m ago`;
+            return 'Just now';
+        } catch (e) {
+            return 'Recently';
+        }
+    }
+
+    // Open Play Page for match with userId parameter
+    function openPlayPage(matchId) {
+        // Open play.html in new tab with matchId and userId as parameters
+        window.open(`play.html?matchId=${matchId}&userId=${userId}`, '_blank');
+    }
+
+    // Open Profile Page
+    function openProfile() {
+        // Open profile.html in new tab
+        window.open('profile.html', '_blank');
+    }
+
+    // Purchase Match
+    function purchaseMatch(matchId) {
+        if (!userId) {
+            alert('Please login first');
+            return;
+        }
+        
+        db.ref('matches/' + currentGameMode + '/' + matchId).once('value', s => {
+            const m = s.val(), fee = parseInt(m.entryFee);
+            if (userBalance < fee) return alert('Low balance!');
+            
+            if (confirm(`Join for ৳${fee}?`)) {
+                // Update user balance
+                db.ref('users/' + userId + '/balance').set(userBalance - fee);
+                
+                // Update match player count
+                db.ref('matches/' + currentGameMode + '/' + matchId + '/currentPlayers').set((m.currentPlayers || 0) + 1);
+                
+                // Add to user's purchased matches
+                const purchaseData = {
+                    matchId, 
+                    purchaseTime: new Date().toISOString(),
+                    matchTitle: m.title || 'Match',
+                    entryFee: fee,
+                    gameMode: currentGameMode
+                };
+                
+                const purchasedRef = db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
+                
+                // Store join record in matchJoins
+                const joinData = {
+                    userId: userId,
+                    userEmail: currentUser?.email || 'Unknown',
+                    joinTime: new Date().toISOString(),
+                    purchaseId: purchasedRef.key,
+                    matchId: matchId,
+                    gameMode: currentGameMode,
+                    entryFee: fee
+                };
+                
+                // Store in matchJoins/{matchId}/{purchaseId}
+                db.ref('matchJoins/' + matchId + '/' + purchasedRef.key).set(joinData);
+                
+                // Also store in users/{userId}/matchJoins/{matchId}
+                db.ref('users/' + userId + '/matchJoins/' + matchId).set({
+                    joinTime: new Date().toISOString(),
+                    purchaseId: purchasedRef.key
+                });
+                
+                alert('Successfully joined the match!');
+            }
+        });
+    }
+
+    function showMatchDetails(matchId) {
+        db.ref('matches/' + currentGameMode + '/' + matchId).once('value', s => {
+            const m = s.val();
+            alert(`Match: ${m.title}\nMap: ${m.map}\nTime: ${m.time}`);
+        });
+    }
+
+    // Modal Functions
+    function openModal(mode) {
+        if (!userId) {
+            alert('Please login first');
+            return;
+        }
+        
+        currentMode = mode;
+        document.getElementById('payModal').classList.remove('hidden');
+        document.getElementById('methodStep').classList.remove('hidden');
+        document.getElementById('formStep').classList.add('hidden');
+        document.getElementById('headerTitle').textContent = mode === 'add' ? 'ADD MONEY' : 'WITHDRAW';
+        document.getElementById('modalHeader').style.background = "#334155";
+    }
+
+    function showForm(method) {
+        currentMethod = method;
+        document.getElementById('methodStep').classList.add('hidden');
+        document.getElementById('formStep').classList.remove('hidden');
+        const color = method === 'bkash' ? '#d12053' : '#f6921e';
+        document.getElementById('modalHeader').style.background = color;
+        document.getElementById('submitBtn').style.background = color;
+        
+        if (currentMode === 'add') {
+            db.ref('admin/numbers/' + method).once('value', s => {
+                document.getElementById('instr1').innerHTML = "Copy Number:";
+                document.getElementById('copyNumberDisplay').innerHTML = s.val() || "01XXXXXXX";
+                document.getElementById('instr2').innerHTML = "Send money and enter TrxID";
+            });
+        } else {
+            document.getElementById('instr1').innerHTML = "Min Withdraw:";
+            document.getElementById('copyNumberDisplay').innerHTML = "100৳";
+            document.getElementById('instr2').innerHTML = "Your Balance: ৳" + userBalance;
+        }
+    }
+
+    function goBackToMethod() {
+        document.getElementById('formStep').classList.add('hidden');
+        document.getElementById('methodStep').classList.remove('hidden');
+    }
+
+    function submitReq() {
+        if (!userId) {
+            alert('Please login first');
+            return;
+        }
+        
+        const amount = parseInt(document.getElementById('inpAmount').value);
+        const info = document.getElementById('inpInfo').value.trim();
+        if (!amount || !info) return alert('Fill all fields!');
+        
+        // For withdraw, check minimum amount
+        if (currentMode === 'withdraw' && amount < 100) {
+            alert('Minimum withdrawal amount is ৳100');
+            return;
+        }
+        
+        // For withdraw, check balance
+        if (currentMode === 'withdraw' && amount > userBalance) {
+            alert('Insufficient balance');
+            return;
+        }
+        
+        const transaction = {
+            userId, 
+            amount, 
+            info, 
+            method: currentMethod, 
+            type: currentMode, 
+            status: 'pending', 
+            date: new Date().toLocaleString(),
+            userEmail: currentUser?.email || 'Unknown',
+            timestamp: Date.now()
+        };
+        
+        // Push to user's history
+        db.ref('users/' + userId + '/history').push(transaction);
+        
+        // Push to admin requests
+        db.ref('admin/requests').push(transaction).then(() => {
+            alert('Request submitted successfully!');
+            closeModal();
+        });
+    }
+
+    function closeModal() { 
+        document.getElementById('payModal').classList.add('hidden'); 
+        // Clear form fields
+        document.getElementById('inpAmount').value = '';
+        document.getElementById('inpInfo').value = '';
+    }
+    
+    function logout() { 
+        if (confirm('Logout?')) {
+            auth.signOut().then(() => {
+                console.log('User signed out');
+            }).catch((error) => {
+                console.error('Logout error:', error);
+            });
+        }
+    }
+
+    // Check initial auth state - FIXED
+    document.addEventListener('DOMContentLoaded', () => {
+        // Show loading only for a brief moment while checking auth state
+        showLoading(true);
+        
+        // Set a timeout to hide loading and show login if auth takes too long
+        setTimeout(() => {
+            // If auth state hasn't changed yet, hide loading
+            // Firebase auth will call onAuthStateChanged when ready
+            showLoading(false);
+        }, 2000);
+        
+        // Auth state observer will handle the rest
+        // It will automatically show login screen if user is not logged in
+    });
+
+</script>
+</body>
+</html>
