@@ -71,7 +71,7 @@
             align-items: center;
         }
         
-        /* Store Icon (NEW) */
+        /* Store Icon */
         .store-icon {
             background-color: #8b5cf6;
             color: white;
@@ -614,6 +614,11 @@
             font-size: 13px;
             display: none;
         }
+        
+        /* Admin button in bottom nav */
+        .admin-btn {
+            color: #8b5cf6 !important;
+        }
     </style>
 </head>
 <body>
@@ -647,7 +652,7 @@
     <div class="header">
         <div class="logo" onclick="openProfile()">DENZ ARENA</div>
         <div class="header-right">
-            <!-- Store Icon (NEW) -->
+            <!-- Store Icon -->
             <div class="store-icon" onclick="openStore()" title="Visit Store">
                 <i class="fas fa-store"></i>
             </div>
@@ -697,6 +702,10 @@
     <div class="nav-btn" onclick="switchPage('matches')">
         <i class="fas fa-trophy"></i>
         <span>MATCHES</span>
+    </div>
+    <div class="nav-btn admin-btn" onclick="openAdminPanel()">
+        <i class="fas fa-user-shield"></i>
+        <span>ADMIN</span>
     </div>
     <div class="nav-btn" onclick="logout()">
         <i class="fas fa-sign-out-alt"></i>
@@ -758,31 +767,33 @@
     let purchasedMatchesListener = null;
     let matchListeners = {};
 
-    // NEW FUNCTION: Open Store Link
+    // Open Admin Panel
+    function openAdminPanel() {
+        window.open('admin.html', '_blank');
+    }
+
+    // Open Store Link
     function openStore() {
-        // আপনার স্টোর লিঙ্ক এখানে বসান
-        const storeLink = "https://your-store-link.com"; // এখানে আপনার লিঙ্ক দিন
+        const storeLink = "https://your-store-link.com"; // আপনার লিঙ্ক দিন
         window.open(storeLink, '_blank');
     }
 
-    // Auth State Observer - FIXED
+    // Auth State Observer
     auth.onAuthStateChanged((user) => {
         if (user) {
-            // User is signed in
             currentUser = user;
             userId = user.uid;
             showLoading(false);
             showMainApp();
             initializeUserData();
         } else {
-            // User is signed out - SHOW LOGIN SCREEN IMMEDIATELY
             removeAllListeners();
             showLoginScreen();
-            showLoading(false); // Hide loading when not logged in
+            showLoading(false);
         }
     });
 
-    // Remove all listeners when user logs out
+    // Remove all listeners
     function removeAllListeners() {
         if (historyListener) {
             historyListener();
@@ -797,7 +808,6 @@
             purchasedMatchesListener = null;
         }
         
-        // Remove all match listeners
         Object.values(matchListeners).forEach(off => off());
         matchListeners = {};
     }
@@ -827,13 +837,13 @@
         }, 5000);
     }
 
-    // Show Login Screen - FIXED
+    // Show Login Screen
     function showLoginScreen() {
         document.getElementById('loginScreen').classList.remove('hidden');
         document.getElementById('mainContainer').classList.add('hidden');
         document.getElementById('bottomNav').classList.add('hidden');
         document.getElementById('userEmailDisplay').style.display = 'none';
-        showLoading(false); // Ensure loading is hidden
+        showLoading(false);
     }
 
     // Show Main App
@@ -859,11 +869,8 @@
         
         auth.signInWithPopup(provider)
             .then((result) => {
-                // User signed in successfully
                 const user = result.user;
                 console.log('User signed in:', user.uid, user.email);
-                
-                // Initialize user data in database if first time
                 initializeUserInDatabase(user.uid, user.email);
             })
             .catch((error) => {
@@ -879,7 +886,6 @@
         
         userRef.once('value').then((snapshot) => {
             if (!snapshot.exists()) {
-                // First time user - create initial data
                 userRef.set({
                     email: email,
                     balance: 0,
@@ -887,7 +893,6 @@
                     lastLogin: new Date().toISOString()
                 });
             } else {
-                // Update last login time
                 userRef.update({
                     lastLogin: new Date().toISOString()
                 });
@@ -898,11 +903,10 @@
     // Initialize User Data
     function initializeUserData() {
         if (!userId) return;
-        
         loadUserData();
     }
 
-    // Load User Data
+    // Load User Data - FIXED
     function loadUserData() {
         if (!userId) return;
         
@@ -912,29 +916,36 @@
             document.getElementById('balanceVal').textContent = userBalance;
         });
         
-        // Purchased matches listener
+        // Purchased matches listener - FIXED
         purchasedMatchesListener = db.ref('users/' + userId + '/purchasedMatches').on('value', s => {
             userPurchasedMatches = [];
-            s.forEach(child => { 
-                if(child.val().matchId) userPurchasedMatches.push(child.val().matchId); 
-            });
-            loadMatches();
+            if (s.exists()) {
+                s.forEach(child => {
+                    const purchase = child.val();
+                    if (purchase.matchId) {
+                        userPurchasedMatches.push(purchase.matchId);
+                    }
+                });
+            }
+            console.log('Purchased matches loaded:', userPurchasedMatches);
+            
+            if (document.getElementById('matchesPage').classList.contains('active')) {
+                loadMatches();
+            }
         });
         
         // History listener
         loadHistory();
     }
 
-    // Load History - Fixed with single listener
+    // Load History
     function loadHistory() {
         if (!userId) return;
         
-        // Remove previous history listener if exists
         if (historyListener) {
             historyListener();
         }
         
-        // Attach new listener
         historyListener = db.ref('users/' + userId + '/history').on('value', s => {
             const div = document.getElementById('historyItems');
             div.innerHTML = "";
@@ -958,7 +969,6 @@
                 });
             });
             
-            // Sort by date (newest first)
             history.sort((a,b) => {
                 const dateA = new Date(a.date);
                 const dateB = new Date(b.date);
@@ -970,7 +980,6 @@
                 return;
             }
             
-            // Display all history items
             history.forEach(d => {
                 const amountColor = d.type === 'add' ? 'add-color' : 'withdraw-color';
                 const statusClass = d.status === 'pending' ? 'pending' : d.status === 'approved' ? 'approved' : 'rejected';
@@ -1006,149 +1015,137 @@
         }
     }
 
-    // Change Game Mode
+    // Change Game Mode - FIXED
     function changeGameMode(mode) {
         currentGameMode = mode;
         document.querySelectorAll('.game-tab').forEach(t => t.classList.remove('active'));
         event.target.classList.add('active');
-        loadMatches();
+        
+        // Show loading immediately
+        const container = document.getElementById('matchListContainer');
+        container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+        
+        // Load matches
+        setTimeout(() => {
+            loadMatches();
+        }, 100);
     }
 
-    // Load Matches with visibility check
+    // Load Matches - FIXED VERSION
     function loadMatches() {
         if (!userId) return;
         
         const container = document.getElementById('matchListContainer');
         container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
         
-        // Remove previous match listener for this game mode
+        // Remove previous listener
         if (matchListeners[currentGameMode]) {
             matchListeners[currentGameMode]();
         }
         
-        // Attach new match listener
+        // Attach new listener
         matchListeners[currentGameMode] = db.ref('matches/' + currentGameMode).on('value', snapshot => {
             container.innerHTML = '';
+            
             if (!snapshot.exists()) {
-                container.innerHTML = `<div class="empty-state"><div class="empty-text">No matches available</div></div>`;
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="fas fa-trophy"></i></div>
+                        <div class="empty-text">No matches available</div>
+                        <div class="empty-subtext">Check back later for new tournaments</div>
+                    </div>`;
                 return;
             }
             
-            // Create an array to store visible matches
-            const matchesPromises = [];
-            snapshot.forEach(child => {
-                const matchId = child.key;
-                const matchData = child.val();
-                
-                // Check if match is visible for this user
-                const promise = checkMatchVisibility(matchId, matchData).then(isVisible => {
-                    if (isVisible) {
-                        // Get joined users for this match
-                        return getJoinedUsersForMatch(matchId).then(joinedUsers => {
-                            return {
-                                id: matchId,
-                                ...matchData,
-                                joinedUsers: joinedUsers
-                            };
-                        });
-                    } else {
-                        return null; // Match not visible for this user
-                    }
-                });
-                matchesPromises.push(promise);
-            });
-            
-            // Wait for all promises to resolve
-            Promise.all(matchesPromises).then(matchesWithUsers => {
-                container.innerHTML = '';
-                const visibleMatches = matchesWithUsers.filter(match => match !== null);
-                
-                if (visibleMatches.length === 0) {
-                    container.innerHTML = `<div class="empty-state"><div class="empty-text">No matches available</div></div>`;
-                    return;
+            // Get purchased matches for this user
+            db.ref('users/' + userId + '/purchasedMatches').once('value').then(purchasedSnapshot => {
+                const purchasedMatchIds = [];
+                if (purchasedSnapshot.exists()) {
+                    purchasedSnapshot.forEach(child => {
+                        const purchase = child.val();
+                        if (purchase.matchId) {
+                            purchasedMatchIds.push(purchase.matchId);
+                        }
+                    });
                 }
                 
-                visibleMatches.forEach(match => {
-                    container.appendChild(createMatchCard(match));
+                console.log('Purchased matches for filtering:', purchasedMatchIds);
+                
+                // Create matches array
+                const matches = [];
+                snapshot.forEach(child => {
+                    const matchId = child.key;
+                    const matchData = child.val();
+                    
+                    matches.push({
+                        id: matchId,
+                        ...matchData
+                    });
                 });
+                
+                // Filter and display matches
+                filterAndDisplayMatches(matches, purchasedMatchIds, container);
             });
         });
     }
 
-    // Check if match is visible for the current user
-    async function checkMatchVisibility(matchId, matchData) {
-        // Default visibility is true (visible)
-        const isVisible = matchData.visible !== undefined ? matchData.visible : true;
-        
-        // If match is visible, show to everyone
-        if (isVisible) {
-            return true;
-        }
-        
-        // If match is invisible, only show to users who have purchased it
-        if (!isVisible) {
-            // Check if current user has purchased this match
-            const hasPurchased = userPurchasedMatches.includes(matchId);
-            return hasPurchased;
-        }
-        
-        return false;
-    }
-
-    // Get joined users for a match
-    async function getJoinedUsersForMatch(matchId) {
-        try {
-            // First, get all users who purchased this match
-            const snapshot = await db.ref('matchJoins/' + matchId).once('value');
-            
-            if (!snapshot.exists()) {
-                return [];
+    // Filter and Display Matches - FIXED
+    function filterAndDisplayMatches(matches, purchasedMatchIds, container) {
+        // Filter matches
+        const visibleMatches = matches.filter(match => {
+            // If visible is true or undefined, show to all
+            if (match.visible === true || match.visible === undefined) {
+                return true;
             }
             
-            const joinedUsers = [];
-            const promises = [];
+            // If visible is false, only show to users who purchased it
+            if (match.visible === false) {
+                return purchasedMatchIds.includes(match.id);
+            }
             
-            snapshot.forEach(child => {
-                const joinData = child.val();
-                const userId = joinData.userId;
-                
-                // Get user email/name for each user
-                const promise = db.ref('users/' + userId + '/email').once('value').then(userSnapshot => {
-                    joinedUsers.push({
-                        userId: userId,
-                        email: userSnapshot.val() || 'Unknown User',
-                        joinTime: joinData.joinTime || joinData.purchaseTime || 'Unknown Time',
-                        purchaseId: child.key
-                    });
-                });
-                promises.push(promise);
-            });
-            
-            await Promise.all(promises);
-            
-            // Sort by join time (newest first)
-            joinedUsers.sort((a, b) => new Date(b.joinTime) - new Date(a.joinTime));
-            
-            return joinedUsers;
-        } catch (error) {
-            console.error('Error getting joined users:', error);
-            return [];
+            return true;
+        });
+        
+        // Sort by date/time
+        visibleMatches.sort((a, b) => {
+            try {
+                const dateA = new Date(a.date + ' ' + a.time);
+                const dateB = new Date(b.date + ' ' + b.time);
+                return dateA - dateB;
+            } catch (e) {
+                return 0;
+            }
+        });
+        
+        // Display matches
+        if (visibleMatches.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-trophy"></i></div>
+                    <div class="empty-text">No matches available</div>
+                    <div class="empty-subtext">Check back later for new tournaments</div>
+                </div>`;
+            return;
         }
+        
+        visibleMatches.forEach(match => {
+            container.appendChild(createMatchCard(match, purchasedMatchIds));
+        });
     }
 
-    // Create Match Card with joined users and visibility badge
-    function createMatchCard(match) {
+    // Create Match Card - FIXED
+    function createMatchCard(match, purchasedMatchIds) {
         const card = document.createElement('div');
         card.className = 'match-card';
-        const hasPurchased = userPurchasedMatches.includes(match.id);
-        const canJoin = userBalance >= parseInt(match.entryFee || 0);
-        const isFull = (match.currentPlayers || 0) >= (match.maxPlayers || 20);
-        const joinedUsers = match.joinedUsers || [];
-        const isVisible = match.visible !== undefined ? match.visible : true;
         
-        // Add hidden badge if match is invisible
+        const hasPurchased = purchasedMatchIds.includes(match.id);
+        const canJoin = userBalance >= parseInt(match.entryFee || 0);
+        const isFull = (match.currentPlayers || 0) >= (match.maxPlayers || 100);
+        const isVisible = match.visible !== false;
+        
+        // Add hidden badge if match is invisible and user hasn't purchased it
         let hiddenBadge = '';
-        if (!isVisible && hasPurchased) {
+        if (match.visible === false && !hasPurchased) {
             hiddenBadge = '<div class="hidden-badge">HIDDEN</div>';
         }
         
@@ -1166,103 +1163,41 @@
                 <div class="detail-item"><div class="detail-label">VER</div><div class="detail-value">${match.version || ''}</div></div>
                 <div class="detail-item"><div class="detail-label">MAP</div><div class="detail-value">${match.map || ''}</div></div>
             </div>
-            <div class="players-info">${match.currentPlayers || 0}/${match.maxPlayers || 20} Players</div>
+            <div class="players-info">${match.currentPlayers || 0}/${match.maxPlayers || 100} Players</div>
             <div class="purchase-status ${hasPurchased ? 'purchased' : 'not-purchased'}">${hasPurchased ? 'Purchased' : 'Purchase Required'}</div>
             
-            <!-- Joined Users Section -->
-            ${joinedUsers.length > 0 ? `
-                <div class="joined-users-section" id="joinedUsers-${match.id}">
-                    <div class="joined-users-title" onclick="toggleJoinedUsers('${match.id}')">
-                        <span>Joined Players (${joinedUsers.length})</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="joined-users-list" id="joinedUsersList-${match.id}" style="display: none;">
-                        ${joinedUsers.map(user => `
-                            <div class="joined-user-item">
-                                <span class="user-email">${user.email}</span>
-                                <span class="user-time">${formatTime(user.joinTime)}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            ` : ''}
-            
             ${hasPurchased ? 
-                `<button class="link-btn show" onclick="openPlayPage('${match.id}')">ENTER MATCH LINK</button>` : 
+                `<button class="link-btn show" onclick="openPlayPage('${match.id}')">
+                    <i class="fas fa-play"></i>
+                    ENTER MATCH LINK
+                </button>` : 
                 `<div class="match-actions">
-                    <button class="match-btn details-btn" onclick="showMatchDetails('${match.id}')">DETAILS</button>
+                    <button class="match-btn details-btn" onclick="showMatchDetails('${match.id}')">
+                        <i class="fas fa-info-circle"></i>
+                        DETAILS
+                    </button>
                     <button class="match-btn purchase-btn" onclick="purchaseMatch('${match.id}')" ${!canJoin || isFull ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i>
                         ${isFull ? 'FULL' : (canJoin ? 'PURCHASE' : 'LOW BALANCE')}
                     </button>
                 </div>`
             }
         `;
         
-        // Show joined users section if there are any
-        if (joinedUsers.length > 0) {
-            setTimeout(() => {
-                const joinedSection = card.querySelector('.joined-users-section');
-                if (joinedSection) {
-                    joinedSection.classList.add('show');
-                }
-            }, 100);
-        }
-        
         return card;
     }
 
-    // Toggle joined users visibility
-    function toggleJoinedUsers(matchId) {
-        const usersList = document.getElementById('joinedUsersList-' + matchId);
-        const toggleIcon = document.querySelector(`#joinedUsers-${matchId} .joined-users-title i`);
-        
-        if (usersList.style.display === 'none') {
-            usersList.style.display = 'block';
-            toggleIcon.classList.remove('fa-chevron-down');
-            toggleIcon.classList.add('fa-chevron-up');
-        } else {
-            usersList.style.display = 'none';
-            toggleIcon.classList.remove('fa-chevron-up');
-            toggleIcon.classList.add('fa-chevron-down');
-        }
-    }
-
-    // Format time for display
-    function formatTime(timeString) {
-        if (!timeString || timeString === 'Unknown Time') return 'Recently';
-        
-        try {
-            const time = new Date(timeString);
-            if (isNaN(time.getTime())) return 'Recently';
-            
-            const now = new Date();
-            const diffMs = now - time;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMs / 3600000);
-            const diffDays = Math.floor(diffMs / 86400000);
-            
-            if (diffDays > 0) return `${diffDays}d ago`;
-            if (diffHours > 0) return `${diffHours}h ago`;
-            if (diffMins > 0) return `${diffMins}m ago`;
-            return 'Just now';
-        } catch (e) {
-            return 'Recently';
-        }
-    }
-
-    // Open Play Page for match with userId parameter
+    // Open Play Page
     function openPlayPage(matchId) {
-        // Open play.html in new tab with matchId and userId as parameters
         window.open(`play.html?matchId=${matchId}&userId=${userId}`, '_blank');
     }
 
     // Open Profile Page
     function openProfile() {
-        // Open profile.html in new tab
         window.open('profile.html', '_blank');
     }
 
-    // Purchase Match
+    // Purchase Match - FIXED
     function purchaseMatch(matchId) {
         if (!userId) {
             alert('Please login first');
@@ -1270,28 +1205,37 @@
         }
         
         db.ref('matches/' + currentGameMode + '/' + matchId).once('value', s => {
-            const m = s.val(), fee = parseInt(m.entryFee);
-            if (userBalance < fee) return alert('Low balance!');
+            const m = s.val();
+            const fee = parseInt(m.entryFee || 0);
+            
+            if (userBalance < fee) {
+                alert('Low balance!');
+                return;
+            }
             
             if (confirm(`Join for ৳${fee}?`)) {
                 // Update user balance
-                db.ref('users/' + userId + '/balance').set(userBalance - fee);
+                const newBalance = userBalance - fee;
+                db.ref('users/' + userId + '/balance').set(newBalance);
                 
                 // Update match player count
-                db.ref('matches/' + currentGameMode + '/' + matchId + '/currentPlayers').set((m.currentPlayers || 0) + 1);
+                const newPlayerCount = (m.currentPlayers || 0) + 1;
+                db.ref('matches/' + currentGameMode + '/' + matchId + '/currentPlayers').set(newPlayerCount);
                 
                 // Add to user's purchased matches
                 const purchaseData = {
-                    matchId, 
+                    matchId: matchId, 
                     purchaseTime: new Date().toISOString(),
                     matchTitle: m.title || 'Match',
                     entryFee: fee,
-                    gameMode: currentGameMode
+                    gameMode: currentGameMode,
+                    matchDate: m.date,
+                    matchTime: m.time
                 };
                 
                 const purchasedRef = db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
                 
-                // Store join record in matchJoins
+                // Store join record
                 const joinData = {
                     userId: userId,
                     userEmail: currentUser?.email || 'Unknown',
@@ -1302,16 +1246,18 @@
                     entryFee: fee
                 };
                 
-                // Store in matchJoins/{matchId}/{purchaseId}
                 db.ref('matchJoins/' + matchId + '/' + purchasedRef.key).set(joinData);
                 
-                // Also store in users/{userId}/matchJoins/{matchId}
-                db.ref('users/' + userId + '/matchJoins/' + matchId).set({
-                    joinTime: new Date().toISOString(),
-                    purchaseId: purchasedRef.key
-                });
+                // Update local balance
+                userBalance = newBalance;
+                document.getElementById('balanceVal').textContent = userBalance;
                 
                 alert('Successfully joined the match!');
+                
+                // Reload matches
+                setTimeout(() => {
+                    loadMatches();
+                }, 500);
             }
         });
     }
@@ -1319,7 +1265,7 @@
     function showMatchDetails(matchId) {
         db.ref('matches/' + currentGameMode + '/' + matchId).once('value', s => {
             const m = s.val();
-            alert(`Match: ${m.title}\nMap: ${m.map}\nTime: ${m.time}`);
+            alert(`Match: ${m.title}\nMap: ${m.map}\nTime: ${m.time}\nPrize: ৳${m.totalPrize}\nEntry Fee: ৳${m.entryFee}`);
         });
     }
 
@@ -1374,13 +1320,11 @@
         const info = document.getElementById('inpInfo').value.trim();
         if (!amount || !info) return alert('Fill all fields!');
         
-        // For withdraw, check minimum amount
         if (currentMode === 'withdraw' && amount < 100) {
             alert('Minimum withdrawal amount is ৳100');
             return;
         }
         
-        // For withdraw, check balance
         if (currentMode === 'withdraw' && amount > userBalance) {
             alert('Insufficient balance');
             return;
@@ -1410,7 +1354,6 @@
 
     function closeModal() { 
         document.getElementById('payModal').classList.add('hidden'); 
-        // Clear form fields
         document.getElementById('inpAmount').value = '';
         document.getElementById('inpInfo').value = '';
     }
@@ -1425,20 +1368,13 @@
         }
     }
 
-    // Check initial auth state - FIXED
+    // Initialize
     document.addEventListener('DOMContentLoaded', () => {
-        // Show loading only for a brief moment while checking auth state
         showLoading(true);
         
-        // Set a timeout to hide loading and show login if auth takes too long
         setTimeout(() => {
-            // If auth state hasn't changed yet, hide loading
-            // Firebase auth will call onAuthStateChanged when ready
             showLoading(false);
         }, 2000);
-        
-        // Auth state observer will handle the rest
-        // It will automatically show login screen if user is not logged in
     });
 
 </script>
