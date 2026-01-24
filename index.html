@@ -614,11 +614,6 @@
             font-size: 13px;
             display: none;
         }
-        
-        /* Admin button in bottom nav */
-        .admin-btn {
-            color: #8b5cf6 !important;
-        }
     </style>
 </head>
 <body>
@@ -703,10 +698,6 @@
         <i class="fas fa-trophy"></i>
         <span>MATCHES</span>
     </div>
-    <div class="nav-btn admin-btn" onclick="openAdminPanel()">
-        <i class="fas fa-user-shield"></i>
-        <span>ADMIN</span>
-    </div>
     <div class="nav-btn" onclick="logout()">
         <i class="fas fa-sign-out-alt"></i>
         <span>LOGOUT</span>
@@ -767,14 +758,9 @@
     let purchasedMatchesListener = null;
     let matchListeners = {};
 
-    // Open Admin Panel
-    function openAdminPanel() {
-        window.open('admin.html', '_blank');
-    }
-
     // Open Store Link
     function openStore() {
-        const storeLink = "https://your-store-link.com"; // আপনার লিঙ্ক দিন
+        const storeLink = "https://your-store-link.com"; // আপনার স্টোর লিঙ্ক এখানে বসান
         window.open(storeLink, '_blank');
     }
 
@@ -906,7 +892,7 @@
         loadUserData();
     }
 
-    // Load User Data - FIXED
+    // Load User Data
     function loadUserData() {
         if (!userId) return;
         
@@ -916,7 +902,7 @@
             document.getElementById('balanceVal').textContent = userBalance;
         });
         
-        // Purchased matches listener - FIXED
+        // Purchased matches listener
         purchasedMatchesListener = db.ref('users/' + userId + '/purchasedMatches').on('value', s => {
             userPurchasedMatches = [];
             if (s.exists()) {
@@ -927,7 +913,6 @@
                     }
                 });
             }
-            console.log('Purchased matches loaded:', userPurchasedMatches);
             
             if (document.getElementById('matchesPage').classList.contains('active')) {
                 loadMatches();
@@ -1015,35 +1000,31 @@
         }
     }
 
-    // Change Game Mode - FIXED
+    // Change Game Mode
     function changeGameMode(mode) {
         currentGameMode = mode;
         document.querySelectorAll('.game-tab').forEach(t => t.classList.remove('active'));
         event.target.classList.add('active');
         
-        // Show loading immediately
         const container = document.getElementById('matchListContainer');
         container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
         
-        // Load matches
         setTimeout(() => {
             loadMatches();
         }, 100);
     }
 
-    // Load Matches - FIXED VERSION
+    // Load Matches
     function loadMatches() {
         if (!userId) return;
         
         const container = document.getElementById('matchListContainer');
         container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
         
-        // Remove previous listener
         if (matchListeners[currentGameMode]) {
             matchListeners[currentGameMode]();
         }
         
-        // Attach new listener
         matchListeners[currentGameMode] = db.ref('matches/' + currentGameMode).on('value', snapshot => {
             container.innerHTML = '';
             
@@ -1057,7 +1038,6 @@
                 return;
             }
             
-            // Get purchased matches for this user
             db.ref('users/' + userId + '/purchasedMatches').once('value').then(purchasedSnapshot => {
                 const purchasedMatchIds = [];
                 if (purchasedSnapshot.exists()) {
@@ -1069,9 +1049,6 @@
                     });
                 }
                 
-                console.log('Purchased matches for filtering:', purchasedMatchIds);
-                
-                // Create matches array
                 const matches = [];
                 snapshot.forEach(child => {
                     const matchId = child.key;
@@ -1083,22 +1060,18 @@
                     });
                 });
                 
-                // Filter and display matches
                 filterAndDisplayMatches(matches, purchasedMatchIds, container);
             });
         });
     }
 
-    // Filter and Display Matches - FIXED
+    // Filter and Display Matches
     function filterAndDisplayMatches(matches, purchasedMatchIds, container) {
-        // Filter matches
         const visibleMatches = matches.filter(match => {
-            // If visible is true or undefined, show to all
             if (match.visible === true || match.visible === undefined) {
                 return true;
             }
             
-            // If visible is false, only show to users who purchased it
             if (match.visible === false) {
                 return purchasedMatchIds.includes(match.id);
             }
@@ -1106,7 +1079,6 @@
             return true;
         });
         
-        // Sort by date/time
         visibleMatches.sort((a, b) => {
             try {
                 const dateA = new Date(a.date + ' ' + a.time);
@@ -1117,7 +1089,6 @@
             }
         });
         
-        // Display matches
         if (visibleMatches.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
@@ -1133,7 +1104,7 @@
         });
     }
 
-    // Create Match Card - FIXED
+    // Create Match Card
     function createMatchCard(match, purchasedMatchIds) {
         const card = document.createElement('div');
         card.className = 'match-card';
@@ -1141,9 +1112,7 @@
         const hasPurchased = purchasedMatchIds.includes(match.id);
         const canJoin = userBalance >= parseInt(match.entryFee || 0);
         const isFull = (match.currentPlayers || 0) >= (match.maxPlayers || 100);
-        const isVisible = match.visible !== false;
         
-        // Add hidden badge if match is invisible and user hasn't purchased it
         let hiddenBadge = '';
         if (match.visible === false && !hasPurchased) {
             hiddenBadge = '<div class="hidden-badge">HIDDEN</div>';
@@ -1197,7 +1166,7 @@
         window.open('profile.html', '_blank');
     }
 
-    // Purchase Match - FIXED
+    // Purchase Match
     function purchaseMatch(matchId) {
         if (!userId) {
             alert('Please login first');
@@ -1214,15 +1183,12 @@
             }
             
             if (confirm(`Join for ৳${fee}?`)) {
-                // Update user balance
                 const newBalance = userBalance - fee;
                 db.ref('users/' + userId + '/balance').set(newBalance);
                 
-                // Update match player count
                 const newPlayerCount = (m.currentPlayers || 0) + 1;
                 db.ref('matches/' + currentGameMode + '/' + matchId + '/currentPlayers').set(newPlayerCount);
                 
-                // Add to user's purchased matches
                 const purchaseData = {
                     matchId: matchId, 
                     purchaseTime: new Date().toISOString(),
@@ -1235,7 +1201,6 @@
                 
                 const purchasedRef = db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
                 
-                // Store join record
                 const joinData = {
                     userId: userId,
                     userEmail: currentUser?.email || 'Unknown',
@@ -1248,13 +1213,11 @@
                 
                 db.ref('matchJoins/' + matchId + '/' + purchasedRef.key).set(joinData);
                 
-                // Update local balance
                 userBalance = newBalance;
                 document.getElementById('balanceVal').textContent = userBalance;
                 
                 alert('Successfully joined the match!');
                 
-                // Reload matches
                 setTimeout(() => {
                     loadMatches();
                 }, 500);
@@ -1342,10 +1305,8 @@
             timestamp: Date.now()
         };
         
-        // Push to user's history
         db.ref('users/' + userId + '/history').push(transaction);
         
-        // Push to admin requests
         db.ref('admin/requests').push(transaction).then(() => {
             alert('Request submitted successfully!');
             closeModal();
