@@ -54,6 +54,12 @@
             cursor: pointer;
         }
         
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
         .balance-badge {
             background-color: #f59e0b;
             color: black;
@@ -63,6 +69,28 @@
             font-size: 14px;
             display: flex;
             align-items: center;
+        }
+        
+        /* Store Icon (NEW) */
+        .store-icon {
+            background-color: #8b5cf6;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            border: 2px solid #a78bfa;
+        }
+        
+        .store-icon:hover {
+            background-color: #7c3aed;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
         }
         
         /* Wallet Section */
@@ -618,9 +646,16 @@
 <div class="app-container hidden" id="mainContainer">
     <div class="header">
         <div class="logo" onclick="openProfile()">DENZ ARENA</div>
-        <div class="balance-badge">
-            <i class="fas fa-wallet mr-1"></i>
-            ৳ <span id="balanceVal">0</span>
+        <div class="header-right">
+            <!-- Store Icon (NEW) -->
+            <div class="store-icon" onclick="openStore()" title="Visit Store">
+                <i class="fas fa-store"></i>
+            </div>
+            
+            <div class="balance-badge">
+                <i class="fas fa-wallet mr-1"></i>
+                ৳ <span id="balanceVal">0</span>
+            </div>
         </div>
     </div>
     
@@ -722,6 +757,13 @@
     let balanceListener = null;
     let purchasedMatchesListener = null;
     let matchListeners = {};
+
+    // NEW FUNCTION: Open Store Link
+    function openStore() {
+        // আপনার স্টোর লিঙ্ক এখানে বসান
+        const storeLink = "https://your-store-link.com"; // এখানে আপনার লিঙ্ক দিন
+        window.open(storeLink, '_blank');
+    }
 
     // Auth State Observer - FIXED
     auth.onAuthStateChanged((user) => {
