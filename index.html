@@ -901,10 +901,13 @@
     let matchListeners = {};
     let currentMatchId = null;
     let currentMatchData = null;
+    
+    // Global variable to track current active listener
+    let currentMatchListener = null;
 
     // Open Store Link
     function openStore() {
-        const storeLink = "https://your-store-link.com"; // আপনার স্টোর লিঙ্ক এখানে বসান
+        const storeLink = "https://your-store-link.com";
         window.open(storeLink, '_blank');
     }
 
@@ -923,23 +926,42 @@
         }
     });
 
-    // Remove all listeners
+    // Remove all listeners - FIXED VERSION
     function removeAllListeners() {
+        console.log("Removing all listeners...");
+        
+        // Remove user data listeners
         if (historyListener) {
             historyListener();
             historyListener = null;
+            console.log("History listener removed");
         }
         if (balanceListener) {
             balanceListener();
             balanceListener = null;
+            console.log("Balance listener removed");
         }
         if (purchasedMatchesListener) {
             purchasedMatchesListener();
             purchasedMatchesListener = null;
+            console.log("Purchased matches listener removed");
         }
         
-        Object.values(matchListeners).forEach(off => off());
+        // Remove ALL match listeners - FIXED
+        Object.keys(matchListeners).forEach(mode => {
+            if (matchListeners[mode]) {
+                matchListeners[mode]();
+                console.log(`Match listener for ${mode} removed`);
+            }
+        });
         matchListeners = {};
+        
+        // Remove current match listener if exists
+        if (currentMatchListener) {
+            currentMatchListener();
+            currentMatchListener = null;
+            console.log("Current match listener removed");
+        }
     }
 
     // Show Loading
@@ -1220,68 +1242,120 @@
         }
     }
 
-    // Change Game Mode
+    // Change Game Mode - FIXED VERSION
     function changeGameMode(mode) {
-        currentGameMode = mode;
+        console.log(`Changing game mode from ${currentGameMode} to ${mode}`);
+        
+        // Update active tab UI
         document.querySelectorAll('.game-tab').forEach(t => t.classList.remove('active'));
         event.target.classList.add('active');
         
+        // Set loading state
         const container = document.getElementById('matchListContainer');
         container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
         
+        // Remove previous listener for the OLD mode
+        if (matchListeners[currentGameMode]) {
+            console.log(`Removing listener for old mode: ${currentGameMode}`);
+            matchListeners[currentGameMode]();
+            delete matchListeners[currentGameMode];
+        }
+        
+        // Update current game mode
+        currentGameMode = mode;
+        
+        // Load matches for new mode
         setTimeout(() => {
             loadMatches();
         }, 100);
     }
 
-    // Load Matches
+    // Load Matches - COMPLETELY FIXED VERSION
     function loadMatches() {
-        if (!userId) return;
+        if (!userId) {
+            console.log("User not logged in, cannot load matches");
+            return;
+        }
+        
+        console.log(`Loading matches for mode: ${currentGameMode}`);
         
         const container = document.getElementById('matchListContainer');
         container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
         
+        // Remove existing listener for this mode if exists
         if (matchListeners[currentGameMode]) {
+            console.log(`Removing existing listener for ${currentGameMode}`);
             matchListeners[currentGameMode]();
         }
         
-        matchListeners[currentGameMode] = db.ref('matches/' + currentGameMode).on('value', snapshot => {
-            container.innerHTML = '';
-            
-            if (!snapshot.exists()) {
+        // Create new listener
+        matchListeners[currentGameMode] = db.ref('matches/' + currentGameMode).on('value', 
+            (snapshot) => {
+                console.log(`Received data for ${currentGameMode}:`, snapshot.exists());
+                handleMatchesSnapshot(snapshot);
+            },
+            (error) => {
+                console.error(`Error loading matches for ${currentGameMode}:`, error);
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon"><i class="fas fa-trophy"></i></div>
-                        <div class="empty-text">No matches available</div>
-                        <div class="empty-subtext">Check back later for new tournaments</div>
+                        <div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div class="empty-text">Error loading matches</div>
+                        <div class="empty-subtext">Please try again</div>
                     </div>`;
-                return;
+            }
+        );
+        
+        console.log(`Listener created for ${currentGameMode}`);
+    }
+
+    // Handle Matches Snapshot - NEW FUNCTION
+    function handleMatchesSnapshot(snapshot) {
+        const container = document.getElementById('matchListContainer');
+        
+        if (!snapshot.exists()) {
+            console.log(`No matches found for ${currentGameMode}`);
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-trophy"></i></div>
+                    <div class="empty-text">No matches available</div>
+                    <div class="empty-subtext">Check back later for new tournaments</div>
+                </div>`;
+            return;
+        }
+        
+        // Load user's purchased matches
+        db.ref('users/' + userId + '/purchasedMatches').once('value').then(purchasedSnapshot => {
+            const purchasedMatchIds = [];
+            if (purchasedSnapshot.exists()) {
+                purchasedSnapshot.forEach(child => {
+                    const purchase = child.val();
+                    if (purchase.matchId) {
+                        purchasedMatchIds.push(purchase.matchId);
+                    }
+                });
             }
             
-            db.ref('users/' + userId + '/purchasedMatches').once('value').then(purchasedSnapshot => {
-                const purchasedMatchIds = [];
-                if (purchasedSnapshot.exists()) {
-                    purchasedSnapshot.forEach(child => {
-                        const purchase = child.val();
-                        if (purchase.matchId) {
-                            purchasedMatchIds.push(purchase.matchId);
-                        }
-                    });
-                }
+            const matches = [];
+            snapshot.forEach(child => {
+                const matchId = child.key;
+                const matchData = child.val();
                 
-                const matches = [];
-                snapshot.forEach(child => {
-                    const matchId = child.key;
-                    const matchData = child.val();
-                    
-                    matches.push({
-                        id: matchId,
-                        ...matchData
-                    });
+                matches.push({
+                    id: matchId,
+                    ...matchData
                 });
-                
-                filterAndDisplayMatches(matches, purchasedMatchIds, container);
             });
+            
+            console.log(`Found ${matches.length} matches for ${currentGameMode}`);
+            filterAndDisplayMatches(matches, purchasedMatchIds, container);
+        }).catch(error => {
+            console.error("Error loading purchased matches:", error);
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="empty-text">Error loading matches</div>
+                    <div class="empty-subtext">Please try again</div>
+                </div>`;
         });
     }
 
@@ -1319,6 +1393,7 @@
             return;
         }
         
+        container.innerHTML = '';
         visibleMatches.forEach(match => {
             container.appendChild(createMatchCard(match, purchasedMatchIds));
         });
@@ -1376,7 +1451,7 @@
         return card;
     }
 
-    // Open Join Match Form (UPDATED)
+    // Open Join Match Form
     function openJoinMatchForm(matchId) {
         currentMatchId = matchId;
         
@@ -1426,7 +1501,7 @@
         });
     }
 
-    // Submit Game Details (UPDATED)
+    // Submit Game Details
     function submitGameDetails() {
         const gameIdName = document.getElementById('gameIdName').value.trim();
         const gameUid = document.getElementById('gameUid').value.trim();
@@ -1586,7 +1661,7 @@
         });
     }
 
-    // Modal Functions (UPDATED WITHDRAWAL LOGIC)
+    // Modal Functions
     function openModal(mode) {
         if (!userId) {
             alert('Please login first');
@@ -1646,7 +1721,7 @@
         }
         
         if (currentMode === 'withdraw') {
-            // FIXED: Remove minimum withdrawal warning
+            // No minimum withdrawal warning
             if (amount > userBalance) {
                 alert('Insufficient balance');
                 return;
