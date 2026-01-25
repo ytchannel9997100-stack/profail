@@ -459,36 +459,131 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        .modal-header { padding: 20px; text-align: center; color: white; font-weight: 900; font-size: 18px; font-style: italic; }
+        .modal-header { 
+            padding: 20px; 
+            text-align: center; 
+            color: white; 
+            font-weight: 900; 
+            font-size: 18px; 
+            font-style: italic;
+            background: #334155;
+        }
+        
         .modal-body { padding: 20px; }
-        .modal-title { text-align: center; color: #334155; font-weight: 700; font-size: 14px; margin-bottom: 16px; }
+        .modal-title { 
+            text-align: center; 
+            color: #334155; 
+            font-weight: 700; 
+            font-size: 14px; 
+            margin-bottom: 16px; 
+        }
         
         .method-buttons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
         .method-btn { padding: 16px; border-radius: 12px; color: white; font-weight: 700; font-size: 14px; border: none; cursor: pointer; }
         .bkash-btn { background: #d12053; }
         .nagad-btn { background: #f6921e; }
         
-        .info-box { background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 16px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        .info-text { color: #334155 !important; margin-bottom: 8px; line-height: 1.5; }
-        .copy-number { background: #f59e0b20; padding: 12px; border-radius: 8px; border: 1px solid #f59e0b40; margin: 12px 0; font-weight: 700; color: #f59e0b !important; text-align: center; font-size: 18px; letter-spacing: 1px; }
-        
-        .input-field { 
-            width: 100%; padding: 14px; margin-bottom: 12px; 
-            border: 2px solid #e2e8f0; border-radius: 10px; 
-            color: #334155 !important; background-color: #ffffff;
-            font-weight: 500; font-size: 14px; outline: none;
+        .info-box { 
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9); 
+            padding: 16px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            border: 1px solid #e2e8f0; 
         }
         
-        .verify-btn { width: 100%; padding: 16px; background: #f59e0b; color: black; border: none; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; text-transform: uppercase; margin-top: 8px; }
-        .cancel-btn { width: 100%; text-align: center; padding: 12px; color: #64748b; font-weight: 600; font-size: 12px; cursor: pointer; margin-top: 8px; }
+        .info-text { 
+            color: #334155 !important; 
+            margin-bottom: 8px; 
+            line-height: 1.5; 
+        }
+        
+        .copy-number { 
+            background: #f59e0b20; 
+            padding: 12px; 
+            border-radius: 8px; 
+            border: 1px solid #f59e0b40; 
+            margin: 12px 0; 
+            font-weight: 700; 
+            color: #f59e0b !important; 
+            text-align: center; 
+            font-size: 18px; 
+            letter-spacing: 1px; 
+        }
+        
+        .input-field { 
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 8px; 
+            color: #334155 !important; 
+            background-color: #ffffff;
+            font-weight: 500; 
+            font-size: 14px; 
+            outline: none;
+        }
+        
+        .input-field:focus {
+            border-color: #f59e0b;
+        }
+        
+        .verify-btn { 
+            width: 100%; 
+            padding: 14px; 
+            background: #f59e0b; 
+            color: black; 
+            border: none; 
+            border-radius: 10px; 
+            font-weight: 700; 
+            font-size: 14px; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            margin-top: 8px; 
+        }
+        
+        .cancel-btn { 
+            width: 100%; 
+            text-align: center; 
+            padding: 12px; 
+            color: #64748b; 
+            font-weight: 600; 
+            font-size: 12px; 
+            cursor: pointer; 
+            margin-top: 8px; 
+        }
         
         /* States */
-        .empty-state { text-align: center; padding: 60px 20px; color: #64748b; }
-        .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
-        .loading { display: flex; justify-content: center; padding: 40px; }
-        .spinner { width: 40px; height: 40px; border: 4px solid rgba(245, 158, 11, 0.2); border-top: 4px solid #f59e0b; border-radius: 50%; animation: spin 1s linear infinite; }
+        .empty-state { 
+            text-align: center; 
+            padding: 60px 20px; 
+            color: #64748b; 
+        }
         
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .empty-icon { 
+            font-size: 48px; 
+            margin-bottom: 16px; 
+            opacity: 0.5; 
+        }
+        
+        .loading { 
+            display: flex; 
+            justify-content: center; 
+            padding: 40px; 
+        }
+        
+        .spinner { 
+            width: 40px; 
+            height: 40px; 
+            border: 4px solid rgba(245, 158, 11, 0.2); 
+            border-top: 4px solid #f59e0b; 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+        }
+        
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
         
         /* Bottom Nav */
         .bottom-nav { 
@@ -505,6 +600,7 @@
             display: flex; 
             justify-content: space-around; 
         }
+        
         .nav-btn { 
             display: flex; 
             flex-direction: column; 
@@ -518,11 +614,23 @@
             flex: 1; 
             padding: 8px 0; 
         }
-        .nav-btn i { font-size: 20px; margin-bottom: 4px; }
-        .nav-btn.active { color: #f59e0b; }
         
-        .page-section { display: none; }
-        .page-section.active { display: block; }
+        .nav-btn i { 
+            font-size: 20px; 
+            margin-bottom: 4px; 
+        }
+        
+        .nav-btn.active { 
+            color: #f59e0b; 
+        }
+        
+        .page-section { 
+            display: none; 
+        }
+        
+        .page-section.active { 
+            display: block; 
+        }
         
         /* Login Screen Styles */
         .login-screen {
@@ -614,6 +722,67 @@
             font-size: 13px;
             display: none;
         }
+        
+        /* Join Match Form Modal */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #334155;
+            font-size: 13px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #334155;
+            background: #f9fafb;
+        }
+        
+        .submit-btn {
+            background: #f59e0b;
+            color: black;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .telegram-link-box {
+            background: #0088cc20;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #0088cc40;
+        }
+        
+        .telegram-link {
+            color: #0088cc;
+            font-weight: 600;
+            word-break: break-all;
+            font-size: 14px;
+        }
+        
+        .copy-link-btn {
+            background: #0088cc;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -704,6 +873,7 @@
     </div>
 </div>
 
+<!-- Payment Modal -->
 <div id="payModal" class="hidden modal-overlay">
     <div class="modal-content">
         <div id="modalHeader" class="modal-header">
@@ -735,6 +905,56 @@
     </div>
 </div>
 
+<!-- Join Match Modal -->
+<div id="joinMatchModal" class="hidden modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="joinMatchTitle">Join Match</span>
+        </div>
+        <div class="modal-body">
+            <div id="joinMatchStep1">
+                <div class="modal-title">Enter Your Game Details</div>
+                <div class="form-group">
+                    <label class="form-label">Game ID Name (PUBG/BGMI ID)</label>
+                    <input type="text" id="gameIdName" class="form-input" placeholder="Enter your game ID name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Game UID (Numeric ID)</label>
+                    <input type="text" id="gameUid" class="form-input" placeholder="Enter your game UID">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Telegram Username (with @)</label>
+                    <input type="text" id="telegramUsername" class="form-input" placeholder="@username">
+                </div>
+                <div class="info-box">
+                    <p class="info-text">After submitting details, you will get Telegram group link to join the match.</p>
+                </div>
+                <button onclick="submitGameDetails()" class="submit-btn">SUBMIT DETAILS</button>
+                <button onclick="closeJoinMatchModal()" class="cancel-btn">CANCEL</button>
+            </div>
+            <div id="joinMatchStep2" class="hidden">
+                <div class="modal-title">Join Telegram Group</div>
+                <div class="info-box">
+                    <p class="info-text">Your details have been submitted successfully!</p>
+                    <p class="info-text">Entry fee of <span id="matchFeeDisplay" class="font-bold">৳0</span> has been deducted from your balance.</p>
+                </div>
+                <div class="telegram-link-box">
+                    <p class="info-text font-bold">Telegram Group Link:</p>
+                    <div id="telegramLinkDisplay" class="telegram-link">Loading...</div>
+                    <button onclick="copyTelegramLink()" class="copy-link-btn">
+                        <i class="far fa-copy"></i> Copy Link
+                    </button>
+                </div>
+                <p class="info-text">Join the Telegram group to get match room details and connect with other players.</p>
+                <button onclick="openTelegramLink()" class="submit-btn">
+                    <i class="fab fa-telegram"></i> OPEN TELEGRAM
+                </button>
+                <button onclick="closeJoinMatchModal()" class="cancel-btn">CLOSE</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     // Firebase Configuration
     const firebaseConfig = {
@@ -757,6 +977,8 @@
     let balanceListener = null;
     let purchasedMatchesListener = null;
     let matchListeners = {};
+    let currentMatchId = null;
+    let currentMatchData = null;
 
     // Open Store Link
     function openStore() {
@@ -1232,6 +1454,9 @@
             hiddenBadge = '<div class="hidden-badge">HIDDEN</div>';
         }
         
+        // Check if admin has provided Telegram link
+        const hasTelegramLink = match.telegramLink && match.telegramLink.trim() !== '';
+        
         card.innerHTML = `
             ${hiddenBadge}
             <div class="match-title">${match.title || 'MATCH'}</div>
@@ -1250,7 +1475,7 @@
             <div class="purchase-status ${hasPurchased ? 'purchased' : 'not-purchased'}">${hasPurchased ? 'Purchased' : 'Purchase Required'}</div>
             
             ${hasPurchased ? 
-                `<button class="link-btn show" onclick="openPlayPage('${match.id}')">
+                `<button class="link-btn show" onclick="openJoinMatchForm('${match.id}')">
                     <i class="fas fa-play"></i>
                     ENTER MATCH LINK
                 </button>` : 
@@ -1268,6 +1493,161 @@
         `;
         
         return card;
+    }
+
+    // Open Join Match Form
+    function openJoinMatchForm(matchId) {
+        currentMatchId = matchId;
+        
+        // Load match details
+        db.ref('matches/' + currentGameMode + '/' + matchId).once('value', s => {
+            currentMatchData = s.val();
+            
+            if (!currentMatchData) {
+                alert('Match not found!');
+                return;
+            }
+            
+            // Set match fee display
+            document.getElementById('matchFeeDisplay').textContent = `৳${currentMatchData.entryFee || 0}`;
+            
+            // Show modal
+            document.getElementById('joinMatchModal').classList.remove('hidden');
+            document.getElementById('joinMatchStep1').classList.remove('hidden');
+            document.getElementById('joinMatchStep2').classList.add('hidden');
+            document.getElementById('joinMatchTitle').textContent = `Join: ${currentMatchData.title || 'Match'}`;
+            
+            // Clear form fields
+            document.getElementById('gameIdName').value = '';
+            document.getElementById('gameUid').value = '';
+            document.getElementById('telegramUsername').value = '';
+        });
+    }
+
+    // Submit Game Details
+    function submitGameDetails() {
+        const gameIdName = document.getElementById('gameIdName').value.trim();
+        const gameUid = document.getElementById('gameUid').value.trim();
+        const telegramUsername = document.getElementById('telegramUsername').value.trim();
+        
+        if (!gameIdName || !gameUid || !telegramUsername) {
+            alert('Please fill in all fields!');
+            return;
+        }
+        
+        if (!/^@/.test(telegramUsername)) {
+            alert('Telegram username must start with @');
+            return;
+        }
+        
+        // Check if user has enough balance
+        const entryFee = parseInt(currentMatchData.entryFee || 0);
+        if (userBalance < entryFee) {
+            alert(`Insufficient balance! Entry fee is ৳${entryFee}`);
+            return;
+        }
+        
+        // Deduct entry fee from user balance
+        const newBalance = userBalance - entryFee;
+        db.ref('users/' + userId + '/balance').set(newBalance);
+        
+        // Update user balance locally
+        userBalance = newBalance;
+        document.getElementById('balanceVal').textContent = userBalance;
+        
+        // Save player details to match joins
+        const playerData = {
+            userId: userId,
+            userEmail: currentUser?.email || 'Unknown',
+            gameIdName: gameIdName,
+            gameUid: gameUid,
+            telegramUsername: telegramUsername,
+            joinTime: new Date().toISOString(),
+            matchId: currentMatchId,
+            gameMode: currentGameMode,
+            entryFee: entryFee,
+            matchTitle: currentMatchData.title || 'Match',
+            status: 'joined'
+        };
+        
+        const joinRef = db.ref('matchJoins/' + currentMatchId).push(playerData);
+        
+        // Update player count
+        const newPlayerCount = (currentMatchData.currentPlayers || 0) + 1;
+        db.ref('matches/' + currentGameMode + '/' + currentMatchId + '/currentPlayers').set(newPlayerCount);
+        
+        // Update purchased matches
+        const purchaseData = {
+            matchId: currentMatchId,
+            purchaseTime: new Date().toISOString(),
+            matchTitle: currentMatchData.title || 'Match',
+            entryFee: entryFee,
+            gameMode: currentGameMode,
+            matchDate: currentMatchData.date,
+            matchTime: currentMatchData.time,
+            joinId: joinRef.key,
+            gameDetailsSubmitted: true
+        };
+        
+        db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
+        
+        // Show step 2 with Telegram link
+        document.getElementById('joinMatchStep1').classList.add('hidden');
+        document.getElementById('joinMatchStep2').classList.remove('hidden');
+        
+        // Load Telegram link from admin data
+        loadTelegramLink();
+    }
+
+    // Load Telegram Link
+    function loadTelegramLink() {
+        const telegramLinkDiv = document.getElementById('telegramLinkDisplay');
+        
+        // Check if admin has provided Telegram link
+        if (currentMatchData.telegramLink && currentMatchData.telegramLink.trim() !== '') {
+            telegramLinkDiv.innerHTML = `<a href="${currentMatchData.telegramLink}" target="_blank" class="telegram-link">${currentMatchData.telegramLink}</a>`;
+        } else {
+            // If no link from admin, show default message
+            telegramLinkDiv.textContent = "Admin will share Telegram link soon. Please wait for notification.";
+        }
+    }
+
+    // Copy Telegram Link
+    function copyTelegramLink() {
+        const telegramLinkDiv = document.getElementById('telegramLinkDisplay');
+        let link = '';
+        
+        if (telegramLinkDiv.querySelector('a')) {
+            link = telegramLinkDiv.querySelector('a').href;
+        } else {
+            link = telegramLinkDiv.textContent;
+        }
+        
+        navigator.clipboard.writeText(link).then(() => {
+            alert('Link copied to clipboard!');
+        }).catch(err => {
+            console.error('Copy failed:', err);
+        });
+    }
+
+    // Open Telegram Link
+    function openTelegramLink() {
+        const telegramLinkDiv = document.getElementById('telegramLinkDisplay');
+        let link = '';
+        
+        if (telegramLinkDiv.querySelector('a')) {
+            link = telegramLinkDiv.querySelector('a').href;
+            window.open(link, '_blank');
+        } else {
+            alert('Telegram link will be available soon. Please wait for admin notification.');
+        }
+    }
+
+    // Close Join Match Modal
+    function closeJoinMatchModal() {
+        document.getElementById('joinMatchModal').classList.add('hidden');
+        // Reload matches to update player count and status
+        loadMatches();
     }
 
     // Open Play Page
@@ -1313,24 +1693,24 @@
                     matchTime: m.time
                 };
                 
-                const purchasedRef = db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
+                db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
                 
                 const joinData = {
                     userId: userId,
                     userEmail: currentUser?.email || 'Unknown',
                     joinTime: new Date().toISOString(),
-                    purchaseId: purchasedRef.key,
                     matchId: matchId,
                     gameMode: currentGameMode,
-                    entryFee: fee
+                    entryFee: fee,
+                    status: 'purchased'
                 };
                 
-                db.ref('matchJoins/' + matchId + '/' + purchasedRef.key).set(joinData);
+                db.ref('matchJoins/' + matchId).push(joinData);
                 
                 userBalance = newBalance;
                 document.getElementById('balanceVal').textContent = userBalance;
                 
-                alert('Successfully joined the match!');
+                alert('Successfully purchased the match! You can now join by clicking "ENTER MATCH LINK"');
                 
                 setTimeout(() => {
                     loadMatches();
@@ -1342,7 +1722,7 @@
     function showMatchDetails(matchId) {
         db.ref('matches/' + currentGameMode + '/' + matchId).once('value', s => {
             const m = s.val();
-            alert(`Match: ${m.title}\nMap: ${m.map}\nTime: ${m.time}\nPrize: ৳${m.totalPrize}\nEntry Fee: ৳${m.entryFee}`);
+            alert(`Match: ${m.title}\nMap: ${m.map}\nTime: ${m.time}\nPrize: ৳${m.totalPrize}\nEntry Fee: ৳${m.entryFee}\nPlayers: ${m.currentPlayers || 0}/${m.maxPlayers || 100}`);
         });
     }
 
