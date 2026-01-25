@@ -1866,7 +1866,90 @@
         // View User Details
         function viewUserDetails(userId) {
             // Open user details in new tab or modal
-            window.open(`user-details.html?userId=${userId}`, '_blank');
+            const detailsWindow = window.open('', '_blank');
+            detailsWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>User Details - ${userId}</title>
+                    <style>
+                        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+                        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+                        .section { margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; }
+                        h2 { color: #333; }
+                        .loading { text-align: center; padding: 40px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>User Details</h1>
+                        <div id="userDetails" class="loading">Loading...</div>
+                        <div class="section">
+                            <h2>Transaction History</h2>
+                            <div id="userHistory">Loading...</div>
+                        </div>
+                        <div class="section">
+                            <h2>Purchased Matches</h2>
+                            <div id="userMatches">Loading...</div>
+                        </div>
+                    </div>
+                    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"><\/script>
+                    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"><\/script>
+                    <script>
+                        const firebaseConfig = ${JSON.stringify(firebaseConfig)};
+                        firebase.initializeApp(firebaseConfig);
+                        const db = firebase.database();
+                        
+                        const userId = "${userId}";
+                        
+                        // Load user details
+                        db.ref('users/' + userId).once('value').then(snapshot => {
+                            const user = snapshot.val();
+                            if (user) {
+                                document.getElementById('userDetails').innerHTML = \`
+                                    <p><strong>User ID:</strong> \${userId}</p>
+                                    <p><strong>Email:</strong> \${user.email || 'N/A'}</p>
+                                    <p><strong>Balance:</strong> ৳\${user.balance || 0}</p>
+                                    <p><strong>Joined:</strong> \${user.createdAt ? new Date(user.createdAt).toLocaleString() : 'N/A'}</p>
+                                    <p><strong>Last Login:</strong> \${user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'N/A'}</p>
+                                \`;
+                            }
+                        });
+                        
+                        // Load user history
+                        db.ref('users/' + userId + '/history').once('value').then(snapshot => {
+                            let html = '<ul>';
+                            if (!snapshot.exists()) {
+                                html = '<p>No transaction history</p>';
+                            } else {
+                                snapshot.forEach(child => {
+                                    const trans = child.val();
+                                    html += \`<li>\${trans.type} - ৳\${trans.amount} (\${trans.status}) - \${trans.date}</li>\`;
+                                });
+                                html += '</ul>';
+                            }
+                            document.getElementById('userHistory').innerHTML = html;
+                        });
+                        
+                        // Load purchased matches
+                        db.ref('users/' + userId + '/purchasedMatches').once('value').then(snapshot => {
+                            let html = '<ul>';
+                            if (!snapshot.exists()) {
+                                html = '<p>No purchased matches</p>';
+                            } else {
+                                snapshot.forEach(child => {
+                                    const match = child.val();
+                                    html += \`<li>\${match.matchTitle} - ৳\${match.entryFee} - \${new Date(match.purchaseTime).toLocaleString()}</li>\`;
+                                });
+                                html += '</ul>';
+                            }
+                            document.getElementById('userMatches').innerHTML = html;
+                        });
+                    <\/script>
+                </body>
+                </html>
+            `);
+            detailsWindow.document.close();
         }
         
         // Load Transactions
@@ -1947,15 +2030,22 @@
                 // Update transaction status
                 db.ref('admin/requests/' + transKey + '/status').set('approved');
                 
-                // If it's a deposit, add to user balance
-                if (trans.type === 'add') {
-                    db.ref('users/' + trans.userId + '/balance').transaction(currentBalance => {
-                        return (currentBalance || 0) + parseInt(trans.amount);
+                // Update in user's history
+                if (trans.userId) {
+                    // Find the transaction in user's history
+                    db.ref('users/' + trans.userId + '/history').orderByChild('timestamp').equalTo(trans.timestamp).once('value').then(userSnapshot => {
+                        userSnapshot.forEach(child => {
+                            db.ref('users/' + trans.userId + '/history/' + child.key + '/status').set('approved');
+                        });
                     });
+                    
+                    // If it's a deposit, add to user balance
+                    if (trans.type === 'add') {
+                        db.ref('users/' + trans.userId + '/balance').transaction(currentBalance => {
+                            return (currentBalance || 0) + parseInt(trans.amount);
+                        });
+                    }
                 }
-                
-                // Update user's transaction history
-                db.ref('users/' + trans.userId + '/history/' + transKey + '/status').set('approved');
                 
                 alert('Transaction approved!');
                 loadTransactions();
@@ -1978,10 +2068,18 @@
             if (confirm('Are you sure you want to reject this transaction?')) {
                 db.ref('admin/requests/' + transKey + '/status').set('rejected');
                 
-                // Update user's transaction history
+                // Update in user's history
                 db.ref('admin/requests/' + transKey).once('value').then(snapshot => {
                     const trans = snapshot.val();
-                    db.ref('users/' + trans.userId + '/history/' + transKey + '/status').set('rejected');
+                    
+                    if (trans.userId) {
+                        // Find the transaction in user's history
+                        db.ref('users/' + trans.userId + '/history').orderByChild('timestamp').equalTo(trans.timestamp).once('value').then(userSnapshot => {
+                            userSnapshot.forEach(child => {
+                                db.ref('users/' + trans.userId + '/history/' + child.key + '/status').set('rejected');
+                            });
+                        });
+                    }
                     
                     alert('Transaction rejected!');
                     loadTransactions();
@@ -2571,9 +2669,32 @@
             });
         }
         
+        // Fix: Transaction approval issue in user history
+        function fixTransactionHistory(userId, transKey, newStatus) {
+            db.ref('users/' + userId + '/history').orderByChild('timestamp').once('value').then(snapshot => {
+                snapshot.forEach(child => {
+                    const trans = child.val();
+                    // Match by timestamp and amount
+                    if (Math.abs(trans.timestamp - transKey.timestamp) < 1000 && 
+                        trans.amount === transKey.amount && 
+                        trans.type === transKey.type) {
+                        db.ref('users/' + userId + '/history/' + child.key + '/status').set(newStatus);
+                        return true;
+                    }
+                });
+            });
+        }
+        
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             checkAdminSession();
+            
+            // Set today's date as default for tournament creation
+            const today = new Date().toISOString().split('T')[0];
+            const tournamentDateInput = document.getElementById('tournamentDate');
+            if (tournamentDateInput) {
+                tournamentDateInput.min = today;
+            }
         });
     </script>
 </body>
