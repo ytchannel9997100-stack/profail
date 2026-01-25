@@ -919,70 +919,184 @@
             }
         });
         
-        // History listener
-        loadHistory();
+        // History listener - FIXED VERSION
+        loadCombinedHistory();
     }
 
-    // Load History
-    function loadHistory() {
+    // Load Combined History (FIXED VERSION)
+    function loadCombinedHistory() {
         if (!userId) return;
         
         if (historyListener) {
             historyListener();
         }
         
-        historyListener = db.ref('users/' + userId + '/history').on('value', s => {
+        historyListener = db.ref('users/' + userId + '/history').on('value', userSnapshot => {
             const div = document.getElementById('historyItems');
             div.innerHTML = "";
             
-            if (!s.exists()) {
-                div.innerHTML = `<div class="empty-state"><div class="empty-text">No transaction history</div></div>`;
-                return;
-            }
-            
-            let history = [];
-            s.forEach(c => {
-                const data = c.val();
-                history.push({
-                    key: c.key,
-                    type: data.type || '',
-                    method: data.method || '',
-                    amount: data.amount || 0,
-                    status: data.status || 'pending',
-                    date: data.date || new Date().toLocaleString(),
-                    info: data.info || ''
-                });
-            });
-            
-            history.sort((a,b) => {
-                const dateA = new Date(a.date);
-                const dateB = new Date(b.date);
-                return dateB - dateA;
-            });
-            
-            if (history.length === 0) {
-                div.innerHTML = `<div class="empty-state"><div class="empty-text">No transaction history</div></div>`;
-                return;
-            }
-            
-            history.forEach(d => {
-                const amountColor = d.type === 'add' ? 'add-color' : 'withdraw-color';
-                const statusClass = d.status === 'pending' ? 'pending' : d.status === 'approved' ? 'approved' : 'rejected';
-                const displayDate = d.date ? d.date : 'Date not available';
+            // Load from both user history and admin requests
+            Promise.all([
+                Promise.resolve(userSnapshot),
+                db.ref('admin/requests').orderByChild('userId').equalTo(userId).once('value')
+            ]).then(([userData, adminSnapshot]) => {
+                let allTransactions = [];
                 
-                div.innerHTML += `
-                    <div class="history-card">
-                        <div class="history-header">
-                            <span class="history-type">${d.type.toUpperCase()} - ${d.method.toUpperCase()}</span>
-                            <span class="history-amount ${amountColor}">${d.type === 'add' ? '+' : '-'}৳${d.amount}</span>
-                        </div>
-                        <div class="history-footer">
-                            <span>${displayDate}</span>
-                            <span class="history-status ${statusClass}">${d.status.toUpperCase()}</span>
-                        </div>
-                    </div>`;
+                // 1. Collect from user's history
+                if (userData.exists()) {
+                    userData.forEach(child => {
+                        const data = child.val();
+                        allTransactions.push({
+                            source: 'user_history',
+                            key: child.key,
+                            type: data.type || '',
+                            method: data.method || '',
+                            amount: data.amount || 0,
+                            status: data.status || 'pending',
+                            date: data.date || new Date().toLocaleString(),
+                            info: data.info || '',
+                            timestamp: data.timestamp || Date.now()
+                        });
+                    });
+                }
+                
+                // 2. Collect from admin requests (for any missing transactions)
+                if (adminSnapshot.exists()) {
+                    adminSnapshot.forEach(child => {
+                        const data = child.val();
+                        
+                        // Check if this transaction already exists in user history
+                        const existsInHistory = allTransactions.some(t => 
+                            t.amount == data.amount && 
+                            t.type === data.type && 
+                            t.method === data.method &&
+                            Math.abs(new Date(t.date) - new Date(data.date)) < 60000
+                        );
+                        
+                        if (!existsInHistory) {
+                            allTransactions.push({
+                                source: 'admin_requests',
+                                key: child.key,
+                                type: data.type || '',
+                                method: data.method || '',
+                                amount: data.amount || 0,
+                                status: data.status || 'pending',
+                                date: data.date || new Date().toLocaleString(),
+                                info: data.info || '',
+                                timestamp: data.timestamp || Date.now()
+                            });
+                            
+                            // Auto-sync: Add missing transaction to user history
+                            if (data.status === 'approved' || data.status === 'rejected') {
+                                syncTransactionToUserHistory(data);
+                            }
+                        } else {
+                            // Update status if different
+                            const existingTrans = allTransactions.find(t => 
+                                t.amount == data.amount && 
+                                t.type === data.type && 
+                                t.method === data.method &&
+                                Math.abs(new Date(t.date) - new Date(data.date)) < 60000
+                            );
+                            
+                            if (existingTrans && existingTrans.status !== data.status) {
+                                existingTrans.status = data.status;
+                                // Update in user history
+                                updateTransactionStatusInUserHistory(data);
+                            }
+                        }
+                    });
+                }
+                
+                // Sort by timestamp (newest first)
+                allTransactions.sort((a,b) => b.timestamp - a.timestamp);
+                
+                if (allTransactions.length === 0) {
+                    div.innerHTML = `<div class="empty-state"><div class="empty-text">No transaction history</div></div>`;
+                    return;
+                }
+                
+                // Show only last 10 transactions
+                displayTransactions(allTransactions.slice(0, 10));
             });
         });
+    }
+    
+    // Sync transaction to user history
+    function syncTransactionToUserHistory(transaction) {
+        if (!userId) return;
+        
+        const historyEntry = {
+            type: transaction.type,
+            method: transaction.method,
+            amount: transaction.amount,
+            status: transaction.status || 'pending',
+            date: transaction.date || new Date().toLocaleString(),
+            info: transaction.info || '',
+            timestamp: transaction.timestamp || Date.now(),
+            userId: userId,
+            userEmail: currentUser?.email || 'Unknown',
+            syncedAt: new Date().toISOString()
+        };
+        
+        db.ref('users/' + userId + '/history').push(historyEntry);
+        
+        // Update balance if approved deposit
+        if (transaction.status === 'approved' && transaction.type === 'add') {
+            db.ref('users/' + userId + '/balance').transaction(currentBalance => {
+                return (currentBalance || 0) + parseInt(transaction.amount);
+            });
+        }
+    }
+    
+    // Update transaction status in user history
+    function updateTransactionStatusInUserHistory(transaction) {
+        if (!userId) return;
+        
+        // Find and update the transaction in user history
+        db.ref('users/' + userId + '/history').orderByChild('timestamp')
+            .equalTo(transaction.timestamp).once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        db.ref('users/' + userId + '/history/' + child.key + '/status')
+                            .set(transaction.status);
+                    });
+                }
+                
+                // Update balance if approved deposit
+                if (transaction.status === 'approved' && transaction.type === 'add') {
+                    db.ref('users/' + userId + '/balance').transaction(currentBalance => {
+                        return (currentBalance || 0) + parseInt(transaction.amount);
+                    });
+                }
+            });
+    }
+    
+    // Display transactions
+    function displayTransactions(transactions) {
+        const div = document.getElementById('historyItems');
+        let html = '';
+        
+        transactions.forEach(d => {
+            const amountColor = d.type === 'add' ? 'add-color' : 'withdraw-color';
+            const statusClass = d.status === 'pending' ? 'pending' : 
+                              d.status === 'approved' ? 'approved' : 'rejected';
+            const displayDate = d.date ? d.date : 'Date not available';
+            
+            html += `
+                <div class="history-card">
+                    <div class="history-header">
+                        <span class="history-type">${d.type.toUpperCase()} - ${d.method.toUpperCase()}</span>
+                        <span class="history-amount ${amountColor}">${d.type === 'add' ? '+' : '-'}৳${d.amount}</span>
+                    </div>
+                    <div class="history-footer">
+                        <span>${displayDate}</span>
+                        <span class="history-status ${statusClass}">${d.status.toUpperCase()}</span>
+                    </div>
+                </div>`;
+        });
+        
+        div.innerHTML = html;
     }
 
     // Switch Page
@@ -1305,8 +1419,10 @@
             timestamp: Date.now()
         };
         
+        // Save to user history
         db.ref('users/' + userId + '/history').push(transaction);
         
+        // Save to admin requests
         db.ref('admin/requests').push(transaction).then(() => {
             alert('Request submitted successfully!');
             closeModal();
