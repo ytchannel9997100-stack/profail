@@ -1,3 +1,895 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Easy Premium | Wallet & Matches</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body { 
+            background-color: #0f172a; 
+            color: white; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .app-container { 
+            max-width: 400px; 
+            margin: 0 auto; 
+            min-height: 100vh; 
+            background: #0f172a;
+            position: relative;
+            padding-bottom: 70px;
+        }
+        
+        .hidden { display: none !important; }
+        
+        /* Header */
+        .header {
+            background: #1e293b;
+            padding: 16px;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f59e0b;
+            font-style: italic;
+            cursor: pointer;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .balance-badge {
+            background-color: #f59e0b;
+            color: black;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Store Icon */
+        .store-icon {
+            background-color: #8b5cf6;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            border: 2px solid #a78bfa;
+        }
+        
+        .store-icon:hover {
+            background-color: #7c3aed;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+        
+        /* Wallet Section */
+        .wallet-section {
+            padding: 20px 16px;
+        }
+        
+        .wallet-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .action-btn {
+            padding: 18px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .add-money {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .withdraw {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        /* History Section */
+        .history-section {
+            padding: 0 16px;
+        }
+        
+        .section-title {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        
+        .history-card {
+            background: #1e293b;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .history-type {
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+        }
+        
+        .history-amount {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .add-color {
+            color: #10b981;
+        }
+        
+        .withdraw-color {
+            color: #ef4444;
+        }
+        
+        .history-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #64748b;
+        }
+        
+        .history-status {
+            font-weight: 700;
+        }
+        
+        .pending { color: #f59e0b; }
+        .approved { color: #10b981; }
+        .rejected { color: #ef4444; }
+        
+        /* Matches Section */
+        .matches-section {
+            padding: 20px 16px;
+        }
+        
+        .matches-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 8px;
+        }
+        
+        .matches-subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 24px;
+        }
+        
+        .game-mode-tabs {
+            display: flex;
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 6px;
+            margin-bottom: 20px;
+            gap: 6px;
+        }
+        
+        .game-tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            text-transform: uppercase;
+        }
+        
+        .game-tab.active {
+            background: #f59e0b;
+            color: black;
+            border-color: #f59e0b;
+        }
+        
+        /* Match Card */
+        .match-card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 2px solid #334155;
+            position: relative;
+        }
+        
+        .match-title {
+            font-size: 18px;
+            font-weight: 900;
+            color: #f59e0b;
+            margin-bottom: 8px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        
+        .match-time {
+            font-size: 12px;
+            color: #94a3b8;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        
+        .match-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .match-item {
+            background: rgba(245, 158, 11, 0.1);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .item-label { font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+        .item-value { font-size: 16px; font-weight: 800; color: #f59e0b; }
+        
+        .match-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+            background: rgba(30, 41, 59, 0.8);
+            padding: 12px;
+            border-radius: 10px;
+        }
+        
+        .detail-item { text-align: center; }
+        .detail-label { font-size: 10px; color: #94a3b8; margin-bottom: 4px; }
+        .detail-value { font-size: 13px; font-weight: 700; color: white; }
+        
+        .players-info {
+            font-size: 14px;
+            color: #f59e0b;
+            text-align: center;
+            margin: 12px 0;
+            font-weight: 700;
+        }
+        
+        .purchase-status {
+            font-size: 12px;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-weight: 700;
+        }
+        
+        .purchased { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .not-purchased { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        
+        .match-actions { display: flex; gap: 12px; margin-top: 16px; }
+        
+        .match-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .details-btn { background: #0ea5e9; color: white; }
+        .purchase-btn { background: #f59e0b; color: black; }
+        .purchase-btn:disabled { background: #64748b; cursor: not-allowed; }
+        
+        .link-btn {
+            background: #8b5cf6;
+            color: white;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            margin-top: 12px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .link-btn.show { display: flex; }
+        
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 340px;
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header { 
+            padding: 20px; 
+            text-align: center; 
+            color: white; 
+            font-weight: 900; 
+            font-size: 18px; 
+            font-style: italic;
+            background: #334155;
+        }
+        
+        .modal-body { padding: 20px; }
+        .modal-title { 
+            text-align: center; 
+            color: #334155; 
+            font-weight: 700; 
+            font-size: 14px; 
+            margin-bottom: 16px; 
+        }
+        
+        .method-buttons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        .method-btn { padding: 16px; border-radius: 12px; color: white; font-weight: 700; font-size: 14px; border: none; cursor: pointer; }
+        .bkash-btn { background: #d12053; }
+        .nagad-btn { background: #f6921e; }
+        
+        .info-box { 
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9); 
+            padding: 16px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            border: 1px solid #e2e8f0; 
+        }
+        
+        .info-text { 
+            color: #334155 !important; 
+            margin-bottom: 8px; 
+            line-height: 1.5; 
+        }
+        
+        .copy-number { 
+            background: #f59e0b20; 
+            padding: 12px; 
+            border-radius: 8px; 
+            border: 1px solid #f59e0b40; 
+            margin: 12px 0; 
+            font-weight: 700; 
+            color: #f59e0b !important; 
+            text-align: center; 
+            font-size: 18px; 
+            letter-spacing: 1px; 
+        }
+        
+        .input-field { 
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 8px; 
+            color: #334155 !important; 
+            background-color: #ffffff;
+            font-weight: 500; 
+            font-size: 14px; 
+            outline: none;
+        }
+        
+        .input-field:focus {
+            border-color: #f59e0b;
+        }
+        
+        .verify-btn { 
+            width: 100%; 
+            padding: 14px; 
+            background: #f59e0b; 
+            color: black; 
+            border: none; 
+            border-radius: 10px; 
+            font-weight: 700; 
+            font-size: 14px; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            margin-top: 8px; 
+        }
+        
+        .cancel-btn { 
+            width: 100%; 
+            text-align: center; 
+            padding: 12px; 
+            color: #64748b; 
+            font-weight: 600; 
+            font-size: 12px; 
+            cursor: pointer; 
+            margin-top: 8px; 
+        }
+        
+        /* States */
+        .empty-state { 
+            text-align: center; 
+            padding: 60px 20px; 
+            color: #64748b; 
+        }
+        
+        .empty-icon { 
+            font-size: 48px; 
+            margin-bottom: 16px; 
+            opacity: 0.5; 
+        }
+        
+        .loading { 
+            display: flex; 
+            justify-content: center; 
+            padding: 40px; 
+        }
+        
+        .spinner { 
+            width: 40px; 
+            height: 40px; 
+            border: 4px solid rgba(245, 158, 11, 0.2); 
+            border-top: 4px solid #f59e0b; 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+        }
+        
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+        
+        /* Bottom Nav */
+        .bottom-nav { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            max-width: 400px; 
+            margin: 0 auto; 
+            background: #1e293b; 
+            border-top: 1px solid #334155; 
+            padding: 10px 0; 
+            z-index: 100; 
+            display: flex; 
+            justify-content: space-around; 
+        }
+        
+        .nav-btn { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            color: #94a3b8; 
+            font-size: 11px; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            cursor: pointer; 
+            flex: 1; 
+            padding: 8px 0; 
+        }
+        
+        .nav-btn i { 
+            font-size: 20px; 
+            margin-bottom: 4px; 
+        }
+        
+        .nav-btn.active { 
+            color: #f59e0b; 
+        }
+        
+        .page-section { 
+            display: none; 
+        }
+        
+        .page-section.active { 
+            display: block; 
+        }
+        
+        /* Login Screen Styles */
+        .login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: #0f172a;
+        }
+        
+        .login-logo {
+            font-size: 36px;
+            font-weight: 900;
+            color: #f59e0b;
+            font-style: italic;
+            margin-bottom: 40px;
+            cursor: pointer;
+        }
+        
+        .login-card {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 350px;
+            border: 2px solid #334155;
+            text-align: center;
+        }
+        
+        .login-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 10px;
+        }
+        
+        .login-subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+        
+        .google-login-btn {
+            background: white;
+            color: #334155;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .google-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .google-icon {
+            font-size: 20px;
+            color: #4285F4;
+        }
+        
+        .user-email-display {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 20px;
+            padding: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            word-break: break-all;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            background: rgba(239,68,68,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+            display: none;
+        }
+        
+        /* Join Match Form Modal */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #334155;
+            font-size: 13px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #334155;
+            background: #f9fafb;
+        }
+        
+        .submit-btn {
+            background: #f59e0b;
+            color: black;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .telegram-link-box {
+            background: #0088cc20;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #0088cc40;
+        }
+        
+        .telegram-link {
+            color: #0088cc;
+            font-weight: 600;
+            word-break: break-all;
+            font-size: 14px;
+        }
+        
+        .copy-link-btn {
+            background: #0088cc;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        
+        /* Success Message */
+        .success-message {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+        
+        /* Hidden Badge */
+        .hidden-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ef4444;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="loginScreen" class="login-screen">
+    <div class="login-card">
+        <div class="login-logo" onclick="openProfile()">Easy Premium</div>
+        <h2 class="login-title">Welcome to Easy Premium</h2>
+        <p class="login-subtitle">Join tournaments and win real money</p>
+        
+        <div id="loadingSection" class="loading" style="display: none;">
+            <div class="spinner"></div>
+        </div>
+        
+        <div id="loginSection">
+            <button id="googleLoginBtn" class="google-login-btn" onclick="signInWithGoogle()">
+                <i class="fab fa-google google-icon"></i>
+                Sign in with Google
+            </button>
+            
+            <div class="user-email-display" id="userEmailDisplay" style="display: none;"></div>
+            
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Main App (Hidden initially) -->
+<div class="app-container hidden" id="mainContainer">
+    <div class="header">
+        <div class="logo" onclick="openProfile()">Easy Premium</div>
+        <div class="header-right">
+            <!-- Store Icon -->
+            <div class="store-icon" onclick="openStore()" title="Visit Store">
+                <i class="fas fa-store"></i>
+            </div>
+            
+            <div class="balance-badge">
+                <i class="fas fa-wallet mr-1"></i>
+                ৳ <span id="balanceVal">0</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="page-section active" id="walletPage">
+        <div class="wallet-section">
+            <h1 class="wallet-title">MY WALLET</h1>
+            <div class="action-buttons">
+                <button class="action-btn add-money" onclick="openModal('add')">ADD MONEY</button>
+                <button class="action-btn withdraw" onclick="openModal('withdraw')">WITHDRAW</button>
+            </div>
+            <div class="history-section">
+                <div class="section-title">HISTORY</div>
+                <div id="historyItems"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="page-section" id="matchesPage">
+        <div class="matches-section">
+            <h1 class="matches-title">GAME MATCHES</h1>
+            <p class="matches-subtitle">Join tournaments and win real money</p>
+            <div class="game-mode-tabs">
+                <div class="game-tab active" onclick="changeGameMode('solo')">Solo</div>
+                <div class="game-tab" onclick="changeGameMode('duo')">Duo</div>
+                <div class="game-tab" onclick="changeGameMode('squad')">Squad</div>
+                <div class="game-tab" onclick="changeGameMode('clash')">Clash</div>
+            </div>
+            <div id="matchListContainer"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Nav (Initially Hidden) -->
+<div class="bottom-nav hidden" id="bottomNav">
+    <div class="nav-btn active" onclick="switchPage('wallet')">
+        <i class="fas fa-wallet"></i>
+        <span>WALLET</span>
+    </div>
+    <div class="nav-btn" onclick="switchPage('matches')">
+        <i class="fas fa-trophy"></i>
+        <span>MATCHES</span>
+    </div>
+    <div class="nav-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>LOGOUT</span>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div id="payModal" class="hidden modal-overlay">
+    <div class="modal-content">
+        <div id="modalHeader" class="modal-header">
+            <span id="headerTitle">ADD MONEY</span>
+        </div>
+        <div class="modal-body">
+            <div id="methodStep">
+                <div class="modal-title">Select Payment Method</div>
+                <div class="method-buttons">
+                    <button class="method-btn bkash-btn" onclick="showForm('bkash')">BKASH</button>
+                    <button class="method-btn nagad-btn" onclick="showForm('nagad')">NAGAD</button>
+                </div>
+                <button onclick="closeModal()" class="cancel-btn">CANCEL</button>
+            </div>
+            <div id="formStep" class="hidden">
+                <div id="infoBox" class="info-box">
+                    <p id="instr1" class="info-text font-bold"></p>
+                    <div id="copyNumberDisplay" class="copy-number"></div>
+                    <p id="instr2" class="info-text"></p>
+                </div>
+                <div>
+                    <input type="number" id="inpAmount" class="input-field" placeholder="Enter Amount">
+                    <input type="text" id="inpInfo" class="input-field" placeholder="Transaction ID / Number">
+                    <button onclick="submitReq()" id="submitBtn" class="verify-btn">VERIFY</button>
+                </div>
+                <button onclick="goBackToMethod()" class="cancel-btn">BACK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Join Match Modal -->
+<div id="joinMatchModal" class="hidden modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="joinMatchTitle">Join: Match</span>
+        </div>
+        <div class="modal-body">
+            <div id="joinMatchStep1">
+                <div class="modal-title">Enter Your Game Details</div>
+                <div class="form-group">
+                    <label class="form-label">Game ID Name</label>
+                    <input type="text" id="gameIdName" class="form-input" placeholder="Enter your game ID name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Game UID</label>
+                    <input type="text" id="gameUid" class="form-input" placeholder="Enter your game UID">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Telegram Username</label>
+                    <input type="text" id="telegramUsername" class="form-input" placeholder="@username">
+                </div>
+                <div class="info-box">
+                    <p class="info-text">After submitting details, Telegram will open automatically.</p>
+                </div>
+                <button onclick="submitGameDetails()" class="submit-btn">JOIN MATCH</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     // Firebase Configuration
     const firebaseConfig = {
@@ -20,7 +912,7 @@
     let balanceListener = null;
     let purchasedMatchesListener = null;
     
-    // FIX: COMPLETELY NEW APPROACH - Store matches data locally
+    // FIX: COMPLETELY NEW APPROACH
     let allMatchesData = {};
     let matchDataLoaded = false;
     let currentMatchesListener = null;
@@ -763,7 +1655,7 @@
         }
     }
 
-    // Modal Functions (unchanged)
+    // Modal Functions
     function openModal(mode) {
         if (!userId) {
             alert('Please login first');
@@ -898,3 +1790,5 @@
     });
 
 </script>
+</body>
+</html>
