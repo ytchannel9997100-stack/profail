@@ -507,6 +507,47 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Player Count Indicator */
+        .player-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 8px;
+            background: rgba(245, 158, 11, 0.1);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .player-count.full {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        /* Details Link Button */
+        .details-link-btn {
+            background: #8b5cf6;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        /* Match Card Preview */
+        .match-preview {
+            background: rgba(30, 41, 59, 0.5);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .match-preview-title {
+            font-weight: 600;
+            color: #f59e0b;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -700,7 +741,7 @@
                 </div>
             </div>
             
-            <!-- Match Joins Section (NEW) -->
+            <!-- Match Joins Section -->
             <div id="matchJoinsSection" class="section-container" style="display: none;">
                 <div class="section-header">
                     <h2 class="section-title">Match Joins & Player Details</h2>
@@ -954,6 +995,13 @@
                     <label class="form-label">Telegram Group Link</label>
                     <input type="text" id="tournamentTelegramLink" class="form-input" placeholder="https://t.me/yourgroup">
                     <small style="color: #666; font-size: 12px;">This link will be shown to users after they join the match</small>
+                </div>
+                
+                <!-- NEW: Details Link Field -->
+                <div class="form-group">
+                    <label class="form-label">Details Link (Optional)</label>
+                    <input type="text" id="tournamentDetailsLink" class="form-input" placeholder="https://example.com/match-details">
+                    <small style="color: #666; font-size: 12px;">This link will open when users click "DETAILS" button</small>
                 </div>
                 
                 <div class="form-group">
@@ -1531,6 +1579,17 @@
                     loadUsers();
                 }
             });
+            
+            // Listen for match updates (for player count)
+            const modes = ['solo', 'duo', 'squad', 'clash'];
+            modes.forEach(mode => {
+                db.ref('matches/' + mode).on('value', snapshot => {
+                    if (document.getElementById('tournamentsSection').style.display !== 'none' && 
+                        currentTournamentTab === mode) {
+                        loadTournaments();
+                    }
+                });
+            });
         }
         
         // Show Section
@@ -1587,7 +1646,7 @@
             }
         }
         
-        // Load Tournaments
+        // Load Tournaments - UPDATED WITH PLAYER COUNT
         function loadTournaments() {
             const container = document.getElementById('tournamentsTableContainer');
             container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
@@ -1599,21 +1658,31 @@
                 }
                 
                 let html = '<table class="data-table">';
-                html += '<thead><tr><th>Title</th><th>Date/Time</th><th>Fee</th><th>Prize</th><th>Players</th><th>Telegram Link</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+                html += '<thead><tr><th>Title</th><th>Date/Time</th><th>Fee</th><th>Prize</th><th>Players</th><th>Telegram Link</th><th>Details Link</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
                 
                 snapshot.forEach(child => {
                     const match = child.val();
                     const matchId = child.key;
                     
-                    // Calculate player status
+                    // Get real-time player count
                     const currentPlayers = match.currentPlayers || 0;
                     const maxPlayers = match.maxPlayers || 100;
                     const playerStatus = `${currentPlayers}/${maxPlayers}`;
                     
+                    // Player count indicator
+                    let playerCountHtml = `<span class="player-count ${currentPlayers >= maxPlayers ? 'full' : ''}">`;
+                    playerCountHtml += `<i class="fas fa-users"></i> ${playerStatus}`;
+                    playerCountHtml += `</span>`;
+                    
                     // Check Telegram link
                     const telegramLink = match.telegramLink || 'Not Set';
-                    const telegramDisplay = telegramLink.length > 30 ? 
-                        telegramLink.substring(0, 30) + '...' : telegramLink;
+                    const telegramDisplay = telegramLink.length > 20 ? 
+                        telegramLink.substring(0, 20) + '...' : telegramLink;
+                    
+                    // Check Details link
+                    const detailsLink = match.detailsLink || '';
+                    const detailsDisplay = detailsLink ? 
+                        `<a href="${detailsLink}" target="_blank" class="details-link-btn">Open</a>` : 'Not Set';
                     
                     // Determine match status
                     let status = 'Upcoming';
@@ -1638,8 +1707,13 @@
                         <td>${match.date} ${match.time}</td>
                         <td>৳${match.entryFee || 0}</td>
                         <td>৳${match.totalPrize || 0}</td>
-                        <td>${playerStatus}</td>
-                        <td title="${telegramLink}">${telegramDisplay}</td>
+                        <td>${playerCountHtml}</td>
+                        <td title="${telegramLink}">
+                            ${telegramLink !== 'Not Set' ? 
+                                `<a href="${telegramLink}" target="_blank" style="color:#3b82f6; text-decoration:underline;">${telegramDisplay}</a>` : 
+                                'Not Set'}
+                        </td>
+                        <td>${detailsDisplay}</td>
                         <td><span class="status-badge ${statusClass}">${status}</span></td>
                         <td>
                             <button class="action-btn edit-btn" onclick="editTournament('${matchId}')"><i class="fas fa-edit"></i></button>
@@ -1668,7 +1742,7 @@
             loadTournaments();
         }
         
-        // Show Tournament Modal
+        // Show Tournament Modal - UPDATED WITH DETAILS LINK
         function showTournamentModal(editId = null) {
             document.getElementById('tournamentModal').style.display = 'flex';
             
@@ -1692,6 +1766,7 @@
                         document.getElementById('tournamentMap').value = match.map || '';
                         document.getElementById('tournamentType').value = match.type || '';
                         document.getElementById('tournamentTelegramLink').value = match.telegramLink || '';
+                        document.getElementById('tournamentDetailsLink').value = match.detailsLink || '';
                         document.getElementById('tournamentVisible').checked = match.visible !== false;
                     }
                 });
@@ -1712,6 +1787,7 @@
                 document.getElementById('tournamentMap').value = 'Erangel';
                 document.getElementById('tournamentType').value = 'TPP';
                 document.getElementById('tournamentTelegramLink').value = '';
+                document.getElementById('tournamentDetailsLink').value = '';
                 document.getElementById('tournamentVisible').checked = true;
             }
         }
@@ -1721,7 +1797,7 @@
             document.getElementById('tournamentModal').style.display = 'none';
         }
         
-        // Save Tournament
+        // Save Tournament - UPDATED WITH DETAILS LINK
         function saveTournament() {
             const tournamentId = document.getElementById('tournamentId').value;
             const mode = document.getElementById('tournamentMode').value;
@@ -1736,6 +1812,7 @@
             const map = document.getElementById('tournamentMap').value;
             const type = document.getElementById('tournamentType').value;
             const telegramLink = document.getElementById('tournamentTelegramLink').value;
+            const detailsLink = document.getElementById('tournamentDetailsLink').value;
             const visible = document.getElementById('tournamentVisible').checked;
             
             if (!title || !date || !time) {
@@ -1754,7 +1831,8 @@
                 version: version,
                 map: map,
                 type: type,
-                telegramLink: telegramLink, // Added Telegram link
+                telegramLink: telegramLink,
+                detailsLink: detailsLink, // Added details link
                 visible: visible,
                 currentPlayers: 0,
                 createdAt: new Date().toISOString(),
@@ -1766,26 +1844,43 @@
                 // Update existing tournament
                 ref = db.ref('matches/' + mode + '/' + tournamentId);
                 tournamentData.updatedAt = new Date().toISOString();
+                // Keep current players count when updating
+                db.ref('matches/' + mode + '/' + tournamentId + '/currentPlayers').once('value').then(snap => {
+                    tournamentData.currentPlayers = snap.val() || 0;
+                    ref.set(tournamentData).then(() => {
+                        alert('Tournament updated successfully!');
+                        closeTournamentModal();
+                        loadTournaments();
+                        loadDashboardData();
+                        
+                        // Log the action
+                        db.ref('admin/logs').push({
+                            type: 'tournament_updated',
+                            details: tournamentData,
+                            time: new Date().toISOString(),
+                            admin: currentAdmin.email
+                        });
+                    });
+                });
             } else {
                 // Create new tournament
                 ref = db.ref('matches/' + mode).push();
                 tournamentData.createdAt = new Date().toISOString();
-            }
-            
-            ref.set(tournamentData).then(() => {
-                alert('Tournament saved successfully!');
-                closeTournamentModal();
-                loadTournaments();
-                loadDashboardData();
-                
-                // Log the action
-                db.ref('admin/logs').push({
-                    type: tournamentId ? 'tournament_updated' : 'tournament_created',
-                    details: tournamentData,
-                    time: new Date().toISOString(),
-                    admin: currentAdmin.email
+                ref.set(tournamentData).then(() => {
+                    alert('Tournament created successfully!');
+                    closeTournamentModal();
+                    loadTournaments();
+                    loadDashboardData();
+                    
+                    // Log the action
+                    db.ref('admin/logs').push({
+                        type: 'tournament_created',
+                        details: tournamentData,
+                        time: new Date().toISOString(),
+                        admin: currentAdmin.email
+                    });
                 });
-            });
+            }
         }
         
         // Edit Tournament
@@ -2130,7 +2225,6 @@
         
         // View User Details
         function viewUserDetails(userId) {
-            // Open user details in new tab or modal
             const detailsWindow = window.open('', '_blank');
             detailsWindow.document.write(`
                 <!DOCTYPE html>
