@@ -555,6 +555,11 @@
                     <span>Transactions</span>
                 </div>
                 
+                <div class="nav-item" onclick="showSection('matchJoins')">
+                    <i class="fas fa-gamepad"></i>
+                    <span>Match Joins</span>
+                </div>
+                
                 <div class="nav-item" onclick="showSection('results')">
                     <i class="fas fa-medal"></i>
                     <span>Match Results</span>
@@ -692,6 +697,36 @@
                 
                 <div id="transactionsTableContainer">
                     Loading transactions...
+                </div>
+            </div>
+            
+            <!-- Match Joins Section (NEW) -->
+            <div id="matchJoinsSection" class="section-container" style="display: none;">
+                <div class="section-header">
+                    <h2 class="section-title">Match Joins & Player Details</h2>
+                </div>
+                
+                <div class="tabs" id="matchJoinsTabs">
+                    <div class="tab active" onclick="changeMatchJoinsTab('all')">All Joins</div>
+                    <div class="tab" onclick="changeMatchJoinsTab('pending')">Pending</div>
+                    <div class="tab" onclick="changeMatchJoinsTab('joined')">Joined</div>
+                </div>
+                
+                <div class="section">
+                    <div class="form-row" style="margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">Search Match ID</label>
+                            <input type="text" id="searchMatchId" class="form-input" placeholder="Enter Match ID" onkeyup="searchMatchJoins()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Search User</label>
+                            <input type="text" id="searchUserId" class="form-input" placeholder="Enter User ID/Email" onkeyup="searchMatchJoins()">
+                        </div>
+                    </div>
+                    
+                    <div id="matchJoinsTableContainer">
+                        Loading match joins...
+                    </div>
                 </div>
             </div>
             
@@ -914,6 +949,13 @@
                     <input type="text" id="tournamentType" class="form-input" placeholder="TPP">
                 </div>
                 
+                <!-- NEW: Telegram Link Field -->
+                <div class="form-group">
+                    <label class="form-label">Telegram Group Link</label>
+                    <input type="text" id="tournamentTelegramLink" class="form-input" placeholder="https://t.me/yourgroup">
+                    <small style="color: #666; font-size: 12px;">This link will be shown to users after they join the match</small>
+                </div>
+                
                 <div class="form-group">
                     <label class="form-label">
                         <input type="checkbox" id="tournamentVisible" checked>
@@ -1038,6 +1080,21 @@
             </div>
         </div>
     </div>
+    
+    <!-- Match Join Details Modal -->
+    <div id="matchJoinDetailsModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Player Details</h3>
+                <button class="close-modal" onclick="closeMatchJoinDetailsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="joinDetailsContent">
+                    Loading details...
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Firebase Configuration
@@ -1056,6 +1113,7 @@
         let currentAdmin = null;
         let currentTournamentTab = 'solo';
         let currentTransactionTab = 'pending';
+        let currentMatchJoinsTab = 'all';
         let revenueChart = null;
         let incomeExpenseChart = null;
         
@@ -1499,6 +1557,7 @@
                 'tournaments': 'Tournaments',
                 'users': 'Users',
                 'transactions': 'Transactions',
+                'matchJoins': 'Match Joins',
                 'results': 'Match Results',
                 'reports': 'Reports',
                 'settings': 'Settings'
@@ -1515,6 +1574,9 @@
                     break;
                 case 'transactions':
                     loadTransactions();
+                    break;
+                case 'matchJoins':
+                    loadMatchJoins();
                     break;
                 case 'results':
                     loadResults();
@@ -1537,7 +1599,7 @@
                 }
                 
                 let html = '<table class="data-table">';
-                html += '<thead><tr><th>Title</th><th>Date/Time</th><th>Fee</th><th>Prize</th><th>Players</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+                html += '<thead><tr><th>Title</th><th>Date/Time</th><th>Fee</th><th>Prize</th><th>Players</th><th>Telegram Link</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
                 
                 snapshot.forEach(child => {
                     const match = child.val();
@@ -1547,6 +1609,11 @@
                     const currentPlayers = match.currentPlayers || 0;
                     const maxPlayers = match.maxPlayers || 100;
                     const playerStatus = `${currentPlayers}/${maxPlayers}`;
+                    
+                    // Check Telegram link
+                    const telegramLink = match.telegramLink || 'Not Set';
+                    const telegramDisplay = telegramLink.length > 30 ? 
+                        telegramLink.substring(0, 30) + '...' : telegramLink;
                     
                     // Determine match status
                     let status = 'Upcoming';
@@ -1572,10 +1639,12 @@
                         <td>৳${match.entryFee || 0}</td>
                         <td>৳${match.totalPrize || 0}</td>
                         <td>${playerStatus}</td>
+                        <td title="${telegramLink}">${telegramDisplay}</td>
                         <td><span class="status-badge ${statusClass}">${status}</span></td>
                         <td>
                             <button class="action-btn edit-btn" onclick="editTournament('${matchId}')"><i class="fas fa-edit"></i></button>
                             <button class="action-btn delete-btn" onclick="deleteTournament('${matchId}')"><i class="fas fa-trash"></i></button>
+                            <button class="action-btn view-btn" onclick="viewMatchJoins('${matchId}')"><i class="fas fa-eye"></i></button>
                         </td>
                     </tr>`;
                 });
@@ -1622,6 +1691,7 @@
                         document.getElementById('tournamentVersion').value = match.version || '';
                         document.getElementById('tournamentMap').value = match.map || '';
                         document.getElementById('tournamentType').value = match.type || '';
+                        document.getElementById('tournamentTelegramLink').value = match.telegramLink || '';
                         document.getElementById('tournamentVisible').checked = match.visible !== false;
                     }
                 });
@@ -1641,6 +1711,7 @@
                 document.getElementById('tournamentVersion').value = '2.5';
                 document.getElementById('tournamentMap').value = 'Erangel';
                 document.getElementById('tournamentType').value = 'TPP';
+                document.getElementById('tournamentTelegramLink').value = '';
                 document.getElementById('tournamentVisible').checked = true;
             }
         }
@@ -1664,6 +1735,7 @@
             const version = document.getElementById('tournamentVersion').value;
             const map = document.getElementById('tournamentMap').value;
             const type = document.getElementById('tournamentType').value;
+            const telegramLink = document.getElementById('tournamentTelegramLink').value;
             const visible = document.getElementById('tournamentVisible').checked;
             
             if (!title || !date || !time) {
@@ -1682,6 +1754,7 @@
                 version: version,
                 map: map,
                 type: type,
+                telegramLink: telegramLink, // Added Telegram link
                 visible: visible,
                 currentPlayers: 0,
                 createdAt: new Date().toISOString(),
@@ -1736,6 +1809,198 @@
                     });
                 });
             }
+        }
+        
+        // View Match Joins for a specific match
+        function viewMatchJoins(matchId) {
+            showSection('matchJoins');
+            document.getElementById('searchMatchId').value = matchId;
+            searchMatchJoins();
+        }
+        
+        // Load Match Joins
+        function loadMatchJoins() {
+            const container = document.getElementById('matchJoinsTableContainer');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            
+            db.ref('matchJoins').once('value').then(snapshot => {
+                if (!snapshot.exists()) {
+                    container.innerHTML = '<div class="empty-state">No match joins found</div>';
+                    return;
+                }
+                
+                displayMatchJoins(snapshot);
+            });
+        }
+        
+        // Display Match Joins
+        function displayMatchJoins(snapshot) {
+            const container = document.getElementById('matchJoinsTableContainer');
+            let allJoins = [];
+            
+            snapshot.forEach(matchChild => {
+                const matchId = matchChild.key;
+                matchChild.forEach(joinChild => {
+                    const join = joinChild.val();
+                    join.id = joinChild.key;
+                    join.matchId = matchId;
+                    allJoins.push(join);
+                });
+            });
+            
+            // Filter by tab
+            let filteredJoins = allJoins;
+            if (currentMatchJoinsTab === 'pending') {
+                filteredJoins = allJoins.filter(join => join.status === 'pending');
+            } else if (currentMatchJoinsTab === 'joined') {
+                filteredJoins = allJoins.filter(join => join.status === 'joined');
+            }
+            
+            // Search filter
+            const searchMatchId = document.getElementById('searchMatchId').value.toLowerCase();
+            const searchUserId = document.getElementById('searchUserId').value.toLowerCase();
+            
+            if (searchMatchId) {
+                filteredJoins = filteredJoins.filter(join => 
+                    join.matchId.toLowerCase().includes(searchMatchId)
+                );
+            }
+            
+            if (searchUserId) {
+                filteredJoins = filteredJoins.filter(join => 
+                    (join.userId && join.userId.toLowerCase().includes(searchUserId)) ||
+                    (join.userEmail && join.userEmail.toLowerCase().includes(searchUserId)) ||
+                    (join.telegramUsername && join.telegramUsername.toLowerCase().includes(searchUserId))
+                );
+            }
+            
+            // Sort by join time (newest first)
+            filteredJoins.sort((a, b) => new Date(b.joinTime) - new Date(a.joinTime));
+            
+            let html = '<table class="data-table">';
+            html += '<thead><tr><th>Match ID</th><th>User</th><th>Game ID</th><th>Telegram</th><th>Entry Fee</th><th>Join Time</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+            
+            filteredJoins.forEach(join => {
+                const joinTime = new Date(join.joinTime).toLocaleString();
+                const statusClass = 'status-' + (join.status || 'pending');
+                const gameIdDisplay = join.gameIdName ? 
+                    `${join.gameIdName.substring(0, 10)}...` : 'N/A';
+                
+                html += `<tr>
+                    <td title="${join.matchId}">${join.matchId.substring(0, 8)}...</td>
+                    <td title="${join.userEmail}">${join.userEmail ? join.userEmail.substring(0, 15) + '...' : 'N/A'}</td>
+                    <td title="${join.gameIdName || 'N/A'}">${gameIdDisplay}</td>
+                    <td title="${join.telegramUsername || 'N/A'}">${join.telegramUsername || 'N/A'}</td>
+                    <td>৳${join.entryFee || 0}</td>
+                    <td>${joinTime}</td>
+                    <td><span class="status-badge ${statusClass}">${join.status || 'pending'}</span></td>
+                    <td>
+                        <button class="action-btn view-btn" onclick="viewJoinDetails('${join.id}', '${join.matchId}')">Details</button>
+                        <button class="action-btn edit-btn" onclick="updateJoinStatus('${join.id}', '${join.matchId}', 'joined')">Approve</button>
+                    </td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+        
+        // Change Match Joins Tab
+        function changeMatchJoinsTab(tab) {
+            currentMatchJoinsTab = tab;
+            
+            // Update tab UI
+            document.querySelectorAll('#matchJoinsTabs .tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Load match joins for this tab
+            loadMatchJoins();
+        }
+        
+        // Search Match Joins
+        function searchMatchJoins() {
+            loadMatchJoins();
+        }
+        
+        // View Join Details
+        function viewJoinDetails(joinId, matchId) {
+            db.ref('matchJoins/' + matchId + '/' + joinId).once('value').then(snapshot => {
+                const join = snapshot.val();
+                
+                let details = `
+                    <div class="form-group">
+                        <label class="form-label">User Email</label>
+                        <div class="form-input" style="background: #f3f4f6;">${join.userEmail || 'N/A'}</div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Game ID Name</label>
+                            <div class="form-input" style="background: #f3f4f6;">${join.gameIdName || 'N/A'}</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Game UID</label>
+                            <div class="form-input" style="background: #f3f4f6;">${join.gameUid || 'N/A'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Telegram Username</label>
+                            <div class="form-input" style="background: #f3f4f6;">${join.telegramUsername || 'N/A'}</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Entry Fee</label>
+                            <div class="form-input" style="background: #f3f4f6;">৳${join.entryFee || 0}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Match Title</label>
+                        <div class="form-input" style="background: #f3f4f6;">${join.matchTitle || 'N/A'}</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Join Time</label>
+                        <div class="form-input" style="background: #f3f4f6;">${new Date(join.joinTime).toLocaleString()}</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <div class="form-input" style="background: #f3f4f6;">${join.status || 'pending'}</div>
+                    </div>
+                `;
+                
+                document.getElementById('joinDetailsContent').innerHTML = details;
+                document.getElementById('matchJoinDetailsModal').style.display = 'flex';
+            });
+        }
+        
+        // Close Match Join Details Modal
+        function closeMatchJoinDetailsModal() {
+            document.getElementById('matchJoinDetailsModal').style.display = 'none';
+        }
+        
+        // Update Join Status
+        function updateJoinStatus(joinId, matchId, status) {
+            db.ref('matchJoins/' + matchId + '/' + joinId + '/status').set(status).then(() => {
+                alert('Join status updated successfully!');
+                loadMatchJoins();
+                
+                // Log the action
+                db.ref('admin/logs').push({
+                    type: 'join_status_updated',
+                    joinId: joinId,
+                    matchId: matchId,
+                    status: status,
+                    time: new Date().toISOString(),
+                    admin: currentAdmin.email
+                });
+            });
         }
         
         // Load Users
@@ -2665,22 +2930,6 @@
                     type: 'admin_password_changed',
                     time: new Date().toISOString(),
                     admin: currentAdmin.email
-                });
-            });
-        }
-        
-        // Fix: Transaction approval issue in user history
-        function fixTransactionHistory(userId, transKey, newStatus) {
-            db.ref('users/' + userId + '/history').orderByChild('timestamp').once('value').then(snapshot => {
-                snapshot.forEach(child => {
-                    const trans = child.val();
-                    // Match by timestamp and amount
-                    if (Math.abs(trans.timestamp - transKey.timestamp) < 1000 && 
-                        trans.amount === transKey.amount && 
-                        trans.type === transKey.type) {
-                        db.ref('users/' + userId + '/history/' + child.key + '/status').set(newStatus);
-                        return true;
-                    }
                 });
             });
         }
