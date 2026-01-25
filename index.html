@@ -790,19 +790,6 @@
             font-size: 10px;
             font-weight: 700;
         }
-        
-        /* Security Notice */
-        .security-notice {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 8px;
-            padding: 12px;
-            margin: 10px 0;
-            font-size: 12px;
-            color: #ef4444;
-            text-align: center;
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -815,10 +802,6 @@
         </div>
         <h2 class="login-title">Welcome to Easy Premium</h2>
         <p class="login-subtitle">Join tournaments and win real money</p>
-        
-        <div id="securityNotice" class="security-notice">
-            <i class="fas fa-shield-alt"></i> Enhanced Security Enabled
-        </div>
         
         <div id="loadingSection" class="loading" style="display: none;">
             <div class="spinner"></div>
@@ -964,184 +947,96 @@
 </div>
 
 <script>
-    // 🔒 **ENHANCED SECURITY CONFIGURATION**
-    // ✅ আপনার নিজের Firebase কনফিগারেশন এখানে বসান
-    // ⚠️ এটি শুধু উদাহরণ - নতুন Firebase প্রজেক্ট তৈরি করুন
-    
+    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
         authDomain: "top-up-4db01.firebaseapp.com",
         projectId: "top-up-4db01",
         databaseURL: "https://top-up-4db01-default-rtdb.asia-southeast1.firebasedatabase.app",
         storageBucket: "top-up-4db01.appspot.com",
-        appId: "1:264548197473:web:abcd1234efgh5678",
-        measurementId: "G-XXXXXXXXXX" // Optional: Analytics ID
+        appId: "1:264548197473:web:abcd1234efgh5678"
     };
 
-    // 🔒 Firebase Security Initialization with Error Handling
+    // Initialize Firebase
     try {
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
-            console.log("🔥 Firebase initialized with enhanced security");
-            document.getElementById('securityNotice').style.display = 'block';
+            console.log("Firebase initialized successfully");
         }
     } catch (error) {
-        console.error("❌ Firebase initialization error:", error);
-        showError("System security error. Please refresh or contact admin.");
-        document.getElementById('securityNotice').innerHTML = 
-            '<i class="fas fa-exclamation-triangle"></i> Security Error: Please contact admin';
-        document.getElementById('securityNotice').style.display = 'block';
-        document.getElementById('securityNotice').style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+        console.error("Firebase initialization error:", error);
+        document.getElementById('errorMessage').textContent = "Firebase configuration error. Please contact admin.";
+        document.getElementById('errorMessage').style.display = 'block';
     }
     
     const db = firebase.database();
     const auth = firebase.auth();
     
-    // 🔒 Security Variables
     let currentMode = 'add', currentMethod = 'bkash', currentGameMode = 'solo';
     let userId = null, userBalance = 0, userPurchasedMatches = [];
     let currentUser = null;
-    let securityToken = null;
-    
-    // 🔒 Security Timeouts
     let historyListener = null;
     let balanceListener = null;
     let purchasedMatchesListener = null;
-    let currentMatchesListener = null;
+    let currentMatchId = null, currentMatchData = null;
     
-    // 🔒 Match Data Cache
     let allMatchesData = {};
     let matchDataLoaded = false;
+    let currentMatchesListener = null;
     let storeLink = "https://your-store-link.com";
-    
-    // 🔒 Request Security Counter
-    let requestCount = 0;
-    const MAX_REQUESTS_PER_MINUTE = 30;
-    const requestTimestamps = [];
 
-    // 🔒 Rate Limiter Function
-    function checkRateLimit() {
-        const now = Date.now();
-        const oneMinuteAgo = now - 60000;
-        
-        // Remove old timestamps
-        while (requestTimestamps.length > 0 && requestTimestamps[0] < oneMinuteAgo) {
-            requestTimestamps.shift();
-        }
-        
-        // Check if limit exceeded
-        if (requestTimestamps.length >= MAX_REQUESTS_PER_MINUTE) {
-            console.warn("⚠️ Rate limit exceeded - Possible attack detected");
-            showError("Too many requests. Please wait a moment.");
-            return false;
-        }
-        
-        requestTimestamps.push(now);
-        return true;
-    }
-
-    // 🔒 Secure Open Store Function
+    // Open Store Link
     function openStore() {
-        if (!checkRateLimit()) return;
-        
         db.ref('admin/storeLink').once('value').then(snapshot => {
             if (snapshot.exists() && snapshot.val()) {
-                const link = snapshot.val();
-                // Validate URL
-                if (link.startsWith('http://') || link.startsWith('https://')) {
-                    storeLink = link;
-                    window.open(storeLink, '_blank');
-                } else {
-                    console.error("Invalid store link");
-                    showError("Invalid store link configuration");
-                }
-            } else {
-                window.open(storeLink, '_blank');
+                storeLink = snapshot.val();
             }
+            window.open(storeLink, '_blank');
         }).catch(error => {
             console.error("Error fetching store link:", error);
-            showError("Unable to open store. Please try again.");
+            window.open(storeLink, '_blank');
         });
     }
 
-    // 🔒 Secure Auth State Observer
+    // Auth State Observer
     auth.onAuthStateChanged((user) => {
-        if (!checkRateLimit()) return;
-        
         if (user) {
-            // Verify user email
-            if (user.emailVerified || user.providerData[0]?.providerId === 'google.com') {
-                currentUser = user;
-                userId = user.uid;
-                showLoading(false);
-                showMainApp();
-                initializeUserData();
-                generateSecurityToken();
-            } else {
-                showError("Please verify your email first");
-                auth.signOut();
-            }
+            currentUser = user;
+            userId = user.uid;
+            showLoading(false);
+            showMainApp();
+            initializeUserData();
         } else {
             removeAllListeners();
-            clearSecurityData();
             showLoginScreen();
             showLoading(false);
         }
-    }, (error) => {
-        console.error("Auth state error:", error);
-        showError("Authentication error. Please refresh.");
     });
 
-    // 🔒 Generate Security Token
-    function generateSecurityToken() {
-        if (!userId) return;
-        securityToken = btoa(userId + ':' + Date.now() + ':' + Math.random());
-        sessionStorage.setItem('securityToken', securityToken);
-    }
-
-    // 🔒 Clear Security Data
-    function clearSecurityData() {
-        securityToken = null;
-        sessionStorage.removeItem('securityToken');
-        allMatchesData = {};
-        matchDataLoaded = false;
-        userPurchasedMatches = [];
-        userBalance = 0;
-        currentUser = null;
-        userId = null;
-    }
-
-    // 🔒 Remove All Listeners with Security
+    // Remove all listeners
     function removeAllListeners() {
-        console.log("🔒 Removing all listeners for security...");
+        console.log("Removing all listeners...");
         
-        const listeners = [
-            historyListener,
-            balanceListener,
-            purchasedMatchesListener,
-            currentMatchesListener
-        ];
-        
-        listeners.forEach(listener => {
-            if (listener && typeof listener === 'function') {
-                try {
-                    listener();
-                } catch (e) {
-                    console.warn("Error removing listener:", e);
-                }
-            }
-        });
-        
-        historyListener = null;
-        balanceListener = null;
-        purchasedMatchesListener = null;
-        currentMatchesListener = null;
+        if (historyListener) {
+            historyListener();
+            historyListener = null;
+        }
+        if (balanceListener) {
+            balanceListener();
+            balanceListener = null;
+        }
+        if (purchasedMatchesListener) {
+            purchasedMatchesListener();
+            purchasedMatchesListener = null;
+        }
+        if (currentMatchesListener) {
+            currentMatchesListener();
+            currentMatchesListener = null;
+        }
     }
 
-    // 🔒 Show Loading with Security Check
+    // Show Loading
     function showLoading(show) {
-        if (!checkRateLimit() && show) return;
-        
         const loadingSection = document.getElementById('loadingSection');
         const loginSection = document.getElementById('loginSection');
         
@@ -1154,14 +1049,10 @@
         }
     }
 
-    // 🔒 Show Error Message Securely
+    // Show Error Message
     function showError(message) {
-        if (!checkRateLimit()) return;
-        
         const errorDiv = document.getElementById('errorMessage');
-        // Sanitize message to prevent XSS
-        const sanitizedMessage = message.replace(/[<>]/g, '');
-        errorDiv.textContent = sanitizedMessage;
+        errorDiv.textContent = message;
         errorDiv.style.display = 'block';
         
         setTimeout(() => {
@@ -1169,7 +1060,7 @@
         }, 5000);
     }
 
-    // 🔒 Show Login Screen
+    // Show Login Screen
     function showLoginScreen() {
         document.getElementById('loginScreen').classList.remove('hidden');
         document.getElementById('mainContainer').classList.add('hidden');
@@ -1178,7 +1069,7 @@
         showLoading(false);
     }
 
-    // 🔒 Show Main App
+    // Show Main App
     function showMainApp() {
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('mainContainer').classList.remove('hidden');
@@ -1186,238 +1077,117 @@
         
         if (currentUser) {
             const userEmail = document.getElementById('userEmailDisplay');
-            // Sanitize email display
-            userEmail.textContent = currentUser.email.replace(/[<>]/g, '');
+            userEmail.textContent = currentUser.email;
             userEmail.style.display = 'block';
         }
     }
 
-    // 🔒 Google Sign In with Security
+    // Google Sign In
     function signInWithGoogle() {
-        if (!checkRateLimit()) return;
         showLoading(true);
         
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.addScope('email');
         provider.addScope('profile');
         
-        // Set custom parameters for security
-        provider.setCustomParameters({
-            'prompt': 'select_account',
-            'login_hint': ''
-        });
-        
         auth.signInWithPopup(provider)
             .then((result) => {
                 const user = result.user;
-                console.log('✅ User signed in securely:', user.uid);
+                console.log('User signed in:', user.uid, user.email);
                 initializeUserInDatabase(user.uid, user.email);
             })
             .catch((error) => {
                 showLoading(false);
-                // Generic error message for security
-                showError('Login failed. Please try again.');
-                console.error('Login error:', error.code);
+                showError('Login failed: ' + error.message);
+                console.error('Login error:', error);
             });
     }
 
-    // 🔒 Initialize User in Database with Validation
+    // Initialize User in Database
     function initializeUserInDatabase(uid, email) {
-        if (!checkRateLimit()) return;
-        
         const userRef = db.ref('users/' + uid);
         
         userRef.once('value').then((snapshot) => {
             if (!snapshot.exists()) {
-                // New user - create with default security settings
                 userRef.set({
                     email: email,
                     balance: 0,
                     createdAt: new Date().toISOString(),
-                    lastLogin: new Date().toISOString(),
-                    securityLevel: 'standard',
-                    isActive: true,
-                    totalDeposits: 0,
-                    totalWithdrawals: 0
-                }).then(() => {
-                    console.log('✅ New user created with security settings');
+                    lastLogin: new Date().toISOString()
                 });
             } else {
-                // Existing user - update last login
                 userRef.update({
-                    lastLogin: new Date().toISOString(),
-                    isActive: true
+                    lastLogin: new Date().toISOString()
                 });
             }
-        }).catch(error => {
-            console.error('❌ Database initialization error:', error);
-            showError('User setup failed. Please contact support.');
         });
     }
 
-    // 🔒 Initialize User Data with Security Checks
+    // Initialize User Data
     function initializeUserData() {
-        if (!userId || !checkRateLimit()) return;
-        
-        // Load ALL matches data once
-        loadAllMatchesData();
-        
-        // Then load user data
-        loadUserData();
-        
-        // Check for suspicious activity
-        setTimeout(checkSuspiciousActivity, 10000);
-    }
-
-    // 🔒 Check for Suspicious Activity
-    function checkSuspiciousActivity() {
         if (!userId) return;
         
-        // Check if balance is negative (impossible in normal operation)
-        if (userBalance < 0) {
-            console.error("⚠️ SUSPICIOUS ACTIVITY: Negative balance detected");
-            db.ref('security/alerts').push({
-                userId: userId,
-                type: 'negative_balance',
-                balance: userBalance,
-                timestamp: Date.now(),
-                message: 'Negative balance detected - possible exploit'
-            });
-        }
-        
-        // Check for rapid balance changes
-        const rapidChangeThreshold = 1000; // ৳1000 in 10 seconds
-        // This would require tracking previous balance
+        loadAllMatchesData();
+        loadUserData();
     }
 
-    // 🔒 Load ALL matches data with Security
+    // Load ALL matches data
     function loadAllMatchesData() {
-        if (!checkRateLimit()) return;
+        console.log("Loading all matches data...");
         
-        console.log("🔒 Loading all matches data with security...");
-        
-        // Remove existing listener
         if (currentMatchesListener) {
             currentMatchesListener();
             currentMatchesListener = null;
         }
         
-        // Load all matches at once with timeout
-        const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('Timeout loading matches')), 10000);
-        });
-        
-        const matchesPromise = new Promise((resolve, reject) => {
-            currentMatchesListener = db.ref('matches').on('value', 
-                (snapshot) => {
-                    if (snapshot.exists()) {
-                        allMatchesData = {};
-                        snapshot.forEach(modeSnapshot => {
-                            const mode = modeSnapshot.key;
-                            allMatchesData[mode] = [];
-                            
-                            modeSnapshot.forEach(matchSnapshot => {
-                                const matchData = matchSnapshot.val();
-                                // Validate match data structure
-                                if (validateMatchData(matchData)) {
-                                    allMatchesData[mode].push({
-                                        id: matchSnapshot.key,
-                                        ...matchData
-                                    });
-                                }
+        currentMatchesListener = db.ref('matches').on('value', 
+            (snapshot) => {
+                if (snapshot.exists()) {
+                    allMatchesData = {};
+                    snapshot.forEach(modeSnapshot => {
+                        const mode = modeSnapshot.key;
+                        allMatchesData[mode] = [];
+                        
+                        modeSnapshot.forEach(matchSnapshot => {
+                            allMatchesData[mode].push({
+                                id: matchSnapshot.key,
+                                ...matchSnapshot.val()
                             });
                         });
-                        
-                        matchDataLoaded = true;
-                        console.log("✅ All matches data loaded securely");
-                        resolve(allMatchesData);
-                    } else {
-                        console.log("ℹ️ No matches data found");
-                        allMatchesData = {};
-                        resolve({});
+                    });
+                    
+                    matchDataLoaded = true;
+                    console.log("All matches data loaded:", Object.keys(allMatchesData));
+                    
+                    if (document.getElementById('matchesPage').classList.contains('active')) {
+                        displayMatchesForCurrentMode();
                     }
-                },
-                (error) => {
-                    console.error("❌ Error loading matches data:", error);
-                    reject(error);
+                } else {
+                    console.log("No matches data found");
+                    allMatchesData = {};
                 }
-            );
-        });
-        
-        Promise.race([matchesPromise, timeoutPromise])
-            .then(data => {
-                if (document.getElementById('matchesPage').classList.contains('active')) {
-                    displayMatchesForCurrentMode();
-                }
-            })
-            .catch(error => {
-                console.error("Matches loading failed:", error);
-                showError("Unable to load matches. Please try again.");
-            });
-    }
-
-    // 🔒 Validate Match Data Structure
-    function validateMatchData(matchData) {
-        if (!matchData) return false;
-        
-        // Required fields
-        const required = ['title', 'entryFee', 'totalPrize', 'maxPlayers'];
-        for (const field of required) {
-            if (!matchData[field] && matchData[field] !== 0) {
-                console.warn(`Invalid match data: Missing ${field}`);
-                return false;
+            },
+            (error) => {
+                console.error("Error loading matches data:", error);
             }
-        }
-        
-        // Validate numeric fields
-        if (isNaN(parseInt(matchData.entryFee)) || 
-            isNaN(parseInt(matchData.totalPrize)) || 
-            isNaN(parseInt(matchData.maxPlayers))) {
-            console.warn("Invalid match data: Non-numeric values");
-            return false;
-        }
-        
-        return true;
+        );
     }
 
-    // 🔒 Load User Data with Security
+    // Load User Data
     function loadUserData() {
-        if (!userId || !checkRateLimit()) return;
+        if (!userId) return;
         
-        // Balance listener with validation
         balanceListener = db.ref('users/' + userId + '/balance').on('value', s => {
-            const balance = parseInt(s.val()) || 0;
-            
-            // Validate balance (should be non-negative)
-            if (balance < 0) {
-                console.error("Invalid balance detected:", balance);
-                // Log suspicious activity
-                db.ref('security/alerts').push({
-                    userId: userId,
-                    type: 'invalid_balance',
-                    balance: balance,
-                    timestamp: Date.now()
-                });
-                
-                // Use 0 as fallback
-                userBalance = 0;
-            } else {
-                userBalance = balance;
-            }
-            
+            userBalance = parseInt(s.val()) || 0;
             document.getElementById('balanceVal').textContent = userBalance;
-        }, error => {
-            console.error("Balance listener error:", error);
-            showError("Unable to load balance. Please refresh.");
         });
         
-        // Purchased matches listener
         purchasedMatchesListener = db.ref('users/' + userId + '/purchasedMatches').on('value', s => {
             userPurchasedMatches = [];
             if (s.exists()) {
                 s.forEach(child => {
                     const purchase = child.val();
-                    if (purchase.matchId && typeof purchase.matchId === 'string') {
+                    if (purchase.matchId) {
                         userPurchasedMatches.push(purchase.matchId);
                     }
                 });
@@ -1426,17 +1196,14 @@
             if (document.getElementById('matchesPage').classList.contains('active')) {
                 displayMatchesForCurrentMode();
             }
-        }, error => {
-            console.error("Purchased matches listener error:", error);
         });
         
-        // History listener
         loadCombinedHistory();
     }
 
-    // 🔒 Load Combined History with Security
+    // Load Combined History
     function loadCombinedHistory() {
-        if (!userId || !checkRateLimit()) return;
+        if (!userId) return;
         
         if (historyListener) {
             historyListener();
@@ -1452,36 +1219,27 @@
             ]).then(([userData, adminSnapshot]) => {
                 let allTransactions = [];
                 
-                // 1. Collect from user's history
                 if (userData.exists()) {
                     userData.forEach(child => {
                         const data = child.val();
-                        // Validate transaction data
-                        if (validateTransactionData(data)) {
-                            allTransactions.push({
-                                source: 'user_history',
-                                key: child.key,
-                                type: data.type || '',
-                                method: data.method || '',
-                                amount: data.amount || 0,
-                                status: data.status || 'pending',
-                                date: data.date || new Date().toLocaleString(),
-                                info: data.info || '',
-                                timestamp: data.timestamp || Date.now()
-                            });
-                        }
+                        allTransactions.push({
+                            source: 'user_history',
+                            key: child.key,
+                            type: data.type || '',
+                            method: data.method || '',
+                            amount: data.amount || 0,
+                            status: data.status || 'pending',
+                            date: data.date || new Date().toLocaleString(),
+                            info: data.info || '',
+                            timestamp: data.timestamp || Date.now()
+                        });
                     });
                 }
                 
-                // 2. Collect from admin requests
                 if (adminSnapshot.exists()) {
                     adminSnapshot.forEach(child => {
                         const data = child.val();
                         
-                        // Validate transaction data
-                        if (!validateTransactionData(data)) return;
-                        
-                        // Check if this transaction already exists in user history
                         const existsInHistory = allTransactions.some(t => 
                             t.amount == data.amount && 
                             t.type === data.type && 
@@ -1502,7 +1260,6 @@
                                 timestamp: data.timestamp || Date.now()
                             });
                             
-                            // Auto-sync missing transaction to user history
                             if (data.status === 'approved' || data.status === 'rejected') {
                                 syncTransactionToUserHistory(data);
                             }
@@ -1510,7 +1267,6 @@
                     });
                 }
                 
-                // Sort by timestamp (newest first)
                 allTransactions.sort((a,b) => b.timestamp - a.timestamp);
                 
                 if (allTransactions.length === 0) {
@@ -1518,43 +1274,14 @@
                     return;
                 }
                 
-                // Show only last 10 transactions
                 displayTransactions(allTransactions.slice(0, 10));
-            }).catch(error => {
-                console.error("History loading error:", error);
-                div.innerHTML = `<div class="empty-state"><div class="empty-text">Unable to load history</div></div>`;
             });
-        }, error => {
-            console.error("History listener error:", error);
-            showError("Unable to load transaction history.");
         });
     }
     
-    // 🔒 Validate Transaction Data
-    function validateTransactionData(data) {
-        if (!data) return false;
-        
-        // Check for required fields
-        if (!data.type || !data.amount) return false;
-        
-        // Validate type
-        if (data.type !== 'add' && data.type !== 'withdraw') return false;
-        
-        // Validate amount
-        const amount = parseInt(data.amount);
-        if (isNaN(amount) || amount < 0) return false;
-        
-        // Validate status
-        if (data.status && !['pending', 'approved', 'rejected'].includes(data.status)) {
-            return false;
-        }
-        
-        return true;
-    }
-    
-    // 🔒 Sync transaction to user history with security
+    // Sync transaction to user history
     function syncTransactionToUserHistory(transaction) {
-        if (!userId || !validateTransactionData(transaction)) return;
+        if (!userId) return;
         
         const historyEntry = {
             type: transaction.type,
@@ -1566,13 +1293,11 @@
             timestamp: transaction.timestamp || Date.now(),
             userId: userId,
             userEmail: currentUser?.email || 'Unknown',
-            syncedAt: new Date().toISOString(),
-            verified: true
+            syncedAt: new Date().toISOString()
         };
         
         db.ref('users/' + userId + '/history').push(historyEntry);
         
-        // Update balance if approved deposit
         if (transaction.status === 'approved' && transaction.type === 'add') {
             db.ref('users/' + userId + '/balance').transaction(currentBalance => {
                 return (currentBalance || 0) + parseInt(transaction.amount);
@@ -1580,56 +1305,35 @@
         }
     }
     
-    // 🔒 Display transactions with XSS protection
+    // Display transactions
     function displayTransactions(transactions) {
         const div = document.getElementById('historyItems');
         let html = '';
         
         transactions.forEach(d => {
-            // Sanitize all user inputs
-            const type = escapeHtml(d.type.toUpperCase());
-            const method = escapeHtml(d.method.toUpperCase());
-            const status = escapeHtml(d.status.toUpperCase());
-            const displayDate = d.date ? escapeHtml(d.date) : 'Date not available';
-            const amount = parseInt(d.amount) || 0;
-            
             const amountColor = d.type === 'add' ? 'add-color' : 'withdraw-color';
             const statusClass = d.status === 'pending' ? 'pending' : 
                               d.status === 'approved' ? 'approved' : 'rejected';
+            const displayDate = d.date ? d.date : 'Date not available';
             
             html += `
                 <div class="history-card">
                     <div class="history-header">
-                        <span class="history-type">${type} - ${method}</span>
-                        <span class="history-amount ${amountColor}">${d.type === 'add' ? '+' : '-'}৳${amount}</span>
+                        <span class="history-type">${d.type.toUpperCase()} - ${d.method.toUpperCase()}</span>
+                        <span class="history-amount ${amountColor}">${d.type === 'add' ? '+' : '-'}৳${d.amount}</span>
                     </div>
                     <div class="history-footer">
                         <span>${displayDate}</span>
-                        <span class="history-status ${statusClass}">${status}</span>
+                        <span class="history-status ${statusClass}">${d.status.toUpperCase()}</span>
                     </div>
                 </div>`;
         });
         
         div.innerHTML = html;
     }
-    
-    // 🔒 XSS Protection Function
-    function escapeHtml(text) {
-        if (!text) return '';
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return text.toString().replace(/[&<>"']/g, m => map[m]);
-    }
 
-    // 🔒 Switch Page
+    // Switch Page
     function switchPage(page) {
-        if (!checkRateLimit()) return;
-        
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
         
@@ -1643,35 +1347,24 @@
         }
     }
 
-    // 🔒 Change Game Mode
+    // Change Game Mode
     function changeGameMode(mode) {
-        if (!checkRateLimit()) return;
+        console.log(`Changing game mode from ${currentGameMode} to ${mode}`);
         
-        // Validate mode
-        const validModes = ['solo', 'duo', 'squad', 'clash'];
-        if (!validModes.includes(mode)) {
-            console.error("Invalid game mode:", mode);
-            return;
-        }
-        
-        // Update active tab UI
         document.querySelectorAll('.game-tab').forEach(t => t.classList.remove('active'));
         event.target.classList.add('active');
         
-        // Set loading state
         const container = document.getElementById('matchListContainer');
         container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
         
-        // Update current game mode
         currentGameMode = mode;
         
-        // Display matches for new mode
         setTimeout(() => {
             displayMatchesForCurrentMode();
         }, 100);
     }
 
-    // 🔒 Display matches for current mode
+    // Display matches for current mode
     function displayMatchesForCurrentMode() {
         const container = document.getElementById('matchListContainer');
         
@@ -1692,7 +1385,6 @@
             return;
         }
         
-        // Filter visible matches based on purchased status
         const visibleMatches = matches.filter(match => {
             if (match.visible === true || match.visible === undefined) {
                 return true;
@@ -1715,7 +1407,6 @@
             return;
         }
         
-        // Sort by date/time
         visibleMatches.sort((a, b) => {
             try {
                 const dateA = new Date(a.date + ' ' + a.time);
@@ -1726,14 +1417,13 @@
             }
         });
         
-        // Clear and create match cards
         container.innerHTML = '';
         visibleMatches.forEach(match => {
             container.appendChild(createMatchCard(match, userPurchasedMatches));
         });
     }
 
-    // 🔒 Create Match Card with XSS protection
+    // Create Match Card
     function createMatchCard(match, purchasedMatchIds) {
         const card = document.createElement('div');
         card.className = 'match-card';
@@ -1742,52 +1432,46 @@
         const canJoin = userBalance >= parseInt(match.entryFee || 0);
         const isFull = (match.currentPlayers || 0) >= (match.maxPlayers || 100);
         
-        // Sanitize match data
-        const title = escapeHtml(match.title || 'MATCH');
-        const date = escapeHtml(match.date || '');
-        const time = escapeHtml(match.time || '');
-        const totalPrize = parseInt(match.totalPrize) || 0;
-        const perKill = parseInt(match.perKill) || 0;
-        const entryFee = parseInt(match.entryFee) || 0;
-        const type = escapeHtml(match.type || '');
-        const version = escapeHtml(match.version || '');
-        const map = escapeHtml(match.map || '');
-        const currentPlayers = parseInt(match.currentPlayers) || 0;
-        const maxPlayers = parseInt(match.maxPlayers) || 100;
-        
         let hiddenBadge = '';
         if (match.visible === false && !hasPurchased) {
             hiddenBadge = '<div class="hidden-badge">HIDDEN</div>';
         }
         
+        // Get current players count from Firebase real-time
+        let currentPlayers = match.currentPlayers || 0;
+        let maxPlayers = match.maxPlayers || 100;
+        
+        // Check if there's a details link
+        const hasDetailsLink = match.detailsLink && match.detailsLink.trim() !== '';
+        
         card.innerHTML = `
             ${hiddenBadge}
-            <div class="match-title">${title}</div>
-            <div class="match-time">${date} • ${time}</div>
+            <div class="match-title">${match.title || 'MATCH'}</div>
+            <div class="match-time">${match.date || ''} • ${match.time || ''}</div>
             <div class="match-grid">
-                <div class="match-item"><div class="item-label">PRIZE</div><div class="item-value">৳${totalPrize}</div></div>
-                <div class="match-item"><div class="item-label">KILL</div><div class="item-value">৳${perKill}</div></div>
-                <div class="match-item"><div class="item-label">FEE</div><div class="item-value">৳${entryFee}</div></div>
+                <div class="match-item"><div class="item-label">PRIZE</div><div class="item-value">৳${match.totalPrize || '0'}</div></div>
+                <div class="match-item"><div class="item-label">KILL</div><div class="item-value">৳${match.perKill || '0'}</div></div>
+                <div class="match-item"><div class="item-label">FEE</div><div class="item-value">৳${match.entryFee || '0'}</div></div>
             </div>
             <div class="match-details">
-                <div class="detail-item"><div class="detail-label">TYPE</div><div class="detail-value">${type}</div></div>
-                <div class="detail-item"><div class="detail-label">VER</div><div class="detail-value">${version}</div></div>
-                <div class="detail-item"><div class="detail-label">MAP</div><div class="detail-value">${map}</div></div>
+                <div class="detail-item"><div class="detail-label">TYPE</div><div class="detail-value">${match.type || ''}</div></div>
+                <div class="detail-item"><div class="detail-label">VER</div><div class="detail-value">${match.version || ''}</div></div>
+                <div class="detail-item"><div class="detail-label">MAP</div><div class="detail-value">${match.map || ''}</div></div>
             </div>
             <div class="players-info">${currentPlayers}/${maxPlayers} Players</div>
             <div class="purchase-status ${hasPurchased ? 'purchased' : 'not-purchased'}">${hasPurchased ? 'Purchased' : 'Purchase Required'}</div>
             
             ${hasPurchased ? 
-                `<button class="link-btn show" onclick="openJoinMatchForm('${escapeHtml(match.id)}')">
+                `<button class="link-btn show" onclick="openJoinMatchForm('${match.id}')">
                     <i class="fas fa-play"></i>
                     ENTER MATCH LINK
                 </button>` : 
                 `<div class="match-actions">
-                    <button class="match-btn details-btn" onclick="showMatchDetails('${escapeHtml(match.id)}')">
+                    <button class="match-btn details-btn" onclick="showMatchDetails('${match.id}')">
                         <i class="fas fa-info-circle"></i>
                         DETAILS
                     </button>
-                    <button class="match-btn purchase-btn" onclick="purchaseMatch('${escapeHtml(match.id)}')" ${!canJoin || isFull ? 'disabled' : ''}>
+                    <button class="match-btn purchase-btn" onclick="purchaseMatch('${match.id}')" ${!canJoin || isFull ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i>
                         ${isFull ? 'FULL' : (canJoin ? 'PURCHASE' : 'LOW BALANCE')}
                     </button>
@@ -1798,13 +1482,10 @@
         return card;
     }
 
-    // 🔒 Open Join Match Form
+    // Open Join Match Form
     function openJoinMatchForm(matchId) {
-        if (!checkRateLimit() || !userId) return;
-        
         currentMatchId = matchId;
         
-        // Find match in local data
         const matches = allMatchesData[currentGameMode] || [];
         currentMatchData = matches.find(m => m.id === matchId);
         
@@ -1813,7 +1494,6 @@
             return;
         }
         
-        // Check if user already submitted details for this match
         db.ref('matchJoins/' + matchId).orderByChild('userId').equalTo(userId).once('value').then(snapshot => {
             if (snapshot.exists()) {
                 let alreadyJoined = false;
@@ -1835,80 +1515,43 @@
                 }
             }
             
-            // Show modal for new join
             document.getElementById('joinMatchModal').classList.remove('hidden');
-            document.getElementById('joinMatchTitle').textContent = `Join: ${escapeHtml(currentMatchData.title || 'Match')}`;
+            document.getElementById('joinMatchTitle').textContent = `Join: ${currentMatchData.title || 'Match'}`;
             
-            // Clear form fields
             document.getElementById('gameIdName').value = '';
             document.getElementById('gameUid').value = '';
             document.getElementById('telegramUsername').value = '';
-        }).catch(error => {
-            console.error("Error checking join status:", error);
-            alert('Unable to check join status. Please try again.');
         });
     }
 
-    // 🔒 Submit Game Details with Validation
+    // Submit Game Details
     function submitGameDetails() {
-        if (!checkRateLimit() || !userId || !currentMatchData) return;
-        
         const gameIdName = document.getElementById('gameIdName').value.trim();
         const gameUid = document.getElementById('gameUid').value.trim();
         const telegramUsername = document.getElementById('telegramUsername').value.trim();
         
-        // Validate inputs
         if (!gameIdName || !gameUid || !telegramUsername) {
             alert('Please fill in all fields!');
             return;
         }
         
-        if (gameIdName.length < 3 || gameIdName.length > 50) {
-            alert('Game ID Name must be 3-50 characters long');
+        if (!/^@/.test(telegramUsername)) {
+            alert('Telegram username must start with @');
             return;
         }
         
-        if (!/^\d+$/.test(gameUid)) {
-            alert('Game UID must contain only numbers');
-            return;
-        }
-        
-        if (gameUid.length < 5 || gameUid.length > 20) {
-            alert('Game UID must be 5-20 digits long');
-            return;
-        }
-        
-        if (!/^@[a-zA-Z0-9_]+$/.test(telegramUsername)) {
-            alert('Telegram username must start with @ and contain only letters, numbers, and underscores');
-            return;
-        }
-        
-        if (telegramUsername.length > 32) {
-            alert('Telegram username too long');
-            return;
-        }
-        
-        // Check if user has enough balance
         const entryFee = parseInt(currentMatchData.entryFee || 0);
         if (userBalance < entryFee) {
             alert(`Insufficient balance! Entry fee is ৳${entryFee}`);
             return;
         }
         
-        // Confirm purchase
-        if (!confirm(`Join match for ৳${entryFee}? This amount will be deducted from your balance.`)) {
-            return;
-        }
-        
-        // Deduct entry fee from user balance
         const newBalance = userBalance - entryFee;
         db.ref('users/' + userId + '/balance').set(newBalance);
         
-        // Update local balance
         userBalance = newBalance;
         document.getElementById('balanceVal').textContent = userBalance;
         
-        // Save player details
         const playerData = {
             userId: userId,
             userEmail: currentUser?.email || 'Unknown',
@@ -1921,23 +1564,19 @@
             entryFee: entryFee,
             matchTitle: currentMatchData.title || 'Match',
             status: 'joined',
-            gameDetailsSubmitted: true,
-            securityCheck: securityToken
+            gameDetailsSubmitted: true
         };
         
         const joinRef = db.ref('matchJoins/' + currentMatchId).push(playerData);
         
-        // Update player count in Firebase and local data
         const newPlayerCount = (currentMatchData.currentPlayers || 0) + 1;
         db.ref('matches/' + currentGameMode + '/' + currentMatchId + '/currentPlayers').set(newPlayerCount);
         
-        // Update local data
         const matchIndex = allMatchesData[currentGameMode].findIndex(m => m.id === currentMatchId);
         if (matchIndex !== -1) {
             allMatchesData[currentGameMode][matchIndex].currentPlayers = newPlayerCount;
         }
         
-        // Update purchased matches
         const purchaseData = {
             matchId: currentMatchId,
             purchaseTime: new Date().toISOString(),
@@ -1947,19 +1586,15 @@
             matchDate: currentMatchData.date,
             matchTime: currentMatchData.time,
             joinId: joinRef.key,
-            gameDetailsSubmitted: true,
-            securityToken: securityToken
+            gameDetailsSubmitted: true
         };
         
         db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
         
-        // Update local purchased matches
         userPurchasedMatches.push(currentMatchId);
         
-        // Close modal
         document.getElementById('joinMatchModal').classList.add('hidden');
         
-        // Check for Telegram link
         if (currentMatchData.telegramLink && currentMatchData.telegramLink.trim() !== '') {
             setTimeout(() => {
                 alert(`Successfully joined! Opening Telegram group...\n\nEntry fee of ৳${entryFee} has been deducted from your balance.`);
@@ -1971,27 +1606,31 @@
             }, 300);
         }
         
-        // Refresh matches display
         setTimeout(() => {
             displayMatchesForCurrentMode();
         }, 1000);
     }
 
-    // 🔒 Show Match Details
+    // Show Match Details - Updated to open details link
     function showMatchDetails(matchId) {
-        if (!checkRateLimit()) return;
-        
         const matches = allMatchesData[currentGameMode] || [];
         const match = matches.find(m => m.id === matchId);
         
         if (match) {
-            alert(`Match: ${escapeHtml(match.title)}\nMap: ${escapeHtml(match.map)}\nTime: ${escapeHtml(match.time)}\nPrize: ৳${parseInt(match.totalPrize) || 0}\nEntry Fee: ৳${parseInt(match.entryFee) || 0}\nPlayers: ${parseInt(match.currentPlayers) || 0}/${parseInt(match.maxPlayers) || 100}`);
+            // Check if there's a details link in Firebase
+            if (match.detailsLink && match.detailsLink.trim() !== '') {
+                // Open the details link directly
+                window.open(match.detailsLink, '_blank');
+            } else {
+                // Fallback to showing basic info if no link
+                alert(`Match: ${match.title}\nMap: ${match.map}\nTime: ${match.time}\nPrize: ৳${match.totalPrize}\nEntry Fee: ৳${match.entryFee}\nPlayers: ${match.currentPlayers || 0}/${match.maxPlayers || 100}`);
+            }
         }
     }
 
-    // 🔒 Purchase Match with Security
+    // Purchase Match
     function purchaseMatch(matchId) {
-        if (!checkRateLimit() || !userId) {
+        if (!userId) {
             alert('Please login first');
             return;
         }
@@ -2017,24 +1656,20 @@
             return;
         }
         
-        if (confirm(`Join match for ৳${fee}? This amount will be deducted from your balance.`)) {
-            // Update balance
+        if (confirm(`Join for ৳${fee}?`)) {
             const newBalance = userBalance - fee;
             db.ref('users/' + userId + '/balance').set(newBalance);
             userBalance = newBalance;
             document.getElementById('balanceVal').textContent = userBalance;
             
-            // Update player count
             const newPlayerCount = (match.currentPlayers || 0) + 1;
             db.ref('matches/' + currentGameMode + '/' + matchId + '/currentPlayers').set(newPlayerCount);
             
-            // Update local data
             const matchIndex = matches.findIndex(m => m.id === matchId);
             if (matchIndex !== -1) {
                 allMatchesData[currentGameMode][matchIndex].currentPlayers = newPlayerCount;
             }
             
-            // Save purchase
             const purchaseData = {
                 matchId: matchId, 
                 purchaseTime: new Date().toISOString(),
@@ -2042,16 +1677,13 @@
                 entryFee: fee,
                 gameMode: currentGameMode,
                 matchDate: match.date,
-                matchTime: match.time,
-                securityToken: securityToken
+                matchTime: match.time
             };
             
             db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
             
-            // Update local purchased matches
             userPurchasedMatches.push(matchId);
             
-            // Save join info
             const joinData = {
                 userId: userId,
                 userEmail: currentUser?.email || 'Unknown',
@@ -2059,30 +1691,23 @@
                 matchId: matchId,
                 gameMode: currentGameMode,
                 entryFee: fee,
-                status: 'purchased',
-                securityToken: securityToken
+                status: 'purchased'
             };
             
             db.ref('matchJoins/' + matchId).push(joinData);
             
             alert('Successfully purchased the match! You can now join by clicking "ENTER MATCH LINK"');
             
-            // Refresh display
             setTimeout(() => {
                 displayMatchesForCurrentMode();
             }, 500);
         }
     }
 
-    // 🔒 Modal Functions with Security
+    // Modal Functions
     function openModal(mode) {
-        if (!checkRateLimit() || !userId) {
+        if (!userId) {
             alert('Please login first');
-            return;
-        }
-        
-        if (mode !== 'add' && mode !== 'withdraw') {
-            console.error("Invalid modal mode:", mode);
             return;
         }
         
@@ -2095,13 +1720,6 @@
     }
 
     function showForm(method) {
-        if (!checkRateLimit()) return;
-        
-        if (method !== 'bkash' && method !== 'nagad') {
-            console.error("Invalid payment method:", method);
-            return;
-        }
-        
         currentMethod = method;
         document.getElementById('methodStep').classList.add('hidden');
         document.getElementById('formStep').classList.remove('hidden');
@@ -2112,8 +1730,7 @@
         if (currentMode === 'add') {
             db.ref('admin/numbers/' + method).once('value', s => {
                 document.getElementById('instr1').innerHTML = "Copy Number:";
-                const number = s.val() || "01XXXXXXX";
-                document.getElementById('copyNumberDisplay').innerHTML = escapeHtml(number);
+                document.getElementById('copyNumberDisplay').innerHTML = s.val() || "01XXXXXXX";
                 document.getElementById('instr2').innerHTML = "Send money and enter TrxID";
             });
         } else {
@@ -2127,31 +1744,21 @@
     }
 
     function goBackToMethod() {
-        if (!checkRateLimit()) return;
-        
         document.getElementById('formStep').classList.add('hidden');
         document.getElementById('methodStep').classList.remove('hidden');
     }
 
-    // 🔒 Submit Request with Validation
     function submitReq() {
-        if (!checkRateLimit() || !userId) {
+        if (!userId) {
             alert('Please login first');
             return;
         }
         
-        const amountInput = document.getElementById('inpAmount').value.trim();
+        const amount = parseInt(document.getElementById('inpAmount').value);
         const info = document.getElementById('inpInfo').value.trim();
         
-        if (!amountInput || !info) {
+        if (!amount || !info) {
             alert('Fill all fields!');
-            return;
-        }
-        
-        const amount = parseInt(amountInput);
-        
-        if (isNaN(amount) || amount <= 0) {
-            alert('Invalid amount!');
             return;
         }
         
@@ -2161,30 +1768,13 @@
                 return;
             }
             
-            if (amount < 100) {
-                alert('Minimum withdrawal amount is ৳100');
-                return;
-            }
-            
-            // Validate phone number for withdrawal
-            if (!/^01[3-9]\d{8}$/.test(info)) {
-                alert('Please enter a valid Bangladeshi mobile number (01XXXXXXXXX)');
+            if (amount < 1) {
+                alert('Amount must be at least ৳1');
                 return;
             }
         } else {
             if (amount < 10) {
                 alert('Minimum deposit amount is ৳10');
-                return;
-            }
-            
-            if (amount > 10000) {
-                alert('Maximum deposit amount is ৳10,000');
-                return;
-            }
-            
-            // Validate transaction ID
-            if (info.length < 8 || info.length > 20) {
-                alert('Transaction ID must be 8-20 characters');
                 return;
             }
         }
@@ -2198,15 +1788,11 @@
             status: 'pending', 
             date: new Date().toLocaleString(),
             userEmail: currentUser?.email || 'Unknown',
-            timestamp: Date.now(),
-            securityToken: securityToken,
-            userBalanceBefore: userBalance
+            timestamp: Date.now()
         };
         
-        // Save to user history
         db.ref('users/' + userId + '/history').push(transaction);
         
-        // Save to admin requests
         db.ref('admin/requests').push(transaction).then(() => {
             alert('Request submitted successfully!');
             closeModal();
@@ -2216,20 +1802,7 @@
                 db.ref('users/' + userId + '/balance').set(newBalance);
                 userBalance = newBalance;
                 document.getElementById('balanceVal').textContent = userBalance;
-                
-                // Log withdrawal for security
-                db.ref('security/withdrawals').push({
-                    userId: userId,
-                    amount: amount,
-                    phone: info,
-                    timestamp: Date.now(),
-                    previousBalance: userBalance + amount,
-                    newBalance: userBalance
-                });
             }
-        }).catch(error => {
-            console.error("Transaction submission error:", error);
-            alert('Failed to submit request. Please try again.');
         });
     }
 
@@ -2239,60 +1812,23 @@
         document.getElementById('inpInfo').value = '';
     }
     
-    // 🔒 Logout with Security Cleanup
     function logout() { 
-        if (confirm('Are you sure you want to logout?')) {
-            removeAllListeners();
-            clearSecurityData();
-            
+        if (confirm('Logout?')) {
             auth.signOut().then(() => {
-                console.log('✅ User signed out securely');
+                console.log('User signed out');
             }).catch((error) => {
                 console.error('Logout error:', error);
             });
         }
     }
 
-    // 🔒 Initialize with Security
+    // Initialize
     document.addEventListener('DOMContentLoaded', () => {
         showLoading(true);
-        
-        // Check for suspicious browser extensions
-        setTimeout(() => {
-            if (window.chrome && chrome.runtime && chrome.runtime.id) {
-                console.warn("⚠️ Chrome extension detected");
-                // Optional: Log extension detection
-            }
-        }, 2000);
-        
-        // Show security notice
-        setTimeout(() => {
-            document.getElementById('securityNotice').style.display = 'block';
-        }, 1000);
         
         setTimeout(() => {
             showLoading(false);
         }, 2000);
-        
-        // Prevent right-click (optional security measure)
-        document.addEventListener('contextmenu', function(e) {
-            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-            }
-        });
-        
-        // Prevent F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-        document.addEventListener('keydown', function(e) {
-            if (
-                e.key === 'F12' ||
-                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
-                (e.ctrlKey && e.key === 'U')
-            ) {
-                e.preventDefault();
-                showError("Developer tools are disabled for security.");
-                return false;
-            }
-        });
     });
 
 </script>
