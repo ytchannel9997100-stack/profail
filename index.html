@@ -927,28 +927,24 @@
                     <input type="text" id="telegramUsername" class="form-input" placeholder="@username">
                 </div>
                 <div class="info-box">
-                    <p class="info-text">After submitting details, you will get Telegram group link to join the match.</p>
+                    <p class="info-text">After submitting details, Telegram will open automatically.</p>
                 </div>
-                <button onclick="submitGameDetails()" class="submit-btn">JOIN MATCHES</button>
+                <button onclick="submitGameDetails()" class="submit-btn">JOIN MATCH</button>
             </div>
             <div id="joinMatchStep2" class="hidden">
-                <div class="modal-title">Join Telegram Group</div>
+                <div class="modal-title">Successfully Joined!</div>
                 <div class="info-box">
                     <p class="info-text">Your details have been submitted successfully!</p>
                     <p class="info-text">Entry fee of <span id="matchFeeDisplay" class="font-bold">৳0</span> has been deducted from your balance.</p>
                 </div>
                 <div class="telegram-link-box">
                     <p class="info-text font-bold">Telegram Group Link:</p>
-                    <div id="telegramLinkDisplay" class="telegram-link">Loading...</div>
-                    <button onclick="copyTelegramLink()" class="copy-link-btn">
-                        <i class="far fa-copy"></i> Copy Link
-                    </button>
+                    <div id="telegramLinkDisplay" class="telegram-link">Opening Telegram...</div>
                 </div>
-                <p class="info-text">Join the Telegram group to get match room details and connect with other players.</p>
-                <button onclick="openTelegramLink()" class="submit-btn">
-                    <i class="fab fa-telegram"></i> OPEN TELEGRAM
-                </button>
-                <button onclick="closeJoinMatchModal()" class="cancel-btn">CLOSE</button>
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div style="margin-left: 10px; color: #334155;">Opening Telegram...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -1523,7 +1519,7 @@
         });
     }
 
-    // Submit Game Details
+    // Submit Game Details (MODIFIED VERSION)
     function submitGameDetails() {
         const gameIdName = document.getElementById('gameIdName').value.trim();
         const gameUid = document.getElementById('gameUid').value.trim();
@@ -1546,7 +1542,7 @@
             return;
         }
         
-        // Deduct entry fee from user balance
+        // Deduct entry fee from user balance immediately
         const newBalance = userBalance - entryFee;
         db.ref('users/' + userId + '/balance').set(newBalance);
         
@@ -1590,55 +1586,33 @@
         
         db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
         
-        // Show step 2 with Telegram link
+        // Show step 2
         document.getElementById('joinMatchStep1').classList.add('hidden');
         document.getElementById('joinMatchStep2').classList.remove('hidden');
         
-        // Load Telegram link from admin data
-        loadTelegramLink();
-    }
-
-    // Load Telegram Link
-    function loadTelegramLink() {
-        const telegramLinkDiv = document.getElementById('telegramLinkDisplay');
-        
         // Check if admin has provided Telegram link
         if (currentMatchData.telegramLink && currentMatchData.telegramLink.trim() !== '') {
-            telegramLinkDiv.innerHTML = `<a href="${currentMatchData.telegramLink}" target="_blank" class="telegram-link">${currentMatchData.telegramLink}</a>`;
+            // Update Telegram link display
+            document.getElementById('telegramLinkDisplay').innerHTML = 
+                `<a href="${currentMatchData.telegramLink}" target="_blank" class="telegram-link">${currentMatchData.telegramLink}</a>`;
+            
+            // Auto open Telegram link after 2 seconds
+            setTimeout(() => {
+                window.open(currentMatchData.telegramLink, '_blank');
+                
+                // Auto close modal after 5 seconds
+                setTimeout(() => {
+                    closeJoinMatchModal();
+                }, 5000);
+            }, 2000);
         } else {
-            // If no link from admin, show default message
-            telegramLinkDiv.textContent = "Admin will share Telegram link soon. Please wait for notification.";
-        }
-    }
-
-    // Copy Telegram Link
-    function copyTelegramLink() {
-        const telegramLinkDiv = document.getElementById('telegramLinkDisplay');
-        let link = '';
-        
-        if (telegramLinkDiv.querySelector('a')) {
-            link = telegramLinkDiv.querySelector('a').href;
-        } else {
-            link = telegramLinkDiv.textContent;
-        }
-        
-        navigator.clipboard.writeText(link).then(() => {
-            alert('Link copied to clipboard!');
-        }).catch(err => {
-            console.error('Copy failed:', err);
-        });
-    }
-
-    // Open Telegram Link
-    function openTelegramLink() {
-        const telegramLinkDiv = document.getElementById('telegramLinkDisplay');
-        let link = '';
-        
-        if (telegramLinkDiv.querySelector('a')) {
-            link = telegramLinkDiv.querySelector('a').href;
-            window.open(link, '_blank');
-        } else {
-            alert('Telegram link will be available soon. Please wait for admin notification.');
+            // If no Telegram link, show message and auto close
+            document.getElementById('telegramLinkDisplay').textContent = "Admin will contact you on Telegram soon.";
+            
+            // Auto close modal after 5 seconds
+            setTimeout(() => {
+                closeJoinMatchModal();
+            }, 5000);
         }
     }
 
