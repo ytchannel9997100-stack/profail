@@ -67,7 +67,7 @@
         }
         
         .logo {
-            font-size: 16px; /* ছোট করা হয়েছে */
+            font-size: 16px;
             font-weight: 800;
             color: #f59e0b;
             font-style: italic;
@@ -622,7 +622,7 @@
         }
         
         .login-logo {
-            font-size: 24px; /* ছোট করা হয়েছে */
+            font-size: 24px;
             font-weight: 800;
             color: #f59e0b;
             font-style: italic;
@@ -644,7 +644,7 @@
         }
         
         .login-title {
-            font-size: 18px; /* ছোট করা হয়েছে */
+            font-size: 18px;
             font-weight: 700;
             color: white;
             margin-bottom: 8px;
@@ -652,7 +652,7 @@
         }
         
         .login-subtitle {
-            font-size: 13px; /* ছোট করা হয়েছে */
+            font-size: 13px;
             color: #94a3b8;
             margin-bottom: 30px;
         }
@@ -799,7 +799,7 @@
     <div class="login-card">
         <div class="login-logo-container">
             <div class="login-game-logo">🎮</div>
-            <div class="login-logo">EASY<br>PREMIUM</div> <!-- লাইন ব্রেক যোগ করা হয়েছে -->
+            <div class="login-logo">EASY<br>PREMIUM</div>
         </div>
         <h2 class="login-title">Welcome to Easy Premium</h2>
         <p class="login-subtitle">Join tournaments and win real money</p>
@@ -826,7 +826,7 @@
     <div class="header">
         <div class="logo-container">
             <div class="game-logo">🎮</div>
-            <div class="logo">EASY<br>PREMIUM</div> <!-- লাইন ব্রেক যোগ করা হয়েছে -->
+            <div class="logo">EASY<br>PREMIUM</div>
         </div>
         <div class="header-right">
             <!-- Store Icon -->
@@ -949,37 +949,27 @@
 </div>
 
 <script>
-    // ENCRYPTED FIREBASE CONFIGURATION
-    // Decryption key: EASY_PREMIUM_2024
-    const encryptedConfig = "7A6B5C4D3E2F1A0B9C8D7E6F5A4B3C2D1E0F9A8B7C6D5E4F3A2B1C0D9E8F7A6B5C4D3E2F1A0B9C8D";
-    
-    // Decrypt function (simplified for demo)
-    function decryptConfig(encrypted) {
-        // In production, use proper encryption/decryption
-        // This is just a placeholder
-        return {
-            apiKey: "YOUR_OWN_API_KEY_HERE",
-            authDomain: "YOUR_OWN_AUTH_DOMAIN",
-            projectId: "YOUR_OWN_PROJECT_ID",
-            databaseURL: "YOUR_OWN_DATABASE_URL",
-            storageBucket: "YOUR_OWN_STORAGE_BUCKET",
-            appId: "YOUR_OWN_WEB_APP_ID"
-        };
-    }
-    
-    // Get actual config (user must replace with their own)
-    const firebaseConfig = decryptConfig(encryptedConfig);
+    // Firebase Configuration
+    // REPLACE THESE VALUES WITH YOUR OWN FIREBASE CONFIGURATION
+    const firebaseConfig = {
+        apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
+        authDomain: "top-up-4db01.firebaseapp.com",
+        projectId: "top-up-4db01",
+        databaseURL: "https://top-up-4db01-default-rtdb.asia-southeast1.firebasedatabase.app",
+        storageBucket: "top-up-4db01.appspot.com",
+        appId: "1:264548197473:web:abcd1234efgh5678" // Replace with your web app ID
+    };
 
-    // Initialize Firebase with error handling
+    // Initialize Firebase
     try {
-        if (firebaseConfig.apiKey === "YOUR_OWN_API_KEY_HERE") {
-            console.error("Please configure your own Firebase project!");
-            alert("Firebase is not configured. Please contact admin.");
-        } else {
+        if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
+            console.log("Firebase initialized successfully");
         }
     } catch (error) {
         console.error("Firebase initialization error:", error);
+        document.getElementById('errorMessage').textContent = "Firebase configuration error. Please contact admin.";
+        document.getElementById('errorMessage').style.display = 'block';
     }
     
     const db = firebase.database();
