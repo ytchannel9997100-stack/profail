@@ -364,124 +364,6 @@
         
         .link-btn.show { display: flex; }
         
-        /* Joined Users Section */
-        .joined-users-section {
-            margin-top: 12px;
-            background: rgba(30, 41, 59, 0.5);
-            border-radius: 8px;
-            padding: 12px;
-            display: none;
-        }
-        
-        .joined-users-section.show { display: block; }
-        
-        .joined-users-title {
-            font-size: 12px;
-            color: #94a3b8;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-        
-        .joined-users-list {
-            max-height: 150px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-        
-        .joined-user-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 6px;
-            margin-bottom: 4px;
-            font-size: 11px;
-        }
-        
-        .user-email {
-            color: #94a3b8;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            flex: 1;
-        }
-        
-        .user-time {
-            color: #f59e0b;
-            font-size: 10px;
-            margin-left: 8px;
-            white-space: nowrap;
-        }
-        
-        /* Hidden Match Badge */
-        .hidden-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        
-        /* Telegram Link Section */
-        .telegram-link-section {
-            margin-top: 12px;
-            background: rgba(30, 41, 59, 0.5);
-            border-radius: 8px;
-            padding: 12px;
-            display: none;
-        }
-        
-        .telegram-link-section.show { display: block; }
-        
-        .telegram-link-title {
-            font-size: 12px;
-            color: #94a3b8;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .telegram-link-box {
-            background: rgba(0, 136, 204, 0.2);
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
-        
-        .telegram-link-text {
-            color: #0088cc;
-            font-weight: 600;
-            word-break: break-all;
-            font-size: 12px;
-            text-align: center;
-        }
-        
-        .copy-telegram-btn {
-            background: #0088cc;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 11px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 8px;
-        }
-        
         /* Modals */
         .modal-overlay {
             position: fixed;
@@ -833,43 +715,6 @@
             margin-top: 8px;
         }
         
-        /* Match Details Section */
-        .match-details-section {
-            background: rgba(30, 41, 59, 0.5);
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 12px;
-            display: none;
-        }
-        
-        .match-details-section.show { display: block; }
-        
-        .details-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        
-        .detail-box {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 8px;
-            border-radius: 6px;
-            text-align: center;
-        }
-        
-        .detail-label-small {
-            font-size: 10px;
-            color: #94a3b8;
-            margin-bottom: 4px;
-        }
-        
-        .detail-value-small {
-            font-size: 12px;
-            font-weight: 700;
-            color: #f59e0b;
-        }
-        
         /* Success Message */
         .success-message {
             background: rgba(34, 197, 94, 0.1);
@@ -887,7 +732,7 @@
 <!-- Login Screen -->
 <div id="loginScreen" class="login-screen">
     <div class="login-card">
-        <div class="login-logo" onclick="openProfile()">DENZ ARENA</div>
+        <div class="login-logo" onclick="openProfile()">Easy Premium</div>
         <h2 class="login-title">Welcome to Easy Premium</h2>
         <p class="login-subtitle">Join tournaments and win real money</p>
         
@@ -911,7 +756,7 @@
 <!-- Main App (Hidden initially) -->
 <div class="app-container hidden" id="mainContainer">
     <div class="header">
-        <div class="logo" onclick="openProfile()">DENZ ARENA</div>
+        <div class="logo" onclick="openProfile()">Easy Premium</div>
         <div class="header-right">
             <!-- Store Icon -->
             <div class="store-icon" onclick="openStore()" title="Visit Store">
@@ -1531,7 +1376,7 @@
         return card;
     }
 
-    // Open Join Match Form
+    // Open Join Match Form (UPDATED)
     function openJoinMatchForm(matchId) {
         currentMatchId = matchId;
         
@@ -1544,18 +1389,29 @@
                 return;
             }
             
-            // Check if user already submitted details
+            // Check if user already submitted details for this match
             db.ref('matchJoins/' + matchId).orderByChild('userId').equalTo(userId).once('value').then(snapshot => {
                 if (snapshot.exists()) {
-                    // User already joined, check Telegram link and open it
+                    // User already joined, check if Telegram link exists
+                    let alreadyJoined = false;
                     snapshot.forEach(child => {
                         const joinData = child.val();
-                        if (joinData.gameDetailsSubmitted && currentMatchData.telegramLink) {
-                            // Open Telegram link immediately
-                            window.open(currentMatchData.telegramLink, '_blank');
-                            return;
+                        if (joinData.gameDetailsSubmitted) {
+                            alreadyJoined = true;
+                            // Check if Telegram link exists in match data
+                            if (currentMatchData.telegramLink) {
+                                // Open Telegram link immediately without showing form
+                                window.open(currentMatchData.telegramLink, '_blank');
+                                alert('Opening Telegram group...');
+                            } else {
+                                alert('You have already joined this match. Admin will share Telegram link soon.');
+                            }
                         }
                     });
+                    
+                    if (alreadyJoined) {
+                        return; // Don't show form if already joined
+                    }
                 }
                 
                 // Show modal for new join
@@ -1570,7 +1426,7 @@
         });
     }
 
-    // Submit Game Details (IMPORTANT CHANGE HERE)
+    // Submit Game Details (UPDATED)
     function submitGameDetails() {
         const gameIdName = document.getElementById('gameIdName').value.trim();
         const gameUid = document.getElementById('gameUid').value.trim();
@@ -1644,15 +1500,17 @@
         // Check if admin has provided Telegram link
         if (currentMatchData.telegramLink && currentMatchData.telegramLink.trim() !== '') {
             // SHOW SUCCESS MESSAGE AND OPEN TELEGRAM LINK
-            alert(`Successfully joined! Opening Telegram group...\n\nEntry fee of ৳${entryFee} has been deducted from your balance.`);
-            
-            // Open Telegram link in new tab
             setTimeout(() => {
+                alert(`Successfully joined! Opening Telegram group...\n\nEntry fee of ৳${entryFee} has been deducted from your balance.`);
+                
+                // Open Telegram link in new tab
                 window.open(currentMatchData.telegramLink, '_blank');
-            }, 500);
+            }, 300);
         } else {
             // If no Telegram link, show message
-            alert(`Successfully joined!\n\nEntry fee of ৳${entryFee} has been deducted from your balance.\n\nAdmin will share Telegram link soon.`);
+            setTimeout(() => {
+                alert(`Successfully joined!\n\nEntry fee of ৳${entryFee} has been deducted from your balance.\n\nAdmin will share Telegram link soon.`);
+            }, 300);
         }
         
         // Reload matches to update player count and status
@@ -1728,7 +1586,7 @@
         });
     }
 
-    // Modal Functions
+    // Modal Functions (UPDATED WITHDRAWAL LOGIC)
     function openModal(mode) {
         if (!userId) {
             alert('Please login first');
@@ -1758,9 +1616,13 @@
                 document.getElementById('instr2').innerHTML = "Send money and enter TrxID";
             });
         } else {
-            document.getElementById('instr1').innerHTML = "Min Withdraw:";
-            document.getElementById('copyNumberDisplay').innerHTML = "100৳";
-            document.getElementById('instr2').innerHTML = "Your Balance: ৳" + userBalance;
+            document.getElementById('instr1').innerHTML = "Your Balance";
+            document.getElementById('copyNumberDisplay').innerHTML = "৳" + userBalance;
+            document.getElementById('instr2').innerHTML = "Enter withdrawal amount and your number";
+            
+            // Clear previous values
+            document.getElementById('inpAmount').value = '';
+            document.getElementById('inpInfo').value = '';
         }
     }
 
@@ -1777,16 +1639,29 @@
         
         const amount = parseInt(document.getElementById('inpAmount').value);
         const info = document.getElementById('inpInfo').value.trim();
-        if (!amount || !info) return alert('Fill all fields!');
         
-        if (currentMode === 'withdraw' && amount < 100) {
-            alert('Minimum withdrawal amount is ৳100');
+        if (!amount || !info) {
+            alert('Fill all fields!');
             return;
         }
         
-        if (currentMode === 'withdraw' && amount > userBalance) {
-            alert('Insufficient balance');
-            return;
+        if (currentMode === 'withdraw') {
+            // FIXED: Remove minimum withdrawal warning
+            if (amount > userBalance) {
+                alert('Insufficient balance');
+                return;
+            }
+            
+            if (amount < 1) {
+                alert('Amount must be at least ৳1');
+                return;
+            }
+        } else {
+            // For deposit
+            if (amount < 10) {
+                alert('Minimum deposit amount is ৳10');
+                return;
+            }
         }
         
         const transaction = {
@@ -1808,6 +1683,14 @@
         db.ref('admin/requests').push(transaction).then(() => {
             alert('Request submitted successfully!');
             closeModal();
+            
+            // If withdrawal, update balance immediately
+            if (currentMode === 'withdraw') {
+                const newBalance = userBalance - amount;
+                db.ref('users/' + userId + '/balance').set(newBalance);
+                userBalance = newBalance;
+                document.getElementById('balanceVal').textContent = userBalance;
+            }
         });
     }
 
