@@ -898,12 +898,12 @@
     let historyListener = null;
     let balanceListener = null;
     let purchasedMatchesListener = null;
-    let matchListeners = {};
+    
+    // FIXED: Single listener for current game mode
+    let currentMatchListener = null;
+    
     let currentMatchId = null;
     let currentMatchData = null;
-    
-    // Global variable to track current active listener
-    let currentMatchListener = null;
 
     // Open Store Link
     function openStore() {
@@ -947,20 +947,11 @@
             console.log("Purchased matches listener removed");
         }
         
-        // Remove ALL match listeners - FIXED
-        Object.keys(matchListeners).forEach(mode => {
-            if (matchListeners[mode]) {
-                matchListeners[mode]();
-                console.log(`Match listener for ${mode} removed`);
-            }
-        });
-        matchListeners = {};
-        
-        // Remove current match listener if exists
+        // Remove match listener
         if (currentMatchListener) {
             currentMatchListener();
             currentMatchListener = null;
-            console.log("Current match listener removed");
+            console.log("Match listener removed");
         }
     }
 
@@ -1254,20 +1245,18 @@
         const container = document.getElementById('matchListContainer');
         container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
         
-        // Remove previous listener for the OLD mode
-        if (matchListeners[currentGameMode]) {
-            console.log(`Removing listener for old mode: ${currentGameMode}`);
-            matchListeners[currentGameMode]();
-            delete matchListeners[currentGameMode];
+        // IMPORTANT: Remove previous listener
+        if (currentMatchListener) {
+            console.log(`Removing listener for ${currentGameMode}`);
+            currentMatchListener();
+            currentMatchListener = null;
         }
         
         // Update current game mode
         currentGameMode = mode;
         
         // Load matches for new mode
-        setTimeout(() => {
-            loadMatches();
-        }, 100);
+        loadMatches();
     }
 
     // Load Matches - COMPLETELY FIXED VERSION
@@ -1282,14 +1271,15 @@
         const container = document.getElementById('matchListContainer');
         container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
         
-        // Remove existing listener for this mode if exists
-        if (matchListeners[currentGameMode]) {
+        // Remove existing listener if exists
+        if (currentMatchListener) {
             console.log(`Removing existing listener for ${currentGameMode}`);
-            matchListeners[currentGameMode]();
+            currentMatchListener();
+            currentMatchListener = null;
         }
         
         // Create new listener
-        matchListeners[currentGameMode] = db.ref('matches/' + currentGameMode).on('value', 
+        currentMatchListener = db.ref('matches/' + currentGameMode).on('value', 
             (snapshot) => {
                 console.log(`Received data for ${currentGameMode}:`, snapshot.exists());
                 handleMatchesSnapshot(snapshot);
@@ -1304,8 +1294,6 @@
                     </div>`;
             }
         );
-        
-        console.log(`Listener created for ${currentGameMode}`);
     }
 
     // Handle Matches Snapshot - NEW FUNCTION
@@ -1347,7 +1335,47 @@
             });
             
             console.log(`Found ${matches.length} matches for ${currentGameMode}`);
-            filterAndDisplayMatches(matches, purchasedMatchIds, container);
+            
+            // Filter visible matches
+            const visibleMatches = matches.filter(match => {
+                if (match.visible === true || match.visible === undefined) {
+                    return true;
+                }
+                
+                if (match.visible === false) {
+                    return purchasedMatchIds.includes(match.id);
+                }
+                
+                return true;
+            });
+            
+            if (visibleMatches.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="fas fa-trophy"></i></div>
+                        <div class="empty-text">No matches available</div>
+                        <div class="empty-subtext">Check back later for new tournaments</div>
+                    </div>`;
+                return;
+            }
+            
+            // Sort by date/time
+            visibleMatches.sort((a, b) => {
+                try {
+                    const dateA = new Date(a.date + ' ' + a.time);
+                    const dateB = new Date(b.date + ' ' + b.time);
+                    return dateA - dateB;
+                } catch (e) {
+                    return 0;
+                }
+            });
+            
+            // Clear and create match cards
+            container.innerHTML = '';
+            visibleMatches.forEach(match => {
+                container.appendChild(createMatchCard(match, purchasedMatchIds));
+            });
+            
         }).catch(error => {
             console.error("Error loading purchased matches:", error);
             container.innerHTML = `
@@ -1356,46 +1384,6 @@
                     <div class="empty-text">Error loading matches</div>
                     <div class="empty-subtext">Please try again</div>
                 </div>`;
-        });
-    }
-
-    // Filter and Display Matches
-    function filterAndDisplayMatches(matches, purchasedMatchIds, container) {
-        const visibleMatches = matches.filter(match => {
-            if (match.visible === true || match.visible === undefined) {
-                return true;
-            }
-            
-            if (match.visible === false) {
-                return purchasedMatchIds.includes(match.id);
-            }
-            
-            return true;
-        });
-        
-        visibleMatches.sort((a, b) => {
-            try {
-                const dateA = new Date(a.date + ' ' + a.time);
-                const dateB = new Date(b.date + ' ' + b.time);
-                return dateA - dateB;
-            } catch (e) {
-                return 0;
-            }
-        });
-        
-        if (visibleMatches.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon"><i class="fas fa-trophy"></i></div>
-                    <div class="empty-text">No matches available</div>
-                    <div class="empty-subtext">Check back later for new tournaments</div>
-                </div>`;
-            return;
-        }
-        
-        container.innerHTML = '';
-        visibleMatches.forEach(match => {
-            container.appendChild(createMatchCard(match, purchasedMatchIds));
         });
     }
 
