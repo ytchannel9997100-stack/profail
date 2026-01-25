@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        
+        body {
+            background: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .main-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #0088cc;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .main-header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .main-header h1 i {
+            font-size: 32px;
+        }
+        
+        .main-subtitle {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .plans-container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .plan-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .plan-header {
+            background: linear-gradient(to right, #0088cc, #006699);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        
+        .plan-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .plan-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .price-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .price-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .price {
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+        
+        .currency {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0088cc;
+        }
+        
+        .period {
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .features {
+            margin-bottom: 20px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #444;
+        }
+        
+        .feature-item i {
+            color: #0088cc;
+            font-size: 16px;
+        }
+        
+        .terms {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+        
+        .buy-now-btn {
+            width: 100%;
+            background: linear-gradient(to right, #0088cc, #006699);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            text-align: center;
+        }
+        
+        .buy-now-btn:hover {
+            background: linear-gradient(to right, #006699, #004466);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 136, 204, 0.3);
+        }
+        
+        .plan-footer {
+            padding: 15px 20px;
+            text-align: center;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .plans-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .plans-container .plan-card:last-child {
+                grid-column: span 2;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .plans-container {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+            
+            .plans-container .plan-card:last-child {
+                grid-column: span 1;
+            }
+            
+            .main-header h1 {
+                font-size: 24px;
+            }
+            
+            .main-subtitle {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-header">
+        <h1><i class="fab fa-telegram"></i> Telegram Premium</h1>
+        <p class="main-subtitle">অ্যাডভান্সড মেসেজিং, ফাইল ট্রান্সফার এবং প্রাইভেসি ফিচার</p>
+    </div>
+    
+    <div class="plans-container">
+        <!-- Basic Plan -->
+        <div class="plan-card">
+            <div class="plan-header">
+                <div class="plan-title">Basic</div>
+            </div>
+            
+            <div class="plan-content">
+                <div class="price-section">
+                    <div class="price-label">Monthly</div>
+                    <div class="price">
+                        <span class="currency">BDT</span>
+                        <span class="amount">129.00</span>
+                        <span class="period">/month</span>
+                    </div>
+                </div>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>৪ GB পর্যন্ত ফাইল আপলোড</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>ফাস্ট ডাউনলোড</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>ভয়েস টু টেক্সট</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>বেসিক স্টিকারস</span>
+                    </div>
+                </div>
+                
+                <p class="terms">
+                    Suitable for individual users. Basic premium features included.
+                </p>
+                
+                <a href="https://example.com/buy-telegram-basic" target="_blank" class="buy-now-btn">
+                    <i class="fab fa-telegram"></i>
+                    Buy Now
+                </a>
+            </div>
+            
+            <div class="plan-footer">
+                যে কোনো সময় বাতিল করতে পারেন। প্রতি মাসে BDT 129.00 চার্জ প্রয়োগ হবে।
+            </div>
+        </div>
+        
+        <!-- Pro Plan -->
+        <div class="plan-card">
+            <div class="plan-header">
+                <div class="plan-title">Pro</div>
+            </div>
+            
+            <div class="plan-content">
+                <div class="price-section">
+                    <div class="price-label">Monthly</div>
+                    <div class="price">
+                        <span class="currency">BDT</span>
+                        <span class="amount">299.00</span>
+                        <span class="period">/month</span>
+                    </div>
+                </div>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>৮ GB পর্যন্ত ফাইল আপলোড</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>অ্যানিমেটেড স্টিকারস</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>এডভান্সড চ্যাট ম্যানেজমেন্ট</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>প্রাইভেট ফোল্ডার</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>প্রায়োরিটি সাপোর্ট</span>
+                    </div>
+                </div>
+                
+                <p class="terms">
+                    Best for power users and professionals. Advanced messaging features.
+                </p>
+                
+                <a href="https://example.com/buy-telegram-pro" target="_blank" class="buy-now-btn">
+                    <i class="fab fa-telegram"></i>
+                    Buy Now
+                </a>
+            </div>
+            
+            <div class="plan-footer">
+                যে কোনো সময় বাতিল করতে পারেন। প্রতি মাসে BDT 299.00 চার্জ প্রয়োগ হবে।
+            </div>
+        </div>
+        
+        <!-- Business Plan -->
+        <div class="plan-card">
+            <div class="plan-header">
+                <div class="plan-title">Business</div>
+            </div>
+            
+            <div class="plan-content">
+                <div class="price-section">
+                    <div class="price-label">Monthly</div>
+                    <div class="price">
+                        <span class="currency">BDT</span>
+                        <span class="amount">599.00</span>
+                        <span class="period">/month</span>
+                    </div>
+                </div>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>২০ GB পর্যন্ত ফাইল আপলোড</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>মাল্টি-অ্যাকাউন্ট ম্যানেজমেন্ট</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>টিম কলাবোরেশন টুলস</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>এডভান্সড সিকিউরিটি</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>কাস্টমাইজড বটস</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>২৪/৭ ডেডিকেটেড সাপোর্ট</span>
+                    </div>
+                </div>
+                
+                <p class="terms">
+                    For businesses and organizations. Complete communication solution.
+                </p>
+                
+                <a href="https://example.com/buy-telegram-business" target="_blank" class="buy-now-btn">
+                    <i class="fab fa-telegram"></i>
+                    Buy Now
+                </a>
+            </div>
+            
+            <div class="plan-footer">
+                যে কোনো সময় বাতিল করতে পারেন। প্রতি মাসে BDT 599.00 চার্জ প্রয়োগ হবে।
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add hover effect to plan cards
+        document.querySelectorAll('.plan-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.transition = 'transform 0.3s ease';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Page load animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.plan-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.5s, transform 0.5s';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 200 + (index * 200));
+            });
+        });
+    </script>
+</body>
+</html>
