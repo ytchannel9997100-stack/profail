@@ -869,6 +869,17 @@
             font-weight: 700;
             color: #f59e0b;
         }
+        
+        /* Success Message */
+        .success-message {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -995,7 +1006,7 @@
 <div id="joinMatchModal" class="hidden modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
-            <span id="joinMatchTitle">Join Match</span>
+            <span id="joinMatchTitle">Join: Match</span>
         </div>
         <div class="modal-body">
             <div id="joinMatchStep1">
@@ -1013,25 +1024,9 @@
                     <input type="text" id="telegramUsername" class="form-input" placeholder="@username">
                 </div>
                 <div class="info-box">
-                    <p class="info-text">After submitting details, you will receive Telegram link.</p>
+                    <p class="info-text">After submitting details, Telegram will open automatically.</p>
                 </div>
                 <button onclick="submitGameDetails()" class="submit-btn">JOIN MATCH</button>
-            </div>
-            <div id="joinMatchStep2" class="hidden">
-                <div class="modal-title">Successfully Joined!</div>
-                <div class="info-box">
-                    <p class="info-text">Your details have been submitted successfully!</p>
-                    <p class="info-text">Entry fee of <span id="matchFeeDisplay" class="font-bold">৳0</span> has been deducted from your balance.</p>
-                </div>
-                <div id="telegramLinkContainer">
-                    <div class="telegram-link-box">
-                        <p class="info-text font-bold">Telegram Group Link:</p>
-                        <div id="telegramLinkDisplay" class="telegram-link">Link will appear here</div>
-                        <button onclick="copyTelegramLink()" class="copy-link-btn">Copy Link</button>
-                    </div>
-                    <p class="info-text" style="text-align: center; margin-top: 10px;">Join the Telegram group for match updates</p>
-                </div>
-                <button onclick="closeJoinMatchModal()" class="submit-btn">DONE</button>
             </div>
         </div>
     </div>
@@ -1223,7 +1218,7 @@
             }
         });
         
-        // History listener - FIXED VERSION
+        // History listener
         loadCombinedHistory();
     }
 
@@ -1552,23 +1547,19 @@
             // Check if user already submitted details
             db.ref('matchJoins/' + matchId).orderByChild('userId').equalTo(userId).once('value').then(snapshot => {
                 if (snapshot.exists()) {
-                    // User already joined, show Telegram link directly
+                    // User already joined, check Telegram link and open it
                     snapshot.forEach(child => {
                         const joinData = child.val();
-                        if (joinData.gameDetailsSubmitted) {
-                            showTelegramLink(joinData);
+                        if (joinData.gameDetailsSubmitted && currentMatchData.telegramLink) {
+                            // Open Telegram link immediately
+                            window.open(currentMatchData.telegramLink, '_blank');
                             return;
                         }
                     });
                 }
                 
-                // Set match fee display
-                document.getElementById('matchFeeDisplay').textContent = `৳${currentMatchData.entryFee || 0}`;
-                
                 // Show modal for new join
                 document.getElementById('joinMatchModal').classList.remove('hidden');
-                document.getElementById('joinMatchStep1').classList.remove('hidden');
-                document.getElementById('joinMatchStep2').classList.add('hidden');
                 document.getElementById('joinMatchTitle').textContent = `Join: ${currentMatchData.title || 'Match'}`;
                 
                 // Clear form fields
@@ -1579,25 +1570,7 @@
         });
     }
 
-    // Show Telegram Link
-    function showTelegramLink(joinData) {
-        document.getElementById('joinMatchModal').classList.remove('hidden');
-        document.getElementById('joinMatchStep1').classList.add('hidden');
-        document.getElementById('joinMatchStep2').classList.remove('hidden');
-        document.getElementById('joinMatchTitle').textContent = `Match Link`;
-        
-        // Check if Telegram link exists in match data
-        if (currentMatchData && currentMatchData.telegramLink) {
-            document.getElementById('telegramLinkDisplay').innerHTML = 
-                `<a href="${currentMatchData.telegramLink}" target="_blank">${currentMatchData.telegramLink}</a>`;
-        } else {
-            document.getElementById('telegramLinkDisplay').textContent = "Admin will share link soon";
-        }
-        
-        document.getElementById('matchFeeDisplay').textContent = `৳${joinData.entryFee || 0}`;
-    }
-
-    // Submit Game Details
+    // Submit Game Details (IMPORTANT CHANGE HERE)
     function submitGameDetails() {
         const gameIdName = document.getElementById('gameIdName').value.trim();
         const gameUid = document.getElementById('gameUid').value.trim();
@@ -1665,34 +1638,27 @@
         
         db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
         
-        // Show step 2 with Telegram link
-        document.getElementById('joinMatchStep1').classList.add('hidden');
-        document.getElementById('joinMatchStep2').classList.remove('hidden');
+        // CLOSE MODAL IMMEDIATELY
+        document.getElementById('joinMatchModal').classList.add('hidden');
         
         // Check if admin has provided Telegram link
         if (currentMatchData.telegramLink && currentMatchData.telegramLink.trim() !== '') {
-            document.getElementById('telegramLinkDisplay').innerHTML = 
-                `<a href="${currentMatchData.telegramLink}" target="_blank">${currentMatchData.telegramLink}</a>`;
+            // SHOW SUCCESS MESSAGE AND OPEN TELEGRAM LINK
+            alert(`Successfully joined! Opening Telegram group...\n\nEntry fee of ৳${entryFee} has been deducted from your balance.`);
+            
+            // Open Telegram link in new tab
+            setTimeout(() => {
+                window.open(currentMatchData.telegramLink, '_blank');
+            }, 500);
         } else {
-            document.getElementById('telegramLinkDisplay').textContent = "Admin will share Telegram link soon";
+            // If no Telegram link, show message
+            alert(`Successfully joined!\n\nEntry fee of ৳${entryFee} has been deducted from your balance.\n\nAdmin will share Telegram link soon.`);
         }
-    }
-
-    // Copy Telegram Link
-    function copyTelegramLink() {
-        const telegramLink = document.getElementById('telegramLinkDisplay').textContent;
-        if (telegramLink && telegramLink !== "Admin will share Telegram link soon") {
-            navigator.clipboard.writeText(telegramLink).then(() => {
-                alert('Telegram link copied to clipboard!');
-            });
-        }
-    }
-
-    // Close Join Match Modal
-    function closeJoinMatchModal() {
-        document.getElementById('joinMatchModal').classList.add('hidden');
+        
         // Reload matches to update player count and status
-        loadMatches();
+        setTimeout(() => {
+            loadMatches();
+        }, 1000);
     }
 
     // Show Match Details
