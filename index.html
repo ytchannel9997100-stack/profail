@@ -967,6 +967,7 @@
     let historyListener = null;
     let balanceListener = null;
     let purchasedMatchesListener = null;
+    let currentMatchId = null, currentMatchData = null;
     
     // FIX: COMPLETELY NEW APPROACH
     let allMatchesData = {};
@@ -1838,11 +1839,6 @@
                 console.error('Logout error:', error);
             });
         }
-    }
-
-    // Open Profile Page
-    function openProfile() {
-        window.open('profile.html', '_blank');
     }
 
     // Initialize
