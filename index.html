@@ -985,6 +985,47 @@
     let currentMatchesListener = null;
     let storeLink = "https://easy-premium.com/Products";
 
+    // Function to convert time to 12-hour format with AM/PM
+    function formatTimeTo12Hour(timeString) {
+        if (!timeString) return '';
+        
+        try {
+            // Check if time is already in 12-hour format with AM/PM
+            if (timeString.toLowerCase().includes('am') || timeString.toLowerCase().includes('pm')) {
+                return timeString;
+            }
+            
+            // Parse time in HH:MM format
+            const [hours, minutes] = timeString.split(':');
+            let hour = parseInt(hours);
+            const minute = minutes ? parseInt(minutes) : 0;
+            
+            let period = 'AM';
+            
+            if (hour >= 12) {
+                period = 'PM';
+                if (hour > 12) {
+                    hour -= 12;
+                }
+            }
+            
+            if (hour === 0) {
+                hour = 12;
+            }
+            
+            return `${hour}:${minute.toString().padStart(2, '0')} ${period}`;
+        } catch (error) {
+            console.error('Error formatting time:', error);
+            return timeString;
+        }
+    }
+
+    // Function to format date if needed
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        return dateString;
+    }
+
     // Open Store Link
     function openStore() {
         db.ref('admin/storeLink').once('value').then(snapshot => {
@@ -1429,7 +1470,7 @@
         card.className = 'match-card';
         
         const hasPurchased = purchasedMatchIds.includes(match.id);
-        const canJoin = userBalance >= parseInt(match.entryFee || 0);
+        const canJoin = true; // Always true now since no money deduction
         const isFull = (match.currentPlayers || 0) >= (match.maxPlayers || 100);
         
         let hiddenBadge = '';
@@ -1441,13 +1482,17 @@
         let currentPlayers = match.currentPlayers || 0;
         let maxPlayers = match.maxPlayers || 100;
         
+        // Format time to 12-hour with AM/PM
+        const formattedTime = formatTimeTo12Hour(match.time);
+        const formattedDate = formatDate(match.date);
+        
         // Check if there's a details link
         const hasDetailsLink = match.detailsLink && match.detailsLink.trim() !== '';
         
         card.innerHTML = `
             ${hiddenBadge}
             <div class="match-title">${match.title || 'MATCH'}</div>
-            <div class="match-time">${match.date || ''} • ${match.time || ''}</div>
+            <div class="match-time">${formattedDate} • ${formattedTime}</div>
             <div class="match-grid">
                 <div class="match-item"><div class="item-label">PRIZE</div><div class="item-value">৳${match.totalPrize || '0'}</div></div>
                 <div class="match-item"><div class="item-label">KILL</div><div class="item-value">৳${match.perKill || '0'}</div></div>
@@ -1471,9 +1516,9 @@
                         <i class="fas fa-info-circle"></i>
                         DETAILS
                     </button>
-                    <button class="match-btn purchase-btn" onclick="purchaseMatch('${match.id}')" ${!canJoin || isFull ? 'disabled' : ''}>
+                    <button class="match-btn purchase-btn" onclick="purchaseMatch('${match.id}')" ${isFull ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i>
-                        ${isFull ? 'FULL' : (canJoin ? 'PURCHASE' : 'LOW BALANCE')}
+                        ${isFull ? 'FULL' : 'PURCHASE'}
                     </button>
                 </div>`
             }
@@ -1541,17 +1586,8 @@
         }
         
         const entryFee = parseInt(currentMatchData.entryFee || 0);
-        if (userBalance < entryFee) {
-            alert(`Insufficient balance! Entry fee is ৳${entryFee}`);
-            return;
-        }
         
-        const newBalance = userBalance - entryFee;
-        db.ref('users/' + userId + '/balance').set(newBalance);
-        
-        userBalance = newBalance;
-        document.getElementById('balanceVal').textContent = userBalance;
-        
+        // NO BALANCE DEDUCTION - Just proceed with joining
         const playerData = {
             userId: userId,
             userEmail: currentUser?.email || 'Unknown',
@@ -1564,7 +1600,8 @@
             entryFee: entryFee,
             matchTitle: currentMatchData.title || 'Match',
             status: 'joined',
-            gameDetailsSubmitted: true
+            gameDetailsSubmitted: true,
+            paymentStatus: 'free_entry' // Add this field to indicate free entry
         };
         
         const joinRef = db.ref('matchJoins/' + currentMatchId).push(playerData);
@@ -1586,7 +1623,8 @@
             matchDate: currentMatchData.date,
             matchTime: currentMatchData.time,
             joinId: joinRef.key,
-            gameDetailsSubmitted: true
+            gameDetailsSubmitted: true,
+            paymentStatus: 'free_entry'
         };
         
         db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
@@ -1597,12 +1635,12 @@
         
         if (currentMatchData.telegramLink && currentMatchData.telegramLink.trim() !== '') {
             setTimeout(() => {
-                alert(`Successfully joined! Opening Telegram group...\n\nEntry fee of ৳${entryFee} has been deducted from your balance.`);
+                alert(`Successfully joined! Opening Telegram group...\n\nMatch joined successfully with free entry.`);
                 window.open(currentMatchData.telegramLink, '_blank');
             }, 300);
         } else {
             setTimeout(() => {
-                alert(`Successfully joined!\n\nEntry fee of ৳${entryFee} has been deducted from your balance.\n\nAdmin will share Telegram link soon.`);
+                alert(`Successfully joined!\n\nMatch joined successfully with free entry.\n\nAdmin will share Telegram link soon.`);
             }, 300);
         }
         
@@ -1623,12 +1661,13 @@
                 window.open(match.detailsLink, '_blank');
             } else {
                 // Fallback to showing basic info if no link
-                alert(`Match: ${match.title}\nMap: ${match.map}\nTime: ${match.time}\nPrize: ৳${match.totalPrize}\nEntry Fee: ৳${match.entryFee}\nPlayers: ${match.currentPlayers || 0}/${match.maxPlayers || 100}`);
+                const formattedTime = formatTimeTo12Hour(match.time);
+                alert(`Match: ${match.title}\nMap: ${match.map}\nTime: ${formattedTime}\nPrize: ৳${match.totalPrize}\nEntry Fee: ৳${match.entryFee}\nPlayers: ${match.currentPlayers || 0}/${match.maxPlayers || 100}`);
             }
         }
     }
 
-    // Purchase Match
+    // Purchase Match - UPDATED VERSION (No money deduction)
     function purchaseMatch(matchId) {
         if (!userId) {
             alert('Please login first');
@@ -1645,23 +1684,14 @@
         
         const fee = parseInt(match.entryFee || 0);
         
-        if (userBalance < fee) {
-            alert('Low balance!');
-            return;
-        }
-        
         const isFull = (match.currentPlayers || 0) >= (match.maxPlayers || 100);
         if (isFull) {
             alert('This match is already full!');
             return;
         }
         
-        if (confirm(`Join for ৳${fee}?`)) {
-            const newBalance = userBalance - fee;
-            db.ref('users/' + userId + '/balance').set(newBalance);
-            userBalance = newBalance;
-            document.getElementById('balanceVal').textContent = userBalance;
-            
+        if (confirm(`Join this match for free? (Entry fee: ৳${fee})\n\nNo money will be deducted from your balance.`)) {
+            // NO BALANCE DEDUCTION - Just mark as purchased
             const newPlayerCount = (match.currentPlayers || 0) + 1;
             db.ref('matches/' + currentGameMode + '/' + matchId + '/currentPlayers').set(newPlayerCount);
             
@@ -1677,7 +1707,8 @@
                 entryFee: fee,
                 gameMode: currentGameMode,
                 matchDate: match.date,
-                matchTime: match.time
+                matchTime: match.time,
+                paymentStatus: 'free_entry' // Add this field to indicate free entry
             };
             
             db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
@@ -1691,7 +1722,8 @@
                 matchId: matchId,
                 gameMode: currentGameMode,
                 entryFee: fee,
-                status: 'purchased'
+                status: 'purchased',
+                paymentStatus: 'free_entry'
             };
             
             db.ref('matchJoins/' + matchId).push(joinData);
