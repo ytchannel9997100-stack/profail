@@ -1042,8 +1042,9 @@
         });
     }
 
-    // Auth State Observer
+    // Auth State Observer - FIXED VERSION
     auth.onAuthStateChanged((user) => {
+        console.log('Auth state changed. User:', user ? user.email : 'No user');
         if (user) {
             currentUser = user;
             userId = user.uid;
@@ -1126,24 +1127,63 @@
         }
     }
 
-    // Google Sign In
+    // Google Sign In - FIXED VERSION
     function signInWithGoogle() {
+        console.log('Starting Google sign in...');
         showLoading(true);
         
+        // Clear any existing errors
+        document.getElementById('errorMessage').style.display = 'none';
+        
+        // Create Google Auth Provider
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.addScope('email');
         provider.addScope('profile');
         
-        auth.signInWithPopup(provider)
-            .then((result) => {
-                const user = result.user;
-                console.log('User signed in:', user.uid, user.email);
-                initializeUserInDatabase(user.uid, user.email);
+        // Use redirect instead of popup for better mobile compatibility
+        auth.signInWithRedirect(provider)
+            .then(() => {
+                console.log('Redirect to Google sign in successful');
             })
             .catch((error) => {
                 showLoading(false);
-                showError('Login failed: ' + error.message);
-                console.error('Login error:', error);
+                const errorMessage = getErrorMessage(error.code);
+                showError(errorMessage);
+                console.error('Login error:', error.code, error.message);
+            });
+    }
+
+    // Get user-friendly error messages
+    function getErrorMessage(errorCode) {
+        switch(errorCode) {
+            case 'auth/popup-blocked':
+                return 'Popup was blocked by browser. Please allow popups for this site.';
+            case 'auth/popup-closed-by-user':
+                return 'Login popup was closed. Please try again.';
+            case 'auth/cancelled-popup-request':
+                return 'Login cancelled. Please try again.';
+            case 'auth/network-request-failed':
+                return 'Network error. Please check your internet connection.';
+            case 'auth/unauthorized-domain':
+                return 'This domain is not authorized for Firebase Authentication.';
+            default:
+                return 'Login failed. Please try again.';
+        }
+    }
+
+    // Check for redirect result when page loads
+    function checkRedirectResult() {
+        auth.getRedirectResult()
+            .then((result) => {
+                if (result.user) {
+                    console.log('Redirect sign in successful:', result.user.email);
+                    const user = result.user;
+                    initializeUserInDatabase(user.uid, user.email);
+                }
+            })
+            .catch((error) => {
+                console.error('Redirect result error:', error);
+                showLoading(false);
             });
     }
 
@@ -1158,12 +1198,18 @@
                     balance: 0,
                     createdAt: new Date().toISOString(),
                     lastLogin: new Date().toISOString()
+                }).then(() => {
+                    console.log('New user created in database');
                 });
             } else {
                 userRef.update({
                     lastLogin: new Date().toISOString()
+                }).then(() => {
+                    console.log('User last login updated');
                 });
             }
+        }).catch((error) => {
+            console.error('Database error:', error);
         });
     }
 
@@ -1171,6 +1217,7 @@
     function initializeUserData() {
         if (!userId) return;
         
+        console.log('Initializing user data for:', userId);
         loadAllMatchesData();
         loadUserData();
     }
@@ -1221,11 +1268,18 @@
     function loadUserData() {
         if (!userId) return;
         
+        console.log('Loading user data for:', userId);
+        
+        // Listen for balance changes
         balanceListener = db.ref('users/' + userId + '/balance').on('value', s => {
             userBalance = parseInt(s.val()) || 0;
             document.getElementById('balanceVal').textContent = userBalance;
+            console.log('User balance updated:', userBalance);
+        }, (error) => {
+            console.error('Balance listener error:', error);
         });
         
+        // Listen for purchased matches
         purchasedMatchesListener = db.ref('users/' + userId + '/purchasedMatches').on('value', s => {
             userPurchasedMatches = [];
             if (s.exists()) {
@@ -1236,10 +1290,13 @@
                     }
                 });
             }
+            console.log('Purchased matches updated:', userPurchasedMatches.length);
             
             if (document.getElementById('matchesPage').classList.contains('active')) {
                 displayMatchesForCurrentMode();
             }
+        }, (error) => {
+            console.error('Purchased matches listener error:', error);
         });
         
         loadCombinedHistory();
@@ -1319,7 +1376,12 @@
                 }
                 
                 displayTransactions(allTransactions.slice(0, 10));
+            }).catch(error => {
+                console.error('Error loading history:', error);
+                div.innerHTML = `<div class="empty-state"><div class="empty-text">Error loading history</div></div>`;
             });
+        }, (error) => {
+            console.error('History listener error:', error);
         });
     }
     
@@ -1532,6 +1594,11 @@
 
     // Open Join Match Form Directly (No confirmation)
     function openJoinMatchFormDirectly(matchId) {
+        if (!userId) {
+            alert('Please login first');
+            return;
+        }
+        
         currentMatchId = matchId;
         
         const matches = allMatchesData[currentGameMode] || [];
@@ -1588,6 +1655,9 @@
                 balanceCheckText.innerHTML = `<span style="color: #ef4444;">✗ Insufficient Balance!<br>Your Balance: ৳${userBalance}<br>Required: ৳${entryFee}<br>Need: ৳${entryFee - userBalance} more</span>`;
                 document.getElementById('joinSubmitBtn').disabled = true;
             }
+        }).catch(error => {
+            console.error('Error checking if already joined:', error);
+            alert('Error checking match status. Please try again.');
         });
     }
 
@@ -1615,93 +1685,112 @@
             return;
         }
         
+        // Disable button to prevent double submission
+        document.getElementById('joinSubmitBtn').disabled = true;
+        document.getElementById('joinSubmitBtn').innerHTML = 'PROCESSING...';
+        
         // Deduct balance
         const newBalance = userBalance - entryFee;
-        db.ref('users/' + userId + '/balance').set(newBalance);
-        
-        userBalance = newBalance;
-        document.getElementById('balanceVal').textContent = userBalance;
-        
-        // Record the purchase transaction
-        const purchaseTransaction = {
-            type: 'tournament_entry',
-            method: 'balance_deduction',
-            amount: entryFee,
-            status: 'approved',
-            date: new Date().toLocaleString(),
-            info: `Entry fee for: ${currentMatchData.title || 'Match'}`,
-            timestamp: Date.now(),
-            matchId: currentMatchId,
-            matchTitle: currentMatchData.title
-        };
-        
-        db.ref('users/' + userId + '/history').push(purchaseTransaction);
-        
-        // Add player to match
-        const playerData = {
-            userId: userId,
-            userEmail: currentUser?.email || 'Unknown',
-            gameIdName: gameIdName,
-            gameUid: gameUid,
-            telegramUsername: telegramUsername,
-            joinTime: new Date().toISOString(),
-            matchId: currentMatchId,
-            gameMode: currentGameMode,
-            entryFee: entryFee,
-            matchTitle: currentMatchData.title || 'Match',
-            status: 'joined',
-            gameDetailsSubmitted: true,
-            paymentStatus: 'paid',
-            paymentTime: new Date().toISOString()
-        };
-        
-        const joinRef = db.ref('matchJoins/' + currentMatchId).push(playerData);
-        
-        // Update player count
-        const newPlayerCount = (currentMatchData.currentPlayers || 0) + 1;
-        db.ref('matches/' + currentGameMode + '/' + currentMatchId + '/currentPlayers').set(newPlayerCount);
-        
-        const matchIndex = allMatchesData[currentGameMode].findIndex(m => m.id === currentMatchId);
-        if (matchIndex !== -1) {
-            allMatchesData[currentGameMode][matchIndex].currentPlayers = newPlayerCount;
-        }
-        
-        // Add to purchased matches
-        const purchaseData = {
-            matchId: currentMatchId,
-            purchaseTime: new Date().toISOString(),
-            matchTitle: currentMatchData.title || 'Match',
-            entryFee: entryFee,
-            gameMode: currentGameMode,
-            matchDate: currentMatchData.date,
-            matchTime: currentMatchData.time,
-            joinId: joinRef.key,
-            gameDetailsSubmitted: true,
-            paymentStatus: 'paid',
-            telegramLink: currentMatchData.telegramLink || ''
-        };
-        
-        db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
-        
-        userPurchasedMatches.push(currentMatchId);
-        
-        document.getElementById('joinMatchModal').classList.add('hidden');
-        
-        // Show success message and open Telegram link if available
-        if (currentMatchData.telegramLink && currentMatchData.telegramLink.trim() !== '') {
-            setTimeout(() => {
-                alert(`Successfully joined!\n\n৳${entryFee} has been deducted from your balance.\n\nOpening Telegram group...`);
-                window.open(currentMatchData.telegramLink, '_blank');
-            }, 300);
-        } else {
-            setTimeout(() => {
-                alert(`Successfully joined!\n\n৳${entryFee} has been deducted from your balance.\n\nAdmin will share Telegram link soon.`);
-            }, 300);
-        }
-        
-        setTimeout(() => {
-            displayMatchesForCurrentMode();
-        }, 1000);
+        db.ref('users/' + userId + '/balance').set(newBalance)
+            .then(() => {
+                userBalance = newBalance;
+                document.getElementById('balanceVal').textContent = userBalance;
+                
+                // Record the purchase transaction
+                const purchaseTransaction = {
+                    type: 'tournament_entry',
+                    method: 'balance_deduction',
+                    amount: entryFee,
+                    status: 'approved',
+                    date: new Date().toLocaleString(),
+                    info: `Entry fee for: ${currentMatchData.title || 'Match'}`,
+                    timestamp: Date.now(),
+                    matchId: currentMatchId,
+                    matchTitle: currentMatchData.title
+                };
+                
+                return db.ref('users/' + userId + '/history').push(purchaseTransaction);
+            })
+            .then(() => {
+                // Add player to match
+                const playerData = {
+                    userId: userId,
+                    userEmail: currentUser?.email || 'Unknown',
+                    gameIdName: gameIdName,
+                    gameUid: gameUid,
+                    telegramUsername: telegramUsername,
+                    joinTime: new Date().toISOString(),
+                    matchId: currentMatchId,
+                    gameMode: currentGameMode,
+                    entryFee: entryFee,
+                    matchTitle: currentMatchData.title || 'Match',
+                    status: 'joined',
+                    gameDetailsSubmitted: true,
+                    paymentStatus: 'paid',
+                    paymentTime: new Date().toISOString()
+                };
+                
+                return db.ref('matchJoins/' + currentMatchId).push(playerData);
+            })
+            .then((joinRef) => {
+                // Update player count
+                const newPlayerCount = (currentMatchData.currentPlayers || 0) + 1;
+                return Promise.all([
+                    db.ref('matches/' + currentGameMode + '/' + currentMatchId + '/currentPlayers').set(newPlayerCount),
+                    joinRef
+                ]);
+            })
+            .then(([_, joinRef]) => {
+                // Update local data
+                const matchIndex = allMatchesData[currentGameMode].findIndex(m => m.id === currentMatchId);
+                if (matchIndex !== -1) {
+                    allMatchesData[currentGameMode][matchIndex].currentPlayers = (currentMatchData.currentPlayers || 0) + 1;
+                }
+                
+                // Add to purchased matches
+                const purchaseData = {
+                    matchId: currentMatchId,
+                    purchaseTime: new Date().toISOString(),
+                    matchTitle: currentMatchData.title || 'Match',
+                    entryFee: entryFee,
+                    gameMode: currentGameMode,
+                    matchDate: currentMatchData.date,
+                    matchTime: currentMatchData.time,
+                    joinId: joinRef.key,
+                    gameDetailsSubmitted: true,
+                    paymentStatus: 'paid',
+                    telegramLink: currentMatchData.telegramLink || ''
+                };
+                
+                return db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
+            })
+            .then(() => {
+                userPurchasedMatches.push(currentMatchId);
+                
+                document.getElementById('joinMatchModal').classList.add('hidden');
+                
+                // Show success message and open Telegram link if available
+                if (currentMatchData.telegramLink && currentMatchData.telegramLink.trim() !== '') {
+                    setTimeout(() => {
+                        alert(`Successfully joined!\n\n৳${entryFee} has been deducted from your balance.\n\nOpening Telegram group...`);
+                        window.open(currentMatchData.telegramLink, '_blank');
+                    }, 300);
+                } else {
+                    setTimeout(() => {
+                        alert(`Successfully joined!\n\n৳${entryFee} has been deducted from your balance.\n\nAdmin will share Telegram link soon.`);
+                    }, 300);
+                }
+                
+                setTimeout(() => {
+                    displayMatchesForCurrentMode();
+                }, 1000);
+            })
+            .catch(error => {
+                console.error('Error joining match:', error);
+                alert('Error joining match. Please try again.');
+                document.getElementById('joinSubmitBtn').disabled = false;
+                document.getElementById('joinSubmitBtn').innerHTML = 'JOIN MATCH';
+            });
     }
 
     // Open Telegram Link for already purchased match
@@ -1856,11 +1945,22 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
+        console.log('Page loaded, checking auth state...');
         showLoading(true);
         
+        // Check for redirect result first
+        checkRedirectResult();
+        
+        // Also check current auth state
         setTimeout(() => {
-            showLoading(false);
-        }, 2000);
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+                console.log('User already logged in:', currentUser.email);
+            } else {
+                console.log('No user logged in');
+                showLoading(false);
+            }
+        }, 1000);
     });
 
 </script>
