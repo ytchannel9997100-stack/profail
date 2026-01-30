@@ -636,26 +636,6 @@
         .delete-btn:hover {
             background: rgba(239, 68, 68, 0.3);
         }
-        
-        /* Note Box */
-        .note-box {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
-            border: 2px solid rgba(59, 130, 246, 0.3);
-            padding: 16px;
-            border-radius: 12px;
-            margin: 20px 0;
-            font-size: 14px;
-            color: #93c5fd;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .note-icon {
-            color: #3b82f6;
-            font-size: 18px;
-        }
     </style>
 </head>
 <body>
@@ -702,21 +682,12 @@
                 <div class="stat-title">Total Income</div>
                 <div class="stat-value">৳<span id="totalIncome">0</span></div>
             </div>
-            <div class="stat-card">
-                <div class="stat-title">Players with Details</div>
-                <div class="stat-value" id="playersWithDetails">0</div>
-            </div>
         </div>
 
         <!-- Match Selector -->
         <div class="match-selector">
             <div class="selector-title">
                 <i class="fas fa-trophy"></i> Select Tournament
-            </div>
-            
-            <div class="note-box">
-                <i class="fas fa-info-circle note-icon"></i>
-                <span>Only players with complete details (Game ID, Game UID, Telegram) will be shown</span>
             </div>
             
             <div class="match-info-card" id="selectedMatchInfo" style="display: none;">
@@ -754,24 +725,24 @@
                     <div class="summary-value" id="totalJoined">0</div>
                 </div>
                 <div class="summary-item">
-                    <div class="summary-label">With Details</div>
-                    <div class="summary-value" id="withDetails">0</div>
+                    <div class="summary-label">Earnings</div>
+                    <div class="summary-value">৳<span id="matchEarnings">0</span></div>
                 </div>
                 <div class="summary-item">
-                    <div class="summary-label">Match Earnings</div>
-                    <div class="summary-value">৳<span id="matchEarnings">0</span></div>
+                    <div class="summary-label">Available</div>
+                    <div class="summary-value">৳<span id="availableBalance">0</span></div>
                 </div>
             </div>
             
             <button class="load-btn" onclick="loadPlayersForSelectedMatch()">
-                <i class="fas fa-sync-alt"></i> SHOW PLAYERS WITH DETAILS
+                <i class="fas fa-sync-alt"></i> SHOW PLAYERS
             </button>
         </div>
 
         <!-- Players Table -->
         <div class="players-table-container">
             <div class="table-header">
-                <span><i class="fas fa-users"></i> PLAYERS WITH COMPLETE DETAILS</span>
+                <span><i class="fas fa-users"></i> TOURNAMENT PLAYERS</span>
             </div>
             
             <div class="table-responsive">
@@ -791,7 +762,7 @@
                     <tbody id="playersTableBody">
                         <tr>
                             <td colspan="8" class="empty-message">
-                                Select a match and click "SHOW PLAYERS WITH DETAILS"
+                                Select a match and click "SHOW PLAYERS"
                             </td>
                         </tr>
                     </tbody>
@@ -838,10 +809,10 @@
                     </div>
                 </div>
                 
-                <!-- Match Balance Info -->
-                <div class="balance-info" id="matchBalanceInfo">
-                    <div class="balance-amount">৳<span id="availableBalance">0</span></div>
-                    <div class="balance-label">Available in Tournament</div>
+                <!-- Tournament Balance Info -->
+                <div class="balance-info">
+                    <div class="balance-amount">৳<span id="tournamentBalance">0</span></div>
+                    <div class="balance-label">Tournament Available Balance</div>
                 </div>
                 
                 <div class="warning-box" id="amountWarning" style="display: none;">
@@ -1008,7 +979,6 @@
     function loadMatchSummary(matchId) {
         db.ref('matchJoins/' + matchId).once('value').then(snapshot => {
             let totalJoined = 0;
-            let withDetails = 0;
             tournamentBalance = 0;
             
             if (snapshot.exists()) {
@@ -1016,22 +986,14 @@
                     const playerData = child.val();
                     totalJoined++;
                     
-                    // Check if player has submitted all required details
-                    if (playerData.gameDetailsSubmitted === true && 
-                        playerData.gameIdName && 
-                        playerData.gameUid && 
-                        playerData.telegramUsername) {
-                        withDetails++;
-                    }
-                    
                     // Calculate tournament balance from entry fees
                     tournamentBalance += parseInt(playerData.entryFee || 0);
                 });
             }
             
             document.getElementById('totalJoined').textContent = totalJoined;
-            document.getElementById('withDetails').textContent = withDetails;
             document.getElementById('matchEarnings').textContent = tournamentBalance;
+            document.getElementById('availableBalance').textContent = tournamentBalance;
             
             document.getElementById('matchSummary').style.display = 'flex';
         });
@@ -1050,7 +1012,6 @@
         // Load match joins data
         db.ref('matchJoins/' + matchId).once('value').then(snapshot => {
             const players = [];
-            let playersWithDetails = 0;
             
             if (snapshot.exists()) {
                 snapshot.forEach(child => {
@@ -1063,8 +1024,6 @@
                                        playerData.telegramUsername;
                     
                     if (hasDetails) {
-                        playersWithDetails++;
-                        
                         players.push({
                             key: child.key,
                             joinId: child.key,
@@ -1075,9 +1034,6 @@
                     }
                 });
             }
-            
-            // Update global stats
-            document.getElementById('playersWithDetails').textContent = playersWithDetails;
             
             displayPlayers(players);
             showLoading(false);
@@ -1095,7 +1051,7 @@
             tbody.innerHTML = `
                 <tr>
                     <td colspan="8" class="empty-message">
-                        No players have provided complete details for this match
+                        No players found for this match
                     </td>
                 </tr>`;
             return;
@@ -1165,7 +1121,7 @@
         document.getElementById('modalMatchTitle').textContent = matchTitle;
         document.getElementById('modalEntryFee').textContent = entryFee;
         document.getElementById('amountInput').value = '';
-        document.getElementById('availableBalance').textContent = tournamentBalance;
+        document.getElementById('tournamentBalance').textContent = tournamentBalance;
         
         // Reset warnings
         document.getElementById('amountWarning').style.display = 'none';
@@ -1310,8 +1266,9 @@
                 successMessage.style.display = 'flex';
                 
                 // Update balance display
-                document.getElementById('availableBalance').textContent = tournamentBalance;
+                document.getElementById('tournamentBalance').textContent = tournamentBalance;
                 document.getElementById('matchEarnings').textContent = tournamentBalance;
+                document.getElementById('availableBalance').textContent = tournamentBalance;
                 
                 // Refresh players list after 2 seconds
                 setTimeout(() => {
@@ -1397,6 +1354,21 @@
         db.ref('users').once('value').then(snapshot => {
             const totalUsers = snapshot.exists() ? snapshot.numChildren() : 0;
             document.getElementById('totalPlayers').textContent = totalUsers;
+        });
+        
+        // Calculate total income from all matches
+        let totalIncome = 0;
+        db.ref('matchJoins').once('value').then(snapshot => {
+            if (snapshot.exists()) {
+                snapshot.forEach(matchSnapshot => {
+                    matchSnapshot.forEach(playerSnapshot => {
+                        const player = playerSnapshot.val();
+                        totalIncome += parseInt(player.entryFee || 0);
+                    });
+                });
+            }
+            
+            document.getElementById('totalIncome').textContent = totalIncome;
         });
     }
     
