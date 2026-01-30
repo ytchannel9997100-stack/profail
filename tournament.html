@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     
     <style>
         * {
@@ -234,21 +233,6 @@
             background: rgba(255, 255, 255, 0.05);
         }
         
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .status-joined {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: white;
-            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
-        }
-        
         .empty-message {
             text-align: center;
             padding: 60px 20px;
@@ -435,26 +419,6 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         
-        /* Note Box */
-        .note-box {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
-            border: 2px solid rgba(59, 130, 246, 0.3);
-            padding: 16px;
-            border-radius: 12px;
-            margin: 20px 0;
-            font-size: 14px;
-            color: #93c5fd;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .note-icon {
-            color: #3b82f6;
-            font-size: 18px;
-        }
-        
         /* Email Clickable Style */
         .email-link {
             color: #60a5fa;
@@ -586,29 +550,37 @@
             box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
         }
         
-        /* Success/Error Messages */
-        .success-message {
+        /* Balance Info */
+        .balance-info {
             background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(21, 128, 61, 0.1) 100%);
-            color: #22c55e;
-            padding: 16px;
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            padding: 15px;
             border-radius: 12px;
             margin: 15px 0;
-            border-left: 4px solid #22c55e;
-            display: none;
-            align-items: center;
-            gap: 12px;
+            text-align: center;
         }
         
-        .error-message-box {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(185, 28, 28, 0.1) 100%);
-            color: #ef4444;
-            padding: 16px;
+        .balance-amount {
+            font-size: 24px;
+            font-weight: 900;
+            color: #22c55e;
+        }
+        
+        .balance-label {
+            font-size: 14px;
+            color: #86efac;
+            margin-top: 5px;
+        }
+        
+        /* Warning Box */
+        .warning-box {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%);
+            border: 2px solid rgba(245, 158, 11, 0.3);
+            padding: 15px;
             border-radius: 12px;
             margin: 15px 0;
-            border-left: 4px solid #ef4444;
-            display: none;
-            align-items: center;
-            gap: 12px;
+            color: #fcd34d;
+            font-size: 14px;
         }
         
         /* User Info Box */
@@ -655,24 +627,34 @@
             transition: all 0.3s;
         }
         
-        .edit-btn {
-            background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-        
         .delete-btn {
             background: rgba(239, 68, 68, 0.2);
             color: #f87171;
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
-        .edit-btn:hover {
-            background: rgba(59, 130, 246, 0.3);
-        }
-        
         .delete-btn:hover {
             background: rgba(239, 68, 68, 0.3);
+        }
+        
+        /* Note Box */
+        .note-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            padding: 16px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #93c5fd;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .note-icon {
+            color: #3b82f6;
+            font-size: 18px;
         }
     </style>
 </head>
@@ -765,7 +747,7 @@
                 <option value="">Select a match...</option>
             </select>
             
-            <!-- Summary Card (Shows when match is selected) -->
+            <!-- Summary Card -->
             <div class="summary-card" id="matchSummary" style="display: none;">
                 <div class="summary-item">
                     <div class="summary-label">Total Joined</div>
@@ -776,8 +758,8 @@
                     <div class="summary-value" id="withDetails">0</div>
                 </div>
                 <div class="summary-item">
-                    <div class="summary-label">Total Income</div>
-                    <div class="summary-value">৳<span id="matchIncome">0</span></div>
+                    <div class="summary-label">Match Earnings</div>
+                    <div class="summary-value">৳<span id="matchEarnings">0</span></div>
                 </div>
             </div>
             
@@ -790,9 +772,6 @@
         <div class="players-table-container">
             <div class="table-header">
                 <span><i class="fas fa-users"></i> PLAYERS WITH COMPLETE DETAILS</span>
-                <span style="font-size: 14px; color: #94a3b8;">
-                    <i class="fas fa-mouse-pointer"></i> Click on email to add money & delete data
-                </span>
             </div>
             
             <div class="table-responsive">
@@ -805,14 +784,13 @@
                             <th>GAME UID</th>
                             <th>TELEGRAM</th>
                             <th>ENTRY FEE</th>
-                            <th>STATUS</th>
                             <th>JOIN TIME</th>
                             <th>ACTION</th>
                         </tr>
                     </thead>
                     <tbody id="playersTableBody">
                         <tr>
-                            <td colspan="9" class="empty-message">
+                            <td colspan="8" class="empty-message">
                                 Select a match and click "SHOW PLAYERS WITH DETAILS"
                             </td>
                         </tr>
@@ -830,7 +808,7 @@
     <div id="addMoneyModal" class="hidden modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <i class="fas fa-money-bill-wave"></i> ADD MONEY TO USER
+                <i class="fas fa-money-bill-wave"></i> ADD MONEY TO PLAYER
             </div>
             <div class="modal-body">
                 <div id="userInfoBox" class="user-info-box">
@@ -854,30 +832,40 @@
                         <div class="user-info-label">Match:</div>
                         <div class="user-info-value" id="modalMatchTitle">Loading...</div>
                     </div>
+                    <div class="user-info-row">
+                        <div class="user-info-label">Entry Fee Paid:</div>
+                        <div class="user-info-value">৳<span id="modalEntryFee">0</span></div>
+                    </div>
                 </div>
                 
-                <div class="note-box">
-                    <i class="fas fa-exclamation-triangle note-icon"></i>
-                    <span><strong>Warning:</strong> After adding money, all user data will be permanently deleted!</span>
+                <!-- Match Balance Info -->
+                <div class="balance-info" id="matchBalanceInfo">
+                    <div class="balance-amount">৳<span id="availableBalance">0</span></div>
+                    <div class="balance-label">Available in Tournament</div>
                 </div>
                 
-                <input type="number" id="amountInput" class="modal-input" placeholder="Enter amount to add (৳)" min="1" step="100">
+                <div class="warning-box" id="amountWarning" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="warningText">Amount exceeds tournament balance!</span>
+                </div>
+                
+                <input type="number" id="amountInput" class="modal-input" placeholder="Enter amount to add (৳)" min="1" step="100" oninput="checkBalance()">
                 
                 <div class="modal-actions">
-                    <button class="modal-btn modal-confirm" onclick="confirmAddMoney()">
-                        <i class="fas fa-check-circle"></i> ADD MONEY & DELETE DATA
+                    <button class="modal-btn modal-confirm" onclick="confirmAddMoney()" id="confirmBtn">
+                        <i class="fas fa-check-circle"></i> ADD MONEY
                     </button>
                     <button class="modal-btn modal-cancel" onclick="closeAddMoneyModal()">
                         <i class="fas fa-times-circle"></i> CANCEL
                     </button>
                 </div>
                 
-                <div id="successMessage" class="success-message" style="display: none;">
+                <div id="successMessage" class="balance-info" style="display: none; background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(21, 128, 61, 0.15) 100%);">
                     <i class="fas fa-check-circle"></i>
                     <span id="successText"></span>
                 </div>
                 
-                <div id="errorMessageBox" class="error-message-box" style="display: none;">
+                <div id="errorMessageBox" class="warning-box" style="display: none; background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(185, 28, 28, 0.15) 100%);">
                     <i class="fas fa-exclamation-circle"></i>
                     <span id="errorText"></span>
                 </div>
@@ -911,13 +899,14 @@
     const db = firebase.database();
     
     // Admin credentials
-    const ADMIN_PASSWORD = "admin123"; // Change this in production
+    const ADMIN_PASSWORD = "admin123";
     
     let allMatches = [];
     let selectedMatchId = null;
-    let currentPlayers = [];
+    let currentMatchData = null;
     let currentUserData = null;
     let currentJoinKey = null;
+    let tournamentBalance = 0;
 
     // Admin Login
     function adminLogin() {
@@ -1000,6 +989,7 @@
         const match = allMatches.find(m => m.id === matchId && m.gameMode === gameMode);
         
         if (match) {
+            currentMatchData = match;
             document.getElementById('matchTitle').textContent = match.title || 'Match';
             document.getElementById('matchDateTime').textContent = `${match.date || ''} • ${match.time || ''}`;
             document.getElementById('matchEntryFee').textContent = match.entryFee || '0';
@@ -1009,7 +999,7 @@
             matchInfoDiv.style.display = 'block';
             selectedMatchId = matchPath;
             
-            // Load match summary
+            // Load match summary and balance
             loadMatchSummary(matchId);
         }
     }
@@ -1019,7 +1009,7 @@
         db.ref('matchJoins/' + matchId).once('value').then(snapshot => {
             let totalJoined = 0;
             let withDetails = 0;
-            let totalIncome = 0;
+            tournamentBalance = 0;
             
             if (snapshot.exists()) {
                 snapshot.forEach(child => {
@@ -1034,13 +1024,14 @@
                         withDetails++;
                     }
                     
-                    totalIncome += parseInt(playerData.entryFee || 0);
+                    // Calculate tournament balance from entry fees
+                    tournamentBalance += parseInt(playerData.entryFee || 0);
                 });
             }
             
             document.getElementById('totalJoined').textContent = totalJoined;
             document.getElementById('withDetails').textContent = withDetails;
-            document.getElementById('matchIncome').textContent = totalIncome;
+            document.getElementById('matchEarnings').textContent = tournamentBalance;
             
             document.getElementById('matchSummary').style.display = 'flex';
         });
@@ -1059,7 +1050,6 @@
         // Load match joins data
         db.ref('matchJoins/' + matchId).once('value').then(snapshot => {
             const players = [];
-            let totalIncome = 0;
             let playersWithDetails = 0;
             
             if (snapshot.exists()) {
@@ -1074,7 +1064,6 @@
                     
                     if (hasDetails) {
                         playersWithDetails++;
-                        totalIncome += parseInt(playerData.entryFee || 0);
                         
                         players.push({
                             key: child.key,
@@ -1087,11 +1076,8 @@
                 });
             }
             
-            currentPlayers = players;
-            
             // Update global stats
             document.getElementById('playersWithDetails').textContent = playersWithDetails;
-            document.getElementById('totalIncome').textContent = totalIncome;
             
             displayPlayers(players);
             showLoading(false);
@@ -1108,11 +1094,10 @@
         if (players.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" class="empty-message">
+                    <td colspan="8" class="empty-message">
                         No players have provided complete details for this match
                     </td>
                 </tr>`;
-            document.getElementById('playersCount').textContent = '0';
             return;
         }
         
@@ -1145,7 +1130,6 @@
                     <td><code>${player.gameUid || 'N/A'}</code></td>
                     <td>${player.telegramUsername || 'N/A'}</td>
                     <td>৳${player.entryFee || '0'}</td>
-                    <td><span class="status-badge status-joined">JOINED</span></td>
                     <td>${player.joinTime}</td>
                     <td>
                         <button class="action-btn delete-btn" onclick="deleteUserData('${player.userId}', '${player.key}')">
@@ -1156,7 +1140,6 @@
         });
         
         tbody.innerHTML = html;
-        document.getElementById('playersCount').textContent = players.length;
     }
     
     // Open Add Money Modal
@@ -1180,12 +1163,34 @@
         document.getElementById('modalGameUid').textContent = gameUid;
         document.getElementById('modalTelegram').textContent = telegram;
         document.getElementById('modalMatchTitle').textContent = matchTitle;
+        document.getElementById('modalEntryFee').textContent = entryFee;
         document.getElementById('amountInput').value = '';
+        document.getElementById('availableBalance').textContent = tournamentBalance;
+        
+        // Reset warnings
+        document.getElementById('amountWarning').style.display = 'none';
+        document.getElementById('successMessage').style.display = 'none';
+        document.getElementById('errorMessageBox').style.display = 'none';
+        document.getElementById('confirmBtn').disabled = false;
         
         // Show modal
         document.getElementById('addMoneyModal').classList.remove('hidden');
-        document.getElementById('successMessage').style.display = 'none';
-        document.getElementById('errorMessageBox').style.display = 'none';
+    }
+    
+    // Check balance when amount input changes
+    function checkBalance() {
+        const amount = parseInt(document.getElementById('amountInput').value) || 0;
+        const warningBox = document.getElementById('amountWarning');
+        const confirmBtn = document.getElementById('confirmBtn');
+        
+        if (amount > tournamentBalance) {
+            document.getElementById('warningText').textContent = `Amount (৳${amount}) exceeds tournament balance (৳${tournamentBalance})!`;
+            warningBox.style.display = 'flex';
+            confirmBtn.disabled = true;
+        } else {
+            warningBox.style.display = 'none';
+            confirmBtn.disabled = false;
+        }
     }
     
     // Close Add Money Modal
@@ -1204,11 +1209,18 @@
             return;
         }
         
-        if (!confirm(`Add ৳${amount} to ${currentUserData.email} and DELETE all user data?`)) {
+        if (amount > tournamentBalance) {
+            showError(`Amount (৳${amount}) exceeds tournament balance (৳${tournamentBalance})!`);
+            return;
+        }
+        
+        if (!confirm(`Add ৳${amount} to ${currentUserData.email}?\n\nTournament balance will be reduced to: ৳${tournamentBalance - amount}`)) {
             return;
         }
         
         showLoading(true);
+        
+        const [gameMode, matchId] = selectedMatchId.split('/');
         
         const promises = [];
         
@@ -1220,28 +1232,45 @@
             })
         );
         
-        // 2. Add transaction history
+        // 2. Add transaction history for user
         const historyRef = db.ref('users/' + currentUserData.userId + '/history').push();
         promises.push(
             historyRef.set({
-                type: 'add',
-                method: 'admin',
+                type: 'prize',
+                method: 'tournament',
                 amount: amount,
                 status: 'approved',
                 date: new Date().toLocaleString(),
-                info: 'Added by Admin',
+                info: `Prize from: ${currentMatchData.title || 'Tournament'}`,
                 timestamp: Date.now(),
                 userEmail: currentUserData.email,
-                adminAction: true
+                matchId: matchId,
+                matchTitle: currentMatchData.title
             })
         );
         
-        // 3. Delete from matchJoins
-        const [gameMode, matchId] = selectedMatchId.split('/');
+        // 3. Record tournament payment (for admin tracking)
+        const tournamentPaymentRef = db.ref('tournamentPayments').push();
+        promises.push(
+            tournamentPaymentRef.set({
+                userId: currentUserData.userId,
+                userEmail: currentUserData.email,
+                matchId: matchId,
+                matchTitle: currentMatchData.title,
+                amount: amount,
+                date: new Date().toLocaleString(),
+                timestamp: Date.now(),
+                gameMode: gameMode,
+                tournamentBalanceBefore: tournamentBalance,
+                tournamentBalanceAfter: tournamentBalance - amount
+            })
+        );
+        
+        // 4. Delete from matchJoins
         const joinRef = db.ref('matchJoins/' + matchId + '/' + currentJoinKey);
         promises.push(joinRef.remove());
         
-        // 4. Remove from purchasedMatches
+        // 5. Remove from purchasedMatches
         const purchasedRef = db.ref('users/' + currentUserData.userId + '/purchasedMatches');
         promises.push(
             purchasedRef.once('value').then(snapshot => {
@@ -1258,7 +1287,7 @@
             })
         );
         
-        // 5. Update match currentPlayers count
+        // 6. Update match currentPlayers count
         const matchRef = db.ref('matches/' + gameMode + '/' + matchId + '/currentPlayers');
         promises.push(
             matchRef.transaction(current => {
@@ -1271,11 +1300,18 @@
             .then(() => {
                 showLoading(false);
                 
-                // Update UI
+                // Update tournament balance
+                tournamentBalance -= amount;
+                
+                // Show success message
                 const successMessage = document.getElementById('successMessage');
                 const successText = document.getElementById('successText');
-                successText.textContent = `Successfully added ৳${amount} to ${currentUserData.email} and deleted all user data!`;
+                successText.textContent = `৳${amount} added to ${currentUserData.email}\nTournament balance: ৳${tournamentBalance}`;
                 successMessage.style.display = 'flex';
+                
+                // Update balance display
+                document.getElementById('availableBalance').textContent = tournamentBalance;
+                document.getElementById('matchEarnings').textContent = tournamentBalance;
                 
                 // Refresh players list after 2 seconds
                 setTimeout(() => {
@@ -1294,7 +1330,7 @@
     
     // Delete User Data Only (without adding money)
     function deleteUserData(userId, joinKey) {
-        if (!confirm("Delete this user's data from this match?\nThis will NOT add money to the user.")) {
+        if (!confirm("Delete this user's data from this match?\n\nThis will NOT add money to the user.")) {
             return;
         }
         
