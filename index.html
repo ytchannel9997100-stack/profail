@@ -937,10 +937,13 @@
                     <label class="form-label">Telegram Username</label>
                     <input type="text" id="telegramUsername" class="form-input" placeholder="@username">
                 </div>
-                <div class="info-box">
-                    <p class="info-text">After submitting details, Telegram will open automatically.</p>
+                
+                <div class="info-box" id="balanceCheckBox">
+                    <p class="info-text" id="balanceCheckText">Checking balance...</p>
                 </div>
-                <button onclick="submitGameDetails()" class="submit-btn">JOIN MATCH</button>
+                
+                <button onclick="checkBalanceAndSubmit()" class="submit-btn" id="joinSubmitBtn">JOIN MATCH</button>
+                <button onclick="closeJoinModal()" class="cancel-btn">CANCEL</button>
             </div>
         </div>
     </div>
@@ -1470,7 +1473,7 @@
         card.className = 'match-card';
         
         const hasPurchased = purchasedMatchIds.includes(match.id);
-        const canJoin = true; // Always true now since no money deduction
+        const canJoin = true; // Always true now since no balance check in purchase button
         const isFull = (match.currentPlayers || 0) >= (match.maxPlayers || 100);
         
         let hiddenBadge = '';
@@ -1507,16 +1510,16 @@
             <div class="purchase-status ${hasPurchased ? 'purchased' : 'not-purchased'}">${hasPurchased ? 'Purchased' : 'Purchase Required'}</div>
             
             ${hasPurchased ? 
-                `<button class="link-btn show" onclick="openJoinMatchForm('${match.id}')">
-                    <i class="fas fa-play"></i>
-                    ENTER MATCH LINK
+                `<button class="link-btn show" onclick="openTelegramLink('${match.id}')">
+                    <i class="fab fa-telegram"></i>
+                    JOIN TELEGRAM GROUP
                 </button>` : 
                 `<div class="match-actions">
                     <button class="match-btn details-btn" onclick="showMatchDetails('${match.id}')">
                         <i class="fas fa-info-circle"></i>
                         DETAILS
                     </button>
-                    <button class="match-btn purchase-btn" onclick="purchaseMatch('${match.id}')" ${isFull ? 'disabled' : ''}>
+                    <button class="match-btn purchase-btn" onclick="openJoinMatchFormDirectly('${match.id}')" ${isFull ? 'disabled' : ''}>
                         <i class="fas fa-shopping-cart"></i>
                         ${isFull ? 'FULL' : 'PURCHASE'}
                     </button>
@@ -1527,8 +1530,8 @@
         return card;
     }
 
-    // Open Join Match Form
-    function openJoinMatchForm(matchId) {
+    // Open Join Match Form Directly (No confirmation)
+    function openJoinMatchFormDirectly(matchId) {
         currentMatchId = matchId;
         
         const matches = allMatchesData[currentGameMode] || [];
@@ -1539,6 +1542,13 @@
             return;
         }
         
+        const isFull = (currentMatchData.currentPlayers || 0) >= (currentMatchData.maxPlayers || 100);
+        if (isFull) {
+            alert('This match is already full!');
+            return;
+        }
+        
+        // Check if already joined
         db.ref('matchJoins/' + matchId).orderByChild('userId').equalTo(userId).once('value').then(snapshot => {
             if (snapshot.exists()) {
                 let alreadyJoined = false;
@@ -1546,11 +1556,11 @@
                     const joinData = child.val();
                     if (joinData.gameDetailsSubmitted) {
                         alreadyJoined = true;
+                        alert('You have already joined this match!');
                         if (currentMatchData.telegramLink) {
-                            window.open(currentMatchData.telegramLink, '_blank');
-                            alert('Opening Telegram group...');
-                        } else {
-                            alert('You have already joined this match. Admin will share Telegram link soon.');
+                            setTimeout(() => {
+                                window.open(currentMatchData.telegramLink, '_blank');
+                            }, 500);
                         }
                     }
                 });
@@ -1560,17 +1570,29 @@
                 }
             }
             
+            // Open form directly
             document.getElementById('joinMatchModal').classList.remove('hidden');
             document.getElementById('joinMatchTitle').textContent = `Join: ${currentMatchData.title || 'Match'}`;
             
             document.getElementById('gameIdName').value = '';
             document.getElementById('gameUid').value = '';
             document.getElementById('telegramUsername').value = '';
+            
+            // Update balance check text
+            const entryFee = parseInt(currentMatchData.entryFee || 0);
+            const balanceCheckText = document.getElementById('balanceCheckText');
+            if (userBalance >= entryFee) {
+                balanceCheckText.innerHTML = `<span style="color: #22c55e;">✓ Balance: ৳${userBalance}<br>Entry Fee: ৳${entryFee}<br>After purchase: ৳${userBalance - entryFee}</span>`;
+                document.getElementById('joinSubmitBtn').disabled = false;
+            } else {
+                balanceCheckText.innerHTML = `<span style="color: #ef4444;">✗ Insufficient Balance!<br>Your Balance: ৳${userBalance}<br>Required: ৳${entryFee}<br>Need: ৳${entryFee - userBalance} more</span>`;
+                document.getElementById('joinSubmitBtn').disabled = true;
+            }
         });
     }
 
-    // Submit Game Details
-    function submitGameDetails() {
+    // Check Balance and Submit
+    function checkBalanceAndSubmit() {
         const gameIdName = document.getElementById('gameIdName').value.trim();
         const gameUid = document.getElementById('gameUid').value.trim();
         const telegramUsername = document.getElementById('telegramUsername').value.trim();
@@ -1587,7 +1609,35 @@
         
         const entryFee = parseInt(currentMatchData.entryFee || 0);
         
-        // NO BALANCE DEDUCTION - Just proceed with joining
+        // Check balance again
+        if (userBalance < entryFee) {
+            alert(`Insufficient balance! Entry fee is ৳${entryFee}\nYour balance: ৳${userBalance}\nPlease add money first.`);
+            return;
+        }
+        
+        // Deduct balance
+        const newBalance = userBalance - entryFee;
+        db.ref('users/' + userId + '/balance').set(newBalance);
+        
+        userBalance = newBalance;
+        document.getElementById('balanceVal').textContent = userBalance;
+        
+        // Record the purchase transaction
+        const purchaseTransaction = {
+            type: 'tournament_entry',
+            method: 'balance_deduction',
+            amount: entryFee,
+            status: 'approved',
+            date: new Date().toLocaleString(),
+            info: `Entry fee for: ${currentMatchData.title || 'Match'}`,
+            timestamp: Date.now(),
+            matchId: currentMatchId,
+            matchTitle: currentMatchData.title
+        };
+        
+        db.ref('users/' + userId + '/history').push(purchaseTransaction);
+        
+        // Add player to match
         const playerData = {
             userId: userId,
             userEmail: currentUser?.email || 'Unknown',
@@ -1601,11 +1651,13 @@
             matchTitle: currentMatchData.title || 'Match',
             status: 'joined',
             gameDetailsSubmitted: true,
-            paymentStatus: 'free_entry' // Add this field to indicate free entry
+            paymentStatus: 'paid',
+            paymentTime: new Date().toISOString()
         };
         
         const joinRef = db.ref('matchJoins/' + currentMatchId).push(playerData);
         
+        // Update player count
         const newPlayerCount = (currentMatchData.currentPlayers || 0) + 1;
         db.ref('matches/' + currentGameMode + '/' + currentMatchId + '/currentPlayers').set(newPlayerCount);
         
@@ -1614,6 +1666,7 @@
             allMatchesData[currentGameMode][matchIndex].currentPlayers = newPlayerCount;
         }
         
+        // Add to purchased matches
         const purchaseData = {
             matchId: currentMatchId,
             purchaseTime: new Date().toISOString(),
@@ -1624,7 +1677,8 @@
             matchTime: currentMatchData.time,
             joinId: joinRef.key,
             gameDetailsSubmitted: true,
-            paymentStatus: 'free_entry'
+            paymentStatus: 'paid',
+            telegramLink: currentMatchData.telegramLink || ''
         };
         
         db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
@@ -1633,14 +1687,15 @@
         
         document.getElementById('joinMatchModal').classList.add('hidden');
         
+        // Show success message and open Telegram link if available
         if (currentMatchData.telegramLink && currentMatchData.telegramLink.trim() !== '') {
             setTimeout(() => {
-                alert(`Successfully joined! Opening Telegram group...\n\nMatch joined successfully with free entry.`);
+                alert(`Successfully joined!\n\n৳${entryFee} has been deducted from your balance.\n\nOpening Telegram group...`);
                 window.open(currentMatchData.telegramLink, '_blank');
             }, 300);
         } else {
             setTimeout(() => {
-                alert(`Successfully joined!\n\nMatch joined successfully with free entry.\n\nAdmin will share Telegram link soon.`);
+                alert(`Successfully joined!\n\n৳${entryFee} has been deducted from your balance.\n\nAdmin will share Telegram link soon.`);
             }, 300);
         }
         
@@ -1649,90 +1704,35 @@
         }, 1000);
     }
 
-    // Show Match Details - Updated to open details link
+    // Open Telegram Link for already purchased match
+    function openTelegramLink(matchId) {
+        const matches = allMatchesData[currentGameMode] || [];
+        const match = matches.find(m => m.id === matchId);
+        
+        if (match && match.telegramLink && match.telegramLink.trim() !== '') {
+            window.open(match.telegramLink, '_blank');
+        } else {
+            alert('Telegram link not available yet. Admin will share it soon.');
+        }
+    }
+
+    // Close Join Modal
+    function closeJoinModal() {
+        document.getElementById('joinMatchModal').classList.add('hidden');
+    }
+
+    // Show Match Details
     function showMatchDetails(matchId) {
         const matches = allMatchesData[currentGameMode] || [];
         const match = matches.find(m => m.id === matchId);
         
         if (match) {
-            // Check if there's a details link in Firebase
             if (match.detailsLink && match.detailsLink.trim() !== '') {
-                // Open the details link directly
                 window.open(match.detailsLink, '_blank');
             } else {
-                // Fallback to showing basic info if no link
                 const formattedTime = formatTimeTo12Hour(match.time);
                 alert(`Match: ${match.title}\nMap: ${match.map}\nTime: ${formattedTime}\nPrize: ৳${match.totalPrize}\nEntry Fee: ৳${match.entryFee}\nPlayers: ${match.currentPlayers || 0}/${match.maxPlayers || 100}`);
             }
-        }
-    }
-
-    // Purchase Match - UPDATED VERSION (No money deduction)
-    function purchaseMatch(matchId) {
-        if (!userId) {
-            alert('Please login first');
-            return;
-        }
-        
-        const matches = allMatchesData[currentGameMode] || [];
-        const match = matches.find(m => m.id === matchId);
-        
-        if (!match) {
-            alert('Match not found!');
-            return;
-        }
-        
-        const fee = parseInt(match.entryFee || 0);
-        
-        const isFull = (match.currentPlayers || 0) >= (match.maxPlayers || 100);
-        if (isFull) {
-            alert('This match is already full!');
-            return;
-        }
-        
-        if (confirm(`Join this match for free? (Entry fee: ৳${fee})\n\nNo money will be deducted from your balance.`)) {
-            // NO BALANCE DEDUCTION - Just mark as purchased
-            const newPlayerCount = (match.currentPlayers || 0) + 1;
-            db.ref('matches/' + currentGameMode + '/' + matchId + '/currentPlayers').set(newPlayerCount);
-            
-            const matchIndex = matches.findIndex(m => m.id === matchId);
-            if (matchIndex !== -1) {
-                allMatchesData[currentGameMode][matchIndex].currentPlayers = newPlayerCount;
-            }
-            
-            const purchaseData = {
-                matchId: matchId, 
-                purchaseTime: new Date().toISOString(),
-                matchTitle: match.title || 'Match',
-                entryFee: fee,
-                gameMode: currentGameMode,
-                matchDate: match.date,
-                matchTime: match.time,
-                paymentStatus: 'free_entry' // Add this field to indicate free entry
-            };
-            
-            db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
-            
-            userPurchasedMatches.push(matchId);
-            
-            const joinData = {
-                userId: userId,
-                userEmail: currentUser?.email || 'Unknown',
-                joinTime: new Date().toISOString(),
-                matchId: matchId,
-                gameMode: currentGameMode,
-                entryFee: fee,
-                status: 'purchased',
-                paymentStatus: 'free_entry'
-            };
-            
-            db.ref('matchJoins/' + matchId).push(joinData);
-            
-            alert('Successfully purchased the match! You can now join by clicking "ENTER MATCH LINK"');
-            
-            setTimeout(() => {
-                displayMatchesForCurrentMode();
-            }, 500);
         }
     }
 
