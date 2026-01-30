@@ -950,7 +950,7 @@
 </div>
 
 <script>
-    // Firebase Configuration
+    // Firebase Configuration - FIXED VERSION
     const firebaseConfig = {
         apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
         authDomain: "top-up-4db01.firebaseapp.com",
@@ -961,19 +961,19 @@
     };
 
     // Initialize Firebase
+    let db, auth;
     try {
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
             console.log("Firebase initialized successfully");
         }
+        db = firebase.database();
+        auth = firebase.auth();
     } catch (error) {
         console.error("Firebase initialization error:", error);
         document.getElementById('errorMessage').textContent = "Firebase configuration error. Please contact admin.";
         document.getElementById('errorMessage').style.display = 'block';
     }
-    
-    const db = firebase.database();
-    const auth = firebase.auth();
     
     let currentMode = 'add', currentMethod = 'bkash', currentGameMode = 'solo';
     let userId = null, userBalance = 0, userPurchasedMatches = [];
@@ -1042,7 +1042,7 @@
         });
     }
 
-    // Auth State Observer - FIXED VERSION
+    // Auth State Observer - SIMPLIFIED VERSION
     auth.onAuthStateChanged((user) => {
         console.log('Auth state changed. User:', user ? user.email : 'No user');
         if (user) {
@@ -1127,7 +1127,7 @@
         }
     }
 
-    // Google Sign In - FIXED VERSION
+    // Google Sign In - WORKING VERSION
     function signInWithGoogle() {
         console.log('Starting Google sign in...');
         showLoading(true);
@@ -1140,50 +1140,61 @@
         provider.addScope('email');
         provider.addScope('profile');
         
-        // Use redirect instead of popup for better mobile compatibility
-        auth.signInWithRedirect(provider)
-            .then(() => {
-                console.log('Redirect to Google sign in successful');
+        // Try popup first, if fails try redirect
+        auth.signInWithPopup(provider)
+            .then((result) => {
+                console.log('Google sign in successful:', result.user.email);
+                const user = result.user;
+                initializeUserInDatabase(user.uid, user.email);
             })
             .catch((error) => {
-                showLoading(false);
-                const errorMessage = getErrorMessage(error.code);
-                showError(errorMessage);
-                console.error('Login error:', error.code, error.message);
+                console.log('Popup failed, trying redirect...', error.code);
+                
+                // If popup fails, try redirect
+                auth.signInWithRedirect(provider)
+                    .then(() => {
+                        console.log('Redirect initiated');
+                    })
+                    .catch((redirectError) => {
+                        showLoading(false);
+                        console.error('Both popup and redirect failed:', redirectError);
+                        
+                        // Show user-friendly error message
+                        let errorMessage = 'Login failed. ';
+                        if (redirectError.code === 'auth/popup-blocked') {
+                            errorMessage += 'Popup was blocked. Please allow popups or try again.';
+                        } else if (redirectError.code === 'auth/unauthorized-domain') {
+                            errorMessage += 'Domain not authorized. Please contact admin.';
+                        } else {
+                            errorMessage += 'Please try again.';
+                        }
+                        showError(errorMessage);
+                    });
             });
-    }
-
-    // Get user-friendly error messages
-    function getErrorMessage(errorCode) {
-        switch(errorCode) {
-            case 'auth/popup-blocked':
-                return 'Popup was blocked by browser. Please allow popups for this site.';
-            case 'auth/popup-closed-by-user':
-                return 'Login popup was closed. Please try again.';
-            case 'auth/cancelled-popup-request':
-                return 'Login cancelled. Please try again.';
-            case 'auth/network-request-failed':
-                return 'Network error. Please check your internet connection.';
-            case 'auth/unauthorized-domain':
-                return 'This domain is not authorized for Firebase Authentication.';
-            default:
-                return 'Login failed. Please try again.';
-        }
     }
 
     // Check for redirect result when page loads
     function checkRedirectResult() {
+        console.log('Checking redirect result...');
         auth.getRedirectResult()
             .then((result) => {
                 if (result.user) {
                     console.log('Redirect sign in successful:', result.user.email);
                     const user = result.user;
                     initializeUserInDatabase(user.uid, user.email);
+                } else {
+                    console.log('No redirect result found');
+                    showLoading(false);
                 }
             })
             .catch((error) => {
                 console.error('Redirect result error:', error);
                 showLoading(false);
+                
+                // Don't show error for cancelled popup
+                if (error.code !== 'auth/popup-closed-by-user') {
+                    showError('Login error. Please try again.');
+                }
             });
     }
 
@@ -1200,12 +1211,16 @@
                     lastLogin: new Date().toISOString()
                 }).then(() => {
                     console.log('New user created in database');
+                }).catch(error => {
+                    console.error('Error creating user in database:', error);
                 });
             } else {
                 userRef.update({
                     lastLogin: new Date().toISOString()
                 }).then(() => {
                     console.log('User last login updated');
+                }).catch(error => {
+                    console.error('Error updating user last login:', error);
                 });
             }
         }).catch((error) => {
@@ -1951,11 +1966,13 @@
         // Check for redirect result first
         checkRedirectResult();
         
-        // Also check current auth state
+        // Also check current auth state after a delay
         setTimeout(() => {
             const currentUser = auth.currentUser;
             if (currentUser) {
                 console.log('User already logged in:', currentUser.email);
+                showMainApp();
+                initializeUserData();
             } else {
                 console.log('No user logged in');
                 showLoading(false);
