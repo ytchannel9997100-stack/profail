@@ -1450,19 +1450,30 @@
             let statusText = status.toUpperCase();
             let statusClass = '';
             
-            // TOURNAMENT ENTRY (লাল)
-            if (typeLower.includes('tournament_entry') || 
-                typeLower.includes('entry') ||
-                infoLower.includes('entry fee') ||
-                infoLower.includes('tournament entry') ||
-                (amount < 0 && (infoLower.includes('tournament') || infoLower.includes('match'))) ||
-                methodLower.includes('balance_deduction')) {
+            // ADD MONEY - TOURNAMENT (BONUS) - সবুজ
+            if ((typeLower.includes('add') && infoLower.includes('tournament')) ||
+                (typeLower.includes('add') && infoLower.includes('bonus')) ||
+                (typeLower.includes('bonus') && methodLower.includes('tournament')) ||
+                (infoLower.includes('tournament') && infoLower.includes('bonus'))) {
                 
-                transactionTypeText = "TOURNAMENT_ENTRY";
-                if (method) {
+                transactionTypeText = "ADD MONEY - TOURNAMENT";
+                if (method && !methodLower.includes('tournament')) {
                     transactionTypeText += " - " + method.toUpperCase();
                 }
                 
+                amountColor = 'add-color';
+                sign = '+';
+                statusText = 'BONUS';
+                statusClass = 'approved';
+            }
+            // TOURNAMENT_ENTRY (লাল)
+            else if (typeLower.includes('tournament_entry') || 
+                     typeLower.includes('entry') ||
+                     infoLower.includes('entry fee') ||
+                     infoLower.includes('tournament entry') ||
+                     methodLower.includes('balance_deduction')) {
+                
+                transactionTypeText = "TOURNAMENT_ENTRY - BALANCE_DEDUCTION";
                 amountColor = 'withdraw-color';
                 sign = '-';
                 statusText = 'PURCHASE';
@@ -1477,8 +1488,7 @@
                      infoLower.includes('tournament prize') ||
                      infoLower.includes('tournament bonus') ||
                      infoLower.includes('won tournament') ||
-                     infoLower.includes('tournament reward') ||
-                     infoLower.includes('tournament payment')) {
+                     infoLower.includes('tournament reward')) {
                 
                 transactionTypeText = "TOURNAMENT BONUS";
                 if (method) {
