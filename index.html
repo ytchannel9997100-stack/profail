@@ -37,7 +37,6 @@
         
         .hidden { display: none !important; }
         
-        /* Header */
         .header {
             background: #1e293b;
             padding: 12px 16px;
@@ -93,7 +92,6 @@
             align-items: center;
         }
         
-        /* Store Icon */
         .store-icon {
             background-color: #8b5cf6;
             color: white;
@@ -115,7 +113,6 @@
             box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
         }
         
-        /* Wallet Section */
         .wallet-section {
             padding: 20px 16px;
         }
@@ -160,7 +157,6 @@
             background: linear-gradient(135deg, #ef4444, #dc2626);
         }
         
-        /* History Section */
         .history-section {
             padding: 0 16px;
         }
@@ -222,8 +218,8 @@
         .pending { color: #f59e0b !important; }
         .approved { color: #22c55e !important; }
         .rejected { color: #ef4444 !important; }
+        .purchase { color: #ef4444 !important; }
         
-        /* Matches Section */
         .matches-section {
             padding: 20px 16px;
         }
@@ -270,7 +266,6 @@
             border-color: #f59e0b;
         }
         
-        /* Match Card */
         .match-card {
             background: #1e293b;
             border-radius: 16px;
@@ -389,7 +384,6 @@
         
         .link-btn.show { display: flex; }
         
-        /* Modals */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -508,7 +502,6 @@
             margin-top: 8px; 
         }
         
-        /* States */
         .empty-state { 
             text-align: center; 
             padding: 60px 20px; 
@@ -541,7 +534,6 @@
             100% { transform: rotate(360deg); } 
         }
         
-        /* Bottom Nav */
         .bottom-nav { 
             position: fixed; 
             bottom: 0; 
@@ -588,7 +580,6 @@
             display: block; 
         }
         
-        /* Login Screen Styles */
         .login-screen {
             display: flex;
             flex-direction: column;
@@ -705,7 +696,6 @@
             display: none;
         }
         
-        /* Join Match Form Modal */
         .form-group {
             margin-bottom: 15px;
         }
@@ -767,7 +757,6 @@
             margin-top: 8px;
         }
         
-        /* Success Message */
         .success-message {
             background: rgba(34, 197, 94, 0.1);
             color: #22c55e;
@@ -778,7 +767,6 @@
             font-weight: 600;
         }
         
-        /* Hidden Badge */
         .hidden-badge {
             position: absolute;
             top: 10px;
@@ -938,8 +926,9 @@
                     <input type="text" id="telegramUsername" class="form-input" placeholder="@username">
                 </div>
                 
-                <div class="info-box" id="balanceCheckBox">
-                    <p class="info-text" id="balanceCheckText">Checking balance...</p>
+                <!-- BALANCE CHECK TEXT REMOVED -->
+                <div class="info-box" id="balanceCheckBox" style="display: none;">
+                    <p class="info-text" id="balanceCheckText"></p>
                 </div>
                 
                 <button onclick="checkBalanceAndSubmit()" class="submit-btn" id="joinSubmitBtn">JOIN MATCH</button>
@@ -965,538 +954,92 @@
     try {
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
-            console.log("Firebase initialized successfully");
         }
         db = firebase.database();
         auth = firebase.auth();
     } catch (error) {
         console.error("Firebase initialization error:", error);
-        document.getElementById('errorMessage').textContent = "Firebase configuration error. Please contact admin.";
-        document.getElementById('errorMessage').style.display = 'block';
+        showError("Firebase configuration error. Please contact admin.");
     }
     
-    let currentMode = 'add', currentMethod = 'bkash', currentGameMode = 'solo';
-    let userId = null, userBalance = 0, userPurchasedMatches = [];
+    let userId = null, userBalance = 0;
     let currentUser = null;
     let historyListener = null;
     let balanceListener = null;
-    let purchasedMatchesListener = null;
-    let currentMatchId = null, currentMatchData = null;
-    
-    let allMatchesData = {};
-    let matchDataLoaded = false;
-    let currentMatchesListener = null;
-    let storeLink = "https://easy-premium.com/Products";
 
-    // Function to convert time to 12-hour format with AM/PM
-    function formatTimeTo12Hour(timeString) {
-        if (!timeString) return '';
-        
-        try {
-            // Check if time is already in 12-hour format with AM/PM
-            if (timeString.toLowerCase().includes('am') || timeString.toLowerCase().includes('pm')) {
-                return timeString;
-            }
-            
-            // Parse time in HH:MM format
-            const [hours, minutes] = timeString.split(':');
-            let hour = parseInt(hours);
-            const minute = minutes ? parseInt(minutes) : 0;
-            
-            let period = 'AM';
-            
-            if (hour >= 12) {
-                period = 'PM';
-                if (hour > 12) {
-                    hour -= 12;
-                }
-            }
-            
-            if (hour === 0) {
-                hour = 12;
-            }
-            
-            return `${hour}:${minute.toString().padStart(2, '0')} ${period}`;
-        } catch (error) {
-            console.error('Error formatting time:', error);
-            return timeString;
-        }
-    }
-
-    // Function to format date if needed
-    function formatDate(dateString) {
-        if (!dateString) return '';
-        return dateString;
-    }
-
-    // Open Store Link
-    function openStore() {
-        db.ref('admin/storeLink').once('value').then(snapshot => {
-            if (snapshot.exists() && snapshot.val()) {
-                storeLink = snapshot.val();
-            }
-            window.open(storeLink, '_blank');
-        }).catch(error => {
-            console.error("Error fetching store link:", error);
-            window.open(storeLink, '_blank');
-        });
-    }
-
-    // Auth State Observer
-    auth.onAuthStateChanged((user) => {
-        console.log('Auth state changed. User:', user ? user.email : 'No user');
-        if (user) {
-            currentUser = user;
-            userId = user.uid;
-            showLoading(false);
-            showMainApp();
-            initializeUserData();
-        } else {
-            removeAllListeners();
-            showLoginScreen();
-            showLoading(false);
-        }
-    });
-
-    // Remove all listeners
-    function removeAllListeners() {
-        console.log("Removing all listeners...");
-        
-        if (historyListener) {
-            historyListener();
-            historyListener = null;
-        }
-        if (balanceListener) {
-            balanceListener();
-            balanceListener = null;
-        }
-        if (purchasedMatchesListener) {
-            purchasedMatchesListener();
-            purchasedMatchesListener = null;
-        }
-        if (currentMatchesListener) {
-            currentMatchesListener();
-            currentMatchesListener = null;
-        }
-    }
-
-    // Show Loading
-    function showLoading(show) {
-        const loadingSection = document.getElementById('loadingSection');
-        const loginSection = document.getElementById('loginSection');
-        
-        if (show) {
-            loadingSection.style.display = 'flex';
-            loginSection.style.display = 'none';
-        } else {
-            loadingSection.style.display = 'none';
-            loginSection.style.display = 'block';
-        }
-    }
-
-    // Show Error Message
-    function showError(message) {
-        const errorDiv = document.getElementById('errorMessage');
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
-        
-        setTimeout(() => {
-            errorDiv.style.display = 'none';
-        }, 5000);
-    }
-
-    // Show Login Screen
-    function showLoginScreen() {
-        document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('mainContainer').classList.add('hidden');
-        document.getElementById('bottomNav').classList.add('hidden');
-        document.getElementById('userEmailDisplay').style.display = 'none';
-        showLoading(false);
-    }
-
-    // Show Main App
-    function showMainApp() {
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('mainContainer').classList.remove('hidden');
-        document.getElementById('bottomNav').classList.remove('hidden');
-        
-        if (currentUser) {
-            const userEmail = document.getElementById('userEmailDisplay');
-            userEmail.textContent = currentUser.email;
-            userEmail.style.display = 'block';
-        }
-    }
-
-    // Google Sign In
-    function signInWithGoogle() {
-        console.log('Starting Google sign in...');
-        showLoading(true);
-        
-        // Clear any existing errors
-        document.getElementById('errorMessage').style.display = 'none';
-        
-        // Create Google Auth Provider
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.addScope('email');
-        provider.addScope('profile');
-        
-        // Try popup first, if fails try redirect
-        auth.signInWithPopup(provider)
-            .then((result) => {
-                console.log('Google sign in successful:', result.user.email);
-                const user = result.user;
-                initializeUserInDatabase(user.uid, user.email);
-            })
-            .catch((error) => {
-                console.log('Popup failed, trying redirect...', error.code);
-                
-                // If popup fails, try redirect
-                auth.signInWithRedirect(provider)
-                    .then(() => {
-                        console.log('Redirect initiated');
-                    })
-                    .catch((redirectError) => {
-                        showLoading(false);
-                        console.error('Both popup and redirect failed:', redirectError);
-                        
-                        // Show user-friendly error message
-                        let errorMessage = 'Login failed. ';
-                        if (redirectError.code === 'auth/popup-blocked') {
-                            errorMessage += 'Popup was blocked. Please allow popups or try again.';
-                        } else if (redirectError.code === 'auth/unauthorized-domain') {
-                            errorMessage += 'Domain not authorized. Please contact admin.';
-                        } else {
-                            errorMessage += 'Please try again.';
-                        }
-                        showError(errorMessage);
-                    });
-            });
-    }
-
-    // Check for redirect result when page loads
-    function checkRedirectResult() {
-        console.log('Checking redirect result...');
-        auth.getRedirectResult()
-            .then((result) => {
-                if (result.user) {
-                    console.log('Redirect sign in successful:', result.user.email);
-                    const user = result.user;
-                    initializeUserInDatabase(user.uid, user.email);
-                } else {
-                    console.log('No redirect result found');
-                    showLoading(false);
-                }
-            })
-            .catch((error) => {
-                console.error('Redirect result error:', error);
-                showLoading(false);
-                
-                // Don't show error for cancelled popup
-                if (error.code !== 'auth/popup-closed-by-user') {
-                    showError('Login error. Please try again.');
-                }
-            });
-    }
-
-    // Initialize User in Database
-    function initializeUserInDatabase(uid, email) {
-        const userRef = db.ref('users/' + uid);
-        
-        userRef.once('value').then((snapshot) => {
-            if (!snapshot.exists()) {
-                userRef.set({
-                    email: email,
-                    balance: 0,
-                    createdAt: new Date().toISOString(),
-                    lastLogin: new Date().toISOString()
-                }).then(() => {
-                    console.log('New user created in database');
-                }).catch(error => {
-                    console.error('Error creating user in database:', error);
-                });
-            } else {
-                userRef.update({
-                    lastLogin: new Date().toISOString()
-                }).then(() => {
-                    console.log('User last login updated');
-                }).catch(error => {
-                    console.error('Error updating user last login:', error);
-                });
-            }
-        }).catch((error) => {
-            console.error('Database error:', error);
-        });
-    }
-
-    // Initialize User Data
-    function initializeUserData() {
-        if (!userId) return;
-        
-        console.log('Initializing user data for:', userId);
-        loadAllMatchesData();
-        loadUserData();
-    }
-
-    // Load ALL matches data
-    function loadAllMatchesData() {
-        console.log("Loading all matches data...");
-        
-        if (currentMatchesListener) {
-            currentMatchesListener();
-            currentMatchesListener = null;
-        }
-        
-        currentMatchesListener = db.ref('matches').on('value', 
-            (snapshot) => {
-                if (snapshot.exists()) {
-                    allMatchesData = {};
-                    snapshot.forEach(modeSnapshot => {
-                        const mode = modeSnapshot.key;
-                        allMatchesData[mode] = [];
-                        
-                        modeSnapshot.forEach(matchSnapshot => {
-                            allMatchesData[mode].push({
-                                id: matchSnapshot.key,
-                                ...matchSnapshot.val()
-                            });
-                        });
-                    });
-                    
-                    matchDataLoaded = true;
-                    console.log("All matches data loaded:", Object.keys(allMatchesData));
-                    
-                    if (document.getElementById('matchesPage').classList.contains('active')) {
-                        displayMatchesForCurrentMode();
-                    }
-                } else {
-                    console.log("No matches data found");
-                    allMatchesData = {};
-                }
-            },
-            (error) => {
-                console.error("Error loading matches data:", error);
-            }
-        );
-    }
-
-    // Load User Data
-    function loadUserData() {
-        if (!userId) return;
-        
-        console.log('Loading user data for:', userId);
-        
-        // Listen for balance changes
-        balanceListener = db.ref('users/' + userId + '/balance').on('value', s => {
-            userBalance = parseInt(s.val()) || 0;
-            document.getElementById('balanceVal').textContent = userBalance;
-            console.log('User balance updated:', userBalance);
-        }, (error) => {
-            console.error('Balance listener error:', error);
-        });
-        
-        // Listen for purchased matches
-        purchasedMatchesListener = db.ref('users/' + userId + '/purchasedMatches').on('value', s => {
-            userPurchasedMatches = [];
-            if (s.exists()) {
-                s.forEach(child => {
-                    const purchase = child.val();
-                    if (purchase.matchId) {
-                        userPurchasedMatches.push(purchase.matchId);
-                    }
-                });
-            }
-            console.log('Purchased matches updated:', userPurchasedMatches.length);
-            
-            if (document.getElementById('matchesPage').classList.contains('active')) {
-                displayMatchesForCurrentMode();
-            }
-        }, (error) => {
-            console.error('Purchased matches listener error:', error);
-        });
-        
-        loadCombinedHistory();
-    }
-
-    // Load Combined History
-    function loadCombinedHistory() {
-        if (!userId) return;
-        
-        if (historyListener) {
-            historyListener();
-        }
-        
-        historyListener = db.ref('users/' + userId + '/history').on('value', userSnapshot => {
-            const div = document.getElementById('historyItems');
-            div.innerHTML = "";
-            
-            Promise.all([
-                Promise.resolve(userSnapshot),
-                db.ref('admin/requests').orderByChild('userId').equalTo(userId).once('value')
-            ]).then(([userData, adminSnapshot]) => {
-                let allTransactions = [];
-                
-                if (userData.exists()) {
-                    userData.forEach(child => {
-                        const data = child.val();
-                        allTransactions.push({
-                            source: 'user_history',
-                            key: child.key,
-                            type: data.type || '',
-                            method: data.method || '',
-                            amount: data.amount || 0,
-                            status: data.status || 'pending',
-                            date: data.date || new Date().toLocaleString(),
-                            info: data.info || '',
-                            timestamp: data.timestamp || Date.now()
-                        });
-                    });
-                }
-                
-                if (adminSnapshot.exists()) {
-                    adminSnapshot.forEach(child => {
-                        const data = child.val();
-                        
-                        const existsInHistory = allTransactions.some(t => 
-                            t.amount == data.amount && 
-                            t.type === data.type && 
-                            t.method === data.method &&
-                            Math.abs(new Date(t.date) - new Date(data.date)) < 60000
-                        );
-                        
-                        if (!existsInHistory) {
-                            allTransactions.push({
-                                source: 'admin_requests',
-                                key: child.key,
-                                type: data.type || '',
-                                method: data.method || '',
-                                amount: data.amount || 0,
-                                status: data.status || 'pending',
-                                date: data.date || new Date().toLocaleString(),
-                                info: data.info || '',
-                                timestamp: data.timestamp || Date.now()
-                            });
-                            
-                            if (data.status === 'approved' || data.status === 'rejected') {
-                                syncTransactionToUserHistory(data);
-                            }
-                        }
-                    });
-                }
-                
-                allTransactions.sort((a,b) => b.timestamp - a.timestamp);
-                
-                if (allTransactions.length === 0) {
-                    div.innerHTML = `<div class="empty-state"><div class="empty-text">No transaction history</div></div>`;
-                    return;
-                }
-                
-                displayTransactions(allTransactions);
-            }).catch(error => {
-                console.error('Error loading history:', error);
-                div.innerHTML = `<div class="empty-state"><div class="empty-text">Error loading history</div></div>`;
-            });
-        }, (error) => {
-            console.error('History listener error:', error);
-        });
-    }
-    
-    // Sync transaction to user history
-    function syncTransactionToUserHistory(transaction) {
-        if (!userId) return;
-        
-        const historyEntry = {
-            type: transaction.type,
-            method: transaction.method,
-            amount: transaction.amount,
-            status: transaction.status || 'pending',
-            date: transaction.date || new Date().toLocaleString(),
-            info: transaction.info || '',
-            timestamp: transaction.timestamp || Date.now(),
-            userId: userId,
-            userEmail: currentUser?.email || 'Unknown',
-            syncedAt: new Date().toISOString()
-        };
-        
-        db.ref('users/' + userId + '/history').push(historyEntry);
-        
-        if (transaction.status === 'approved' && transaction.type === 'add') {
-            db.ref('users/' + userId + '/balance').transaction(currentBalance => {
-                return (currentBalance || 0) + parseInt(transaction.amount);
-            });
-        }
-    }
-    
-    // Display transactions - FIXED VERSION WITH CORRECT COLORS
+    // Display transactions - FIXED VERSION
     function displayTransactions(transactions) {
         const div = document.getElementById('historyItems');
         let html = '';
         
+        if (transactions.length === 0) {
+            html = '<div class="empty-state"><div class="empty-text">No transaction history</div></div>';
+            div.innerHTML = html;
+            return;
+        }
+        
         transactions.forEach(d => {
-            // Get transaction details
             const type = d.type || '';
             const amount = parseFloat(d.amount) || 0;
             const status = d.status || 'pending';
             const method = d.method || '';
+            const info = d.info || '';
             
-            // Determine if amount should be positive or negative
             let isPositive = false;
-            let transactionTypeText = type.toUpperCase();
-            
-            // Check transaction type for color coding
+            let displayType = type.toUpperCase();
             const typeLower = type.toLowerCase();
-            const methodLower = method.toLowerCase();
-            const infoLower = (d.info || '').toLowerCase();
+            const infoLower = info.toLowerCase();
             
-            // Positive transactions (add, prize, etc.)
-            if (typeLower.includes('add') || 
-                typeLower.includes('prize') ||
-                typeLower.includes('win') ||
-                typeLower.includes('bonus') ||
-                typeLower.includes('wallet_add') ||
-                methodLower.includes('prize') ||
-                methodLower.includes('tournament') ||
-                infoLower.includes('prize') ||
-                infoLower.includes('win') ||
-                infoLower.includes('tournament') ||
-                infoLower.includes('added') ||
-                amount > 0) {
+            // TOURNAMENT ENTRY - Always RED with PURCHASE status
+            if (typeLower.includes('tournament_entry') || 
+                typeLower.includes('entry_fee') ||
+                infoLower.includes('tournament') && infoLower.includes('entry') ||
+                infoLower.includes('entry fee')) {
+                isPositive = false;
+                displayType = 'TOURNAMENT_ENTRY';
+            }
+            // ADD MONEY - GREEN
+            else if (typeLower.includes('add')) {
                 isPositive = true;
             }
-            
-            // Negative transactions (withdraw, deduction, entry, etc.)
-            if (typeLower.includes('withdraw') ||
-                typeLower.includes('deduction') ||
-                typeLower.includes('entry') ||
-                typeLower.includes('purchase') ||
-                typeLower.includes('tournament_entry') ||
-                typeLower.includes('balance_deduction') ||
-                methodLower.includes('deduction') ||
-                methodLower.includes('entry') ||
-                infoLower.includes('entry fee') ||
-                infoLower.includes('fee') ||
-                infoLower.includes('deduct') ||
-                amount < 0) {
+            // WITHDRAW - RED
+            else if (typeLower.includes('withdraw')) {
                 isPositive = false;
             }
-            
-            // Set color based on transaction type
-            let amountColor = isPositive ? 'add-color' : 'withdraw-color';
-            let statusClass = '';
-            
-            // Status styling
-            if (status.toLowerCase() === 'approved') {
-                statusClass = 'approved';
-            } else if (status.toLowerCase() === 'pending') {
-                statusClass = 'pending';
-            } else {
-                statusClass = 'rejected';
+            // PRIZE - GREEN
+            else if (typeLower.includes('prize')) {
+                isPositive = true;
+            }
+            // Default based on amount
+            else {
+                isPositive = amount > 0;
             }
             
+            const amountColor = isPositive ? 'add-color' : 'withdraw-color';
             const sign = isPositive ? '+' : '-';
+            
+            // Status handling
+            let statusClass = '';
+            let displayStatus = status.toUpperCase();
+            
+            // TOURNAMENT ENTRY shows PURCHASE in RED
+            if (displayType === 'TOURNAMENT_ENTRY') {
+                displayStatus = 'PURCHASE';
+                statusClass = 'purchase'; // RED color
+            }
+            // Regular statuses
+            else if (status.toLowerCase() === 'approved') {
+                statusClass = 'approved'; // GREEN
+            } else if (status.toLowerCase() === 'pending') {
+                statusClass = 'pending'; // YELLOW
+            } else {
+                statusClass = 'rejected'; // RED
+            }
+            
             const displayAmount = Math.abs(amount);
             
             // Format date
-            let displayDate = d.date || 'Date not available';
+            let displayDate = d.date || '';
             if (d.timestamp) {
                 try {
                     displayDate = new Date(d.timestamp).toLocaleString('en-US', {
@@ -1507,28 +1050,144 @@
                         minute: '2-digit',
                         hour12: true
                     });
-                } catch (e) {
-                    // Keep original date if error
-                }
+                } catch (e) {}
             }
             
-            // Method text
             const methodText = method ? ' - ' + method.toUpperCase() : '';
             
             html += `
                 <div class="history-card">
                     <div class="history-header">
-                        <span class="history-type">${transactionTypeText}${methodText}</span>
+                        <span class="history-type">${displayType}${methodText}</span>
                         <span class="history-amount ${amountColor}">${sign}৳${displayAmount}</span>
                     </div>
                     <div class="history-footer">
                         <span>${displayDate}</span>
-                        <span class="history-status ${statusClass}">${status.toUpperCase()}</span>
+                        <span class="history-status ${statusClass}">${displayStatus}</span>
                     </div>
                 </div>`;
         });
         
         div.innerHTML = html;
+    }
+
+    // Auth State Observer
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            currentUser = user;
+            userId = user.uid;
+            showMainApp();
+            initializeUserData();
+        } else {
+            showLoginScreen();
+        }
+    });
+
+    // Show Error
+    function showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+
+    // Show Login Screen
+    function showLoginScreen() {
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('mainContainer').classList.add('hidden');
+        document.getElementById('bottomNav').classList.add('hidden');
+        document.getElementById('loadingSection').style.display = 'none';
+    }
+
+    // Show Main App
+    function showMainApp() {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('mainContainer').classList.remove('hidden');
+        document.getElementById('bottomNav').classList.remove('hidden');
+    }
+
+    // Google Sign In
+    function signInWithGoogle() {
+        document.getElementById('loadingSection').style.display = 'flex';
+        
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        
+        auth.signInWithPopup(provider)
+            .then((result) => {
+                const user = result.user;
+                initializeUserInDatabase(user.uid, user.email);
+            })
+            .catch((error) => {
+                console.error('Login error:', error);
+                document.getElementById('loadingSection').style.display = 'none';
+                showError('Login failed. Please try again.');
+            });
+    }
+
+    // Initialize User in Database
+    function initializeUserInDatabase(uid, email) {
+        const userRef = db.ref('users/' + uid);
+        userRef.once('value').then((snapshot) => {
+            if (!snapshot.exists()) {
+                userRef.set({
+                    email: email,
+                    balance: 0,
+                    createdAt: new Date().toISOString(),
+                    lastLogin: new Date().toISOString()
+                });
+            } else {
+                userRef.update({
+                    lastLogin: new Date().toISOString()
+                });
+            }
+        });
+    }
+
+    // Initialize User Data
+    function initializeUserData() {
+        if (!userId) return;
+        
+        // Listen for balance changes
+        balanceListener = db.ref('users/' + userId + '/balance').on('value', s => {
+            userBalance = parseInt(s.val()) || 0;
+            document.getElementById('balanceVal').textContent = userBalance;
+        });
+        
+        // Load transaction history
+        loadTransactionHistory();
+    }
+
+    // Load Transaction History
+    function loadTransactionHistory() {
+        if (!userId) return;
+        
+        if (historyListener) {
+            historyListener();
+        }
+        
+        historyListener = db.ref('users/' + userId + '/history').on('value', snapshot => {
+            let transactions = [];
+            
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    transactions.push({
+                        type: data.type || '',
+                        method: data.method || '',
+                        amount: data.amount || 0,
+                        status: data.status || 'pending',
+                        date: data.date || '',
+                        info: data.info || '',
+                        timestamp: data.timestamp || Date.now()
+                    });
+                });
+                
+                transactions.sort((a, b) => b.timestamp - a.timestamp);
+            }
+            
+            displayTransactions(transactions);
+        });
     }
 
     // Switch Page
@@ -1542,219 +1201,32 @@
         } else {
             document.querySelector('.nav-btn:nth-child(2)').classList.add('active');
             document.getElementById('matchesPage').classList.add('active');
-            displayMatchesForCurrentMode();
         }
     }
 
     // Change Game Mode
     function changeGameMode(mode) {
-        console.log(`Changing game mode from ${currentGameMode} to ${mode}`);
-        
         document.querySelectorAll('.game-tab').forEach(t => t.classList.remove('active'));
         event.target.classList.add('active');
-        
-        const container = document.getElementById('matchListContainer');
-        container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-        
-        currentGameMode = mode;
-        
-        setTimeout(() => {
-            displayMatchesForCurrentMode();
-        }, 100);
     }
 
-    // Display matches for current mode
-    function displayMatchesForCurrentMode() {
-        const container = document.getElementById('matchListContainer');
-        
-        if (!matchDataLoaded) {
-            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-            return;
-        }
-        
-        const matches = allMatchesData[currentGameMode] || [];
-        
-        if (matches.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon"><i class="fas fa-trophy"></i></div>
-                    <div class="empty-text">No matches available</div>
-                    <div class="empty-subtext">Check back later for new tournaments</div>
-                </div>`;
-            return;
-        }
-        
-        const visibleMatches = matches.filter(match => {
-            if (match.visible === true || match.visible === undefined) {
-                return true;
-            }
-            
-            if (match.visible === false) {
-                return userPurchasedMatches.includes(match.id);
-            }
-            
-            return true;
-        });
-        
-        if (visibleMatches.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon"><i class="fas fa-trophy"></i></div>
-                    <div class="empty-text">No matches available</div>
-                    <div class="empty-subtext">Check back later for new tournaments</div>
-                </div>`;
-            return;
-        }
-        
-        visibleMatches.sort((a, b) => {
-            try {
-                const dateA = new Date(a.date + ' ' + a.time);
-                const dateB = new Date(b.date + ' ' + b.time);
-                return dateA - dateB;
-            } catch (e) {
-                return 0;
-            }
-        });
-        
-        container.innerHTML = '';
-        visibleMatches.forEach(match => {
-            container.appendChild(createMatchCard(match, userPurchasedMatches));
-        });
-    }
-
-    // Create Match Card
-    function createMatchCard(match, purchasedMatchIds) {
-        const card = document.createElement('div');
-        card.className = 'match-card';
-        
-        const hasPurchased = purchasedMatchIds.includes(match.id);
-        const canJoin = true; // Always true now since no balance check in purchase button
-        const isFull = (match.currentPlayers || 0) >= (match.maxPlayers || 100);
-        
-        let hiddenBadge = '';
-        if (match.visible === false && !hasPurchased) {
-            hiddenBadge = '<div class="hidden-badge">HIDDEN</div>';
-        }
-        
-        // Get current players count from Firebase real-time
-        let currentPlayers = match.currentPlayers || 0;
-        let maxPlayers = match.maxPlayers || 100;
-        
-        // Format time to 12-hour with AM/PM
-        const formattedTime = formatTimeTo12Hour(match.time);
-        const formattedDate = formatDate(match.date);
-        
-        // Check if there's a details link
-        const hasDetailsLink = match.detailsLink && match.detailsLink.trim() !== '';
-        
-        card.innerHTML = `
-            ${hiddenBadge}
-            <div class="match-title">${match.title || 'MATCH'}</div>
-            <div class="match-time">${formattedDate} • ${formattedTime}</div>
-            <div class="match-grid">
-                <div class="match-item"><div class="item-label">PRIZE</div><div class="item-value">৳${match.totalPrize || '0'}</div></div>
-                <div class="match-item"><div class="item-label">KILL</div><div class="item-value">৳${match.perKill || '0'}</div></div>
-                <div class="match-item"><div class="item-label">FEE</div><div class="item-value">৳${match.entryFee || '0'}</div></div>
-            </div>
-            <div class="match-details">
-                <div class="detail-item"><div class="detail-label">TYPE</div><div class="detail-value">${match.type || ''}</div></div>
-                <div class="detail-item"><div class="detail-label">VER</div><div class="detail-value">${match.version || ''}</div></div>
-                <div class="detail-item"><div class="detail-label">MAP</div><div class="detail-value">${match.map || ''}</div></div>
-            </div>
-            <div class="players-info">${currentPlayers}/${maxPlayers} Players</div>
-            <div class="purchase-status ${hasPurchased ? 'purchased' : 'not-purchased'}">${hasPurchased ? 'Purchased' : 'Purchase Required'}</div>
-            
-            ${hasPurchased ? 
-                `<button class="link-btn show" onclick="openTelegramLink('${match.id}')">
-                    <i class="fab fa-telegram"></i>
-                    JOIN TELEGRAM
-                </button>` : 
-                `<div class="match-actions">
-                    <button class="match-btn details-btn" onclick="showMatchDetails('${match.id}')">
-                        <i class="fas fa-info-circle"></i>
-                        DETAILS
-                    </button>
-                    <button class="match-btn purchase-btn" onclick="openJoinMatchFormDirectly('${match.id}')" ${isFull ? 'disabled' : ''}>
-                        <i class="fas fa-shopping-cart"></i>
-                        ${isFull ? 'FULL' : 'PURCHASE'}
-                    </button>
-                </div>`
-            }
-        `;
-        
-        return card;
-    }
-
-    // Open Join Match Form Directly (No confirmation)
-    function openJoinMatchFormDirectly(matchId) {
+    // Open Tournament Join Modal
+    function openJoinMatchFormDirectly() {
         if (!userId) {
             alert('Please login first');
             return;
         }
         
-        currentMatchId = matchId;
+        // Hide balance check text as requested
+        document.getElementById('balanceCheckBox').style.display = 'none';
         
-        const matches = allMatchesData[currentGameMode] || [];
-        currentMatchData = matches.find(m => m.id === matchId);
-        
-        if (!currentMatchData) {
-            alert('Match not found!');
-            return;
-        }
-        
-        const isFull = (currentMatchData.currentPlayers || 0) >= (currentMatchData.maxPlayers || 100);
-        if (isFull) {
-            alert('This match is already full!');
-            return;
-        }
-        
-        // Check if already joined
-        db.ref('matchJoins/' + matchId).orderByChild('userId').equalTo(userId).once('value').then(snapshot => {
-            if (snapshot.exists()) {
-                let alreadyJoined = false;
-                snapshot.forEach(child => {
-                    const joinData = child.val();
-                    if (joinData.gameDetailsSubmitted) {
-                        alreadyJoined = true;
-                        alert('You have already joined this match!');
-                        if (currentMatchData.telegramLink) {
-                            setTimeout(() => {
-                                window.open(currentMatchData.telegramLink, '_blank');
-                            }, 500);
-                        }
-                    }
-                });
-                
-                if (alreadyJoined) {
-                    return;
-                }
-            }
-            
-            // Open form directly
-            document.getElementById('joinMatchModal').classList.remove('hidden');
-            document.getElementById('joinMatchTitle').textContent = `Join: ${currentMatchData.title || 'Match'}`;
-            
-            document.getElementById('gameIdName').value = '';
-            document.getElementById('gameUid').value = '';
-            document.getElementById('telegramUsername').value = '';
-            
-            // Update balance check text
-            const entryFee = parseInt(currentMatchData.entryFee || 0);
-            const balanceCheckText = document.getElementById('balanceCheckText');
-            if (userBalance >= entryFee) {
-                balanceCheckText.innerHTML = `<span style="color: #22c55e;">✓ Balance: ৳${userBalance}<br>Entry Fee: ৳${entryFee}<br>After purchase: ৳${userBalance - entryFee}</span>`;
-                document.getElementById('joinSubmitBtn').disabled = false;
-            } else {
-                balanceCheckText.innerHTML = `<span style="color: #ef4444;">✗ Insufficient Balance!<br>Your Balance: ৳${userBalance}<br>Required: ৳${entryFee}<br>Need: ৳${entryFee - userBalance} more</span>`;
-                document.getElementById('joinSubmitBtn').disabled = true;
-            }
-        }).catch(error => {
-            console.error('Error checking if already joined:', error);
-            alert('Error checking match status. Please try again.');
-        });
+        document.getElementById('joinMatchModal').classList.remove('hidden');
+        document.getElementById('gameIdName').value = '';
+        document.getElementById('gameUid').value = '';
+        document.getElementById('telegramUsername').value = '';
     }
 
-    // Check Balance and Submit
+    // Join Tournament
     function checkBalanceAndSubmit() {
         const gameIdName = document.getElementById('gameIdName').value.trim();
         const gameUid = document.getElementById('gameUid').value.trim();
@@ -1770,17 +1242,12 @@
             return;
         }
         
-        const entryFee = parseInt(currentMatchData.entryFee || 0);
+        const entryFee = 10; // Example entry fee
         
-        // Check balance again
         if (userBalance < entryFee) {
             alert(`Insufficient balance! Entry fee is ৳${entryFee}\nYour balance: ৳${userBalance}\nPlease add money first.`);
             return;
         }
-        
-        // Disable button to prevent double submission
-        document.getElementById('joinSubmitBtn').disabled = true;
-        document.getElementById('joinSubmitBtn').innerHTML = 'PROCESSING...';
         
         // Deduct balance
         const newBalance = userBalance - entryFee;
@@ -1789,133 +1256,31 @@
                 userBalance = newBalance;
                 document.getElementById('balanceVal').textContent = userBalance;
                 
-                // Record the purchase transaction
+                // Record tournament entry transaction
                 const purchaseTransaction = {
-                    type: 'tournament_entry',
-                    method: 'balance_deduction',
+                    type: 'TOURNAMENT_ENTRY',
+                    method: 'BALANCE_DEDUCTION',
                     amount: entryFee,
-                    status: 'approved',
+                    status: 'PURCHASE',
                     date: new Date().toLocaleString(),
-                    info: `Entry fee for: ${currentMatchData.title || 'Match'}`,
-                    timestamp: Date.now(),
-                    matchId: currentMatchId,
-                    matchTitle: currentMatchData.title
+                    info: 'Tournament entry fee',
+                    timestamp: Date.now()
                 };
                 
                 return db.ref('users/' + userId + '/history').push(purchaseTransaction);
             })
             .then(() => {
-                // Add player to match
-                const playerData = {
-                    userId: userId,
-                    userEmail: currentUser?.email || 'Unknown',
-                    gameIdName: gameIdName,
-                    gameUid: gameUid,
-                    telegramUsername: telegramUsername,
-                    joinTime: new Date().toISOString(),
-                    matchId: currentMatchId,
-                    gameMode: currentGameMode,
-                    entryFee: entryFee,
-                    matchTitle: currentMatchData.title || 'Match',
-                    status: 'joined',
-                    gameDetailsSubmitted: true,
-                    paymentStatus: 'paid',
-                    paymentTime: new Date().toISOString()
-                };
-                
-                return db.ref('matchJoins/' + currentMatchId).push(playerData);
-            })
-            .then((joinRef) => {
-                // Update player count
-                const newPlayerCount = (currentMatchData.currentPlayers || 0) + 1;
-                return Promise.all([
-                    db.ref('matches/' + currentGameMode + '/' + currentMatchId + '/currentPlayers').set(newPlayerCount),
-                    joinRef
-                ]);
-            })
-            .then(([_, joinRef]) => {
-                // Update local data
-                const matchIndex = allMatchesData[currentGameMode].findIndex(m => m.id === currentMatchId);
-                if (matchIndex !== -1) {
-                    allMatchesData[currentGameMode][matchIndex].currentPlayers = (currentMatchData.currentPlayers || 0) + 1;
-                }
-                
-                // Add to purchased matches
-                const purchaseData = {
-                    matchId: currentMatchId,
-                    purchaseTime: new Date().toISOString(),
-                    matchTitle: currentMatchData.title || 'Match',
-                    entryFee: entryFee,
-                    gameMode: currentGameMode,
-                    matchDate: currentMatchData.date,
-                    matchTime: currentMatchData.time,
-                    joinId: joinRef.key,
-                    gameDetailsSubmitted: true,
-                    paymentStatus: 'paid',
-                    telegramLink: currentMatchData.telegramLink || ''
-                };
-                
-                return db.ref('users/' + userId + '/purchasedMatches').push(purchaseData);
-            })
-            .then(() => {
-                userPurchasedMatches.push(currentMatchId);
-                
                 document.getElementById('joinMatchModal').classList.add('hidden');
-                
-                // Show success message and open Telegram link if available
-                if (currentMatchData.telegramLink && currentMatchData.telegramLink.trim() !== '') {
-                    setTimeout(() => {
-                        alert(`Successfully joined!\n\n৳${entryFee} has been deducted from your balance.\n\nOpening Telegram group...`);
-                        window.open(currentMatchData.telegramLink, '_blank');
-                    }, 300);
-                } else {
-                    setTimeout(() => {
-                        alert(`Successfully joined!\n\n৳${entryFee} has been deducted from your balance.\n\nAdmin will share Telegram link soon.`);
-                    }, 300);
-                }
-                
-                setTimeout(() => {
-                    displayMatchesForCurrentMode();
-                }, 1000);
+                alert(`Successfully joined tournament!\n\n৳${entryFee} has been deducted from your balance.`);
             })
             .catch(error => {
                 console.error('Error joining match:', error);
                 alert('Error joining match. Please try again.');
-                document.getElementById('joinSubmitBtn').disabled = false;
-                document.getElementById('joinSubmitBtn').innerHTML = 'JOIN MATCH';
             });
     }
 
-    // Open Telegram Link for already purchased match
-    function openTelegramLink(matchId) {
-        const matches = allMatchesData[currentGameMode] || [];
-        const match = matches.find(m => m.id === matchId);
-        
-        if (match && match.telegramLink && match.telegramLink.trim() !== '') {
-            window.open(match.telegramLink, '_blank');
-        } else {
-            alert('Telegram link not available yet. Admin will share it soon.');
-        }
-    }
-
-    // Close Join Modal
     function closeJoinModal() {
         document.getElementById('joinMatchModal').classList.add('hidden');
-    }
-
-    // Show Match Details
-    function showMatchDetails(matchId) {
-        const matches = allMatchesData[currentGameMode] || [];
-        const match = matches.find(m => m.id === matchId);
-        
-        if (match) {
-            if (match.detailsLink && match.detailsLink.trim() !== '') {
-                window.open(match.detailsLink, '_blank');
-            } else {
-                const formattedTime = formatTimeTo12Hour(match.time);
-                alert(`Match: ${match.title}\nMap: ${match.map}\nTime: ${formattedTime}\nPrize: ৳${match.totalPrize}\nEntry Fee: ৳${match.entryFee}\nPlayers: ${match.currentPlayers || 0}/${match.maxPlayers || 100}`);
-            }
-        }
     }
 
     // Modal Functions
@@ -1942,11 +1307,9 @@
         document.getElementById('submitBtn').style.background = color;
         
         if (currentMode === 'add') {
-            db.ref('admin/numbers/' + method).once('value', s => {
-                document.getElementById('instr1').innerHTML = "Copy Number:";
-                document.getElementById('copyNumberDisplay').innerHTML = s.val() || "01XXXXXXX";
-                document.getElementById('instr2').innerHTML = "Send money and enter TrxID";
-            });
+            document.getElementById('instr1').innerHTML = "Copy Number:";
+            document.getElementById('copyNumberDisplay').innerHTML = "017XXXXXXXX";
+            document.getElementById('instr2').innerHTML = "Send money and enter TrxID";
         } else {
             document.getElementById('instr1').innerHTML = "Your Balance";
             document.getElementById('copyNumberDisplay').innerHTML = "৳" + userBalance;
@@ -2028,32 +1391,18 @@
     
     function logout() { 
         if (confirm('Logout?')) {
-            auth.signOut().then(() => {
-                console.log('User signed out');
-            }).catch((error) => {
-                console.error('Logout error:', error);
-            });
+            auth.signOut();
         }
     }
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('Page loaded, checking auth state...');
-        showLoading(true);
-        
-        // Check for redirect result first
-        checkRedirectResult();
-        
-        // Also check current auth state after a delay
+        // Check if already logged in
         setTimeout(() => {
             const currentUser = auth.currentUser;
             if (currentUser) {
-                console.log('User already logged in:', currentUser.email);
                 showMainApp();
                 initializeUserData();
-            } else {
-                console.log('No user logged in');
-                showLoading(false);
             }
         }, 1000);
     });
