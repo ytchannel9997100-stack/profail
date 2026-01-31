@@ -1439,164 +1439,121 @@
             const method = d.method || '';
             const info = d.info || '';
             
-            // Determine if amount should be positive or negative
-            let isPositive = false;
-            let transactionTypeText = type.toUpperCase();
-            
-            // SPECIAL HANDLING FOR TOURNAMENT ENTRY
-            if (type.toLowerCase().includes('tournament_entry') || 
-                info.toLowerCase().includes('entry fee') ||
-                info.toLowerCase().includes('tournament') ||
-                (type.toLowerCase().includes('entry') && method.toLowerCase().includes('balance_deduction'))) {
-                transactionTypeText = "TOURNAMENT_ENTRY";
-                isPositive = false; // Tournament entry is always a deduction (negative/red)
-                
-                // For tournament entry, status should show as PURCHASE
-                let displayStatus = "PURCHASE";
-                let statusClass = 'rejected'; // লাল রঙের জন্য
-            
-                const sign = '-';
-                const displayAmount = Math.abs(amount);
-                
-                // Format date
-                let displayDate = d.date || 'Date not available';
-                if (d.timestamp) {
-                    try {
-                        displayDate = new Date(d.timestamp).toLocaleString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true
-                        });
-                    } catch (e) {
-                        // Keep original date if error
-                    }
-                }
-                
-                // Method text
-                const methodText = method ? ' - ' + method.toUpperCase() : '';
-                
-                html += `
-                    <div class="history-card">
-                        <div class="history-header">
-                            <span class="history-type">${transactionTypeText}${methodText}</span>
-                            <span class="history-amount withdraw-color">${sign}৳${displayAmount}</span>
-                        </div>
-                        <div class="history-footer">
-                            <span>${displayDate}</span>
-                            <span class="history-status rejected">${displayStatus}</span>
-                        </div>
-                    </div>`;
-                
-                return; // Skip the rest of the loop for this transaction
-            }
-            
-            // SPECIAL HANDLING FOR TOURNAMENT BONUS
-            if (type.toLowerCase().includes('tournament_bonus') || 
-                type.toLowerCase().includes('tournament_win') ||
-                type.toLowerCase().includes('tournament_prize') ||
-                info.toLowerCase().includes('tournament win') ||
-                info.toLowerCase().includes('tournament prize') ||
-                info.toLowerCase().includes('tournament bonus') ||
-                info.toLowerCase().includes('won tournament') ||
-                info.toLowerCase().includes('tournament reward')) {
-                transactionTypeText = "TOURNAMENT BONUS";
-                isPositive = true; // Tournament bonus is always positive (green)
-                
-                let displayStatus = status.toUpperCase();
-                let statusClass = 'approved'; // সবুজ রঙের জন্য
-            
-                const sign = '+';
-                const displayAmount = Math.abs(amount);
-                
-                // Format date
-                let displayDate = d.date || 'Date not available';
-                if (d.timestamp) {
-                    try {
-                        displayDate = new Date(d.timestamp).toLocaleString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true
-                        });
-                    } catch (e) {
-                        // Keep original date if error
-                    }
-                }
-                
-                // Method text
-                const methodText = method ? ' - ' + method.toUpperCase() : '';
-                
-                html += `
-                    <div class="history-card">
-                        <div class="history-header">
-                            <span class="history-type">${transactionTypeText}${methodText}</span>
-                            <span class="history-amount add-color">${sign}৳${displayAmount}</span>
-                        </div>
-                        <div class="history-footer">
-                            <span>${displayDate}</span>
-                            <span class="history-status approved">${displayStatus}</span>
-                        </div>
-                    </div>`;
-                
-                return; // Skip the rest of the loop for this transaction
-            }
-            
-            // Check transaction type for color coding
+            // Parse the type to determine transaction category
             const typeLower = type.toLowerCase();
             const methodLower = method.toLowerCase();
-            const infoLower = (d.info || '').toLowerCase();
+            const infoLower = (info || '').toLowerCase();
             
-            // Positive transactions (add, prize, etc.)
-            if (typeLower.includes('add') || 
-                typeLower.includes('prize') ||
-                typeLower.includes('win') ||
-                typeLower.includes('bonus') ||
-                typeLower.includes('wallet_add') ||
-                methodLower.includes('prize') ||
-                methodLower.includes('tournament') ||
-                infoLower.includes('prize') ||
-                infoLower.includes('win') ||
-                infoLower.includes('tournament') ||
-                infoLower.includes('added') ||
-                amount > 0) {
-                isPositive = true;
-            }
-            
-            // Negative transactions (withdraw, deduction, entry, etc.)
-            if (typeLower.includes('withdraw') ||
-                typeLower.includes('deduction') ||
-                typeLower.includes('entry') ||
-                typeLower.includes('purchase') ||
-                typeLower.includes('tournament_entry') ||
-                typeLower.includes('balance_deduction') ||
-                methodLower.includes('deduction') ||
-                methodLower.includes('entry') ||
-                infoLower.includes('entry fee') ||
-                infoLower.includes('fee') ||
-                infoLower.includes('deduct') ||
-                amount < 0) {
-                isPositive = false;
-            }
-            
-            // Set color based on transaction type
-            let amountColor = isPositive ? 'add-color' : 'withdraw-color';
+            let transactionTypeText = type.toUpperCase();
+            let amountColor = '';
+            let sign = '';
+            let statusText = status.toUpperCase();
             let statusClass = '';
             
-            // Status styling
-            if (status.toLowerCase() === 'approved') {
-                statusClass = 'approved';
-            } else if (status.toLowerCase() === 'pending') {
-                statusClass = 'pending';
-            } else {
+            // TOURNAMENT ENTRY (লাল)
+            if (typeLower.includes('tournament_entry') || 
+                typeLower.includes('entry') ||
+                infoLower.includes('entry fee') ||
+                infoLower.includes('tournament entry') ||
+                (amount < 0 && (infoLower.includes('tournament') || infoLower.includes('match'))) ||
+                methodLower.includes('balance_deduction')) {
+                
+                transactionTypeText = "TOURNAMENT_ENTRY";
+                if (method) {
+                    transactionTypeText += " - " + method.toUpperCase();
+                }
+                
+                amountColor = 'withdraw-color';
+                sign = '-';
+                statusText = 'PURCHASE';
                 statusClass = 'rejected';
             }
+            // TOURNAMENT BONUS (সবুজ)
+            else if (typeLower.includes('tournament_bonus') || 
+                     typeLower.includes('tournament_win') ||
+                     typeLower.includes('tournament_prize') ||
+                     typeLower.includes('tournament_reward') ||
+                     infoLower.includes('tournament win') ||
+                     infoLower.includes('tournament prize') ||
+                     infoLower.includes('tournament bonus') ||
+                     infoLower.includes('won tournament') ||
+                     infoLower.includes('tournament reward') ||
+                     infoLower.includes('tournament payment')) {
+                
+                transactionTypeText = "TOURNAMENT BONUS";
+                if (method) {
+                    transactionTypeText += " - " + method.toUpperCase();
+                }
+                
+                amountColor = 'add-color';
+                sign = '+';
+                statusText = 'APPROVED';
+                statusClass = 'approved';
+            }
+            // ADD MONEY (সবুজ)
+            else if (typeLower.includes('add') || amount > 0) {
+                transactionTypeText = "ADD MONEY";
+                if (method) {
+                    transactionTypeText += " - " + method.toUpperCase();
+                }
+                
+                amountColor = 'add-color';
+                sign = '+';
+                statusText = status.toUpperCase();
+                
+                if (status.toLowerCase() === 'approved') {
+                    statusClass = 'approved';
+                } else if (status.toLowerCase() === 'pending') {
+                    statusClass = 'pending';
+                } else {
+                    statusClass = 'rejected';
+                }
+            }
+            // WITHDRAW (লাল)
+            else if (typeLower.includes('withdraw') || amount < 0) {
+                transactionTypeText = "WITHDRAW";
+                if (method) {
+                    transactionTypeText += " - " + method.toUpperCase();
+                }
+                
+                amountColor = 'withdraw-color';
+                sign = '-';
+                statusText = status.toUpperCase();
+                
+                if (status.toLowerCase() === 'approved') {
+                    statusClass = 'approved';
+                } else if (status.toLowerCase() === 'pending') {
+                    statusClass = 'pending';
+                } else {
+                    statusClass = 'rejected';
+                }
+            }
+            // OTHER TRANSACTIONS
+            else {
+                transactionTypeText = type.toUpperCase();
+                if (method) {
+                    transactionTypeText += " - " + method.toUpperCase();
+                }
+                
+                // Determine color based on amount
+                if (amount >= 0) {
+                    amountColor = 'add-color';
+                    sign = '+';
+                } else {
+                    amountColor = 'withdraw-color';
+                    sign = '-';
+                }
+                
+                statusText = status.toUpperCase();
+                if (status.toLowerCase() === 'approved') {
+                    statusClass = 'approved';
+                } else if (status.toLowerCase() === 'pending') {
+                    statusClass = 'pending';
+                } else {
+                    statusClass = 'rejected';
+                }
+            }
             
-            const sign = isPositive ? '+' : '-';
             const displayAmount = Math.abs(amount);
             
             // Format date
@@ -1616,18 +1573,15 @@
                 }
             }
             
-            // Method text
-            const methodText = method ? ' - ' + method.toUpperCase() : '';
-            
             html += `
                 <div class="history-card">
                     <div class="history-header">
-                        <span class="history-type">${transactionTypeText}${methodText}</span>
+                        <span class="history-type">${transactionTypeText}</span>
                         <span class="history-amount ${amountColor}">${sign}৳${displayAmount}</span>
                     </div>
                     <div class="history-footer">
                         <span>${displayDate}</span>
-                        <span class="history-status ${statusClass}">${status.toUpperCase()}</span>
+                        <span class="history-status ${statusClass}">${statusText}</span>
                     </div>
                 </div>`;
         });
