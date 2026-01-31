@@ -636,6 +636,150 @@
         .delete-btn:hover {
             background: rgba(239, 68, 68, 0.3);
         }
+        
+        /* Toggle Visibility Button */
+        .visibility-btn {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 10px;
+        }
+        
+        .visibility-btn:hover {
+            background: rgba(139, 92, 246, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .visible-true {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+        
+        .visible-false {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        
+        /* Match Management Section */
+        .match-management {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 1px solid #475569;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .management-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .match-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .match-item-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .match-item-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
+        }
+        
+        .match-item-info {
+            flex: 1;
+        }
+        
+        .match-item-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 5px;
+        }
+        
+        .match-item-details {
+            font-size: 12px;
+            color: #94a3b8;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .match-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .visibility-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        
+        .visible-indicator {
+            background: #22c55e;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+        }
+        
+        .hidden-indicator {
+            background: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        
+        /* Game Mode Filter */
+        .game-mode-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: #94a3b8;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn.active {
+            background: #f59e0b;
+            color: black;
+            border-color: #f59e0b;
+        }
+        
+        .filter-btn:hover {
+            background: rgba(245, 158, 11, 0.2);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -682,6 +826,26 @@
                 <div class="stat-title">Total Income</div>
                 <div class="stat-value">৳<span id="totalIncome">0</span></div>
             </div>
+        </div>
+
+        <!-- Match Management Section (NEW) -->
+        <div class="match-management">
+            <div class="management-title">
+                <i class="fas fa-eye"></i> Match Visibility Control
+            </div>
+            <p style="color: #94a3b8; margin-bottom: 20px; font-size: 14px;">
+                Toggle match visibility. Hidden matches will only be visible to users who have already purchased them.
+            </p>
+            
+            <div class="game-mode-filter" id="gameModeFilter">
+                <button class="filter-btn active" onclick="filterMatchesByMode('all')">All</button>
+                <button class="filter-btn" onclick="filterMatchesByMode('solo')">Solo</button>
+                <button class="filter-btn" onclick="filterMatchesByMode('duo')">Duo</button>
+                <button class="filter-btn" onclick="filterMatchesByMode('squad')">Squad</button>
+                <button class="filter-btn" onclick="filterMatchesByMode('clash')">Clash</button>
+            </div>
+            
+            <div class="match-list" id="matchList"></div>
         </div>
 
         <!-- Match Selector -->
@@ -878,6 +1042,7 @@
     let currentUserData = null;
     let currentJoinKey = null;
     let tournamentBalance = 0;
+    let currentFilterMode = 'all';
 
     // Admin Login
     function adminLogin() {
@@ -889,6 +1054,7 @@
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('adminPanel').classList.remove('hidden');
             loadAllMatches();
+            loadMatchesForManagement();
             updateStats();
         } else {
             errorDiv.textContent = "Incorrect password!";
@@ -943,6 +1109,112 @@
             console.error("Error loading matches:", error);
             showLoading(false);
         });
+    }
+    
+    // Load matches for management (visibility control)
+    function loadMatchesForManagement() {
+        db.ref('matches').once('value').then(snapshot => {
+            if (snapshot.exists()) {
+                displayMatchesForManagement(snapshot.val());
+            } else {
+                document.getElementById('matchList').innerHTML = '<div class="empty-message">No matches found</div>';
+            }
+        }).catch(error => {
+            console.error("Error loading matches for management:", error);
+            document.getElementById('matchList').innerHTML = '<div class="empty-message">Error loading matches</div>';
+        });
+    }
+    
+    // Display matches for management with visibility toggle
+    function displayMatchesForManagement(matchesData) {
+        const matchListDiv = document.getElementById('matchList');
+        let html = '';
+        
+        let matchCount = 0;
+        
+        for (const gameMode in matchesData) {
+            if (currentFilterMode !== 'all' && currentFilterMode !== gameMode) {
+                continue;
+            }
+            
+            const modeMatches = matchesData[gameMode];
+            
+            for (const matchId in modeMatches) {
+                const match = modeMatches[matchId];
+                
+                // Check if match is visible (default is visible if not set)
+                const isVisible = match.visible === undefined ? true : match.visible;
+                
+                html += `
+                    <div class="match-item-card">
+                        <div class="match-item-info">
+                            <div class="match-item-title">${match.title || 'Untitled Match'}</div>
+                            <div class="match-item-details">
+                                <span>${gameMode.toUpperCase()}</span>
+                                <span>৳${match.entryFee || 0} Entry</span>
+                                <span>${match.date || 'No date'}</span>
+                                <span class="visibility-indicator ${isVisible ? 'visible-indicator' : 'hidden-indicator'}"></span>
+                            </div>
+                        </div>
+                        <div class="match-item-actions">
+                            <button class="visibility-btn ${isVisible ? 'visible-true' : 'visible-false'}" 
+                                    onclick="toggleMatchVisibility('${gameMode}', '${matchId}', ${!isVisible})">
+                                <i class="fas fa-eye${isVisible ? '' : '-slash'}"></i>
+                                ${isVisible ? 'Visible' : 'Hidden'}
+                            </button>
+                        </div>
+                    </div>`;
+                
+                matchCount++;
+            }
+        }
+        
+        if (matchCount === 0) {
+            if (currentFilterMode === 'all') {
+                html = '<div class="empty-message">No matches found</div>';
+            } else {
+                html = `<div class="empty-message">No ${currentFilterMode} matches found</div>`;
+            }
+        }
+        
+        matchListDiv.innerHTML = html;
+    }
+    
+    // Filter matches by game mode
+    function filterMatchesByMode(mode) {
+        currentFilterMode = mode;
+        
+        // Update active button
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        loadMatchesForManagement();
+    }
+    
+    // Toggle match visibility
+    function toggleMatchVisibility(gameMode, matchId, makeVisible) {
+        const confirmMessage = makeVisible 
+            ? "Make this match visible to all users?" 
+            : "Hide this match? (Only users who already purchased can see it)";
+        
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+        
+        const matchRef = db.ref(`matches/${gameMode}/${matchId}/visible`);
+        
+        matchRef.set(makeVisible)
+            .then(() => {
+                // Reload matches list
+                loadMatchesForManagement();
+                
+                // Show success message
+                alert(`Match ${makeVisible ? 'made visible' : 'hidden'} successfully!`);
+            })
+            .catch(error => {
+                console.error("Error toggling visibility:", error);
+                alert("Error updating match visibility. Please try again.");
+            });
     }
     
     // Load match info when selected
@@ -1156,7 +1428,7 @@
         currentJoinKey = null;
     }
     
-    // Confirm Add Money
+    // Confirm Add Money - FIXED VERSION (প্রাইজ টাকা + দেখাবে)
     function confirmAddMoney() {
         const amount = parseInt(document.getElementById('amountInput').value);
         
@@ -1188,20 +1460,26 @@
             })
         );
         
-        // 2. Add transaction history for user
+        // 2. Add transaction history for user - FIXED TYPE
         const historyRef = db.ref('users/' + currentUserData.userId + '/history').push();
         promises.push(
             historyRef.set({
-                type: 'prize',
-                method: 'tournament',
+                type: 'PRIZE',  // ✅ Changed from 'prize' to 'PRIZE'
+                method: 'TOURNAMENT',
                 amount: amount,
-                status: 'approved',
+                status: 'APPROVED',
                 date: new Date().toLocaleString(),
                 info: `Prize from: ${currentMatchData.title || 'Tournament'}`,
                 timestamp: Date.now(),
                 userEmail: currentUserData.email,
                 matchId: matchId,
-                matchTitle: currentMatchData.title
+                matchTitle: currentMatchData.title,
+                // Add metadata for better identification
+                metadata: {
+                    isPrize: true,
+                    isPositive: true,
+                    source: 'admin_panel'
+                }
             })
         );
         
@@ -1218,7 +1496,8 @@
                 timestamp: Date.now(),
                 gameMode: gameMode,
                 tournamentBalanceBefore: tournamentBalance,
-                tournamentBalanceAfter: tournamentBalance - amount
+                tournamentBalanceAfter: tournamentBalance - amount,
+                transactionType: 'prize_distribution'
             })
         );
         
