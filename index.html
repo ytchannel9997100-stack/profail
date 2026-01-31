@@ -201,11 +201,11 @@
         }
         
         .add-color {
-            color: #10b981;
+            color: #10b981 !important;
         }
         
         .withdraw-color {
-            color: #ef4444;
+            color: #ef4444 !important;
         }
         
         .history-footer {
@@ -219,9 +219,9 @@
             font-weight: 700;
         }
         
-        .pending { color: #f59e0b; }
-        .approved { color: #22c55e; }
-        .rejected { color: #ef4444; }
+        .pending { color: #f59e0b !important; }
+        .approved { color: #22c55e !important; }
+        .rejected { color: #ef4444 !important; }
         
         /* Matches Section */
         .matches-section {
@@ -950,7 +950,7 @@
 </div>
 
 <script>
-    // Firebase Configuration - FIXED VERSION
+    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
         authDomain: "top-up-4db01.firebaseapp.com",
@@ -1042,7 +1042,7 @@
         });
     }
 
-    // Auth State Observer - SIMPLIFIED VERSION
+    // Auth State Observer
     auth.onAuthStateChanged((user) => {
         console.log('Auth state changed. User:', user ? user.email : 'No user');
         if (user) {
@@ -1127,7 +1127,7 @@
         }
     }
 
-    // Google Sign In - WORKING VERSION
+    // Google Sign In
     function signInWithGoogle() {
         console.log('Starting Google sign in...');
         showLoading(true);
@@ -1390,7 +1390,7 @@
                     return;
                 }
                 
-                displayTransactions(allTransactions.slice(0, 10));
+                displayTransactions(allTransactions);
             }).catch(error => {
                 console.error('Error loading history:', error);
                 div.innerHTML = `<div class="empty-state"><div class="empty-text">Error loading history</div></div>`;
@@ -1426,68 +1426,104 @@
         }
     }
     
-    // Display transactions - FIXED VERSION
+    // Display transactions - FIXED VERSION WITH CORRECT COLORS
     function displayTransactions(transactions) {
         const div = document.getElementById('historyItems');
         let html = '';
         
         transactions.forEach(d => {
-            // Get lowercase values for comparison
-            const typeLower = d.type ? d.type.toLowerCase() : '';
-            const methodLower = d.method ? d.method.toLowerCase() : '';
-            const infoLower = d.info ? d.info.toLowerCase() : '';
+            // Get transaction details
+            const type = d.type || '';
+            const amount = parseFloat(d.amount) || 0;
+            const status = d.status || 'pending';
+            const method = d.method || '';
             
             // Determine if amount should be positive or negative
             let isPositive = false;
+            let transactionTypeText = type.toUpperCase();
+            
+            // Check transaction type for color coding
+            const typeLower = type.toLowerCase();
+            const methodLower = method.toLowerCase();
+            const infoLower = (d.info || '').toLowerCase();
             
             // Positive transactions (add, prize, etc.)
-            if (typeLower === 'add' || 
-                typeLower === 'prize' ||
-                typeLower === 'wallet_add' ||
+            if (typeLower.includes('add') || 
                 typeLower.includes('prize') ||
-                typeLower.includes('add')) {
-                isPositive = true;
-            }
-            
-            // Also check method and info for prize keywords
-            if (methodLower.includes('prize') || 
+                typeLower.includes('win') ||
+                typeLower.includes('bonus') ||
+                typeLower.includes('wallet_add') ||
+                methodLower.includes('prize') ||
                 methodLower.includes('tournament') ||
                 infoLower.includes('prize') ||
+                infoLower.includes('win') ||
                 infoLower.includes('tournament') ||
-                infoLower.includes('win')) {
+                infoLower.includes('added') ||
+                amount > 0) {
                 isPositive = true;
             }
             
-            // Negative transactions (deduction, entry, purchase)
-            if (typeLower === 'tournament_entry' ||
-                typeLower === 'balance_deduction' ||
-                typeLower === 'entry_fee' ||
-                typeLower === 'withdraw' ||
+            // Negative transactions (withdraw, deduction, entry, etc.)
+            if (typeLower.includes('withdraw') ||
                 typeLower.includes('deduction') ||
                 typeLower.includes('entry') ||
+                typeLower.includes('purchase') ||
+                typeLower.includes('tournament_entry') ||
+                typeLower.includes('balance_deduction') ||
+                methodLower.includes('deduction') ||
+                methodLower.includes('entry') ||
                 infoLower.includes('entry fee') ||
-                infoLower.includes('fee')) {
+                infoLower.includes('fee') ||
+                infoLower.includes('deduct') ||
+                amount < 0) {
                 isPositive = false;
             }
             
-            const amountColor = isPositive ? 'add-color' : 'withdraw-color';
+            // Set color based on transaction type
+            let amountColor = isPositive ? 'add-color' : 'withdraw-color';
+            let statusClass = '';
+            
+            // Status styling
+            if (status.toLowerCase() === 'approved') {
+                statusClass = 'approved';
+            } else if (status.toLowerCase() === 'pending') {
+                statusClass = 'pending';
+            } else {
+                statusClass = 'rejected';
+            }
+            
             const sign = isPositive ? '+' : '-';
+            const displayAmount = Math.abs(amount);
             
-            // Status class for APPROVED, PENDING, REJECTED - FIXED
-            const statusClass = d.status.toLowerCase() === 'pending' ? 'pending' : 
-                               d.status.toLowerCase() === 'approved' ? 'approved' : 'rejected';
+            // Format date
+            let displayDate = d.date || 'Date not available';
+            if (d.timestamp) {
+                try {
+                    displayDate = new Date(d.timestamp).toLocaleString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                } catch (e) {
+                    // Keep original date if error
+                }
+            }
             
-            const displayDate = d.date ? d.date : 'Date not available';
+            // Method text
+            const methodText = method ? ' - ' + method.toUpperCase() : '';
             
             html += `
                 <div class="history-card">
                     <div class="history-header">
-                        <span class="history-type">${d.type ? d.type.toUpperCase() : 'N/A'} - ${d.method ? d.method.toUpperCase() : 'N/A'}</span>
-                        <span class="history-amount ${amountColor}">${sign}৳${d.amount}</span>
+                        <span class="history-type">${transactionTypeText}${methodText}</span>
+                        <span class="history-amount ${amountColor}">${sign}৳${displayAmount}</span>
                     </div>
                     <div class="history-footer">
                         <span>${displayDate}</span>
-                        <span class="history-status ${statusClass}">${d.status.toUpperCase()}</span>
+                        <span class="history-status ${statusClass}">${status.toUpperCase()}</span>
                     </div>
                 </div>`;
         });
