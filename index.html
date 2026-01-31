@@ -220,7 +220,7 @@
         }
         
         .pending { color: #f59e0b; }
-        .approved { color: #10b981; }
+        .approved { color: #22c55e; }
         .rejected { color: #ef4444; }
         
         /* Matches Section */
@@ -1472,8 +1472,11 @@
             
             const amountColor = isPositive ? 'add-color' : 'withdraw-color';
             const sign = isPositive ? '+' : '-';
-            const statusClass = d.status === 'pending' ? 'pending' : 
-                              d.status === 'approved' ? 'approved' : 'rejected';
+            
+            // Status class for APPROVED, PENDING, REJECTED - FIXED
+            const statusClass = d.status.toLowerCase() === 'pending' ? 'pending' : 
+                               d.status.toLowerCase() === 'approved' ? 'approved' : 'rejected';
+            
             const displayDate = d.date ? d.date : 'Date not available';
             
             html += `
