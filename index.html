@@ -1426,13 +1426,52 @@
         }
     }
     
-    // Display transactions
+    // Display transactions - FIXED VERSION
     function displayTransactions(transactions) {
         const div = document.getElementById('historyItems');
         let html = '';
         
         transactions.forEach(d => {
-            const amountColor = d.type === 'add' ? 'add-color' : 'withdraw-color';
+            // Get lowercase values for comparison
+            const typeLower = d.type ? d.type.toLowerCase() : '';
+            const methodLower = d.method ? d.method.toLowerCase() : '';
+            const infoLower = d.info ? d.info.toLowerCase() : '';
+            
+            // Determine if amount should be positive or negative
+            let isPositive = false;
+            
+            // Positive transactions (add, prize, etc.)
+            if (typeLower === 'add' || 
+                typeLower === 'prize' ||
+                typeLower === 'wallet_add' ||
+                typeLower.includes('prize') ||
+                typeLower.includes('add')) {
+                isPositive = true;
+            }
+            
+            // Also check method and info for prize keywords
+            if (methodLower.includes('prize') || 
+                methodLower.includes('tournament') ||
+                infoLower.includes('prize') ||
+                infoLower.includes('tournament') ||
+                infoLower.includes('win')) {
+                isPositive = true;
+            }
+            
+            // Negative transactions (deduction, entry, purchase)
+            if (typeLower === 'tournament_entry' ||
+                typeLower === 'balance_deduction' ||
+                typeLower === 'entry_fee' ||
+                typeLower === 'withdraw' ||
+                typeLower.includes('deduction') ||
+                typeLower.includes('entry') ||
+                infoLower.includes('entry fee') ||
+                infoLower.includes('fee')) {
+                isPositive = false;
+            }
+            
+            const amountColor = isPositive ? 'add-color' : 'withdraw-color';
+            const sign = isPositive ? '+' : '-';
             const statusClass = d.status === 'pending' ? 'pending' : 
                               d.status === 'approved' ? 'approved' : 'rejected';
             const displayDate = d.date ? d.date : 'Date not available';
@@ -1440,8 +1479,8 @@
             html += `
                 <div class="history-card">
                     <div class="history-header">
-                        <span class="history-type">${d.type.toUpperCase()} - ${d.method.toUpperCase()}</span>
-                        <span class="history-amount ${amountColor}">${d.type === 'add' ? '+' : '-'}৳${d.amount}</span>
+                        <span class="history-type">${d.type ? d.type.toUpperCase() : 'N/A'} - ${d.method ? d.method.toUpperCase() : 'N/A'}</span>
+                        <span class="history-amount ${amountColor}">${sign}৳${d.amount}</span>
                     </div>
                     <div class="history-footer">
                         <span>${displayDate}</span>
