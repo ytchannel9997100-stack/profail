@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Easy Premium - প্রিমিয়াম প্যাকেজ কিনুন</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -319,6 +322,27 @@
             font-weight: 600;
         }
         
+        /* Loading Spinner */
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ff9800;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         /* Footer */
         .footer {
             background: rgba(0, 0, 0, 0.9);
@@ -388,6 +412,9 @@
         .whatsapp { color: #25D366; }
         .telegram { color: #0088cc; }
         .freefire { color: #FF8800; }
+        .netflix { color: #E50914; }
+        .spotify { color: #1DB954; }
+        .pubg { color: #F9A602; }
     </style>
 </head>
 <body>
@@ -423,125 +450,11 @@
     <!-- Platforms Section -->
     <section id="platforms" class="platforms-section">
         <h2 class="section-title">আপনার পছন্দের প্ল্যাটফর্ম</h2>
-        <div class="platforms-grid">
-            <!-- YouTube -->
-            <div class="platform-card" onclick="openYouTubePage()">
-                <div class="platform-header">
-                    <i class="fab fa-youtube platform-icon youtube"></i>
-                    <div class="platform-name">YouTube Premium</div>
-                </div>
-                <div class="platform-description">
-                    অ্যাড-ফ্রি ইউটিউব, ব্যাকগ্রাউন্ড প্লে, অফলাইন ডাউনলোড সহ ফুল প্রিমিয়াম এক্সপেরিয়েন্স।
-                </div>
-                <div class="platform-features">
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>No Ads</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Background Play</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Offline Downloads</span>
-                    </div>
-                </div>
-                <div class="platform-price">
-                    <div class="price">৳ 150/মাস</div>
-                    <div class="price-desc">সব ফিচার আনলিমিটেড</div>
-                </div>
-                <button class="buy-button">কিনুন</button>
-            </div>
-
-            <!-- Facebook -->
-            <div class="platform-card" onclick="openFacebookPage()">
-                <div class="platform-header">
-                    <i class="fab fa-facebook-f platform-icon facebook"></i>
-                    <div class="platform-name">Facebook Ads Coin</div>
-                </div>
-                <div class="platform-description">
-                    ফেসবুক অ্যাডস কয়েন, রিচ আরও বেশি অডিয়েন্সের কাছে, বিজনেস প্রমোট করুন সহজেই।
-                </div>
-                <div class="platform-features">
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Ads Coin</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>বিজনেস প্রমোশন</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>ইনস্ট্যান্ট ডেলিভারি</span>
-                    </div>
-                </div>
-                <div class="platform-price">
-                    <div class="price">৳ 100/1000 কয়েন</div>
-                    <div class="price-desc">মিনিমাম 1000 কয়েন</div>
-                </div>
-                <button class="buy-button">কিনুন</button>
-            </div>
-
-            <!-- Instagram -->
-            <div class="platform-card" onclick="openInstagramPage()">
-                <div class="platform-header">
-                    <i class="fab fa-instagram platform-icon instagram"></i>
-                    <div class="platform-name">Instagram Premium</div>
-                </div>
-                <div class="platform-description">
-                    ইনস্টাগ্রাম ব্লু টিক, ভেরিফাইড একাউন্ট, প্রমোশন কয়েন এবং স্পেশাল ফিচার।
-                </div>
-                <div class="platform-features">
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Verified Badge</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Promotion Coin</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Special Features</span>
-                    </div>
-                </div>
-                <div class="platform-price">
-                    <div class="price">৳ 500/মাস</div>
-                    <div class="price-desc">ব্লু টিক সহ</div>
-                </div>
-                <button class="buy-button">কিনুন</button>
-            </div>
-
-            <!-- Free Fire -->
-            <div class="platform-card" onclick="openFreeFirePage()">
-                <div class="platform-header">
-                    <i class="fas fa-fire platform-icon freefire"></i>
-                    <div class="platform-name">Free Fire Diamond</div>
-                </div>
-                <div class="platform-description">
-                    ফ্রি ফায়ার ডায়মন্ড, ক্যারেক্টার, স্পেশাল বান্ডেল, গানস এবং সব লিমিটেড আইটেম।
-                </div>
-                <div class="platform-features">
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Instant Delivery</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>All Characters</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Guaranteed Safe</span>
-                    </div>
-                </div>
-                <div class="platform-price">
-                    <div class="price">৳ 100/100 Diamonds</div>
-                    <div class="price-desc">বাল্ক অর্ডারে ডিস্কাউন্ট</div>
-                </div>
-                <button class="buy-button">কিনুন</button>
+        <div id="platforms-grid" class="platforms-grid">
+            <!-- Platforms will be loaded from Firebase here -->
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>প্ল্যাটফর্ম লোড হচ্ছে...</p>
             </div>
         </div>
     </section>
@@ -549,48 +462,11 @@
     <!-- Pricing Plans -->
     <section id="pricing" class="pricing-section">
         <h2 class="section-title">স্পেশাল প্যাকেজ ডিল</h2>
-        <div class="pricing-grid">
-            <!-- Basic Package -->
-            <div class="pricing-card">
-                <div class="plan-name">বেসিক প্যাকেজ</div>
-                <div class="plan-price">৳ 500</div>
-                <ul class="plan-features">
-                    <li><i class="fas fa-check"></i> 500 ফেসবুক অ্যাডস কয়েন</li>
-                    <li><i class="fas fa-check"></i> 1 মাস ইউটিউব প্রিমিয়াম</li>
-                    <li><i class="fas fa-check"></i> 50 ফ্রিফায়ার ডায়মন্ড</li>
-                    <li><i class="fas fa-times"></i> ইনস্টাগ্রাম ব্লু টিক</li>
-                    <li><i class="fas fa-times"></i> প্রায়োরিটি সাপোর্ট</li>
-                </ul>
-                <button class="buy-button" onclick="selectPackage('basic')">প্যাকেজ নিন</button>
-            </div>
-
-            <!-- Popular Package -->
-            <div class="pricing-card popular">
-                <div class="popular-badge">সবচেয়ে জনপ্রিয়</div>
-                <div class="plan-name">প্রিমিয়াম প্যাকেজ</div>
-                <div class="plan-price">৳ 1500</div>
-                <ul class="plan-features">
-                    <li><i class="fas fa-check"></i> 2000 ফেসবুক অ্যাডস কয়েন</li>
-                    <li><i class="fas fa-check"></i> 6 মাস ইউটিউব প্রিমিয়াম</li>
-                    <li><i class="fas fa-check"></i> 500 ফ্রিফায়ার ডায়মন্ড</li>
-                    <li><i class="fas fa-check"></i> 1 মাস ইনস্টাগ্রাম ব্লু টিক</li>
-                    <li><i class="fas fa-check"></i> প্রায়োরিটি সাপোর্ট</li>
-                </ul>
-                <button class="buy-button" onclick="selectPackage('premium')">প্যাকেজ নিন</button>
-            </div>
-
-            <!-- Ultimate Package -->
-            <div class="pricing-card">
-                <div class="plan-name">আলটিমেট প্যাকেজ</div>
-                <div class="plan-price">৳ 3000</div>
-                <ul class="plan-features">
-                    <li><i class="fas fa-check"></i> 5000 ফেসবুক অ্যাডস কয়েন</li>
-                    <li><i class="fas fa-check"></i> 1 বছর ইউটিউব প্রিমিয়াম</li>
-                    <li><i class="fas fa-check"></i> 1500 ফ্রিফায়ার ডায়মন্ড</li>
-                    <li><i class="fas fa-check"></i> 3 মাস ইনস্টাগ্রাম ব্লু টিক</li>
-                    <li><i class="fas fa-check"></i> 24/7 প্রায়োরিটি সাপোর্ট</li>
-                </ul>
-                <button class="buy-button" onclick="selectPackage('ultimate')">প্যাকেজ নিন</button>
+        <div id="pricing-grid" class="pricing-grid">
+            <!-- Packages will be loaded from Firebase here -->
+            <div class="loading-spinner" style="grid-column: 1/-1;">
+                <div class="spinner"></div>
+                <p>প্যাকেজ লোড হচ্ছে...</p>
             </div>
         </div>
     </section>
@@ -639,7 +515,267 @@
     </footer>
 
     <script>
-        // Platform Page Redirect Functions
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
+            authDomain: "top-up-4db01.firebaseapp.com",
+            projectId: "top-up-4db01",
+            databaseURL: "https://top-up-4db01-default-rtdb.asia-southeast1.firebasedatabase.app",
+            storageBucket: "top-up-4db01.appspot.com",
+            appId: "1:264548197473:web:abcd1234efgh5678"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Function to load platforms from Firebase
+        function loadPlatformsFromFirebase() {
+            const platformsGrid = document.getElementById('platforms-grid');
+            platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে...</p></div>';
+
+            // Reference to platforms in Firebase
+            const platformsRef = database.ref('platforms');
+            
+            platformsRef.on('value', (snapshot) => {
+                const platformsData = snapshot.val();
+                platformsGrid.innerHTML = '';
+
+                if (!platformsData) {
+                    platformsGrid.innerHTML = '<p style="text-align: center; color: #ff9800; grid-column: 1/-1;">কোনো প্ল্যাটফর্ম পাওয়া যায়নি। Firebase ডেটাবেসে ডেটা যোগ করুন।</p>';
+                    return;
+                }
+
+                // Convert object to array
+                const platformsArray = Object.values(platformsData);
+                
+                // Sort platforms by order if available
+                platformsArray.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+                // Create platform cards
+                platformsArray.forEach(platform => {
+                    const platformCard = document.createElement('div');
+                    platformCard.className = 'platform-card';
+                    
+                    // Set click function based on platform type
+                    if (platform.pageUrl) {
+                        platformCard.onclick = () => window.open(platform.pageUrl, '_blank');
+                    } else {
+                        platformCard.onclick = () => showPlatformDetails(platform);
+                    }
+
+                    // Platform icon class mapping
+                    const iconClasses = {
+                        'youtube': 'fab fa-youtube youtube',
+                        'facebook': 'fab fa-facebook-f facebook',
+                        'instagram': 'fab fa-instagram instagram',
+                        'tiktok': 'fab fa-tiktok tiktok',
+                        'whatsapp': 'fab fa-whatsapp whatsapp',
+                        'telegram': 'fab fa-telegram telegram',
+                        'freefire': 'fas fa-fire freefire',
+                        'netflix': 'fab fa-netflix netflix',
+                        'spotify': 'fab fa-spotify spotify',
+                        'pubg': 'fas fa-gamepad pubg',
+                        'default': 'fas fa-cube'
+                    };
+
+                    const iconClass = iconClasses[platform.icon] || iconClasses.default;
+
+                    platformCard.innerHTML = `
+                        <div class="platform-header">
+                            <i class="${iconClass} platform-icon"></i>
+                            <div class="platform-name">${platform.name || 'প্ল্যাটফর্ম'}</div>
+                        </div>
+                        <div class="platform-description">
+                            ${platform.description || 'প্রিমিয়াম সেবা পান সবচেয়ে কম দামে।'}
+                        </div>
+                        <div class="platform-features">
+                            ${platform.features ? platform.features.map(feature => `
+                                <div class="feature">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>${feature}</span>
+                                </div>
+                            `).join('') : `
+                                <div class="feature">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>ইনস্ট্যান্ট ডেলিভারি</span>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>১০০% সেফ</span>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>গ্যারান্টিড</span>
+                                </div>
+                            `}
+                        </div>
+                        <div class="platform-price">
+                            <div class="price">${platform.price || '৳ 100'}</div>
+                            <div class="price-desc">${platform.priceDesc || 'বাল্ক অর্ডারে ডিস্কাউন্ট'}</div>
+                        </div>
+                        <button class="buy-button">কিনুন</button>
+                    `;
+
+                    platformsGrid.appendChild(platformCard);
+                });
+
+                // Add event listeners to buy buttons
+                document.querySelectorAll('.platform-card .buy-button').forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const platformCard = this.closest('.platform-card');
+                        const platformName = platformCard.querySelector('.platform-name').textContent;
+                        const price = platformCard.querySelector('.price').textContent;
+                        
+                        alert(`${platformName} - ${price}\n\nপেমেন্টের জন্য আমাদের সাপোর্টে যোগাযোগ করুন।`);
+                        window.open('https://easy-premium.com/Order.html', '_blank');
+                    });
+                });
+
+                // Animate cards after loading
+                animatePlatformCards();
+            }, (error) => {
+                console.error("Error loading platforms:", error);
+                platformsGrid.innerHTML = '<p style="text-align: center; color: #ff9800; grid-column: 1/-1;">ডেটা লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।</p>';
+            });
+        }
+
+        // Function to load packages from Firebase
+        function loadPackagesFromFirebase() {
+            const pricingGrid = document.getElementById('pricing-grid');
+            pricingGrid.innerHTML = '<div class="loading-spinner" style="grid-column: 1/-1;"><div class="spinner"></div><p>প্যাকেজ লোড হচ্ছে...</p></div>';
+
+            // Reference to packages in Firebase
+            const packagesRef = database.ref('packages');
+            
+            packagesRef.on('value', (snapshot) => {
+                const packagesData = snapshot.val();
+                pricingGrid.innerHTML = '';
+
+                if (!packagesData) {
+                    // Show default packages if no Firebase data
+                    showDefaultPackages();
+                    return;
+                }
+
+                // Convert object to array
+                const packagesArray = Object.values(packagesData);
+                
+                // Sort packages by order if available
+                packagesArray.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+                // Create package cards
+                packagesArray.forEach(packageItem => {
+                    const pricingCard = document.createElement('div');
+                    pricingCard.className = 'pricing-card';
+                    
+                    // Add popular class if marked as popular
+                    if (packageItem.popular) {
+                        pricingCard.classList.add('popular');
+                    }
+
+                    // Generate features list
+                    let featuresHtml = '';
+                    if (packageItem.features && Array.isArray(packageItem.features)) {
+                        packageItem.features.forEach(feature => {
+                            if (feature.available) {
+                                featuresHtml += `<li><i class="fas fa-check"></i> ${feature.text}</li>`;
+                            } else {
+                                featuresHtml += `<li><i class="fas fa-times"></i> ${feature.text}</li>`;
+                            }
+                        });
+                    }
+
+                    // Create the card HTML
+                    pricingCard.innerHTML = `
+                        ${packageItem.popular ? '<div class="popular-badge">সবচেয়ে জনপ্রিয়</div>' : ''}
+                        <div class="plan-name">${packageItem.name || 'প্যাকেজ'}</div>
+                        <div class="plan-price">${packageItem.price || '৳ 500'}</div>
+                        <ul class="plan-features">
+                            ${featuresHtml || `
+                                <li><i class="fas fa-check"></i> 500 ফেসবুক অ্যাডস কয়েন</li>
+                                <li><i class="fas fa-check"></i> 1 মাস ইউটিউব প্রিমিয়াম</li>
+                                <li><i class="fas fa-check"></i> 50 ফ্রিফায়ার ডায়মন্ড</li>
+                                <li><i class="fas fa-times"></i> ইনস্টাগ্রাম ব্লু টিক</li>
+                                <li><i class="fas fa-times"></i> প্রায়োরিটি সাপোর্ট</li>
+                            `}
+                        </ul>
+                        <button class="buy-button" onclick="selectPackage('${packageItem.id || 'custom'}')">প্যাকেজ নিন</button>
+                    `;
+
+                    pricingGrid.appendChild(pricingCard);
+                });
+
+                // Add event listeners to package buttons
+                document.querySelectorAll('.pricing-card .buy-button').forEach((button, index) => {
+                    button.addEventListener('click', function() {
+                        const packageCard = this.closest('.pricing-card');
+                        const packageName = packageCard.querySelector('.plan-name').textContent;
+                        const price = packageCard.querySelector('.plan-price').textContent;
+                        
+                        alert(`আপনি নির্বাচন করেছেন: ${packageName}\nমূল্য: ${price}\n\nপেমেন্টের জন্য আমাদের সাপোর্টে যোগাযোগ করুন।`);
+                        window.open('https://easy-premium.com/Payment.html', '_blank');
+                    });
+                });
+
+                // Animate cards after loading
+                animatePackageCards();
+            }, (error) => {
+                console.error("Error loading packages:", error);
+                showDefaultPackages();
+            });
+        }
+
+        // Show default packages if Firebase fails
+        function showDefaultPackages() {
+            const pricingGrid = document.getElementById('pricing-grid');
+            pricingGrid.innerHTML = `
+                <div class="pricing-card">
+                    <div class="plan-name">বেসিক প্যাকেজ</div>
+                    <div class="plan-price">৳ 500</div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> 500 ফেসবুক অ্যাডস কয়েন</li>
+                        <li><i class="fas fa-check"></i> 1 মাস ইউটিউব প্রিমিয়াম</li>
+                        <li><i class="fas fa-check"></i> 50 ফ্রিফায়ার ডায়মন্ড</li>
+                        <li><i class="fas fa-times"></i> ইনস্টাগ্রাম ব্লু টিক</li>
+                        <li><i class="fas fa-times"></i> প্রায়োরিটি সাপোর্ট</li>
+                    </ul>
+                    <button class="buy-button" onclick="selectPackage('basic')">প্যাকেজ নিন</button>
+                </div>
+
+                <div class="pricing-card popular">
+                    <div class="popular-badge">সবচেয়ে জনপ্রিয়</div>
+                    <div class="plan-name">প্রিমিয়াম প্যাকেজ</div>
+                    <div class="plan-price">৳ 1500</div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> 2000 ফেসবুক অ্যাডস কয়েন</li>
+                        <li><i class="fas fa-check"></i> 6 মাস ইউটিউব প্রিমিয়াম</li>
+                        <li><i class="fas fa-check"></i> 500 ফ্রিফায়ার ডায়মন্ড</li>
+                        <li><i class="fas fa-check"></i> 1 মাস ইনস্টাগ্রাম ব্লু টিক</li>
+                        <li><i class="fas fa-check"></i> প্রায়োরিটি সাপোর্ট</li>
+                    </ul>
+                    <button class="buy-button" onclick="selectPackage('premium')">প্যাকেজ নিন</button>
+                </div>
+
+                <div class="pricing-card">
+                    <div class="plan-name">আলটিমেট প্যাকেজ</div>
+                    <div class="plan-price">৳ 3000</div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> 5000 ফেসবুক অ্যাডস কয়েন</li>
+                        <li><i class="fas fa-check"></i> 1 বছর ইউটিউব প্রিমিয়াম</li>
+                        <li><i class="fas fa-check"></i> 1500 ফ্রিফায়ার ডায়মন্ড</li>
+                        <li><i class="fas fa-check"></i> 3 মাস ইনস্টাগ্রাম ব্লু টিক</li>
+                        <li><i class="fas fa-check"></i> 24/7 প্রায়োরিটি সাপোর্ট</li>
+                    </ul>
+                    <button class="buy-button" onclick="selectPackage('ultimate')">প্যাকেজ নিন</button>
+                </div>
+            `;
+            
+            animatePackageCards();
+        }
+
+        // Platform page redirect functions (for backward compatibility)
         function openYouTubePage() {
             window.open('https://easy-premium.com/YouTubePremium.html', '_blank');
         }
@@ -655,8 +791,13 @@
         function openFreeFirePage() {
             window.open('https://easy-premium.com/FreeFire.html', '_blank');
         }
+
+        // Show platform details
+        function showPlatformDetails(platform) {
+            alert(`${platform.name || 'প্ল্যাটফর্ম'}\n\nবিস্তারিত জানতে আমাদের সাপোর্টে যোগাযোগ করুন।`);
+        }
         
-        // Package Selection
+        // Package Selection (for backward compatibility)
         function selectPackage(packageType) {
             let packageName, price;
             
@@ -673,6 +814,9 @@
                     packageName = "আলটিমেট প্যাকেজ";
                     price = "৳ 3000";
                     break;
+                default:
+                    packageName = "প্যাকেজ";
+                    price = "৳ 0";
             }
             
             alert(`আপনি নির্বাচন করেছেন: ${packageName}\nমূল্য: ${price}\n\nপেমেন্টের জন্য আমাদের সাপোর্টে যোগাযোগ করুন।`);
@@ -693,21 +837,9 @@
             });
         });
         
-        // Buy Button Click
-        document.querySelectorAll('.buy-button').forEach(button => {
-            button.addEventListener('click', function() {
-                const platformCard = this.closest('.platform-card');
-                const platformName = platformCard.querySelector('.platform-name').textContent;
-                const price = platformCard.querySelector('.price').textContent;
-                
-                alert(`${platformName} - ${price}\n\nপেমেন্টের জন্য আমাদের সাপোর্টে যোগাযোগ করুন।`);
-                window.open('https://easy-premium.com/Order.html', '_blank');
-            });
-        });
-        
-        // Page Load Animation
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.platform-card, .pricing-card');
+        // Page Load Animation functions
+        function animatePlatformCards() {
+            const cards = document.querySelectorAll('.platform-card');
             cards.forEach((card, index) => {
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(30px)';
@@ -718,6 +850,26 @@
                     card.style.transform = 'translateY(0)';
                 }, index * 200);
             });
+        }
+        
+        function animatePackageCards() {
+            const cards = document.querySelectorAll('.pricing-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'opacity 0.8s, transform 0.8s';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200 + 300);
+            });
+        }
+        
+        // Load platforms and packages when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPlatformsFromFirebase();
+            loadPackagesFromFirebase();
         });
     </script>
 </body>
