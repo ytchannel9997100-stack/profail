@@ -220,88 +220,11 @@
             background: linear-gradient(45deg, #ff5722, #ff9800);
         }
         
-        /* Pricing Plans */
-        .pricing-section {
-            padding: 60px 20px;
-            background: rgba(0, 0, 0, 0.3);
-        }
-        
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .pricing-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            border: 2px solid rgba(255, 152, 0, 0.3);
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .pricing-card:hover {
-            transform: scale(1.03);
-            border-color: #ff9800;
-            box-shadow: 0 10px 25px rgba(255, 152, 0, 0.2);
-        }
-        
-        .pricing-card.popular {
-            border-color: #00bcd4;
-            transform: scale(1.05);
-        }
-        
-        .popular-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #00bcd4;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-        
-        .plan-name {
-            font-size: 1.5rem;
-            color: #ff9800;
-            margin-bottom: 15px;
-        }
-        
-        .plan-price {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #fff;
-            margin: 20px 0;
-        }
-        
-        .plan-features {
-            list-style: none;
-            margin: 25px 0;
-            text-align: left;
-        }
-        
-        .plan-features li {
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ddd;
-        }
-        
-        .plan-features li i {
-            color: #4caf50;
-            margin-right: 10px;
-        }
-        
         /* Payment Methods */
         .payment-section {
             padding: 60px 20px;
             text-align: center;
+            background: rgba(0, 0, 0, 0.3);
         }
         
         .payment-methods {
@@ -394,14 +317,6 @@
             .platforms-grid {
                 grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             }
-            
-            .pricing-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .pricing-card.popular {
-                transform: none;
-            }
         }
         
         /* Platform Specific Colors */
@@ -425,10 +340,6 @@
             <a href="#platforms" class="nav-link">
                 <i class="fas fa-gamepad"></i>
                 <span>প্ল্যাটফর্ম</span>
-            </a>
-            <a href="#pricing" class="nav-link">
-                <i class="fas fa-tags"></i>
-                <span>প্যাকেজ</span>
             </a>
             <a href="#payment" class="nav-link">
                 <i class="fas fa-credit-card"></i>
@@ -455,18 +366,6 @@
             <div class="loading-spinner">
                 <div class="spinner"></div>
                 <p>প্ল্যাটফর্ম লোড হচ্ছে...</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing Plans -->
-    <section id="pricing" class="pricing-section">
-        <h2 class="section-title">স্পেশাল প্যাকেজ ডিল</h2>
-        <div id="pricing-grid" class="pricing-grid">
-            <!-- Packages will be loaded from Firebase here -->
-            <div class="loading-spinner" style="grid-column: 1/-1;">
-                <div class="spinner"></div>
-                <p>প্যাকেজ লোড হচ্ছে...</p>
             </div>
         </div>
     </section>
@@ -641,186 +540,9 @@
             });
         }
 
-        // Function to load packages from Firebase
-        function loadPackagesFromFirebase() {
-            const pricingGrid = document.getElementById('pricing-grid');
-            pricingGrid.innerHTML = '<div class="loading-spinner" style="grid-column: 1/-1;"><div class="spinner"></div><p>প্যাকেজ লোড হচ্ছে...</p></div>';
-
-            // Reference to packages in Firebase
-            const packagesRef = database.ref('packages');
-            
-            packagesRef.on('value', (snapshot) => {
-                const packagesData = snapshot.val();
-                pricingGrid.innerHTML = '';
-
-                if (!packagesData) {
-                    // Show default packages if no Firebase data
-                    showDefaultPackages();
-                    return;
-                }
-
-                // Convert object to array
-                const packagesArray = Object.values(packagesData);
-                
-                // Sort packages by order if available
-                packagesArray.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-                // Create package cards
-                packagesArray.forEach(packageItem => {
-                    const pricingCard = document.createElement('div');
-                    pricingCard.className = 'pricing-card';
-                    
-                    // Add popular class if marked as popular
-                    if (packageItem.popular) {
-                        pricingCard.classList.add('popular');
-                    }
-
-                    // Generate features list
-                    let featuresHtml = '';
-                    if (packageItem.features && Array.isArray(packageItem.features)) {
-                        packageItem.features.forEach(feature => {
-                            if (feature.available) {
-                                featuresHtml += `<li><i class="fas fa-check"></i> ${feature.text}</li>`;
-                            } else {
-                                featuresHtml += `<li><i class="fas fa-times"></i> ${feature.text}</li>`;
-                            }
-                        });
-                    }
-
-                    // Create the card HTML
-                    pricingCard.innerHTML = `
-                        ${packageItem.popular ? '<div class="popular-badge">সবচেয়ে জনপ্রিয়</div>' : ''}
-                        <div class="plan-name">${packageItem.name || 'প্যাকেজ'}</div>
-                        <div class="plan-price">${packageItem.price || '৳ 500'}</div>
-                        <ul class="plan-features">
-                            ${featuresHtml || `
-                                <li><i class="fas fa-check"></i> 500 ফেসবুক অ্যাডস কয়েন</li>
-                                <li><i class="fas fa-check"></i> 1 মাস ইউটিউব প্রিমিয়াম</li>
-                                <li><i class="fas fa-check"></i> 50 ফ্রিফায়ার ডায়মন্ড</li>
-                                <li><i class="fas fa-times"></i> ইনস্টাগ্রাম ব্লু টিক</li>
-                                <li><i class="fas fa-times"></i> প্রায়োরিটি সাপোর্ট</li>
-                            `}
-                        </ul>
-                        <button class="buy-button" onclick="selectPackage('${packageItem.id || 'custom'}')">প্যাকেজ নিন</button>
-                    `;
-
-                    pricingGrid.appendChild(pricingCard);
-                });
-
-                // Add event listeners to package buttons
-                document.querySelectorAll('.pricing-card .buy-button').forEach((button, index) => {
-                    button.addEventListener('click', function() {
-                        const packageCard = this.closest('.pricing-card');
-                        const packageName = packageCard.querySelector('.plan-name').textContent;
-                        const price = packageCard.querySelector('.plan-price').textContent;
-                        
-                        alert(`আপনি নির্বাচন করেছেন: ${packageName}\nমূল্য: ${price}\n\nপেমেন্টের জন্য আমাদের সাপোর্টে যোগাযোগ করুন।`);
-                        window.open('https://easy-premium.com/Payment.html', '_blank');
-                    });
-                });
-
-                // Animate cards after loading
-                animatePackageCards();
-            }, (error) => {
-                console.error("Error loading packages:", error);
-                showDefaultPackages();
-            });
-        }
-
-        // Show default packages if Firebase fails
-        function showDefaultPackages() {
-            const pricingGrid = document.getElementById('pricing-grid');
-            pricingGrid.innerHTML = `
-                <div class="pricing-card">
-                    <div class="plan-name">বেসিক প্যাকেজ</div>
-                    <div class="plan-price">৳ 500</div>
-                    <ul class="plan-features">
-                        <li><i class="fas fa-check"></i> 500 ফেসবুক অ্যাডস কয়েন</li>
-                        <li><i class="fas fa-check"></i> 1 মাস ইউটিউব প্রিমিয়াম</li>
-                        <li><i class="fas fa-check"></i> 50 ফ্রিফায়ার ডায়মন্ড</li>
-                        <li><i class="fas fa-times"></i> ইনস্টাগ্রাম ব্লু টিক</li>
-                        <li><i class="fas fa-times"></i> প্রায়োরিটি সাপোর্ট</li>
-                    </ul>
-                    <button class="buy-button" onclick="selectPackage('basic')">প্যাকেজ নিন</button>
-                </div>
-
-                <div class="pricing-card popular">
-                    <div class="popular-badge">সবচেয়ে জনপ্রিয়</div>
-                    <div class="plan-name">প্রিমিয়াম প্যাকেজ</div>
-                    <div class="plan-price">৳ 1500</div>
-                    <ul class="plan-features">
-                        <li><i class="fas fa-check"></i> 2000 ফেসবুক অ্যাডস কয়েন</li>
-                        <li><i class="fas fa-check"></i> 6 মাস ইউটিউব প্রিমিয়াম</li>
-                        <li><i class="fas fa-check"></i> 500 ফ্রিফায়ার ডায়মন্ড</li>
-                        <li><i class="fas fa-check"></i> 1 মাস ইনস্টাগ্রাম ব্লু টিক</li>
-                        <li><i class="fas fa-check"></i> প্রায়োরিটি সাপোর্ট</li>
-                    </ul>
-                    <button class="buy-button" onclick="selectPackage('premium')">প্যাকেজ নিন</button>
-                </div>
-
-                <div class="pricing-card">
-                    <div class="plan-name">আলটিমেট প্যাকেজ</div>
-                    <div class="plan-price">৳ 3000</div>
-                    <ul class="plan-features">
-                        <li><i class="fas fa-check"></i> 5000 ফেসবুক অ্যাডস কয়েন</li>
-                        <li><i class="fas fa-check"></i> 1 বছর ইউটিউব প্রিমিয়াম</li>
-                        <li><i class="fas fa-check"></i> 1500 ফ্রিফায়ার ডায়মন্ড</li>
-                        <li><i class="fas fa-check"></i> 3 মাস ইনস্টাগ্রাম ব্লু টিক</li>
-                        <li><i class="fas fa-check"></i> 24/7 প্রায়োরিটি সাপোর্ট</li>
-                    </ul>
-                    <button class="buy-button" onclick="selectPackage('ultimate')">প্যাকেজ নিন</button>
-                </div>
-            `;
-            
-            animatePackageCards();
-        }
-
-        // Platform page redirect functions (for backward compatibility)
-        function openYouTubePage() {
-            window.open('https://easy-premium.com/YouTubePremium.html', '_blank');
-        }
-        
-        function openFacebookPage() {
-            window.open('https://easy-premium.com/FacbookPlan.html', '_blank');
-        }
-        
-        function openInstagramPage() {
-            window.open('https://easy-premium.com/InstagramPlan.html', '_blank');
-        }
-        
-        function openFreeFirePage() {
-            window.open('https://easy-premium.com/FreeFire.html', '_blank');
-        }
-
         // Show platform details
         function showPlatformDetails(platform) {
             alert(`${platform.name || 'প্ল্যাটফর্ম'}\n\nবিস্তারিত জানতে আমাদের সাপোর্টে যোগাযোগ করুন।`);
-        }
-        
-        // Package Selection (for backward compatibility)
-        function selectPackage(packageType) {
-            let packageName, price;
-            
-            switch(packageType) {
-                case 'basic':
-                    packageName = "বেসিক প্যাকেজ";
-                    price = "৳ 500";
-                    break;
-                case 'premium':
-                    packageName = "প্রিমিয়াম প্যাকেজ";
-                    price = "৳ 1500";
-                    break;
-                case 'ultimate':
-                    packageName = "আলটিমেট প্যাকেজ";
-                    price = "৳ 3000";
-                    break;
-                default:
-                    packageName = "প্যাকেজ";
-                    price = "৳ 0";
-            }
-            
-            alert(`আপনি নির্বাচন করেছেন: ${packageName}\nমূল্য: ${price}\n\nপেমেন্টের জন্য আমাদের সাপোর্টে যোগাযোগ করুন।`);
-            window.open('https://easy-premium.com/Payment.html', '_blank');
         }
         
         // Smooth Scrolling
@@ -852,24 +574,9 @@
             });
         }
         
-        function animatePackageCards() {
-            const cards = document.querySelectorAll('.pricing-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(30px)';
-                card.style.transition = 'opacity 0.8s, transform 0.8s';
-                
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 200 + 300);
-            });
-        }
-        
-        // Load platforms and packages when page loads
+        // Load platforms when page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadPlatformsFromFirebase();
-            loadPackagesFromFirebase();
         });
     </script>
 </body>
