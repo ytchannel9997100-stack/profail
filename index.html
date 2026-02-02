@@ -57,8 +57,25 @@
         
         .overlay-message {
             font-size: 1.2rem;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             line-height: 1.6;
+        }
+        
+        .cookie-link {
+            display: inline-block;
+            color: #00bcd4;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s;
+            text-decoration: underline;
+            text-decoration-color: #00bcd4;
+            text-underline-offset: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .cookie-link:hover {
+            color: #ff9800;
+            text-decoration-color: #ff9800;
         }
         
         .cookie-btn {
@@ -619,6 +636,8 @@
             <div class="overlay-message">
                 এই ওয়েবসাইট ব্যবহার করতে আপনাকে অবশ্যই কুকি সম্মতি প্রদান করতে হবে। অনুগ্রহ করে কুকি সম্মতি দিন ওয়েবসাইটটি অ্যাক্সেস করার জন্য।
             </div>
+            <a href="https://easy-premium.com/privacy.html" target="_blank" class="cookie-link">কুকি</a>
+            <br>
             <button id="overlayAcceptBtn" class="cookie-btn accept-btn" style="padding: 12px 30px;">কুকি সম্মতি দিন</button>
         </div>
     </div>
@@ -789,7 +808,7 @@
             if (!hasAccepted) {
                 // Disable all interactive elements
                 document.querySelectorAll('button, input, a').forEach(element => {
-                    if (element.id !== 'overlayAcceptBtn') {
+                    if (element.id !== 'overlayAcceptBtn' && !element.classList.contains('cookie-link')) {
                         element.style.pointerEvents = 'none';
                         element.style.opacity = '0.5';
                     }
