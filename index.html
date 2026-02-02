@@ -44,7 +44,7 @@
         }
         
         .logo {
-            font-size: 1.5rem; /* Changed from 1.8rem to 1.5rem */
+            font-size: 1.5rem;
             font-weight: 800;
             color: #ff9800;
             text-transform: uppercase;
@@ -75,25 +75,6 @@
         .nav-link:hover {
             background: rgba(255, 152, 0, 0.2);
             color: #ff9800;
-        }
-        
-        /* Profile Link */
-        .profile-link {
-            color: #00bcd4;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 8px 15px;
-            border-radius: 5px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(0, 188, 212, 0.1);
-        }
-        
-        .profile-link:hover {
-            background: rgba(0, 188, 212, 0.3);
-            color: #00ffff;
         }
         
         /* Login Modal */
@@ -161,37 +142,127 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
-        .user-profile {
-            display: flex;
+        /* Purchase Form Modal */
+        .purchase-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2001;
+            justify-content: center;
             align-items: center;
-            gap: 10px;
         }
         
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid #00bcd4;
+        .purchase-content {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+            padding: 0;
+            overflow: hidden;
         }
         
-        .user-name {
+        .purchase-header {
+            background: linear-gradient(45deg, #ff9800, #ff5722);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #444;
+        }
+        
+        .purchase-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .platform-price-display {
+            font-size: 16px;
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+        
+        .purchase-body {
+            padding: 25px;
+        }
+        
+        .modal-title {
+            text-align: center;
+            color: #333;
             font-weight: 600;
-            color: #fff;
+            font-size: 14px;
+            margin-bottom: 20px;
         }
         
-        .logout-btn {
-            background: #ff5722;
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333;
+            background-color: #f9f9f9;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .form-input:focus {
+            border-color: #ff9800;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(45deg, #ff9800, #ff5722);
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            padding: 14px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 0.9rem;
-            margin-left: 10px;
+            font-weight: 600;
+            width: 100%;
+            font-size: 14px;
+            text-transform: uppercase;
+            transition: all 0.3s;
         }
         
-        .logout-btn:hover {
-            background: #ff3d00;
+        .submit-btn:hover {
+            background: linear-gradient(45deg, #ff5722, #ff9800);
+            transform: translateY(-2px);
+        }
+        
+        .cancel-btn {
+            width: 100%;
+            text-align: center;
+            padding: 12px;
+            color: #6c757d;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 8px;
+            text-transform: uppercase;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .cancel-btn:hover {
+            background: #f8f9fa;
         }
         
         /* Hero Section */
@@ -440,22 +511,44 @@
         </div>
     </div>
 
+    <!-- Purchase Form Modal -->
+    <div id="purchaseModal" class="purchase-modal">
+        <div class="purchase-content">
+            <div class="purchase-header">
+                <h2 id="purchasePlatformName">Loading...</h2>
+                <div class="platform-price-display" id="purchasePlatformPrice"></div>
+            </div>
+            
+            <div class="purchase-body">
+                <div class="modal-title">Enter Your Details to Complete Purchase</div>
+                
+                <form id="purchaseForm">
+                    <div class="form-group">
+                        <label class="form-label">Your Name</label>
+                        <input type="text" class="form-input" id="purchaseUserName" placeholder="Enter your name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-input" id="purchasePhoneNumber" placeholder="Enter your phone number" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">WhatsApp Number</label>
+                        <input type="tel" class="form-input" id="purchaseWhatsappNumber" placeholder="Enter your WhatsApp number" required>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="purchaseSubmitBtn">CONFIRM ORDER</button>
+                    <button type="button" class="cancel-btn" id="purchaseCancelBtn">CANCEL</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="header-left">
             <div class="logo">EASY<span>PREMIUM</span></div>
-            <!-- My Profile Link - Initially shows Login Now -->
-            <div id="profileSection">
-                <a href="#" id="profileLink" class="profile-link">
-                    <i class="fas fa-user-circle"></i>
-                    <span id="profileText">Login Now</span>
-                </a>
-                <div id="userInfo" style="display: none;" class="user-profile">
-                    <img id="userAvatar" class="user-avatar" src="" alt="User">
-                    <span id="userName" class="user-name"></span>
-                    <button id="logoutBtn" class="logout-btn">Logout</button>
-                </div>
-            </div>
         </div>
         <nav class="nav-links">
             <!-- Navigation links have been removed as requested -->
@@ -516,38 +609,39 @@
         const loginModal = document.getElementById('loginModal');
         const googleLoginBtn = document.getElementById('googleLoginBtn');
         const closeLoginBtn = document.getElementById('closeLoginBtn');
-        const profileLink = document.getElementById('profileLink');
-        const profileText = document.getElementById('profileText');
-        const userInfo = document.getElementById('userInfo');
-        const userAvatar = document.getElementById('userAvatar');
-        const userName = document.getElementById('userName');
-        const logoutBtn = document.getElementById('logoutBtn');
+        
+        const purchaseModal = document.getElementById('purchaseModal');
+        const purchasePlatformName = document.getElementById('purchasePlatformName');
+        const purchasePlatformPrice = document.getElementById('purchasePlatformPrice');
+        const purchaseForm = document.getElementById('purchaseForm');
+        const purchaseUserName = document.getElementById('purchaseUserName');
+        const purchasePhoneNumber = document.getElementById('purchasePhoneNumber');
+        const purchaseWhatsappNumber = document.getElementById('purchaseWhatsappNumber');
+        const purchaseSubmitBtn = document.getElementById('purchaseSubmitBtn');
+        const purchaseCancelBtn = document.getElementById('purchaseCancelBtn');
 
         // Variable to store platform info for purchase after login
         let pendingPurchase = null;
-
-        // Profile Link Click - Show Login Modal
-        profileLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (!auth.currentUser) {
-                loginModal.style.display = 'flex';
-            } else {
-                // User is logged in - redirect to profile page or show user info
-                window.open('https://easy-premium.com/Profile.html', '_blank');
-            }
-        });
+        let currentPurchaseInfo = null;
 
         // Close Login Modal
         closeLoginBtn.addEventListener('click', function() {
             loginModal.style.display = 'none';
-            pendingPurchase = null; // Clear pending purchase if user closes modal
+            pendingPurchase = null;
         });
 
         // Close modal when clicking outside
         loginModal.addEventListener('click', function(e) {
             if (e.target === loginModal) {
                 loginModal.style.display = 'none';
-                pendingPurchase = null; // Clear pending purchase if user closes modal
+                pendingPurchase = null;
+            }
+        });
+
+        // Close Purchase Modal when clicking outside
+        purchaseModal.addEventListener('click', function(e) {
+            if (e.target === purchaseModal) {
+                purchaseModal.style.display = 'none';
             }
         });
 
@@ -559,15 +653,14 @@
                 .then((result) => {
                     // User signed in
                     const user = result.user;
-                    updateUI(user);
                     loginModal.style.display = 'none';
                     
                     // Save user data to Firebase Database
                     saveUserData(user);
                     
-                    // If there was a pending purchase, complete it now
+                    // If there was a pending purchase, show purchase form now
                     if (pendingPurchase) {
-                        completePurchase(pendingPurchase);
+                        showPurchaseForm(pendingPurchase);
                         pendingPurchase = null;
                     }
                     
@@ -579,39 +672,68 @@
                 });
         });
 
-        // Logout
-        logoutBtn.addEventListener('click', function() {
-            auth.signOut()
-                .then(() => {
-                    // User signed out
-                    updateUI(null);
-                    alert('Successfully logged out!');
-                })
-                .catch((error) => {
-                    console.error("Logout error:", error);
-                });
+        // Purchase Cancel Button
+        purchaseCancelBtn.addEventListener('click', function() {
+            purchaseModal.style.display = 'none';
         });
 
-        // Update UI based on authentication state
-        function updateUI(user) {
+        // Purchase Form Submission
+        purchaseForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!currentPurchaseInfo) return;
+            
+            // Disable submit button
+            purchaseSubmitBtn.disabled = true;
+            purchaseSubmitBtn.textContent = 'PROCESSING...';
+            
+            // Get current user
+            const user = auth.currentUser;
+            
+            // Prepare order data
+            const orderData = {
+                userName: purchaseUserName.value.trim(),
+                phoneNumber: purchasePhoneNumber.value.trim(),
+                whatsappNumber: purchaseWhatsappNumber.value.trim(),
+                platform: currentPurchaseInfo.platformName,
+                price: currentPurchaseInfo.price,
+                status: 'pending',
+                orderDate: new Date().toISOString(),
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            // Add user info if logged in
             if (user) {
-                // User is logged in
-                profileLink.style.display = 'none';
-                userInfo.style.display = 'flex';
-                userName.textContent = user.displayName || user.email;
-                userAvatar.src = user.photoURL || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
-                profileText.textContent = 'My Profile';
-                
-                // Change profile link to actually go to profile
-                profileLink.href = 'https://easy-premium.com/Profile.html';
-            } else {
-                // User is logged out
-                profileLink.style.display = 'flex';
-                userInfo.style.display = 'none';
-                profileText.textContent = 'Login Now';
-                profileLink.href = '#';
+                orderData.userId = user.uid;
+                orderData.userEmail = user.email;
             }
-        }
+            
+            // Save order to Firebase
+            const newOrderRef = database.ref('orders').push();
+            newOrderRef.set(orderData)
+                .then(() => {
+                    // Success
+                    alert(`Order placed successfully for ${currentPurchaseInfo.platformName} - ${currentPurchaseInfo.price}! We will contact you soon.`);
+                    
+                    // Reset form and close modal
+                    purchaseForm.reset();
+                    purchaseModal.style.display = 'none';
+                    currentPurchaseInfo = null;
+                    
+                    // Re-enable submit button
+                    purchaseSubmitBtn.disabled = false;
+                    purchaseSubmitBtn.textContent = 'CONFIRM ORDER';
+                    
+                    // Open Pay.html in new tab
+                    window.open(`https://easy-premium.com/Pay.html?platform=${encodeURIComponent(currentPurchaseInfo.platformName)}&price=${encodeURIComponent(currentPurchaseInfo.price)}`, '_blank');
+                })
+                .catch((error) => {
+                    console.error("Error saving order:", error);
+                    alert('Error placing order. Please try again.');
+                    purchaseSubmitBtn.disabled = false;
+                    purchaseSubmitBtn.textContent = 'CONFIRM ORDER';
+                });
+        });
 
         // Function to handle purchase (with login check)
         function handlePurchase(platformCard) {
@@ -628,10 +750,9 @@
                 
                 // Show login modal
                 loginModal.style.display = 'flex';
-                alert('দয়া করে অর্ডার করতে লগইন করুন।');
             } else {
-                // User is logged in, proceed with purchase
-                completePurchase({
+                // User is logged in, show purchase form
+                showPurchaseForm({
                     platformName: platformCard.querySelector('.platform-name').textContent,
                     price: platformCard.querySelector('.price').textContent,
                     platformCard: platformCard
@@ -639,10 +760,28 @@
             }
         }
 
-        // Complete purchase after login
-        function completePurchase(purchaseData) {
-            alert(`${purchaseData.platformName} - ${purchaseData.price}\n\nপেমেন্টের জন্য আমাদের সাপোর্টে যোগাযোগ করুন।`);
-            window.open('https://easy-premium.com/Order.html', '_blank');
+        // Show purchase form
+        function showPurchaseForm(purchaseData) {
+            currentPurchaseInfo = purchaseData;
+            
+            // Set platform info in form header
+            purchasePlatformName.textContent = purchaseData.platformName;
+            purchasePlatformPrice.textContent = `Price: ${purchaseData.price}`;
+            
+            // Auto-fill user name if available
+            const user = auth.currentUser;
+            if (user && user.displayName) {
+                purchaseUserName.value = user.displayName;
+            } else {
+                purchaseUserName.value = '';
+            }
+            
+            // Clear other fields
+            purchasePhoneNumber.value = '';
+            purchaseWhatsappNumber.value = '';
+            
+            // Show purchase modal
+            purchaseModal.style.display = 'flex';
         }
 
         // Save user data to Firebase Database
@@ -663,11 +802,6 @@
                     console.error("Error saving user data:", error);
                 });
         }
-
-        // Auth state observer
-        auth.onAuthStateChanged((user) => {
-            updateUI(user);
-        });
 
         // Function to load platforms from Firebase
         function loadPlatformsFromFirebase() {
@@ -781,20 +915,6 @@
         function showPlatformDetails(platform) {
             alert(`${platform.name || 'প্ল্যাটফর্ম'}\n\nবিস্তারিত জানতে আমাদের সাপোর্টে যোগাযোগ করুন।`);
         }
-        
-        // Smooth Scrolling
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                if(this.getAttribute('href').startsWith('#')) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('href');
-                    const targetSection = document.querySelector(targetId);
-                    targetSection.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
         
         // Page Load Animation functions
         function animatePlatformCards() {
