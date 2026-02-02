@@ -8,6 +8,7 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -93,6 +94,110 @@
         .profile-link:hover {
             background: rgba(0, 188, 212, 0.3);
             color: #00ffff;
+        }
+        
+        /* Login Modal */
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .login-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 2px solid #ff9800;
+        }
+        
+        .login-logo {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ff9800;
+        }
+        
+        .login-logo span {
+            color: #00bcd4;
+        }
+        
+        .login-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        
+        .login-subtitle {
+            color: #ddd;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+        
+        .google-login-btn {
+            background: white;
+            color: #333;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .google-login-btn:hover {
+            background: #f1f1f1;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #00bcd4;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .logout-btn {
+            background: #ff5722;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+        
+        .logout-btn:hover {
+            background: #ff3d00;
         }
         
         /* Hero Section */
@@ -328,15 +433,38 @@
     </style>
 </head>
 <body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-content">
+            <div class="login-logo">EASY<span>PREMIUM</span></div>
+            <h2 class="login-title">WELCOME TO EASY PREMIUM</h2>
+            <p class="login-subtitle">Join tournaments and win real money</p>
+            <button id="googleLoginBtn" class="google-login-btn">
+                <i class="fab fa-google"></i>
+                Sign in with Google
+            </button>
+            <button id="closeLoginBtn" style="background: transparent; color: #ddd; border: 1px solid #666; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                Close
+            </button>
+        </div>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="header-left">
             <div class="logo">EASY<span>PREMIUM</span></div>
-            <!-- My Profile Link -->
-            <a href="https://easy-premium.com/Profile.html" target="_blank" class="profile-link">
-                <i class="fas fa-user-circle"></i>
-                <span>My Profile</span>
-            </a>
+            <!-- My Profile Link - Initially shows Login Now -->
+            <div id="profileSection">
+                <a href="#" id="profileLink" class="profile-link">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="profileText">Login Now</span>
+                </a>
+                <div id="userInfo" style="display: none;" class="user-profile">
+                    <img id="userAvatar" class="user-avatar" src="" alt="User">
+                    <span id="userName" class="user-name"></span>
+                    <button id="logoutBtn" class="logout-btn">Logout</button>
+                </div>
+            </div>
         </div>
         <nav class="nav-links">
             <!-- Navigation links have been removed as requested -->
@@ -380,7 +508,7 @@
     </footer>
 
     <script>
-        // Firebase Configuration
+        // Firebase Configuration - Add your own config
         const firebaseConfig = {
             apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
             authDomain: "top-up-4db01.firebaseapp.com",
@@ -393,6 +521,121 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const auth = firebase.auth();
+
+        // DOM Elements
+        const loginModal = document.getElementById('loginModal');
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const closeLoginBtn = document.getElementById('closeLoginBtn');
+        const profileLink = document.getElementById('profileLink');
+        const profileText = document.getElementById('profileText');
+        const userInfo = document.getElementById('userInfo');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Profile Link Click - Show Login Modal
+        profileLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (!auth.currentUser) {
+                loginModal.style.display = 'flex';
+            } else {
+                // User is logged in - redirect to profile page or show user info
+                window.open('https://easy-premium.com/Profile.html', '_blank');
+            }
+        });
+
+        // Close Login Modal
+        closeLoginBtn.addEventListener('click', function() {
+            loginModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        loginModal.addEventListener('click', function(e) {
+            if (e.target === loginModal) {
+                loginModal.style.display = 'none';
+            }
+        });
+
+        // Google Login
+        googleLoginBtn.addEventListener('click', function() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    // User signed in
+                    const user = result.user;
+                    updateUI(user);
+                    loginModal.style.display = 'none';
+                    
+                    // Save user data to Firebase Database
+                    saveUserData(user);
+                    
+                    alert('Successfully logged in with Google!');
+                })
+                .catch((error) => {
+                    console.error("Login error:", error);
+                    alert('Login failed. Please try again.');
+                });
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', function() {
+            auth.signOut()
+                .then(() => {
+                    // User signed out
+                    updateUI(null);
+                    alert('Successfully logged out!');
+                })
+                .catch((error) => {
+                    console.error("Logout error:", error);
+                });
+        });
+
+        // Update UI based on authentication state
+        function updateUI(user) {
+            if (user) {
+                // User is logged in
+                profileLink.style.display = 'none';
+                userInfo.style.display = 'flex';
+                userName.textContent = user.displayName || user.email;
+                userAvatar.src = user.photoURL || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
+                profileText.textContent = 'My Profile';
+                
+                // Change profile link to actually go to profile
+                profileLink.href = 'https://easy-premium.com/Profile.html';
+            } else {
+                // User is logged out
+                profileLink.style.display = 'flex';
+                userInfo.style.display = 'none';
+                profileText.textContent = 'Login Now';
+                profileLink.href = '#';
+            }
+        }
+
+        // Save user data to Firebase Database
+        function saveUserData(user) {
+            const userId = user.uid;
+            const userData = {
+                name: user.displayName,
+                email: user.email,
+                photoURL: user.photoURL,
+                lastLogin: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            database.ref('users/' + userId).set(userData)
+                .then(() => {
+                    console.log("User data saved successfully");
+                })
+                .catch((error) => {
+                    console.error("Error saving user data:", error);
+                });
+        }
+
+        // Auth state observer
+        auth.onAuthStateChanged((user) => {
+            updateUI(user);
+        });
 
         // Function to load platforms from Firebase
         function loadPlatformsFromFirebase() {
