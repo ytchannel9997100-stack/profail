@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>কুকি নীতি - Easy Premium</title>
+    <title>Easy Premium - প্রিমিয়াম প্যাকেজ কিনুন</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -17,7 +21,84 @@
             background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
             min-height: 100vh;
             color: #fff;
+        }
+        
+        /* Website Blur Overlay */
+        .website-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 9998;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .overlay-content {
+            max-width: 500px;
+            background: rgba(26, 26, 46, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            border: 2px solid #ff9800;
+        }
+        
+        .overlay-icon {
+            font-size: 3rem;
+            color: #ff9800;
+            margin-bottom: 20px;
+        }
+        
+        .overlay-message {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
             line-height: 1.6;
+        }
+        
+        .privacy-link {
+            display: block;
+            margin-bottom: 30px;
+            color: #00bcd4;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s;
+            text-decoration: underline;
+            text-decoration-color: #00bcd4;
+            text-underline-offset: 4px;
+        }
+        
+        .privacy-link:hover {
+            color: #ff9800;
+            text-decoration-color: #ff9800;
+        }
+        
+        .cookie-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        
+        .accept-btn {
+            background: linear-gradient(45deg, #ff9800, #ff5722);
+            color: white;
+            border: none;
+        }
+        
+        .accept-btn:hover {
+            background: linear-gradient(45deg, #ff5722, #ff9800);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
         }
         
         /* Header */
@@ -46,14 +127,18 @@
             color: #ff9800;
             text-transform: uppercase;
             letter-spacing: 1px;
-            text-decoration: none;
         }
         
         .logo span {
             color: #00bcd4;
         }
         
-        .back-btn {
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .nav-link {
             color: #fff;
             text-decoration: none;
             font-weight: 600;
@@ -65,88 +150,362 @@
             gap: 8px;
         }
         
-        .back-btn:hover {
+        .nav-link:hover {
             background: rgba(255, 152, 0, 0.2);
             color: #ff9800;
         }
         
-        /* Cookie Policy Container */
-        .cookie-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
+        /* Login Modal */
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
         }
         
-        .cookie-header {
+        .login-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 40px;
+            border-radius: 15px;
             text-align: center;
-            margin-bottom: 40px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 2px solid #ff9800;
         }
         
-        .cookie-header h1 {
-            font-size: 2.5rem;
+        /* EASYPREMIUM লোগোর সাইজ ছোট করা হয়েছে */
+        .login-logo {
+            font-size: 2rem; /* আগে ছিল 2.5rem, এখন 2rem */
+            margin-bottom: 20px;
             color: #ff9800;
-            margin-bottom: 10px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            line-height: 1.2;
         }
         
-        .cookie-icon {
-            font-size: 4rem;
-            color: #ff9800;
+        .login-logo span {
+            color: #00bcd4;
+        }
+        
+        .login-title {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        
+        .google-login-btn {
+            background: white;
+            color: #333;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            transition: all 0.3s;
             margin-bottom: 20px;
         }
         
-        /* Cookie Content */
-        .cookie-content {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        .google-login-btn:hover {
+            background: #f1f1f1;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
-        .cookie-section {
-            margin-bottom: 30px;
+        /* Purchase Form Modal */
+        .purchase-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2001;
+            justify-content: center;
+            align-items: center;
         }
         
-        .cookie-section h2 {
-            color: #ff9800;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
-            border-left: 4px solid #ff9800;
-            padding-left: 15px;
+        .purchase-content {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+            padding: 0;
+            overflow: hidden;
         }
         
-        .cookie-section p {
-            margin-bottom: 15px;
-            color: #ddd;
-            text-align: justify;
-        }
-        
-        .simple-info-box {
-            background: rgba(255, 152, 0, 0.1);
-            border-radius: 10px;
-            padding: 25px;
-            margin: 25px 0;
+        .purchase-header {
+            background: linear-gradient(45deg, #ff9800, #ff5722);
+            color: white;
+            padding: 20px;
             text-align: center;
+            border-bottom: 1px solid #444;
         }
         
-        .simple-info-box h3 {
-            color: #ff9800;
-            margin-bottom: 15px;
-            font-size: 1.3rem;
+        .purchase-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
         }
         
-        .important-note {
-            background: rgba(255, 152, 0, 0.15);
-            border: 2px solid #ff9800;
+        .platform-price-display {
+            font-size: 16px;
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+        
+        .purchase-body {
             padding: 25px;
-            margin: 25px 0;
-            border-radius: 10px;
-            text-align: center;
         }
         
-        .important-note p {
-            color: #fff;
+        .modal-title {
+            text-align: center;
+            color: #333;
             font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333;
+            background-color: #f9f9f9;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .form-input:focus {
+            border-color: #ff9800;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(45deg, #ff9800, #ff5722);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            font-size: 14px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background: linear-gradient(45deg, #ff5722, #ff9800);
+            transform: translateY(-2px);
+        }
+        
+        .cancel-btn {
+            width: 100%;
+            text-align: center;
+            padding: 12px;
+            color: #6c757d;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 8px;
+            text-transform: uppercase;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .cancel-btn:hover {
+            background: #f8f9fa;
+        }
+        
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ff9800;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            color: #ddd;
+            line-height: 1.6;
+        }
+        
+        /* Platforms Grid */
+        .platforms-section {
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 40px;
+            color: #ff9800;
+            position: relative;
+        }
+        
+        .platforms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .platform-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .platform-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            border-color: #ff9800;
+        }
+        
+        .platform-header {
+            padding: 25px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .platform-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .platform-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .platform-description {
+            padding: 20px;
+            color: #ddd;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .platform-features {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #b0bec5;
+        }
+        
+        .feature i {
+            color: #4caf50;
+            margin-right: 10px;
+        }
+        
+        .platform-price {
+            padding: 20px;
+            text-align: center;
+            background: rgba(255, 152, 0, 0.1);
+            border-top: 1px solid rgba(255, 152, 0, 0.3);
+        }
+        
+        .price {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ff9800;
+            margin-bottom: 5px;
+        }
+        
+        .price-desc {
+            color: #b0bec5;
+            font-size: 0.9rem;
+        }
+        
+        .buy-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ff9800, #ff5722);
+            color: white;
+            border: none;
             font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .buy-button:hover {
+            background: linear-gradient(45deg, #ff5722, #ff9800);
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ff9800;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         /* Footer */
@@ -154,7 +513,6 @@
             background: rgba(0, 0, 0, 0.9);
             padding: 40px 20px;
             text-align: center;
-            margin-top: 60px;
         }
         
         .social-links {
@@ -183,140 +541,182 @@
         /* Responsive */
         @media (max-width: 768px) {
             .header {
+                flex-direction: column;
                 padding: 15px;
             }
             
-            .cookie-header h1 {
+            .header-left {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-links {
+                margin-top: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .hero h1 {
                 font-size: 2rem;
             }
             
-            .cookie-content {
-                padding: 25px;
+            .platforms-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             }
             
-            .cookie-section h2 {
+            /* মোবাইলের জন্য EASYPREMIUM লেখার সাইজ আরও ছোট */
+            .login-logo {
+                font-size: 1.8rem; /* মোবাইলে আরও ছোট */
+                line-height: 1.1;
+                padding: 0 10px;
+            }
+            
+            .login-title {
                 font-size: 1.3rem;
+            }
+            
+            .website-overlay {
+                padding: 10px;
+            }
+            
+            .overlay-content {
+                padding: 30px 20px;
+                margin: 0 15px;
             }
         }
         
+        /* Extra small screens */
         @media (max-width: 480px) {
-            .cookie-content {
-                padding: 20px;
+            .login-logo {
+                font-size: 1.6rem; /* খুব ছোট স্ক্রিনে আরও ছোট */
+                letter-spacing: 0.5px;
             }
             
-            .cookie-header h1 {
-                font-size: 1.8rem;
+            .login-title {
+                font-size: 1.2rem;
             }
             
-            .cookie-icon {
-                font-size: 3rem;
+            .google-login-btn {
+                padding: 12px 20px;
+                font-size: 0.9rem;
             }
             
-            .simple-info-box, .important-note {
-                padding: 20px;
+            .login-content {
+                padding: 30px 20px;
+                margin: 0 15px;
+            }
+            
+            .overlay-content {
+                padding: 20px 15px;
+            }
+            
+            .overlay-message {
+                font-size: 1rem;
             }
         }
+        
+        /* Platform Specific Colors */
+        .youtube { color: #FF0000; }
+        .facebook { color: #1877F2; }
+        .instagram { color: #E4405F; }
+        .tiktok { color: #000000; }
+        .whatsapp { color: #25D366; }
+        .telegram { color: #0088cc; }
+        .freefire { color: #FF8800; }
+        .netflix { color: #E50914; }
+        .spotify { color: #1DB954; }
+        .pubg { color: #F9A602; }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-left">
-            <a href="index.html" class="logo">EASY<span>PREMIUM</span></a>
+    <!-- Website Overlay (when cookies not accepted) -->
+    <div id="websiteOverlay" class="website-overlay">
+        <div class="overlay-content">
+            <i class="fas fa-cookie-bite overlay-icon"></i>
+            <div class="overlay-message">
+                এই ওয়েবসাইট ব্যবহার করতে আপনাকে অবশ্যই কুকি সম্মতি প্রদান করতে হবে। অনুগ্রহ করে কুকি সম্মতি দিন ওয়েবসাইটটি অ্যাক্সেস করার জন্য।
+            </div>
+            <a href="https://easy-premium.com/privacy.html" target="_blank" class="privacy-link">কুকিতে</a>
+            <button id="overlayAcceptBtn" class="cookie-btn accept-btn" style="padding: 12px 30px;">কুকি সম্মতি দিন</button>
         </div>
-        <nav>
-            <a href="index.html" class="back-btn">
-                <i class="fas fa-arrow-left"></i>
-                হোমপেজে ফিরে যান
-            </a>
-        </nav>
-    </header>
+    </div>
 
-    <!-- Cookie Policy Container -->
-    <div class="cookie-container">
-        <div class="cookie-header">
-            <div class="cookie-icon">
-                <i class="fas fa-cookie-bite"></i>
-            </div>
-            <h1>কুকি সম্মতি সম্পর্কে</h1>
-            <div class="last-updated">সরল ব্যাখ্যা</div>
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-content">
+            <div class="login-logo">EASY<span>PREMIUM</span></div>
+            <h2 class="login-title">WELCOME TO EASY PREMIUM</h2>
+            <button id="googleLoginBtn" class="google-login-btn">
+                <i class="fab fa-google"></i>
+                Sign in with Google
+            </button>
+            <button id="closeLoginBtn" style="background: transparent; color: #ddd; border: 1px solid #666; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                Close
+            </button>
         </div>
-        
-        <div class="cookie-content">
-            <div class="cookie-section">
-                <h2>কুকি কী?</h2>
-                <p>কুকি হলো ছোট ছোট ফাইল যা ওয়েবসাইট আপনার ডিভাইসে সংরক্ষণ করে। এটি ওয়েবসাইটকে আপনার পছন্দ মনে রাখতে এবং আপনার অভিজ্ঞতা উন্নত করতে সাহায্য করে।</p>
+    </div>
+
+    <!-- Purchase Form Modal -->
+    <div id="purchaseModal" class="purchase-modal">
+        <div class="purchase-content">
+            <div class="purchase-header">
+                <h2 id="purchasePlatformName">Loading...</h2>
+                <div class="platform-price-display" id="purchasePlatformPrice"></div>
+            </div>
+            
+            <div class="purchase-body">
+                <div class="modal-title">Enter Your Details to Complete Purchase</div>
                 
-                <div class="simple-info-box">
-                    <h3>সহজ উদাহরণ:</h3>
-                    <p>আপনি যখন লগইন করেন, কুকি আপনাকে লগইন অবস্থায় রাখে যাতে বারবার পাসওয়ার্ড দিতে না হয়।</p>
-                </div>
-            </div>
-            
-            <div class="cookie-section">
-                <h2>আমরা কেন কুকি ব্যবহার করি?</h2>
-                <p>Easy Premium ওয়েবসাইট শুধুমাত্র নিম্নলিখিত কারণে কুকি ব্যবহার করে:</p>
-                <ul style="margin-left: 20px; color: #ddd; margin-bottom: 20px;">
-                    <li style="margin-bottom: 10px;">ওয়েবসাইটটি সঠিকভাবে কাজ করার জন্য</li>
-                    <li style="margin-bottom: 10px;">আপনার লগইন তথ্য নিরাপদে রাখার জন্য</li>
-                    <li style="margin-bottom: 10px;">আপনার অর্ডার প্রক্রিয়াকরণের জন্য</li>
-                    <li style="margin-bottom: 10px;">ওয়েবসাইটের ব্যবহার বিশ্লেষণের জন্য</li>
-                </ul>
-            </div>
-            
-            <div class="important-note">
-                <p>❗ Easy Premium ওয়েবসাইট ব্যবহার করতে হলে কুকি সম্মতি বাধ্যতামূলক।</p>
-            </div>
-            
-            <div class="cookie-section">
-                <h2>কুকি সম্মতি কীভাবে দেবেন?</h2>
-                <p>খুব সহজ তিনটি ধাপ:</p>
-                <ol style="margin-left: 20px; color: #ddd; margin-bottom: 20px;">
-                    <li style="margin-bottom: 10px;">ওয়েবসাইটে প্রবেশ করুন</li>
-                    <li style="margin-bottom: 10px;">নিচে দেখানো "সব গ্রহণ করুন" বাটনে ক্লিক করুন</li>
-                    <li style="margin-bottom: 10px;">সম্পূর্ণ ওয়েবসাইট ব্যবহার উপভোগ করুন</li>
-                </ol>
-            </div>
-            
-            <div class="cookie-section">
-                <h2>কুকি বন্ধ করলে কী হবে?</h2>
-                <p>আপনি যদি কুকি গ্রহণ না করেন বা ব্রাউজার থেকে কুকি বন্ধ করেন, তাহলে:</p>
-                <ul style="margin-left: 20px; color: #ddd; margin-bottom: 20px;">
-                    <li style="margin-bottom: 10px;">লগইন করতে পারবেন না</li>
-                    <li style="margin-bottom: 10px;">কোনো প্রিমিয়াম প্যাকেজ কিনতে পারবেন না</li>
-                    <li style="margin-bottom: 10px;">ওয়েবসাইটের অনেক বৈশিষ্ট্য কাজ করবে না</li>
-                    <li style="margin-bottom: 10px;">আপনার পছন্দ সংরক্ষিত হবে না</li>
-                </ul>
-            </div>
-            
-            <div class="simple-info-box">
-                <h3>গুরুত্বপূর্ণ তথ্য:</h3>
-                <p>Easy Premium শুধুমাত্র ওয়েবসাইট কাজ করার জন্য প্রয়োজনীয় কুকি ব্যবহার করে। আমরা কোনো তৃতীয় পক্ষের সাথে আপনার তথ্য শেয়ার করি না বা বিজ্ঞাপনের জন্য কুকি ব্যবহার করি না।</p>
-            </div>
-            
-            <div class="cookie-section">
-                <h2>আপনার নিরাপত্তা</h2>
-                <p>আপনার গোপনীয়তা আমাদের কাছে খুবই গুরুত্বপূর্ণ। আমরা:</p>
-                <ul style="margin-left: 20px; color: #ddd; margin-bottom: 20px;">
-                    <li style="margin-bottom: 10px;">শুধুমাত্র প্রয়োজনীয় তথ্য সংগ্রহ করি</li>
-                    <li style="margin-bottom: 10px;">তথ্য নিরাপদভাবে সংরক্ষণ করি</li>
-                    <li style="margin-bottom: 10px;">তথ্য শেয়ার করি না</li>
-                    <li style="margin-bottom: 10px;">নিয়মিত নিরাপত্তা পরীক্ষা করি</li>
-                </ul>
-            </div>
-            
-            <div class="cookie-section">
-                <h2>আরও তথ্যের জন্য</h2>
-                <p>কুকি বা গোপনীয়তা সম্পর্কে আরও জানতে আমাদের গোপনীয়তা নীতি পড়ুন অথবা সরাসরি যোগাযোগ করুন:</p>
-                <div style="text-align: center; margin-top: 20px;">
-                    <p style="margin-top: 20px; color: #b0bec5;">
-                        ইমেইল: privacy@easy-premium.com<br>
-                        হেল্পলাইন: +880 1XXX-XXXXXX
-                    </p>
-                </div>
+                <form id="purchaseForm">
+                    <div class="form-group">
+                        <label class="form-label">Your Name</label>
+                        <input type="text" class="form-input" id="purchaseUserName" placeholder="Enter your name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-input" id="purchasePhoneNumber" placeholder="Enter your phone number" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">WhatsApp Number</label>
+                        <input type="tel" class="form-input" id="purchaseWhatsappNumber" placeholder="Enter your WhatsApp number" required>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="purchaseSubmitBtn">CONFIRM ORDER</button>
+                    <button type="button" class="cancel-btn" id="purchaseCancelBtn">CANCEL</button>
+                </form>
             </div>
         </div>
     </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">EASY<span>PREMIUM</span></div>
+        </div>
+        <nav class="nav-links">
+            <!-- Navigation links have been removed as requested -->
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>সবচেয়ে সস্তায় প্রিমিয়াম কিনুন</h1>
+        <p>ইউটিউব, ফেসবুক, ইনস্টাগ্রাম, ফ্রিফায়ার সহ সব প্ল্যাটফর্মের জন্য অটেন্টিক প্রিমিয়াম একাউন্ট, ডায়মন্ড এবং কয়েন। ১০০% সেফ ও গ্যারান্টিড।</p>
+    </section>
+
+    <!-- Platforms Section -->
+    <section id="platforms" class="platforms-section">
+        <h2 class="section-title"></h2>
+        <div id="platforms-grid" class="platforms-grid">
+            <!-- Platforms will be loaded from Firebase here -->
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>প্ল্যাটফর্ম লোড হচ্ছে...</p>
+            </div>
+        </div>
+    </section>
 
     <!-- Footer -->
     <footer class="footer">
@@ -333,5 +733,554 @@
             কন্টাক্ট: support@easy-premium.com | হেল্পলাইন: +880 1XXX-XXXXXX
         </div>
     </footer>
+
+    <script>
+        // Cookie Consent Logic
+        const websiteOverlay = document.getElementById('websiteOverlay');
+        const overlayAcceptBtn = document.getElementById('overlayAcceptBtn');
+        
+        // Check if user has already accepted cookies
+        function checkCookieConsent() {
+            const cookieAccepted = localStorage.getItem('cookieAccepted');
+            
+            if (cookieAccepted === 'true') {
+                // User has accepted cookies, hide overlay
+                websiteOverlay.style.display = 'none';
+                return true;
+            } else if (cookieAccepted === 'false') {
+                // User has rejected cookies, show overlay
+                websiteOverlay.style.display = 'flex';
+                return false;
+            } else {
+                // First time user, show overlay
+                websiteOverlay.style.display = 'flex';
+                return false;
+            }
+        }
+        
+        // Accept all cookies
+        function acceptAllCookies() {
+            localStorage.setItem('cookieAccepted', 'true');
+            websiteOverlay.style.display = 'none';
+            
+            // Also set a cookie with 30 days expiry
+            setCookie('user_consent', 'accepted_all', 30);
+            
+            // Log to console (for testing)
+            console.log('Cookies accepted');
+            
+            // Reload the page to enable all features
+            location.reload();
+        }
+        
+        // Set a cookie
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+        
+        // Get a cookie
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+        
+        // Event listener for cookie button
+        overlayAcceptBtn.addEventListener('click', acceptAllCookies);
+        
+        // Check cookie consent on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const hasAccepted = checkCookieConsent();
+            
+            // If user hasn't accepted cookies, disable website functionality
+            if (!hasAccepted) {
+                // Disable all interactive elements
+                document.querySelectorAll('button, input, a').forEach(element => {
+                    if (element.id !== 'overlayAcceptBtn' && !element.classList.contains('privacy-link')) {
+                        element.style.pointerEvents = 'none';
+                        element.style.opacity = '0.5';
+                    }
+                });
+            } else {
+                // Enable all interactive elements
+                document.querySelectorAll('button, input, a').forEach(element => {
+                    element.style.pointerEvents = 'auto';
+                    element.style.opacity = '1';
+                });
+            }
+        });
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
+            authDomain: "top-up-4db01.firebaseapp.com",
+            databaseURL: "https://top-up-4db01-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "top-up-4db01",
+            storageBucket: "top-up-4db01.appspot.com",
+            messagingSenderId: "264548197473",
+            appId: "1:264548197473:web:abcd1234efgh5678"
+        };
+
+        // Initialize Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+        } catch (error) {
+            console.log("Firebase already initialized");
+        }
+        
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // DOM Elements
+        const loginModal = document.getElementById('loginModal');
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const closeLoginBtn = document.getElementById('closeLoginBtn');
+        
+        const purchaseModal = document.getElementById('purchaseModal');
+        const purchasePlatformName = document.getElementById('purchasePlatformName');
+        const purchasePlatformPrice = document.getElementById('purchasePlatformPrice');
+        const purchaseForm = document.getElementById('purchaseForm');
+        const purchaseUserName = document.getElementById('purchaseUserName');
+        const purchasePhoneNumber = document.getElementById('purchasePhoneNumber');
+        const purchaseWhatsappNumber = document.getElementById('purchaseWhatsappNumber');
+        const purchaseSubmitBtn = document.getElementById('purchaseSubmitBtn');
+        const purchaseCancelBtn = document.getElementById('purchaseCancelBtn');
+
+        // Variables
+        let pendingPurchase = null;
+        let currentPurchaseInfo = null;
+
+        // Close Login Modal
+        closeLoginBtn.addEventListener('click', function() {
+            loginModal.style.display = 'none';
+            pendingPurchase = null;
+        });
+
+        // Close modals when clicking outside
+        loginModal.addEventListener('click', function(e) {
+            if (e.target === loginModal) {
+                loginModal.style.display = 'none';
+                pendingPurchase = null;
+            }
+        });
+
+        purchaseModal.addEventListener('click', function(e) {
+            if (e.target === purchaseModal) {
+                purchaseModal.style.display = 'none';
+            }
+        });
+
+        // Google Login - Check cookie consent first
+        googleLoginBtn.addEventListener('click', function() {
+            if (!checkCookieConsent()) {
+                websiteOverlay.style.display = 'flex';
+                return;
+            }
+            
+            const provider = new firebase.auth.GoogleAuthProvider();
+            
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    const user = result.user;
+                    loginModal.style.display = 'none';
+                    
+                    // Save user data
+                    saveUserData(user);
+                    
+                    // If there was a pending purchase, show purchase form now
+                    if (pendingPurchase) {
+                        showPurchaseForm(pendingPurchase);
+                        pendingPurchase = null;
+                    }
+                })
+                .catch((error) => {
+                    console.error("Login error:", error);
+                });
+        });
+
+        // Purchase Cancel Button
+        purchaseCancelBtn.addEventListener('click', function() {
+            purchaseModal.style.display = 'none';
+            currentPurchaseInfo = null;
+        });
+
+        // Purchase Form Submission - NO CONFIRMATION MESSAGES
+        purchaseForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Check cookie consent first
+            if (!checkCookieConsent()) {
+                websiteOverlay.style.display = 'flex';
+                return;
+            }
+            
+            if (!currentPurchaseInfo) return;
+            
+            // Basic validation
+            if (!purchaseUserName.value.trim()) {
+                purchaseUserName.focus();
+                return;
+            }
+            
+            if (!purchasePhoneNumber.value.trim()) {
+                purchasePhoneNumber.focus();
+                return;
+            }
+            
+            if (!purchaseWhatsappNumber.value.trim()) {
+                purchaseWhatsappNumber.focus();
+                return;
+            }
+            
+            // Disable submit button
+            purchaseSubmitBtn.disabled = true;
+            purchaseSubmitBtn.textContent = 'PROCESSING...';
+            
+            try {
+                // Get current user
+                const user = auth.currentUser;
+                
+                // Prepare order data
+                const orderData = {
+                    userName: purchaseUserName.value.trim(),
+                    phoneNumber: purchasePhoneNumber.value.trim(),
+                    whatsappNumber: purchaseWhatsappNumber.value.trim(),
+                    platform: currentPurchaseInfo.platformName,
+                    price: currentPurchaseInfo.price,
+                    status: 'pending',
+                    orderDate: new Date().toISOString(),
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
+                
+                // Add user info if logged in
+                if (user) {
+                    orderData.userId = user.uid;
+                    orderData.userEmail = user.email;
+                }
+                
+                // Try to save order to Firebase
+                const newOrderRef = database.ref('orders').push();
+                await newOrderRef.set(orderData);
+                
+                // NO SUCCESS MESSAGE - directly proceed
+                
+                // Reset form immediately
+                purchaseForm.reset();
+                
+                // Open Pay.html in new tab immediately
+                window.open(`https://easy-premium.com/Pay.html?platform=${encodeURIComponent(currentPurchaseInfo.platformName)}&price=${encodeURIComponent(currentPurchaseInfo.price)}&orderId=${newOrderRef.key}`, '_blank');
+                
+                // Close modal immediately
+                purchaseModal.style.display = 'none';
+                currentPurchaseInfo = null;
+                
+                // Re-enable submit button
+                purchaseSubmitBtn.disabled = false;
+                purchaseSubmitBtn.textContent = 'CONFIRM ORDER';
+                
+            } catch (error) {
+                // Silent fail - no error messages shown
+                console.error("Error:", error);
+                
+                // Open Pay.html directly even if Firebase fails
+                window.open(`https://easy-premium.com/Pay.html?platform=${encodeURIComponent(currentPurchaseInfo.platformName)}&price=${encodeURIComponent(currentPurchaseInfo.price)}`, '_blank');
+                
+                // Reset form and close modal
+                purchaseForm.reset();
+                purchaseModal.style.display = 'none';
+                currentPurchaseInfo = null;
+                
+                // Re-enable submit button
+                purchaseSubmitBtn.disabled = false;
+                purchaseSubmitBtn.textContent = 'CONFIRM ORDER';
+            }
+        });
+
+        // Function to handle purchase (with login check AND cookie check)
+        function handlePurchase(platformCard) {
+            // First check cookie consent
+            if (!checkCookieConsent()) {
+                websiteOverlay.style.display = 'flex';
+                return;
+            }
+            
+            if (!auth.currentUser) {
+                // User not logged in, store purchase info and show login modal
+                const platformName = platformCard.querySelector('.platform-name').textContent;
+                const price = platformCard.querySelector('.price').textContent;
+                
+                pendingPurchase = {
+                    platformName: platformName,
+                    price: price,
+                    platformCard: platformCard
+                };
+                
+                // Show login modal
+                loginModal.style.display = 'flex';
+            } else {
+                // User is logged in, show purchase form
+                showPurchaseForm({
+                    platformName: platformCard.querySelector('.platform-name').textContent,
+                    price: platformCard.querySelector('.price').textContent,
+                    platformCard: platformCard
+                });
+            }
+        }
+
+        // Show purchase form
+        function showPurchaseForm(purchaseData) {
+            currentPurchaseInfo = purchaseData;
+            
+            // Set platform info in form header
+            purchasePlatformName.textContent = purchaseData.platformName;
+            purchasePlatformPrice.textContent = `Price: ${purchaseData.price}`;
+            
+            // Auto-fill user name if available
+            const user = auth.currentUser;
+            if (user && user.displayName) {
+                purchaseUserName.value = user.displayName;
+            } else {
+                purchaseUserName.value = '';
+            }
+            
+            // Clear other fields
+            purchasePhoneNumber.value = '';
+            purchaseWhatsappNumber.value = '';
+            
+            // Show purchase modal
+            purchaseModal.style.display = 'flex';
+        }
+
+        // Save user data to Firebase Database
+        function saveUserData(user) {
+            const userId = user.uid;
+            const userData = {
+                name: user.displayName,
+                email: user.email,
+                photoURL: user.photoURL,
+                lastLogin: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            database.ref('users/' + userId).set(userData)
+                .then(() => {
+                    console.log("User data saved successfully");
+                })
+                .catch((error) => {
+                    console.error("Error saving user data:", error);
+                });
+        }
+
+        // Function to load platforms from Firebase
+        function loadPlatformsFromFirebase() {
+            const platformsGrid = document.getElementById('platforms-grid');
+            platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে...</p></div>';
+
+            // Reference to platforms in Firebase
+            const platformsRef = database.ref('platforms');
+            
+            platformsRef.on('value', (snapshot) => {
+                const platformsData = snapshot.val();
+                platformsGrid.innerHTML = '';
+
+                if (!platformsData) {
+                    // Use default platforms if Firebase is empty
+                    createDefaultPlatforms();
+                    return;
+                }
+
+                // Convert object to array
+                const platformsArray = Object.values(platformsData);
+                
+                // Sort platforms by order if available
+                platformsArray.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+                // Create platform cards
+                platformsArray.forEach(platform => {
+                    createPlatformCard(platform);
+                });
+
+                // Add event listeners to buy buttons
+                document.querySelectorAll('.platform-card .buy-button').forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const platformCard = this.closest('.platform-card');
+                        handlePurchase(platformCard);
+                    });
+                });
+
+                // Animate cards after loading
+                animatePlatformCards();
+            }, (error) => {
+                console.error("Error loading platforms:", error);
+                // Create default platforms if Firebase fails
+                createDefaultPlatforms();
+            });
+        }
+
+        // Create default platforms if Firebase fails
+        function createDefaultPlatforms() {
+            const platformsGrid = document.getElementById('platforms-grid');
+            platformsGrid.innerHTML = '';
+            
+            const defaultPlatforms = [
+                {
+                    name: 'YouTube Premium',
+                    icon: 'youtube',
+                    description: 'Ad-free videos, background play, and YouTube Music Premium',
+                    price: '৳ 299/month',
+                    features: ['Ad-free videos', 'Background play', 'YouTube Music Premium', 'Offline downloads']
+                },
+                {
+                    name: 'Facebook Blueprint',
+                    icon: 'facebook',
+                    description: 'Advanced marketing tools and analytics for businesses',
+                    price: '৳ 499/month',
+                    features: ['Advanced analytics', 'Cross-platform integration', 'Priority support', 'Custom tools']
+                },
+                {
+                    name: 'Instagram Blueprint',
+                    icon: 'instagram',
+                    description: 'Perfect for individual creators and influencers',
+                    price: '৳ 399/month',
+                    features: ['Advanced analytics', 'Scheduling features', 'Customer insights', 'Priority posting']
+                },
+                {
+                    name: 'Netflix Premium',
+                    icon: 'netflix',
+                    description: 'Watch Netflix on 4 screens at once in Ultra HD',
+                    price: '৳ 799/month',
+                    features: ['4 screens at once', 'Ultra HD available', 'Watch anywhere', 'Cancel anytime']
+                }
+            ];
+            
+            defaultPlatforms.forEach(platform => {
+                createPlatformCard(platform);
+            });
+            
+            // Add event listeners to buy buttons
+            document.querySelectorAll('.platform-card .buy-button').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const platformCard = this.closest('.platform-card');
+                    handlePurchase(platformCard);
+                });
+            });
+            
+            animatePlatformCards();
+        }
+
+        // Create a platform card
+        function createPlatformCard(platform) {
+            const platformsGrid = document.getElementById('platforms-grid');
+            const platformCard = document.createElement('div');
+            platformCard.className = 'platform-card';
+            
+            // Platform icon class mapping
+            const iconClasses = {
+                'youtube': 'fab fa-youtube youtube',
+                'facebook': 'fab fa-facebook-f facebook',
+                'instagram': 'fab fa-instagram instagram',
+                'tiktok': 'fab fa-tiktok tiktok',
+                'whatsapp': 'fab fa-whatsapp whatsapp',
+                'telegram': 'fab fa-telegram telegram',
+                'freefire': 'fas fa-fire freefire',
+                'netflix': 'fab fa-netflix netflix',
+                'spotify': 'fab fa-spotify spotify',
+                'pubg': 'fas fa-gamepad pubg',
+                'default': 'fas fa-cube'
+            };
+
+            const iconClass = iconClasses[platform.icon] || iconClasses.default;
+
+            platformCard.innerHTML = `
+                <div class="platform-header">
+                    <i class="${iconClass} platform-icon"></i>
+                    <div class="platform-name">${platform.name || 'প্ল্যাটফর্ম'}</div>
+                </div>
+                <div class="platform-description">
+                    ${platform.description || 'প্রিমিয়াম সেবা পান সবচেয়ে কম দামে।'}
+                </div>
+                <div class="platform-features">
+                    ${platform.features ? platform.features.map(feature => `
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>${feature}</span>
+                        </div>
+                    `).join('') : `
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>ইনস্ট্যান্ট ডেলিভারি</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>১০০% সেফ</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>গ্যারান্টিড</span>
+                        </div>
+                    `}
+                </div>
+                <div class="platform-price">
+                    <div class="price">${platform.price || '৳ 100'}</div>
+                    <div class="price-desc">বাল্ক অর্ডারে ডিস্কাউন্ট</div>
+                </div>
+                <button class="buy-button">কিনুন</button>
+            `;
+
+            platformsGrid.appendChild(platformCard);
+        }
+
+        // Show platform details
+        function showPlatformDetails(platform) {
+            // No alert shown for platform details
+        }
+        
+        // Page Load Animation functions
+        function animatePlatformCards() {
+            const cards = document.querySelectorAll('.platform-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'opacity 0.8s, transform 0.8s';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        }
+        
+        // Load platforms when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check cookie consent first
+            const hasAccepted = checkCookieConsent();
+            
+            if (hasAccepted) {
+                // Only load platforms if cookies are accepted
+                loadPlatformsFromFirebase();
+            } else {
+                // Show loading message for platforms
+                const platformsGrid = document.getElementById('platforms-grid');
+                platformsGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+                        <i class="fas fa-cookie-bite" style="font-size: 3rem; color: #ff9800; margin-bottom: 20px;"></i>
+                        <p style="font-size: 1.2rem;">কুকি সম্মতি প্রদান করুন প্ল্যাটফর্ম দেখতে</p>
+                    </div>
+                `;
+            }
+        });
+    </script>
 </body>
 </html>
