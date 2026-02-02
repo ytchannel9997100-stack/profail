@@ -23,6 +23,67 @@
             color: #fff;
         }
         
+        /* Website Blur Overlay */
+        .website-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 9998;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .overlay-content {
+            max-width: 500px;
+            background: rgba(26, 26, 46, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            border: 2px solid #ff9800;
+        }
+        
+        .overlay-icon {
+            font-size: 3rem;
+            color: #ff9800;
+            margin-bottom: 20px;
+        }
+        
+        .overlay-message {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .cookie-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        
+        .accept-btn {
+            background: linear-gradient(45deg, #ff9800, #ff5722);
+            color: white;
+            border: none;
+        }
+        
+        .accept-btn:hover {
+            background: linear-gradient(45deg, #ff5722, #ff9800);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+        }
+        
         /* Header */
         .header {
             background: rgba(0, 0, 0, 0.8);
@@ -496,6 +557,15 @@
             .login-title {
                 font-size: 1.3rem;
             }
+            
+            .website-overlay {
+                padding: 10px;
+            }
+            
+            .overlay-content {
+                padding: 30px 20px;
+                margin: 0 15px;
+            }
         }
         
         /* Extra small screens */
@@ -518,6 +588,14 @@
                 padding: 30px 20px;
                 margin: 0 15px;
             }
+            
+            .overlay-content {
+                padding: 20px 15px;
+            }
+            
+            .overlay-message {
+                font-size: 1rem;
+            }
         }
         
         /* Platform Specific Colors */
@@ -534,6 +612,17 @@
     </style>
 </head>
 <body>
+    <!-- Website Overlay (when cookies not accepted) -->
+    <div id="websiteOverlay" class="website-overlay">
+        <div class="overlay-content">
+            <i class="fas fa-cookie-bite overlay-icon"></i>
+            <div class="overlay-message">
+                এই ওয়েবসাইট ব্যবহার করতে আপনাকে অবশ্যই কুকি সম্মতি প্রদান করতে হবে। অনুগ্রহ করে কুকি সম্মতি দিন ওয়েবসাইটটি অ্যাক্সেস করার জন্য।
+            </div>
+            <button id="overlayAcceptBtn" class="cookie-btn accept-btn" style="padding: 12px 30px;">কুকি সম্মতি দিন</button>
+        </div>
+    </div>
+
     <!-- Login Modal -->
     <div id="loginModal" class="login-modal">
         <div class="login-content">
@@ -628,6 +717,92 @@
     </footer>
 
     <script>
+        // Cookie Consent Logic
+        const websiteOverlay = document.getElementById('websiteOverlay');
+        const overlayAcceptBtn = document.getElementById('overlayAcceptBtn');
+        
+        // Check if user has already accepted cookies
+        function checkCookieConsent() {
+            const cookieAccepted = localStorage.getItem('cookieAccepted');
+            
+            if (cookieAccepted === 'true') {
+                // User has accepted cookies, hide overlay
+                websiteOverlay.style.display = 'none';
+                return true;
+            } else if (cookieAccepted === 'false') {
+                // User has rejected cookies, show overlay
+                websiteOverlay.style.display = 'flex';
+                return false;
+            } else {
+                // First time user, show overlay
+                websiteOverlay.style.display = 'flex';
+                return false;
+            }
+        }
+        
+        // Accept all cookies
+        function acceptAllCookies() {
+            localStorage.setItem('cookieAccepted', 'true');
+            websiteOverlay.style.display = 'none';
+            
+            // Also set a cookie with 30 days expiry
+            setCookie('user_consent', 'accepted_all', 30);
+            
+            // Log to console (for testing)
+            console.log('Cookies accepted');
+            
+            // Reload the page to enable all features
+            location.reload();
+        }
+        
+        // Set a cookie
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+        
+        // Get a cookie
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+        
+        // Event listener for cookie button
+        overlayAcceptBtn.addEventListener('click', acceptAllCookies);
+        
+        // Check cookie consent on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const hasAccepted = checkCookieConsent();
+            
+            // If user hasn't accepted cookies, disable website functionality
+            if (!hasAccepted) {
+                // Disable all interactive elements
+                document.querySelectorAll('button, input, a').forEach(element => {
+                    if (element.id !== 'overlayAcceptBtn') {
+                        element.style.pointerEvents = 'none';
+                        element.style.opacity = '0.5';
+                    }
+                });
+            } else {
+                // Enable all interactive elements
+                document.querySelectorAll('button, input, a').forEach(element => {
+                    element.style.pointerEvents = 'auto';
+                    element.style.opacity = '1';
+                });
+            }
+        });
+
         // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
@@ -688,8 +863,13 @@
             }
         });
 
-        // Google Login
+        // Google Login - Check cookie consent first
         googleLoginBtn.addEventListener('click', function() {
+            if (!checkCookieConsent()) {
+                websiteOverlay.style.display = 'flex';
+                return;
+            }
+            
             const provider = new firebase.auth.GoogleAuthProvider();
             
             auth.signInWithPopup(provider)
@@ -720,6 +900,12 @@
         // Purchase Form Submission - NO CONFIRMATION MESSAGES
         purchaseForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            // Check cookie consent first
+            if (!checkCookieConsent()) {
+                websiteOverlay.style.display = 'flex';
+                return;
+            }
             
             if (!currentPurchaseInfo) return;
             
@@ -803,8 +989,14 @@
             }
         });
 
-        // Function to handle purchase (with login check)
+        // Function to handle purchase (with login check AND cookie check)
         function handlePurchase(platformCard) {
+            // First check cookie consent
+            if (!checkCookieConsent()) {
+                websiteOverlay.style.display = 'flex';
+                return;
+            }
+            
             if (!auth.currentUser) {
                 // User not logged in, store purchase info and show login modal
                 const platformName = platformCard.querySelector('.platform-name').textContent;
@@ -1054,7 +1246,22 @@
         
         // Load platforms when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            loadPlatformsFromFirebase();
+            // Check cookie consent first
+            const hasAccepted = checkCookieConsent();
+            
+            if (hasAccepted) {
+                // Only load platforms if cookies are accepted
+                loadPlatformsFromFirebase();
+            } else {
+                // Show loading message for platforms
+                const platformsGrid = document.getElementById('platforms-grid');
+                platformsGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+                        <i class="fas fa-cookie-bite" style="font-size: 3rem; color: #ff9800; margin-bottom: 20px;"></i>
+                        <p style="font-size: 1.2rem;">কুকি সম্মতি প্রদান করুন প্ল্যাটফর্ম দেখতে</p>
+                    </div>
+                `;
+            }
         });
     </script>
 </body>
