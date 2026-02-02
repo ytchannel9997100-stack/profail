@@ -34,7 +34,6 @@
             z-index: 9999;
             display: none;
             backdrop-filter: blur(10px);
-            /* হলুদ লম্বা লাইনটি ডিলিট করা হয়েছে */
         }
         
         .cookie-content {
@@ -229,10 +228,15 @@
             border: 2px solid #ff9800;
         }
         
+        /* EASYPREMIUM লোগোর সাইজ ছোট করা হয়েছে */
         .login-logo {
-            font-size: 2.5rem;
+            font-size: 2rem; /* আগে ছিল 2.5rem, এখন 2rem */
             margin-bottom: 20px;
             color: #ff9800;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            line-height: 1.2;
         }
         
         .login-logo span {
@@ -625,6 +629,39 @@
             .cookie-btn {
                 flex: 1;
                 padding: 12px;
+            }
+            
+            /* মোবাইলের জন্য EASYPREMIUM লেখার সাইজ আরও ছোট */
+            .login-logo {
+                font-size: 1.8rem; /* মোবাইলে আরও ছোট */
+                line-height: 1.1;
+                padding: 0 10px;
+            }
+            
+            .login-title {
+                font-size: 1.3rem;
+            }
+        }
+        
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            .login-logo {
+                font-size: 1.6rem; /* খুব ছোট স্ক্রিনে আরও ছোট */
+                letter-spacing: 0.5px;
+            }
+            
+            .login-title {
+                font-size: 1.2rem;
+            }
+            
+            .google-login-btn {
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .login-content {
+                padding: 30px 20px;
+                margin: 0 15px;
             }
         }
         
