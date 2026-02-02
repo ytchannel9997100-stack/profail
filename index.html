@@ -133,14 +133,8 @@
         
         .login-title {
             font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #fff;
-        }
-        
-        .login-subtitle {
-            color: #ddd;
             margin-bottom: 30px;
-            font-size: 0.9rem;
+            color: #fff;
         }
         
         .google-login-btn {
@@ -438,7 +432,6 @@
         <div class="login-content">
             <div class="login-logo">EASY<span>PREMIUM</span></div>
             <h2 class="login-title">WELCOME TO EASY PREMIUM</h2>
-            <p class="login-subtitle">Join tournaments and win real money</p>
             <button id="googleLoginBtn" class="google-login-btn">
                 <i class="fab fa-google"></i>
                 Sign in with Google
@@ -534,6 +527,9 @@
         const userName = document.getElementById('userName');
         const logoutBtn = document.getElementById('logoutBtn');
 
+        // Variable to store platform info for purchase after login
+        let pendingPurchase = null;
+
         // Profile Link Click - Show Login Modal
         profileLink.addEventListener('click', function(e) {
             e.preventDefault();
@@ -548,12 +544,14 @@
         // Close Login Modal
         closeLoginBtn.addEventListener('click', function() {
             loginModal.style.display = 'none';
+            pendingPurchase = null; // Clear pending purchase if user closes modal
         });
 
         // Close modal when clicking outside
         loginModal.addEventListener('click', function(e) {
             if (e.target === loginModal) {
                 loginModal.style.display = 'none';
+                pendingPurchase = null; // Clear pending purchase if user closes modal
             }
         });
 
@@ -570,6 +568,12 @@
                     
                     // Save user data to Firebase Database
                     saveUserData(user);
+                    
+                    // If there was a pending purchase, complete it now
+                    if (pendingPurchase) {
+                        completePurchase(pendingPurchase);
+                        pendingPurchase = null;
+                    }
                     
                     alert('Successfully logged in with Google!');
                 })
@@ -611,6 +615,38 @@
                 profileText.textContent = 'Login Now';
                 profileLink.href = '#';
             }
+        }
+
+        // Function to handle purchase (with login check)
+        function handlePurchase(platformCard) {
+            if (!auth.currentUser) {
+                // User not logged in, store purchase info and show login modal
+                const platformName = platformCard.querySelector('.platform-name').textContent;
+                const price = platformCard.querySelector('.price').textContent;
+                
+                pendingPurchase = {
+                    platformName: platformName,
+                    price: price,
+                    platformCard: platformCard
+                };
+                
+                // Show login modal
+                loginModal.style.display = 'flex';
+                alert('দয়া করে অর্ডার করতে লগইন করুন।');
+            } else {
+                // User is logged in, proceed with purchase
+                completePurchase({
+                    platformName: platformCard.querySelector('.platform-name').textContent,
+                    price: platformCard.querySelector('.price').textContent,
+                    platformCard: platformCard
+                });
+            }
+        }
+
+        // Complete purchase after login
+        function completePurchase(purchaseData) {
+            alert(`${purchaseData.platformName} - ${purchaseData.price}\n\nপেমেন্টের জন্য আমাদের সাপোর্টে যোগাযোগ করুন।`);
+            window.open('https://easy-premium.com/Order.html', '_blank');
         }
 
         // Save user data to Firebase Database
@@ -733,11 +769,7 @@
                     button.addEventListener('click', function(e) {
                         e.stopPropagation();
                         const platformCard = this.closest('.platform-card');
-                        const platformName = platformCard.querySelector('.platform-name').textContent;
-                        const price = platformCard.querySelector('.price').textContent;
-                        
-                        alert(`${platformName} - ${price}\n\nপেমেন্টের জন্য আমাদের সাপোর্টে যোগাযোগ করুন।`);
-                        window.open('https://easy-premium.com/Order.html', '_blank');
+                        handlePurchase(platformCard);
                     });
                 });
 
