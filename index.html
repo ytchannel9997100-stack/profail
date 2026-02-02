@@ -265,16 +265,6 @@
             background: #f8f9fa;
         }
         
-        .success-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            text-align: center;
-            display: none;
-        }
-        
         /* Hero Section */
         .hero {
             text-align: center;
@@ -530,10 +520,6 @@
             </div>
             
             <div class="purchase-body">
-                <div id="successMessage" class="success-message">
-                    <i class="fas fa-check-circle"></i> Order placed successfully! We will contact you soon.
-                </div>
-                
                 <div class="modal-title">Enter Your Details to Complete Purchase</div>
                 
                 <form id="purchaseForm">
@@ -604,7 +590,7 @@
     </footer>
 
     <script>
-        // Firebase Configuration - Working Config
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
             authDomain: "top-up-4db01.firebaseapp.com",
@@ -639,7 +625,6 @@
         const purchaseWhatsappNumber = document.getElementById('purchaseWhatsappNumber');
         const purchaseSubmitBtn = document.getElementById('purchaseSubmitBtn');
         const purchaseCancelBtn = document.getElementById('purchaseCancelBtn');
-        const successMessage = document.getElementById('successMessage');
 
         // Variables
         let pendingPurchase = null;
@@ -682,12 +667,9 @@
                         showPurchaseForm(pendingPurchase);
                         pendingPurchase = null;
                     }
-                    
-                    alert('Successfully logged in with Google!');
                 })
                 .catch((error) => {
                     console.error("Login error:", error);
-                    alert('Login failed. Please try again.');
                 });
         });
 
@@ -697,7 +679,7 @@
             currentPurchaseInfo = null;
         });
 
-        // Purchase Form Submission - UPDATED ERROR-FREE VERSION
+        // Purchase Form Submission - NO CONFIRMATION MESSAGES
         purchaseForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -705,19 +687,16 @@
             
             // Basic validation
             if (!purchaseUserName.value.trim()) {
-                alert('Please enter your name');
                 purchaseUserName.focus();
                 return;
             }
             
             if (!purchasePhoneNumber.value.trim()) {
-                alert('Please enter your phone number');
                 purchasePhoneNumber.focus();
                 return;
             }
             
             if (!purchaseWhatsappNumber.value.trim()) {
-                alert('Please enter your WhatsApp number');
                 purchaseWhatsappNumber.focus();
                 return;
             }
@@ -748,38 +727,31 @@
                     orderData.userEmail = user.email;
                 }
                 
-                // Save order to Firebase using try-catch
+                // Try to save order to Firebase
                 const newOrderRef = database.ref('orders').push();
                 await newOrderRef.set(orderData);
                 
-                // Show success message
-                successMessage.style.display = 'block';
+                // NO SUCCESS MESSAGE - directly proceed
                 
-                // Wait 2 seconds then proceed
-                setTimeout(() => {
-                    // Reset form
-                    purchaseForm.reset();
-                    successMessage.style.display = 'none';
-                    
-                    // Open Pay.html in new tab
-                    window.open(`https://easy-premium.com/Pay.html?platform=${encodeURIComponent(currentPurchaseInfo.platformName)}&price=${encodeURIComponent(currentPurchaseInfo.price)}&orderId=${newOrderRef.key}`, '_blank');
-                    
-                    // Close modal
-                    purchaseModal.style.display = 'none';
-                    currentPurchaseInfo = null;
-                    
-                    // Re-enable submit button
-                    purchaseSubmitBtn.disabled = false;
-                    purchaseSubmitBtn.textContent = 'CONFIRM ORDER';
-                }, 2000);
+                // Reset form immediately
+                purchaseForm.reset();
+                
+                // Open Pay.html in new tab immediately
+                window.open(`https://easy-premium.com/Pay.html?platform=${encodeURIComponent(currentPurchaseInfo.platformName)}&price=${encodeURIComponent(currentPurchaseInfo.price)}&orderId=${newOrderRef.key}`, '_blank');
+                
+                // Close modal immediately
+                purchaseModal.style.display = 'none';
+                currentPurchaseInfo = null;
+                
+                // Re-enable submit button
+                purchaseSubmitBtn.disabled = false;
+                purchaseSubmitBtn.textContent = 'CONFIRM ORDER';
                 
             } catch (error) {
+                // Silent fail - no error messages shown
                 console.error("Error:", error);
                 
-                // Fallback: Directly open Pay.html if Firebase fails
-                alert('Order received! We will contact you soon.');
-                
-                // Open Pay.html directly
+                // Open Pay.html directly even if Firebase fails
                 window.open(`https://easy-premium.com/Pay.html?platform=${encodeURIComponent(currentPurchaseInfo.platformName)}&price=${encodeURIComponent(currentPurchaseInfo.price)}`, '_blank');
                 
                 // Reset form and close modal
@@ -834,10 +806,9 @@
                 purchaseUserName.value = '';
             }
             
-            // Clear other fields and hide success message
+            // Clear other fields
             purchasePhoneNumber.value = '';
             purchaseWhatsappNumber.value = '';
-            successMessage.style.display = 'none';
             
             // Show purchase modal
             purchaseModal.style.display = 'flex';
@@ -1025,7 +996,7 @@
 
         // Show platform details
         function showPlatformDetails(platform) {
-            alert(`${platform.name || 'প্ল্যাটফর্ম'}\n\nবিস্তারিত জানতে আমাদের সাপোর্টে যোগাযোগ করুন।`);
+            // No alert shown for platform details
         }
         
         // Page Load Animation functions
