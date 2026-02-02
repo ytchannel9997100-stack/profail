@@ -108,17 +108,6 @@
             position: relative;
         }
         
-        .section-title::after {
-            content: '';
-            position: absolute;
-            width: 100px;
-            height: 3px;
-            background: #00bcd4;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
         .platforms-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -335,7 +324,7 @@
 
     <!-- Platforms Section -->
     <section id="platforms" class="platforms-section">
-        <h2 class="section-title">আপনার পছন্দের প্ল্যাটফর্ম</h2>
+        <h2 class="section-title"></h2>
         <div id="platforms-grid" class="platforms-grid">
             <!-- Platforms will be loaded from Firebase here -->
             <div class="loading-spinner">
