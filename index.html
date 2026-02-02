@@ -36,6 +36,12 @@
             backdrop-filter: blur(10px);
         }
         
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        
         .logo {
             font-size: 1.8rem;
             font-weight: 800;
@@ -68,6 +74,25 @@
         .nav-link:hover {
             background: rgba(255, 152, 0, 0.2);
             color: #ff9800;
+        }
+        
+        /* Profile Link */
+        .profile-link {
+            color: #00bcd4;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 188, 212, 0.1);
+        }
+        
+        .profile-link:hover {
+            background: rgba(0, 188, 212, 0.3);
+            color: #00ffff;
         }
         
         /* Hero Section */
@@ -269,6 +294,11 @@
                 padding: 15px;
             }
             
+            .header-left {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
             .nav-links {
                 margin-top: 15px;
                 flex-wrap: wrap;
@@ -300,7 +330,14 @@
 <body>
     <!-- Header -->
     <header class="header">
-        <div class="logo">EASY<span>PREMIUM</span></div>
+        <div class="header-left">
+            <div class="logo">EASY<span>PREMIUM</span></div>
+            <!-- My Profile Link -->
+            <a href="https://easy-premium.com/Profile.html" target="_blank" class="profile-link">
+                <i class="fas fa-user-circle"></i>
+                <span>My Profile</span>
+            </a>
+        </div>
         <nav class="nav-links">
             <!-- Navigation links have been removed as requested -->
         </nav>
