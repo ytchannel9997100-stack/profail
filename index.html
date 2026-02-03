@@ -846,6 +846,16 @@
         .netflix { color: #E50914; }
         .spotify { color: #1DB954; }
         .pubg { color: #F9A602; }
+
+        /* Hide scrollbar for profile modal */
+        .profile-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .profile-content {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
     </style>
 </head>
 <body>
