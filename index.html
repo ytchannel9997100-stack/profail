@@ -214,16 +214,24 @@
         }
         
         .profile-avatar {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #ff9800, #ff5722);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 2rem;
             font-weight: bold;
             color: white;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .profile-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
         }
         
         .user-details {
@@ -760,6 +768,16 @@
                 gap: 15px;
             }
             
+            .user-info-container {
+                width: 100%;
+            }
+            
+            .profile-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 1.7rem;
+            }
+            
             .profile-actions {
                 align-self: flex-end;
                 width: 100%;
@@ -820,18 +838,15 @@
                 font-size: 1rem;
             }
             
-            .user-info-container {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
             .profile-actions {
                 flex-direction: column;
                 width: 100%;
+                gap: 8px;
             }
             
             .logout-btn-profile, .delete-account-btn {
                 width: 100%;
+                padding: 12px;
             }
         }
         
@@ -892,7 +907,7 @@
             <div class="profile-header">
                 <div class="user-info-container">
                     <div class="profile-avatar" id="profileAvatar">
-                        <!-- First letter will be added here -->
+                        <!-- Profile picture or initial will be added here -->
                     </div>
                     <div class="user-details">
                         <div class="profile-name" id="profileName">Loading...</div>
@@ -1135,6 +1150,23 @@
         let pendingPurchase = null;
         let currentPurchaseInfo = null;
         let userOrders = [];
+
+        // Function to generate color based on name
+        function getColorFromName(name) {
+            // List of attractive colors
+            const colors = [
+                '#FF6B6B', '#4ECDC4', '#FFD166', '#06D6A0', '#118AB2',
+                '#EF476F', '#FFD166', '#06D6A0', '#118AB2', '#073B4C',
+                '#7209B7', '#3A86FF', '#FB5607', '#8338EC', '#FF006E'
+            ];
+            
+            // Get the first character's code to pick a color
+            if (!name || name.length === 0) return colors[0];
+            
+            const charCode = name.charCodeAt(0);
+            const colorIndex = charCode % colors.length;
+            return colors[colorIndex];
+        }
 
         // Three dots icon click handler
         threeDotsIcon.addEventListener('click', function() {
@@ -1406,15 +1438,40 @@
             if (!user) return;
             
             // Set basic user info
-            profileName.textContent = user.displayName || "User";
+            const userName = user.displayName || "User";
+            profileName.textContent = userName;
             profileEmail.textContent = user.email;
             
-            // Set avatar with first letter
-            const firstName = user.displayName ? user.displayName.charAt(0).toUpperCase() : "U";
-            profileAvatar.innerHTML = `<span style="font-size: 1.5rem; font-weight: bold;">${firstName}</span>`;
+            // Clear and set profile avatar
+            profileAvatar.innerHTML = '';
+            
+            if (user.photoURL) {
+                // If user has profile photo, show it
+                const img = document.createElement('img');
+                img.src = user.photoURL;
+                img.alt = userName;
+                img.className = 'profile-avatar-img';
+                img.onerror = function() {
+                    // If image fails to load, show initial
+                    showInitialAvatar(userName);
+                };
+                profileAvatar.appendChild(img);
+            } else {
+                // If no photo, show initial with colored background
+                showInitialAvatar(userName);
+            }
             
             // Load user orders
             loadUserOrders(user.uid);
+        }
+
+        // Function to show initial avatar with colored background
+        function showInitialAvatar(userName) {
+            const firstName = userName ? userName.charAt(0).toUpperCase() : "U";
+            const color = getColorFromName(userName);
+            
+            profileAvatar.style.background = color;
+            profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: bold;">${firstName}</span>`;
         }
 
         // Load user orders from Firebase
