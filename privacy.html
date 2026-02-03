@@ -229,96 +229,20 @@
             font-size: 1.2rem;
         }
         
-        /* Contact Card */
-        .contact-card {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border-radius: 16px;
-            padding: 35px;
-            color: white;
-            text-align: center;
-            margin-top: 40px;
-        }
-        
-        .contact-title {
-            font-size: 1.8rem;
-            margin-bottom: 25px;
-            font-weight: 700;
-        }
-        
-        .contact-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 25px;
-        }
-        
-        .contact-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 12px;
-            backdrop-filter: blur(5px);
-        }
-        
-        .contact-item i {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #fbbf24;
-        }
-        
         /* Footer */
         .footer {
             background: #1e293b;
             color: white;
-            padding: 50px 25px 30px;
+            padding: 40px 25px 30px;
             margin-top: 60px;
-        }
-        
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-        
-        .footer-section h3 {
-            color: #fbbf24;
-            font-size: 1.3rem;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-        
-        .social-links {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .social-link {
-            width: 42px;
-            height: 42px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        
-        .social-link:hover {
-            background: #3b82f6;
-            transform: translateY(-3px);
+            text-align: center;
         }
         
         .copyright {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
             color: #cbd5e1;
             font-size: 0.95rem;
+            line-height: 1.6;
         }
         
         /* Responsive Design */
@@ -341,10 +265,6 @@
             
             .section-title {
                 font-size: 1.4rem;
-            }
-            
-            .contact-details {
-                grid-template-columns: 1fr;
             }
         }
         
@@ -389,7 +309,6 @@
         .section-card:nth-child(5) { animation-delay: 0.4s; }
         .section-card:nth-child(6) { animation-delay: 0.5s; }
         .section-card:nth-child(7) { animation-delay: 0.6s; }
-        .section-card:nth-child(8) { animation-delay: 0.7s; }
     </style>
 </head>
 <body>
@@ -542,7 +461,7 @@
                         <div class="list-item">পাবলিক ওয়াই-ফাই সতর্কতা: পাবলিক বা উন্মুক্ত ওয়াই-ফাই ব্যবহার করে ব্যাংকিং বা গুরুত্বপূর্ণ লগইন করবেন না।</div>
                         <div class="list-item">অ্যাকাউন্ট রিকভারি তথ্য: একটি সঠিক এবং সচল মোবাইল নম্বর বা ইমেইল আইডি অ্যাকাউন্টের সাথে যুক্ত রাখুন।</div>
                         <div class="list-item">লগআউট করা: অন্য কারো ডিভাইস বা কম্পিউটার ব্যবহার করলে কাজ শেষে অবশ্যই লগআউট করুন।</div>
-                        <div class="list-item">অ্যাপস ও ব্যক্তিগত তথ্য: সোশ্যাল মিডিয়ায় অতিরিক্ত ব্যক্তিগত তথ্য শেয়ার করা থেকে বিরত থাকুন।</div>
+                        <div class="list-item">অ্যাপস ও ব্যক্তিগত তথ্য: সোশ্যাল মিডিয়ায় অতিরিক্ত ব্যক্তিগত তথ্য শেয়ার করা থেকে বিরত থাকুন।</div>
                     </div>
                 </div>
             </section>
@@ -569,62 +488,10 @@
                 </div>
             </section>
         </div>
-        
-        <!-- Contact Section -->
-        <section class="contact-card">
-            <h2 class="contact-title">আরও তথ্যের জন্য যোগাযোগ করুন</h2>
-            <p>আমাদের গোপনীয়তা নীতি সম্পর্কে আরও জানতে বা প্রশ্ন থাকলে সরাসরি যোগাযোগ করুন:</p>
-            
-            <div class="contact-details">
-                <div class="contact-item">
-                    <i class="fas fa-envelope"></i>
-                    <h4>ইমেইল</h4>
-                    <p>mdashikislam017705@gmail.com</p>
-                </div>
-                <div class="contact-item">
-                    <i class="fas fa-phone-alt"></i>
-                    <h4>হেল্পলাইন</h4>
-                    <p>+8801770584994</p>
-                </div>
-                <div class="contact-item">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <h4>ঠিকানা</h4>
-                    <p>গাইবান্ধা জেলার, সুন্দরগঞ্জ<br>উপজেলার অন্তর্ভুক্ত</p>
-                </div>
-            </div>
-        </section>
     </div>
     
     <!-- Footer -->
     <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>Easy Premium</h3>
-                <p>আপনার ডিজিটাল নিরাপত্তা আমাদের অগ্রাধিকার। আমরা সর্বোচ্চ গোপনীয়তা এবং নিরাপত্তা নিশ্চিত করি।</p>
-                <div class="social-links">
-                    <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
-                </div>
-            </div>
-            
-            <div class="footer-section">
-                <h3>দ্রুত লিংক</h3>
-                <p><a href="index.html" style="color: #cbd5e1; text-decoration: none;">হোমপেজ</a></p>
-                <p><a href="#" style="color: #cbd5e1; text-decoration: none;">সেবাসমূহ</a></p>
-                <p><a href="#" style="color: #cbd5e1; text-decoration: none;">যোগাযোগ</a></p>
-            </div>
-            
-            <div class="footer-section">
-                <h3>যোগাযোগ তথ্য</h3>
-                <p><i class="fas fa-envelope"></i> mdashikislam017705@gmail.com</p>
-                <p><i class="fas fa-phone"></i> +8801770584994</p>
-                <p><i class="fas fa-map-marker-alt"></i> গাইবান্ধা জেলা, বাংলাদেশ</p>
-            </div>
-        </div>
-        
         <div class="copyright">
             © ২০২৬ Easy Premium. সর্বস্বত্ব সংরক্ষিত।<br>
             এই ওয়েবসাইটের সমস্ত কন্টেন্ট কপিরাইট আইনের অধীন।
