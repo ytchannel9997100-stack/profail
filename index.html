@@ -280,9 +280,9 @@
             box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
         }
         
-        /* Achievements Section */
-        .achievements-section {
-            margin-bottom: 30px;
+        /* Orders Section */
+        .orders-section {
+            margin-top: 20px;
         }
         
         .section-title {
@@ -291,38 +291,6 @@
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 1px solid rgba(0, 188, 212, 0.3);
-        }
-        
-        .achievements-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        
-        .achievement-box {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            border: 1px solid rgba(255, 152, 0, 0.3);
-        }
-        
-        .achievement-label {
-            color: #b0bec5;
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-        }
-        
-        .achievement-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #ff9800;
-        }
-        
-        /* Orders Table */
-        .orders-section {
-            margin-top: 30px;
         }
         
         .orders-table {
@@ -786,10 +754,6 @@
                 max-height: 90vh;
             }
             
-            .achievements-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
             .profile-header {
                 flex-direction: column;
                 align-items: flex-start;
@@ -854,10 +818,6 @@
             
             .overlay-message {
                 font-size: 1rem;
-            }
-            
-            .achievements-grid {
-                grid-template-columns: 1fr;
             }
             
             .user-info-container {
@@ -932,28 +892,6 @@
                 <div class="profile-actions">
                     <button id="logoutBtnProfile" class="logout-btn-profile">লগ আউট</button>
                     <button id="deleteAccountBtn" class="delete-account-btn">অ্যাকাউন্ট ডিলিট</button>
-                </div>
-            </div>
-            
-            <div class="achievements-section">
-                <div class="section-title">অর্জন রিশিষ্ট</div>
-                <div class="achievements-grid">
-                    <div class="achievement-box">
-                        <div class="achievement-label">মোট অর্ডার</div>
-                        <div class="achievement-value" id="totalOrders">0</div>
-                    </div>
-                    <div class="achievement-box">
-                        <div class="achievement-label">মোট অর্জন</div>
-                        <div class="achievement-value" id="totalEarnings">৳ 0</div>
-                    </div>
-                    <div class="achievement-box">
-                        <div class="achievement-label">মোট ব্যয়</div>
-                        <div class="achievement-value" id="totalSpent">৳ 0</div>
-                    </div>
-                    <div class="achievement-box">
-                        <div class="achievement-label">সফল অর্ডার</div>
-                        <div class="achievement-value" id="successOrders">0</div>
-                    </div>
                 </div>
             </div>
             
@@ -1171,11 +1109,6 @@
         const logoutBtnProfile = document.getElementById('logoutBtnProfile');
         const deleteAccountBtn = document.getElementById('deleteAccountBtn');
         
-        // Statistics elements
-        const totalOrders = document.getElementById('totalOrders');
-        const totalEarnings = document.getElementById('totalEarnings');
-        const totalSpent = document.getElementById('totalSpent');
-        const successOrders = document.getElementById('successOrders');
         const ordersList = document.getElementById('ordersList');
         
         const purchaseModal = document.getElementById('purchaseModal');
@@ -1485,7 +1418,6 @@
                     
                     if (!ordersData) {
                         ordersList.innerHTML = '<div class="no-orders">আপনার কোন অর্ডার নেই</div>';
-                        updateStats();
                         return;
                     }
                     
@@ -1502,7 +1434,6 @@
                     
                     // Display orders
                     displayOrders(ordersArray);
-                    updateStats();
                 })
                 .catch((error) => {
                     console.error("Error loading orders:", error);
@@ -1573,37 +1504,6 @@
             `;
             
             ordersList.innerHTML = html;
-        }
-
-        // Update statistics
-        function updateStats() {
-            const total = userOrders.length;
-            let spent = 0;
-            let success = 0;
-            
-            userOrders.forEach(order => {
-                // Extract numeric value from price string
-                if (order.price) {
-                    const priceStr = order.price.toString();
-                    const priceMatch = priceStr.match(/(\d+)/);
-                    if (priceMatch) {
-                        const priceNum = parseInt(priceMatch[1]);
-                        if (!isNaN(priceNum)) {
-                            spent += priceNum;
-                        }
-                    }
-                }
-                
-                // Count successful orders
-                if (order.status === 'success' || order.status === 'completed') {
-                    success++;
-                }
-            });
-            
-            totalOrders.textContent = total;
-            totalEarnings.textContent = `৳ ${success * 100}`; // Placeholder for earnings calculation
-            totalSpent.textContent = `৳ ${spent.toLocaleString('bn-BD')}`;
-            successOrders.textContent = success;
         }
 
         // Function to load platforms from Firebase
