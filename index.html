@@ -242,10 +242,12 @@
             font-size: 0.9rem;
         }
         
-        .logout-btn-profile {
-            background: linear-gradient(45deg, #ff5722, #ff9800);
-            color: white;
-            border: none;
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .logout-btn-profile, .delete-account-btn {
             padding: 10px 20px;
             border-radius: 8px;
             font-weight: 600;
@@ -253,12 +255,29 @@
             transition: all 0.3s;
             font-size: 0.9rem;
             white-space: nowrap;
+            border: none;
+        }
+        
+        .logout-btn-profile {
+            background: linear-gradient(45deg, #ff5722, #ff9800);
+            color: white;
         }
         
         .logout-btn-profile:hover {
             background: linear-gradient(45deg, #ff9800, #ff5722);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(255, 87, 34, 0.3);
+        }
+        
+        .delete-account-btn {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: white;
+        }
+        
+        .delete-account-btn:hover {
+            background: linear-gradient(45deg, #c82333, #dc3545);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
         }
         
         /* Achievements Section */
@@ -777,8 +796,10 @@
                 gap: 15px;
             }
             
-            .logout-btn-profile {
+            .profile-actions {
                 align-self: flex-end;
+                width: 100%;
+                justify-content: flex-end;
             }
             
             .orders-table {
@@ -843,6 +864,15 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
+            
+            .profile-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .logout-btn-profile, .delete-account-btn {
+                width: 100%;
+            }
         }
         
         /* Platform Specific Colors */
@@ -899,7 +929,10 @@
                         <div class="profile-email" id="profileEmail">Loading...</div>
                     </div>
                 </div>
-                <button id="logoutBtnProfile" class="logout-btn-profile">লগ আউট</button>
+                <div class="profile-actions">
+                    <button id="logoutBtnProfile" class="logout-btn-profile">লগ আউট</button>
+                    <button id="deleteAccountBtn" class="delete-account-btn">অ্যাকাউন্ট ডিলিট</button>
+                </div>
             </div>
             
             <div class="achievements-section">
@@ -1136,6 +1169,7 @@
         const profileEmail = document.getElementById('profileEmail');
         const profileAvatar = document.getElementById('profileAvatar');
         const logoutBtnProfile = document.getElementById('logoutBtnProfile');
+        const deleteAccountBtn = document.getElementById('deleteAccountBtn');
         
         // Statistics elements
         const totalOrders = document.getElementById('totalOrders');
@@ -1173,6 +1207,13 @@
                 // Show profile modal
                 loadUserProfile();
                 profileModal.style.display = 'flex';
+            }
+        });
+
+        // Delete Account Button
+        deleteAccountBtn.addEventListener('click', function() {
+            if (confirm("আপনি কি নিশ্চিত যে আপনি আপনার অ্যাকাউন্ট ডিলিট করতে চান? এই একশনটি irreversible হবে।")) {
+                window.open('https://easy-premium.com/AccountDelete.html', '_blank');
             }
         });
 
