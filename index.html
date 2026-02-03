@@ -301,53 +301,111 @@
             border-bottom: 1px solid rgba(0, 188, 212, 0.3);
         }
         
-        .orders-table {
+        /* Updated Orders Table for Mobile */
+        .orders-table-container {
             width: 100%;
-            border-collapse: collapse;
+            overflow-x: auto;
             margin-bottom: 30px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
-            overflow: hidden;
+            padding: 5px;
+        }
+        
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px; /* Minimum width for table */
         }
         
         .orders-table th {
             background: rgba(255, 152, 0, 0.3);
             color: #ff9800;
-            padding: 15px;
+            padding: 12px 10px;
             text-align: left;
             font-weight: 600;
             font-size: 0.9rem;
+            white-space: nowrap;
         }
         
         .orders-table td {
-            padding: 15px;
+            padding: 12px 10px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             color: #ddd;
             font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        
+        .orders-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* Mobile Card View for Orders */
+        .orders-cards {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .order-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .order-card-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .order-card-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .order-card-label {
+            color: #b0bec5;
+            font-size: 0.85rem;
+            min-width: 100px;
+        }
+        
+        .order-card-value {
+            color: #fff;
+            font-size: 0.9rem;
+            text-align: right;
+            flex: 1;
         }
         
         .status-pending {
             color: #ff9800;
             font-weight: 600;
             background: rgba(255, 152, 0, 0.1);
-            padding: 5px 10px;
+            padding: 4px 8px;
             border-radius: 5px;
+            font-size: 0.85rem;
         }
         
         .status-processing {
             color: #00bcd4;
             font-weight: 600;
             background: rgba(0, 188, 212, 0.1);
-            padding: 5px 10px;
+            padding: 4px 8px;
             border-radius: 5px;
+            font-size: 0.85rem;
         }
         
         .status-success {
             color: #4caf50;
             font-weight: 600;
             background: rgba(76, 175, 80, 0.1);
-            padding: 5px 10px;
+            padding: 4px 8px;
             border-radius: 5px;
+            font-size: 0.85rem;
         }
         
         .no-orders {
@@ -850,9 +908,13 @@
                 justify-content: flex-end;
             }
             
-            .orders-table {
-                display: block;
-                overflow-x: auto;
+            /* Show cards and hide table on mobile */
+            .orders-table-container {
+                display: none;
+            }
+            
+            .orders-cards {
+                display: flex;
             }
             
             .login-logo {
@@ -950,6 +1012,20 @@
             .logout-btn-profile, .delete-account-btn {
                 width: 100%;
                 padding: 12px;
+            }
+            
+            .order-card {
+                padding: 12px;
+            }
+            
+            .order-card-row {
+                flex-direction: column;
+                gap: 4px;
+            }
+            
+            .order-card-label, .order-card-value {
+                min-width: auto;
+                text-align: left;
             }
         }
         
@@ -1611,25 +1687,30 @@
                 });
         }
 
-        // Display orders in table
+        // Display orders in table and cards
         function displayOrders(orders) {
             if (orders.length === 0) {
                 ordersList.innerHTML = '<div class="no-orders">আপনার কোন অর্ডার নেই</div>';
                 return;
             }
             
-            let html = `
-                <table class="orders-table">
-                    <thead>
-                        <tr>
-                            <th>তারিখ</th>
-                            <th>প্ল্যাটফর্ম</th>
-                            <th>দাম</th>
-                            <th>স্ট্যাটাস</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            // Create table view for desktop
+            let tableHTML = `
+                <div class="orders-table-container">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>তারিখ</th>
+                                <th>প্ল্যাটফর্ম</th>
+                                <th>দাম</th>
+                                <th>স্ট্যাটাস</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             `;
+            
+            // Create cards view for mobile
+            let cardsHTML = '<div class="orders-cards">';
             
             orders.forEach(order => {
                 const orderDate = new Date(order.orderDate);
@@ -1658,7 +1739,8 @@
                     priceValue = `৳ ${order.price}`;
                 }
                 
-                html += `
+                // Table row
+                tableHTML += `
                     <tr>
                         <td>${formattedDate}</td>
                         <td>${order.platform}</td>
@@ -1666,14 +1748,40 @@
                         <td class="${statusClass}">${statusText}</td>
                     </tr>
                 `;
+                
+                // Card for mobile
+                cardsHTML += `
+                    <div class="order-card">
+                        <div class="order-card-row">
+                            <div class="order-card-label">তারিখ</div>
+                            <div class="order-card-value">${formattedDate}</div>
+                        </div>
+                        <div class="order-card-row">
+                            <div class="order-card-label">প্ল্যাটফর্ম</div>
+                            <div class="order-card-value">${order.platform}</div>
+                        </div>
+                        <div class="order-card-row">
+                            <div class="order-card-label">দাম</div>
+                            <div class="order-card-value">${priceValue}</div>
+                        </div>
+                        <div class="order-card-row">
+                            <div class="order-card-label">স্ট্যাটাস</div>
+                            <div class="order-card-value"><span class="${statusClass}">${statusText}</span></div>
+                        </div>
+                    </div>
+                `;
             });
             
-            html += `
-                    </tbody>
-                </table>
+            tableHTML += `
+                        </tbody>
+                    </table>
+                </div>
             `;
             
-            ordersList.innerHTML = html;
+            cardsHTML += '</div>';
+            
+            // Combine both views - mobile will show cards, desktop will show table
+            ordersList.innerHTML = tableHTML + cardsHTML;
         }
 
         // Function to load platforms from Firebase
