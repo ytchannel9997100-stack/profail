@@ -1,176 +1,1069 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Admin - Easy Premium</title>
-    <!-- Firebase SDKs -->
+    <title>Admin Panel - Easy Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
     <style>
+        :root {
+            --primary: #ff9800;
+            --secondary: #00bcd4;
+            --dark: #1a1a2e;
+            --darker: #16213e;
+            --success: #4CAF50;
+            --danger: #f44336;
+            --warning: #ffc107;
+            --info: #2196F3;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', 'Noto Sans Bengali', sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            background: #f5f5f5;
             min-height: 100vh;
+        }
+        
+        /* Loading Screen */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--dark), var(--darker));
             display: flex;
             justify-content: center;
             align-items: center;
+            z-index: 9999;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Login Screen */
+        #loginScreen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--dark), var(--darker));
+            z-index: 9998;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--primary);
+        }
+        
+        /* Main Container */
+        #mainContainer {
+            display: none;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--dark);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            box-shadow: 3px 0 10px rgba(0,0,0,0.2);
+        }
+        
+        .logo {
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .logo h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+        
+        .logo span {
+            color: var(--secondary);
+        }
+        
+        .user-info {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 1.5rem;
+        }
+        
+        .nav-menu {
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            padding: 12px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #ddd;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255,152,0,0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+            background: #f5f5f5;
+        }
+        
+        .top-bar {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 12px;
+            color: #999;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #666;
+            cursor: pointer;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+        
+        .logout-btn {
+            padding: 8px 20px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        /* Content Area */
+        .content-area {
+            padding: 30px;
+        }
+        
+        .page-title {
+            color: var(--dark);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+        }
+        
+        .icon-1 { background: linear-gradient(45deg, var(--primary), var(--warning)); }
+        .icon-2 { background: linear-gradient(45deg, var(--info), var(--secondary)); }
+        .icon-3 { background: linear-gradient(45deg, var(--success), #4CAF50); }
+        .icon-4 { background: linear-gradient(45deg, #9C27B0, #E91E63); }
+        
+        .stat-info h3 {
+            font-size: 2rem;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .stat-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            background: #ff5722;
+            transform: translateY(-2px);
+        }
+        
+        /* Recent Orders Table */
+        .card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .card-header {
+            padding: 20px;
+            background: var(--dark);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-body {
+            padding: 0;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th,
+        .table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .table tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .modal-body {
             padding: 20px;
         }
         
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 40px;
-            border-radius: 15px;
-            width: 100%;
-            max-width: 500px;
-            border: 2px solid #ff9800;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
         }
         
-        h1 {
-            color: #ff9800;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2rem;
-        }
-        
+        /* Form Styles */
         .form-group {
             margin-bottom: 20px;
         }
         
-        label {
+        .form-group label {
             display: block;
-            color: #fff;
             margin-bottom: 8px;
-            font-weight: 600;
+            color: var(--dark);
+            font-weight: 500;
         }
         
-        input {
+        .form-control {
             width: 100%;
             padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: white;
-            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
         }
         
-        input:focus {
+        .form-control:focus {
             outline: none;
-            border-color: #ff9800;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(255,152,0,0.2);
         }
         
-        button {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(45deg, #ff9800, #ff5722);
-            color: white;
+        .btn {
+            padding: 12px 25px;
             border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 700;
+            border-radius: 6px;
             cursor: pointer;
-            margin-top: 20px;
+            font-weight: 600;
             transition: all 0.3s;
         }
         
-        button:hover {
-            background: linear-gradient(45deg, #ff5722, #ff9800);
+        .btn-primary {
+            background: var(--primary);
+            color: white;
         }
         
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            display: none;
+        .btn-primary:hover {
+            background: #ff5722;
         }
         
-        .success {
-            background: rgba(76, 175, 80, 0.2);
-            border-left: 4px solid #4CAF50;
-            color: #4CAF50;
-            display: block;
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
         }
         
-        .error {
-            background: rgba(244, 67, 54, 0.2);
-            border-left: 4px solid #f44336;
-            color: #f44336;
-            display: block;
-        }
-        
-        .uid-display {
-            background: rgba(0, 188, 212, 0.2);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            color: #00bcd4;
-            word-break: break-all;
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar .logo h2,
+            .sidebar .user-info span,
+            .sidebar .nav-item span {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+            
+            .top-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Add Admin to Easy Premium</h1>
-        
-        <!-- Current User UID -->
-        <div id="currentUserInfo" style="display: none;">
-            <h3 style="color: #00bcd4; margin-bottom: 10px;">Current User:</h3>
-            <div class="uid-display">
-                <strong>UID:</strong> <span id="currentUID"></span><br>
-                <strong>Email:</strong> <span id="currentEmail"></span>
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div class="login-container">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 style="color: var(--primary); margin-bottom: 10px;">Easy Premium</h2>
+                <p style="color: #ddd;">Admin Panel Login</p>
+            </div>
+            
+            <div class="form-group">
+                <input type="email" id="loginEmail" class="form-control" placeholder="Admin Email">
+            </div>
+            
+            <div class="form-group">
+                <input type="password" id="loginPassword" class="form-control" placeholder="Password">
+            </div>
+            
+            <button id="loginBtn" class="btn btn-primary" style="width: 100%;">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            
+            <div id="loginError" style="color: var(--danger); margin-top: 15px; display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Main Admin Panel -->
+    <div id="mainContainer">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h2>EASY<span>PREMIUM</span></h2>
+                <p style="font-size: 0.9rem; color: #ddd; margin-top: 5px;">Admin Panel</p>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h4 id="adminName">Loading...</h4>
+                <p id="adminEmail" style="color: #ddd; font-size: 0.9rem;">admin@example.com</p>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="#dashboard" class="nav-item active" onclick="showSection('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>ড্যাশবোর্ড</span>
+                </a>
+                
+                <a href="#platforms" class="nav-item" onclick="showSection('platforms')">
+                    <i class="fas fa-layer-group"></i>
+                    <span>প্ল্যাটফর্ম</span>
+                </a>
+                
+                <a href="#add-platform" class="nav-item" onclick="showSection('addPlatform')">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>নতুন যোগ করুন</span>
+                </a>
+                
+                <a href="#orders" class="nav-item" onclick="showSection('orders')">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>অর্ডারসমূহ</span>
+                </a>
+                
+                <a href="#users" class="nav-item" onclick="showSection('users')">
+                    <i class="fas fa-users"></i>
+                    <span>ইউজারসমূহ</span>
+                </a>
+                
+                <a href="#categories" class="nav-item" onclick="showSection('categories')">
+                    <i class="fas fa-tags"></i>
+                    <span>ক্যাটাগরিসমূহ</span>
+                </a>
+                
+                <a href="#analytics" class="nav-item" onclick="showSection('analytics')">
+                    <i class="fas fa-chart-line"></i>
+                    <span>অ্যানালিটিক্স</span>
+                </a>
+                
+                <a href="#settings" class="nav-item" onclick="showSection('settings')">
+                    <i class="fas fa-cog"></i>
+                    <span>সেটিংস</span>
+                </a>
             </div>
         </div>
-        
-        <!-- Login Form -->
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email">Admin Email</label>
-                <input type="email" id="email" placeholder="admin@example.com" required>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="globalSearch" placeholder="সার্চ করুন...">
+                </div>
+                
+                <div class="user-menu">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    
+                    <button id="logoutBtnMain" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
             </div>
-            
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Your password" required>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="content-section">
+                    <h2 class="page-title">ড্যাশবোর্ড</h2>
+                    
+                    <!-- Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon icon-1">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalPlatforms">0</h3>
+                                <p>মোট প্ল্যাটফর্ম</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon icon-2">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalOrders">0</h3>
+                                <p>মোট অর্ডার</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon icon-3">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalUsers">0</h3>
+                                <p>মোট ইউজার</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon icon-4">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalRevenue">৳ 0</h3>
+                                <p>মোট আয়</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">দ্রুত কাজসমূহ</h4>
+                        <div class="action-buttons">
+                            <button class="action-btn" onclick="showSection('addPlatform')">
+                                <i class="fas fa-plus"></i> নতুন প্ল্যাটফর্ম
+                            </button>
+                            <button class="action-btn" onclick="showSection('categories')">
+                                <i class="fas fa-tag"></i> ক্যাটাগরি যোগ
+                            </button>
+                            <button class="action-btn" onclick="viewAllOrders()">
+                                <i class="fas fa-eye"></i> সব অর্ডার দেখুন
+                            </button>
+                            <button class="action-btn" onclick="showSection('settings')">
+                                <i class="fas fa-cog"></i> সেটিংস
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Orders -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 style="margin: 0; color: white;">সাম্প্রতিক অর্ডার</h3>
+                            <a href="#orders" onclick="showSection('orders')" style="color: white; text-decoration: none;">
+                                সব দেখুন <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>অর্ডার আইডি</th>
+                                        <th>প্ল্যাটফর্ম</th>
+                                        <th>ইউজার</th>
+                                        <th>দাম</th>
+                                        <th>স্ট্যাটাস</th>
+                                        <th>তারিখ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentOrdersTable">
+                                    <tr>
+                                        <td colspan="6" style="text-align: center; padding: 30px;">
+                                            লোড হচ্ছে...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Platforms -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 style="margin: 0; color: white;">সাম্প্রতিক প্ল্যাটফর্ম</h3>
+                            <a href="#platforms" onclick="showSection('platforms')" style="color: white; text-decoration: none;">
+                                সব দেখুন <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>নাম</th>
+                                        <th>ক্যাটাগরি</th>
+                                        <th>দাম</th>
+                                        <th>স্টক</th>
+                                        <th>স্ট্যাটাস</th>
+                                        <th>অ্যাকশন</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentPlatformsTable">
+                                    <tr>
+                                        <td colspan="6" style="text-align: center; padding: 30px;">
+                                            লোড হচ্ছে...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Platforms Section -->
+                <div id="platforms" class="content-section" style="display: none;">
+                    <h2 class="page-title">সকল প্ল্যাটফর্ম</h2>
+                    
+                    <!-- Platform Filters -->
+                    <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <input type="text" id="platformSearch" class="form-control" placeholder="প্ল্যাটফর্ম খুঁজুন..." style="flex: 1; min-width: 300px;">
+                            <select id="categoryFilter" class="form-control" style="width: 200px;">
+                                <option value="">সব ক্যাটাগরি</option>
+                            </select>
+                            <select id="statusFilter" class="form-control" style="width: 150px;">
+                                <option value="">সব স্ট্যাটাস</option>
+                                <option value="active">সক্রিয়</option>
+                                <option value="inactive">নিষ্ক্রিয়</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="searchPlatforms()">
+                                <i class="fas fa-search"></i> সার্চ
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Platforms Grid -->
+                    <div id="platformsContainer">
+                        <div style="text-align: center; padding: 50px;">
+                            <div class="spinner" style="margin: 0 auto 20px;"></div>
+                            <p>প্ল্যাটফর্ম লোড হচ্ছে...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Add Platform Section -->
+                <div id="addPlatform" class="content-section" style="display: none;">
+                    <h2 class="page-title">নতুন প্ল্যাটফর্ম যোগ করুন</h2>
+                    
+                    <div style="background: white; padding: 30px; border-radius: 10px;">
+                        <form id="addPlatformForm">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                                <div class="form-group">
+                                    <label>প্ল্যাটফর্মের নাম *</label>
+                                    <input type="text" class="form-control" id="platformName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>ইউনিক আইডি (Slug) *</label>
+                                    <input type="text" class="form-control" id="platformSlug" required>
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                                <div class="form-group">
+                                    <label>ক্যাটাগরি *</label>
+                                    <select class="form-control" id="platformCategory" required>
+                                        <option value="">সিলেক্ট করুন</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>টাইপ *</label>
+                                    <select class="form-control" id="platformType" required>
+                                        <option value="">সিলেক্ট করুন</option>
+                                        <option value="account">অ্যাকাউন্ট</option>
+                                        <option value="diamond">ডায়মন্ড</option>
+                                        <option value="coin">কয়েন</option>
+                                        <option value="subscription">সাবস্ক্রিপশন</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>বর্ণনা *</label>
+                                <textarea class="form-control" id="platformDescription" rows="3" required></textarea>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                                <div class="form-group">
+                                    <label>দাম (৳) *</label>
+                                    <input type="number" class="form-control" id="platformPrice" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>পুরাতন দাম (যদি থাকে)</label>
+                                    <input type="number" class="form-control" id="platformOldPrice">
+                                </div>
+                                <div class="form-group">
+                                    <label>স্টক</label>
+                                    <input type="number" class="form-control" id="platformStock" value="9999">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>ফিচারসমূহ (প্রতি লাইনে একটি)</label>
+                                <textarea class="form-control" id="platformFeatures" rows="4" placeholder="ইনস্ট্যান্ট ডেলিভারি&#10;১০০% সেফ&#10;গ্যারান্টিড"></textarea>
+                            </div>
+                            
+                            <div style="display: flex; gap: 15px;">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> সংরক্ষণ করুন
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="resetPlatformForm()">
+                                    <i class="fas fa-redo"></i> রিসেট
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Orders Section -->
+                <div id="orders" class="content-section" style="display: none;">
+                    <h2 class="page-title">অর্ডার ম্যানেজমেন্ট</h2>
+                    
+                    <!-- Order Stats -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                        <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
+                            <h3 style="color: var(--warning); margin: 0;">0</h3>
+                            <p style="color: #666; margin: 5px 0 0;">পেন্ডিং</p>
+                        </div>
+                        <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
+                            <h3 style="color: var(--info); margin: 0;">0</h3>
+                            <p style="color: #666; margin: 5px 0 0;">প্রসেসিং</p>
+                        </div>
+                        <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
+                            <h3 style="color: var(--success); margin: 0;">0</h3>
+                            <p style="color: #666; margin: 5px 0 0;">সম্পূর্ণ</p>
+                        </div>
+                        <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
+                            <h3 style="color: var(--danger); margin: 0;">0</h3>
+                            <p style="color: #666; margin: 5px 0 0;">বাতিল</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Orders Table -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 style="margin: 0; color: white;">সকল অর্ডার</h3>
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>অর্ডার আইডি</th>
+                                        <th>প্ল্যাটফর্ম</th>
+                                        <th>ইউজার</th>
+                                        <th>দাম</th>
+                                        <th>স্ট্যাটাস</th>
+                                        <th>তারিখ</th>
+                                        <th>অ্যাকশন</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allOrdersTable">
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; padding: 30px;">
+                                            লোড হচ্ছে...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Users Section -->
+                <div id="users" class="content-section" style="display: none;">
+                    <h2 class="page-title">ইউজার ম্যানেজমেন্ট</h2>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>নাম</th>
+                                        <th>ইমেইল</th>
+                                        <th>ফোন</th>
+                                        <th>অর্ডার</th>
+                                        <th>রেজিস্ট্রেশন</th>
+                                        <th>অ্যাকশন</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTable">
+                                    <tr>
+                                        <td colspan="6" style="text-align: center; padding: 30px;">
+                                            লোড হচ্ছে...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Categories Section -->
+                <div id="categories" class="content-section" style="display: none;">
+                    <h2 class="page-title">ক্যাটাগরি ম্যানেজমেন্ট</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 300px 1fr; gap: 30px;">
+                        <!-- Add Category Form -->
+                        <div style="background: white; padding: 25px; border-radius: 10px;">
+                            <h4 style="margin-bottom: 20px; color: var(--dark);">নতুন ক্যাটাগরি</h4>
+                            <form id="addCategoryForm">
+                                <div class="form-group">
+                                    <label>ক্যাটাগরি নাম</label>
+                                    <input type="text" class="form-control" id="categoryName">
+                                </div>
+                                <div class="form-group">
+                                    <label>স্লাগ</label>
+                                    <input type="text" class="form-control" id="categorySlug">
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                    <i class="fas fa-plus"></i> যোগ করুন
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Categories List -->
+                        <div>
+                            <h4 style="margin-bottom: 20px; color: var(--dark);">সকল ক্যাটাগরি</h4>
+                            <div id="categoriesContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+                                <!-- Categories will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analytics Section -->
+                <div id="analytics" class="content-section" style="display: none;">
+                    <h2 class="page-title">অ্যানালিটিক্স</h2>
+                    
+                    <div style="background: white; padding: 30px; border-radius: 10px;">
+                        <div style="text-align: center; padding: 50px;">
+                            <i class="fas fa-chart-bar" style="font-size: 4rem; color: #ddd; margin-bottom: 20px;"></i>
+                            <h4 style="color: #666;">Analytics Coming Soon</h4>
+                            <p style="color: #999;">ডিটেইলড অ্যানালিটিক্স শীঘ্রই যোগ করা হবে</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Settings Section -->
+                <div id="settings" class="content-section" style="display: none;">
+                    <h2 class="page-title">সেটিংস</h2>
+                    
+                    <div style="background: white; padding: 30px; border-radius: 10px;">
+                        <form id="settingsForm">
+                            <div class="form-group">
+                                <label>সাইটের নাম</label>
+                                <input type="text" class="form-control" id="siteName" value="Easy Premium">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>সাইটের বর্ণনা</label>
+                                <textarea class="form-control" id="siteDescription" rows="3">সবচেয়ে সস্তায় প্রিমিয়াম কিনুন</textarea>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                                <div class="form-group">
+                                    <label>কারেন্সি</label>
+                                    <select class="form-control" id="siteCurrency">
+                                        <option value="৳">৳ (BDT)</option>
+                                        <option value="$">$ (USD)</option>
+                                        <option value="₹">₹ (INR)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>টাইমজোন</label>
+                                    <select class="form-control" id="siteTimezone">
+                                        <option value="Asia/Dhaka">Asia/Dhaka (BD)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>কন্টাক্ট ইমেইল</label>
+                                <input type="email" class="form-control" id="contactEmail" value="support@easy-premium.com">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>হেল্পলাইন</label>
+                                <input type="text" class="form-control" id="helpline" value="+880 1XXX-XXXXXX">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> সেটিংস আপডেট করুন
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
-            
-            <button type="submit">Login & Get UID</button>
-        </form>
-        
-        <!-- Add Admin Form -->
-        <form id="addAdminForm" style="display: none;">
-            <div class="form-group">
-                <label for="adminEmail">Enter UID to make Admin</label>
-                <input type="text" id="adminUID" placeholder="Paste UID here" required>
+        </div>
+    </div>
+
+    <!-- Platform Edit Modal -->
+    <div id="editPlatformModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin: 0;">প্ল্যাটফর্ম এডিট করুন</h3>
+                <button class="close-modal" onclick="closeModal('editPlatformModal')">&times;</button>
             </div>
-            
-            <button type="submit">Add as Admin</button>
-        </form>
-        
-        <!-- Results -->
-        <div id="result" class="result"></div>
-        
-        <!-- Firebase Config -->
-        <div style="margin-top: 30px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px;">
-            <h4 style="color: #ff9800; margin-bottom: 10px;">Firebase Config:</h4>
-            <pre style="color: #ccc; font-size: 0.9rem; overflow: auto;">
-const firebaseConfig = {
-    apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
-    authDomain: "top-up-4db01.firebaseapp.com",
-    projectId: "top-up-4db01",
-    databaseURL: "https://top-up-4db01-default-rtdb.asia-southeast1.firebasedatabase.app",
-    storageBucket: "top-up-4db01.appspot.com",
-    appId: "1:264548197473:web:abcd1234efgh5678"
-};</pre>
+            <div class="modal-body" id="editPlatformContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="orderDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin: 0;">অর্ডার ডিটেইলস</h3>
+                <button class="close-modal" onclick="closeModal('orderDetailsModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="orderDetailsContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" style="position: fixed; top: 20px; right: 20px; background: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 10001; display: none; max-width: 400px; border-left: 4px solid var(--primary);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i id="notificationIcon" class="fas fa-check-circle" style="color: var(--success);"></i>
+            <div>
+                <strong id="notificationTitle">Success</strong>
+                <p id="notificationMessage" style="margin: 5px 0 0; font-size: 0.9rem;"></p>
+            </div>
         </div>
     </div>
 
@@ -187,90 +1080,613 @@ const firebaseConfig = {
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
         const auth = firebase.auth();
+        const database = firebase.database();
+        const storage = firebase.storage();
 
+        // Global Variables
         let currentUser = null;
+        let isAdmin = false;
 
-        // Login Form Submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    currentUser = userCredential.user;
+        // DOM Elements
+        const loadingScreen = document.getElementById('loadingScreen');
+        const loginScreen = document.getElementById('loginScreen');
+        const mainContainer = document.getElementById('mainContainer');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtnMain = document.getElementById('logoutBtnMain');
+        const adminName = document.getElementById('adminName');
+        const adminEmail = document.getElementById('adminEmail');
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication state
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentUser = user;
                     
-                    // Show user info
-                    document.getElementById('currentUserInfo').style.display = 'block';
-                    document.getElementById('currentUID').textContent = currentUser.uid;
-                    document.getElementById('currentEmail').textContent = currentUser.email;
+                    // Check if user is admin
+                    const adminSnapshot = await database.ref('admins/' + user.uid).once('value');
+                    isAdmin = adminSnapshot.exists() && adminSnapshot.val() === true;
                     
-                    // Show admin form
-                    document.getElementById('addAdminForm').style.display = 'block';
-                    document.getElementById('adminUID').value = currentUser.uid;
-                    
-                    // Show success message
-                    showResult('Successfully logged in! Your UID is ready.', 'success');
-                })
-                .catch((error) => {
-                    showResult('Login failed: ' + error.message, 'error');
-                });
+                    if (isAdmin) {
+                        // User is admin, show admin panel
+                        showAdminPanel();
+                        loadDashboardData();
+                        loadCategories();
+                    } else {
+                        // User is not admin
+                        showLoginScreen();
+                        showNotification('Access Denied', 'You are not an administrator.', 'error');
+                    }
+                } else {
+                    // No user logged in
+                    showLoginScreen();
+                }
+                
+                // Hide loading screen
+                loadingScreen.style.display = 'none';
+            });
         });
 
-        // Add Admin Form Submission
-        document.getElementById('addAdminForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Login Function
+        loginBtn.addEventListener('click', function() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
             
-            const adminUID = document.getElementById('adminUID').value.trim();
-            
-            if (!adminUID) {
-                showResult('Please enter a valid UID', 'error');
+            if (!email || !password) {
+                showLoginError('Please enter email and password');
                 return;
             }
             
-            // Add to admins node
-            database.ref('admins').child(adminUID).set(true)
-                .then(() => {
-                    showResult(`User with UID: ${adminUID} has been added as Admin successfully!`, 'success');
-                    
-                    // Verify the admin was added
-                    database.ref('admins').child(adminUID).once('value')
-                        .then(snapshot => {
-                            if (snapshot.exists()) {
-                                showResult('✓ Verified: Admin successfully added to database.', 'success');
-                            }
-                        });
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    showNotification('Login Successful', 'Welcome to Admin Panel', 'success');
                 })
                 .catch((error) => {
-                    showResult('Error adding admin: ' + error.message, 'error');
+                    showLoginError(error.message);
                 });
         });
 
-        // Show result message
-        function showResult(message, type) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.textContent = message;
-            resultDiv.className = 'result ' + type;
-            resultDiv.style.display = 'block';
+        // Logout Function
+        logoutBtnMain.addEventListener('click', function() {
+            auth.signOut()
+                .then(() => {
+                    showLoginScreen();
+                    showNotification('Logged Out', 'You have been logged out successfully', 'info');
+                });
+        });
+
+        // Show/Hide Functions
+        function showLoginScreen() {
+            loginScreen.style.display = 'block';
+            mainContainer.style.display = 'none';
         }
 
-        // Check if user is already logged in
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('currentUserInfo').style.display = 'block';
-                document.getElementById('currentUID').textContent = currentUser.uid;
-                document.getElementById('currentEmail').textContent = currentUser.email;
-                document.getElementById('addAdminForm').style.display = 'block';
-                document.getElementById('adminUID').value = currentUser.uid;
-                document.getElementById('loginForm').style.display = 'none';
+        function showAdminPanel() {
+            loginScreen.style.display = 'none';
+            mainContainer.style.display = 'block';
+            
+            // Update user info
+            if (currentUser) {
+                adminName.textContent = currentUser.displayName || 'Admin User';
+                adminEmail.textContent = currentUser.email;
+            }
+        }
+
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Navigation Functions
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected section
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.style.display = 'block';
+            }
+            
+            // Add active class to clicked nav item
+            const navItem = document.querySelector(`[href="#${sectionId}"]`);
+            if (navItem) {
+                navItem.classList.add('active');
+            }
+            
+            // Load section data
+            switch(sectionId) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'platforms':
+                    loadPlatforms();
+                    break;
+                case 'orders':
+                    loadOrders();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'categories':
+                    loadCategories();
+                    break;
+            }
+        }
+
+        // Dashboard Data Loading
+        async function loadDashboardData() {
+            try {
+                // Load platform count
+                const platformsSnap = await database.ref('platforms').once('value');
+                const platforms = platformsSnap.val();
+                document.getElementById('totalPlatforms').textContent = platforms ? Object.keys(platforms).length : 0;
                 
-                showResult('Already logged in!', 'success');
+                // Load order count and recent orders
+                const ordersSnap = await database.ref('orders').orderByChild('createdAt').limitToLast(5).once('value');
+                const orders = ordersSnap.val();
+                document.getElementById('totalOrders').textContent = orders ? Object.keys(orders).length : 0;
+                
+                // Load recent orders table
+                if (orders) {
+                    let html = '';
+                    Object.entries(orders).forEach(([id, order]) => {
+                        html += `
+                            <tr>
+                                <td>#${id.substring(0, 8)}</td>
+                                <td>${order.platformName || 'N/A'}</td>
+                                <td>${order.userEmail || 'N/A'}</td>
+                                <td>${order.currency || '৳'} ${order.amount || 0}</td>
+                                <td><span class="badge badge-${order.status}">${order.status || 'pending'}</span></td>
+                                <td>${formatDate(order.createdAt)}</td>
+                            </tr>
+                        `;
+                    });
+                    document.getElementById('recentOrdersTable').innerHTML = html;
+                }
+                
+                // Load user count
+                const usersSnap = await database.ref('users').once('value');
+                const users = usersSnap.val();
+                document.getElementById('totalUsers').textContent = users ? Object.keys(users).length : 0;
+                
+                // Load recent platforms
+                if (platforms) {
+                    let html = '';
+                    const platformArray = Object.entries(platforms).slice(-5);
+                    
+                    platformArray.forEach(([id, platform]) => {
+                        html += `
+                            <tr>
+                                <td>${platform.name || 'N/A'}</td>
+                                <td>${platform.category || 'N/A'}</td>
+                                <td>${platform.currency || '৳'} ${platform.price || 0}</td>
+                                <td>${platform.stock || 0}</td>
+                                <td><span class="badge badge-${platform.status || 'active'}">${platform.status || 'active'}</span></td>
+                                <td>
+                                    <button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.85rem;" onclick="editPlatform('${id}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    document.getElementById('recentPlatformsTable').innerHTML = html;
+                }
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Load Platforms
+        async function loadPlatforms() {
+            try {
+                const snapshot = await database.ref('platforms').once('value');
+                const platforms = snapshot.val();
+                
+                if (!platforms) {
+                    document.getElementById('platformsContainer').innerHTML = `
+                        <div style="text-align: center; padding: 50px;">
+                            <i class="fas fa-box-open" style="font-size: 4rem; color: #ddd; margin-bottom: 20px;"></i>
+                            <h4 style="color: #666;">No Platforms Found</h4>
+                            <p style="color: #999;">Add your first platform to get started</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">';
+                
+                Object.entries(platforms).forEach(([id, platform]) => {
+                    html += `
+                        <div style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                            <div style="padding: 20px; background: var(--dark); color: white;">
+                                <h4 style="margin: 0;">${platform.name}</h4>
+                                <p style="margin: 5px 0 0; font-size: 0.9rem; color: #ddd;">${platform.category} • ${platform.type}</p>
+                            </div>
+                            <div style="padding: 15px;">
+                                <p style="color: #666; margin-bottom: 10px;">${platform.description || 'No description'}</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong style="color: var(--primary); font-size: 1.2rem;">${platform.currency || '৳'} ${platform.price}</strong>
+                                        ${platform.oldPrice ? `<span style="color: #999; text-decoration: line-through; margin-left: 5px;">${platform.currency || '৳'} ${platform.oldPrice}</span>` : ''}
+                                    </div>
+                                    <span class="badge badge-${platform.status || 'active'}">${platform.status || 'active'}</span>
+                                </div>
+                                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                    <button class="btn btn-primary" style="flex: 1; padding: 8px;" onclick="editPlatform('${id}')">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="btn btn-danger" style="padding: 8px 15px;" onclick="deletePlatform('${id}', '${platform.name}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                document.getElementById('platformsContainer').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading platforms:', error);
+            }
+        }
+
+        // Add Platform Form
+        document.getElementById('addPlatformForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const platformData = {
+                name: document.getElementById('platformName').value,
+                slug: document.getElementById('platformSlug').value.toLowerCase().replace(/\s+/g, '-'),
+                category: document.getElementById('platformCategory').value,
+                type: document.getElementById('platformType').value,
+                description: document.getElementById('platformDescription').value,
+                price: parseFloat(document.getElementById('platformPrice').value) || 0,
+                oldPrice: parseFloat(document.getElementById('platformOldPrice').value) || null,
+                stock: parseInt(document.getElementById('platformStock').value) || 9999,
+                features: document.getElementById('platformFeatures').value.split('\n').filter(f => f.trim()),
+                status: 'active',
+                createdAt: firebase.database.ServerValue.TIMESTAMP,
+                createdBy: currentUser.uid,
+                sales: 0,
+                views: 0
+            };
+            
+            try {
+                const newPlatformRef = database.ref('platforms').push();
+                await newPlatformRef.set(platformData);
+                
+                showNotification('Success', 'Platform added successfully', 'success');
+                resetPlatformForm();
+                showSection('platforms');
+                loadPlatforms();
+                
+            } catch (error) {
+                showNotification('Error', 'Failed to add platform: ' + error.message, 'error');
             }
         });
+
+        // Edit Platform
+        async function editPlatform(platformId) {
+            try {
+                const snapshot = await database.ref('platforms/' + platformId).once('value');
+                const platform = snapshot.val();
+                
+                const content = `
+                    <form id="editPlatformForm">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" class="form-control" id="editName" value="${platform.name || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label>Price (৳)</label>
+                            <input type="number" class="form-control" id="editPrice" value="${platform.price || 0}">
+                        </div>
+                        <div class="form-group">
+                            <label>Stock</label>
+                            <input type="number" class="form-control" id="editStock" value="${platform.stock || 9999}">
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select class="form-control" id="editStatus">
+                                <option value="active" ${platform.status === 'active' ? 'selected' : ''}>Active</option>
+                                <option value="inactive" ${platform.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="button" class="btn btn-primary" onclick="updatePlatform('${platformId}')">
+                                Update
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('editPlatformModal')">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                `;
+                
+                document.getElementById('editPlatformContent').innerHTML = content;
+                document.getElementById('editPlatformModal').style.display = 'flex';
+                
+            } catch (error) {
+                console.error('Error loading platform for edit:', error);
+            }
+        }
+
+        // Update Platform
+        async function updatePlatform(platformId) {
+            try {
+                const updates = {
+                    name: document.getElementById('editName').value,
+                    price: parseFloat(document.getElementById('editPrice').value) || 0,
+                    stock: parseInt(document.getElementById('editStock').value) || 0,
+                    status: document.getElementById('editStatus').value,
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP
+                };
+                
+                await database.ref('platforms/' + platformId).update(updates);
+                
+                showNotification('Success', 'Platform updated successfully', 'success');
+                closeModal('editPlatformModal');
+                loadPlatforms();
+                loadDashboardData();
+                
+            } catch (error) {
+                showNotification('Error', 'Failed to update platform', 'error');
+            }
+        }
+
+        // Delete Platform
+        async function deletePlatform(platformId, platformName) {
+            if (confirm(`Are you sure you want to delete "${platformName}"?`)) {
+                try {
+                    await database.ref('platforms/' + platformId).remove();
+                    showNotification('Success', 'Platform deleted successfully', 'success');
+                    loadPlatforms();
+                    loadDashboardData();
+                } catch (error) {
+                    showNotification('Error', 'Failed to delete platform', 'error');
+                }
+            }
+        }
+
+        // Load Orders
+        async function loadOrders() {
+            try {
+                const snapshot = await database.ref('orders').orderByChild('createdAt').once('value');
+                const orders = snapshot.val();
+                
+                if (!orders) {
+                    document.getElementById('allOrdersTable').innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 30px;">
+                                No orders found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                Object.entries(orders).forEach(([id, order]) => {
+                    html += `
+                        <tr>
+                            <td>#${id.substring(0, 8)}</td>
+                            <td>${order.platformName || 'N/A'}</td>
+                            <td>${order.userEmail || 'N/A'}</td>
+                            <td>${order.currency || '৳'} ${order.amount || 0}</td>
+                            <td><span class="badge badge-${order.status || 'pending'}">${order.status || 'pending'}</span></td>
+                            <td>${formatDate(order.createdAt)}</td>
+                            <td>
+                                <button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.85rem;" onclick="viewOrder('${id}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                document.getElementById('allOrdersTable').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading orders:', error);
+            }
+        }
+
+        // Load Users
+        async function loadUsers() {
+            try {
+                const snapshot = await database.ref('users').once('value');
+                const users = snapshot.val();
+                
+                if (!users) {
+                    document.getElementById('usersTable').innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 30px;">
+                                No users found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                Object.entries(users).forEach(([id, user]) => {
+                    html += `
+                        <tr>
+                            <td>${user.name || 'N/A'}</td>
+                            <td>${user.email || 'N/A'}</td>
+                            <td>${user.phone || 'N/A'}</td>
+                            <td>${user.orders || 0}</td>
+                            <td>${formatDate(user.createdAt)}</td>
+                            <td>
+                                <button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.85rem;">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                document.getElementById('usersTable').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        // Load Categories
+        async function loadCategories() {
+            try {
+                // Load categories for filter
+                const categoriesSnap = await database.ref('categories').once('value');
+                const categories = categoriesSnap.val();
+                
+                let filterOptions = '<option value="">All Categories</option>';
+                let categoriesHtml = '';
+                
+                if (categories) {
+                    Object.entries(categories).forEach(([id, category]) => {
+                        filterOptions += `<option value="${category.slug || id}">${category.name}</option>`;
+                        
+                        categoriesHtml += `
+                            <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>${category.name}</strong>
+                                        <p style="margin: 5px 0 0; font-size: 0.9rem; color: #666;">${category.description || 'No description'}</p>
+                                    </div>
+                                    <button class="btn btn-danger" style="padding: 5px 10px;" onclick="deleteCategory('${id}', '${category.name}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                document.getElementById('categoryFilter').innerHTML = filterOptions;
+                document.getElementById('platformCategory').innerHTML = '<option value="">Select Category</option>' + filterOptions;
+                document.getElementById('categoriesContainer').innerHTML = categoriesHtml || '<p>No categories found</p>';
+                
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+
+        // Add Category
+        document.getElementById('addCategoryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const categoryData = {
+                name: document.getElementById('categoryName').value,
+                slug: document.getElementById('categorySlug').value.toLowerCase().replace(/\s+/g, '-'),
+                createdAt: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            try {
+                const newCategoryRef = database.ref('categories').push();
+                await newCategoryRef.set(categoryData);
+                
+                showNotification('Success', 'Category added successfully', 'success');
+                document.getElementById('addCategoryForm').reset();
+                loadCategories();
+                
+            } catch (error) {
+                showNotification('Error', 'Failed to add category', 'error');
+            }
+        });
+
+        // Delete Category
+        async function deleteCategory(categoryId, categoryName) {
+            if (confirm(`Delete category "${categoryName}"?`)) {
+                try {
+                    await database.ref('categories/' + categoryId).remove();
+                    showNotification('Success', 'Category deleted', 'success');
+                    loadCategories();
+                } catch (error) {
+                    showNotification('Error', 'Failed to delete category', 'error');
+                }
+            }
+        }
+
+        // Utility Functions
+        function formatDate(timestamp) {
+            if (!timestamp) return 'N/A';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('bn-BD');
+        }
+
+        function resetPlatformForm() {
+            document.getElementById('addPlatformForm').reset();
+            document.getElementById('platformStock').value = 9999;
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function showNotification(title, message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const icon = document.getElementById('notificationIcon');
+            const titleEl = document.getElementById('notificationTitle');
+            const messageEl = document.getElementById('notificationMessage');
+            
+            // Set icon based on type
+            switch(type) {
+                case 'success':
+                    icon.className = 'fas fa-check-circle';
+                    icon.style.color = 'var(--success)';
+                    break;
+                case 'error':
+                    icon.className = 'fas fa-times-circle';
+                    icon.style.color = 'var(--danger)';
+                    break;
+                case 'warning':
+                    icon.className = 'fas fa-exclamation-triangle';
+                    icon.style.color = 'var(--warning)';
+                    break;
+                case 'info':
+                    icon.className = 'fas fa-info-circle';
+                    icon.style.color = 'var(--info)';
+                    break;
+            }
+            
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            
+            notification.style.display = 'block';
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+
+        // Initialize badges CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            .badge-pending { background: #ffc107; color: #000; }
+            .badge-processing { background: #17a2b8; color: #fff; }
+            .badge-completed { background: #28a745; color: #fff; }
+            .badge-cancelled { background: #dc3545; color: #fff; }
+            .badge-active { background: #28a745; color: #fff; }
+            .badge-inactive { background: #6c757d; color: #fff; }
+            .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
