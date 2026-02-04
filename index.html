@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
+        /* আপনার পুরাতন CSS একই রাখুন */
         * {
             margin: 0;
             padding: 0;
@@ -122,7 +123,7 @@
             flex: 1;
         }
         
-        /* নতুন লোগো স্টাইলিং */
+        /* লোগো স্টাইলিং */
         .logo {
             display: flex;
             align-items: center;
@@ -219,7 +220,7 @@
             color: #ff9800;
         }
         
-        /* MODERN CART ICON - UPDATED */
+        /* CART ICON */
         .cart-icon-container {
             cursor: pointer;
             transition: all 0.3s;
@@ -600,7 +601,7 @@
         .orders-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px; /* Minimum width for table */
+            min-width: 600px;
         }
         
         .orders-table th {
@@ -726,7 +727,7 @@
             border: 2px solid #ff9800;
         }
         
-        /* লগইন মডালে লোগো আপডেট */
+        /* লগইন মডালে লোগো */
         .login-logo {
             display: flex;
             align-items: center;
@@ -1126,7 +1127,6 @@
                 gap: 15px;
             }
             
-            /* মোবাইলে লোগো স্টাইলিং */
             .logo-icon {
                 width: 45px;
                 height: 45px;
@@ -1148,7 +1148,6 @@
                 display: none;
             }
             
-            /* Hide search bar on mobile */
             .search-container {
                 display: none;
             }
@@ -1263,7 +1262,6 @@
                 justify-content: flex-end;
             }
             
-            /* Show cards and hide table on mobile */
             .orders-table-container {
                 display: none;
             }
@@ -1272,7 +1270,6 @@
                 display: flex;
             }
             
-            /* লগইন মডালের লোগো মোবাইল স্টাইলিং */
             .login-logo {
                 gap: 10px;
                 flex-direction: column;
@@ -1322,23 +1319,12 @@
             }
         }
         
-        /* For tablets and larger devices, show search bar */
         @media (min-width: 769px) {
             .search-container {
                 display: block;
             }
-            
-            /* Adjust header layout for search bar */
-            .header {
-                padding: 10px 20px;
-            }
-            
-            .header-left {
-                flex: 1;
-            }
         }
         
-        /* Extra small screens */
         @media (max-width: 480px) {
             .hero {
                 padding: 25px 12px;
@@ -1365,7 +1351,6 @@
                 gap: 12px;
             }
             
-            /* এক্সট্রা ছোট স্ক্রিনে লোগো স্টাইলিং */
             .logo-icon {
                 width: 40px;
                 height: 40px;
@@ -1473,13 +1458,13 @@
         }
 
         .profile-content {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 </head>
 <body>
-    <!-- Website Overlay (when cookies not accepted) -->
+    <!-- Website Overlay -->
     <div id="websiteOverlay" class="website-overlay">
         <div class="overlay-content">
             <div class="overlay-message">
@@ -1519,9 +1504,7 @@
         <div class="profile-content">
             <div class="profile-header">
                 <div class="user-info-container">
-                    <div class="profile-avatar" id="profileAvatar">
-                        <!-- Profile picture or initial will be added here -->
-                    </div>
+                    <div class="profile-avatar" id="profileAvatar"></div>
                     <div class="user-details">
                         <div class="profile-name" id="profileName">Loading...</div>
                         <div class="profile-email" id="profileEmail">Loading...</div>
@@ -1582,7 +1565,6 @@
     <!-- Header -->
     <header class="header">
         <div class="header-left">
-            <!-- নতুন লোগো -->
             <a href="#" class="logo">
                 <div class="logo-icon">
                     <i class="fas fa-crown"></i>
@@ -1593,21 +1575,17 @@
                 </div>
             </a>
             
-            <!-- Search Bar for Desktop and Tablet -->
             <div class="search-container">
                 <div class="search-wrapper">
                     <input type="text" id="searchInput" class="search-input" placeholder="প্ল্যাটফর্ম বা প্যাকেজ সার্চ করুন...">
                     <button id="searchBtn" class="search-btn">
                         <i class="fas fa-search"></i>
                     </button>
-                    <div id="searchResults" class="search-results">
-                        <!-- Search results will be populated here -->
-                    </div>
+                    <div id="searchResults" class="search-results"></div>
                 </div>
             </div>
         </div>
         
-        <!-- MODERN CART ICON -->
         <div class="cart-icon-container" id="cartIcon">
             <div class="cart-modern-icon">
                 <i class="fas fa-shopping-cart"></i>
@@ -1615,9 +1593,7 @@
             <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
         </div>
         
-        <nav class="nav-links">
-            <!-- Navigation links have been removed as requested -->
-        </nav>
+        <nav class="nav-links"></nav>
     </header>
 
     <!-- Hero Section -->
@@ -1630,7 +1606,6 @@
     <section id="platforms" class="platforms-section">
         <h2 class="section-title"></h2>
         <div id="platforms-grid" class="platforms-grid">
-            <!-- Platforms will be loaded from Firebase here -->
             <div class="loading-spinner">
                 <div class="spinner"></div>
                 <p>প্ল্যাটফর্ম লোড হচ্ছে...</p>
@@ -1655,84 +1630,7 @@
     </footer>
 
     <script>
-        // Cookie Consent Logic
-        const websiteOverlay = document.getElementById('websiteOverlay');
-        const overlayAcceptBtn = document.getElementById('overlayAcceptBtn');
-        
-        // Check if user has already accepted cookies
-        function checkCookieConsent() {
-            const cookieAccepted = localStorage.getItem('cookieAccepted');
-            
-            if (cookieAccepted === 'true') {
-                websiteOverlay.style.display = 'none';
-                return true;
-            } else if (cookieAccepted === 'false') {
-                websiteOverlay.style.display = 'flex';
-                return false;
-            } else {
-                websiteOverlay.style.display = 'flex';
-                return false;
-            }
-        }
-        
-        // Accept all cookies
-        function acceptAllCookies() {
-            localStorage.setItem('cookieAccepted', 'true');
-            websiteOverlay.style.display = 'none';
-            
-            setCookie('user_consent', 'accepted_all', 30);
-            
-            console.log('Cookies accepted');
-            
-            location.reload();
-        }
-        
-        // Set a cookie
-        function setCookie(name, value, days) {
-            let expires = "";
-            if (days) {
-                const date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                expires = "; expires=" + date.toUTCString();
-            }
-            document.cookie = name + "=" + (value || "") + expires + "; path=/";
-        }
-        
-        // Get a cookie
-        function getCookie(name) {
-            const nameEQ = name + "=";
-            const ca = document.cookie.split(';');
-            for(let i = 0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-            }
-            return null;
-        }
-        
-        // Event listener for cookie button
-        overlayAcceptBtn.addEventListener('click', acceptAllCookies);
-        
-        // Check cookie consent on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const hasAccepted = checkCookieConsent();
-            
-            if (!hasAccepted) {
-                document.querySelectorAll('button, input, a').forEach(element => {
-                    if (element.id !== 'overlayAcceptBtn' && !element.classList.contains('cookie-link')) {
-                        element.style.pointerEvents = 'none';
-                        element.style.opacity = '0.5';
-                    }
-                });
-            } else {
-                document.querySelectorAll('button, input, a').forEach(element => {
-                    element.style.pointerEvents = 'auto';
-                    element.style.opacity = '1';
-                });
-            }
-        });
-
-        // Firebase Configuration - আপনার দেওয়া কনফিগারেশন
+        // Firebase Configuration - আপনার Original Key
         const firebaseConfig = {
             apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
             authDomain: "easy-premium.firebaseapp.com",
@@ -1784,7 +1682,7 @@
         const searchBtn = document.getElementById('searchBtn');
         const searchResults = document.getElementById('searchResults');
         
-        // MODERN Cart icon element
+        // Cart icon element
         const cartIcon = document.getElementById('cartIcon');
         const cartBadge = document.getElementById('cartBadge');
 
@@ -1809,7 +1707,31 @@
             return colors[colorIndex];
         }
 
-        // MODERN Cart icon click handler
+        // Cookie Consent Logic
+        const websiteOverlay = document.getElementById('websiteOverlay');
+        const overlayAcceptBtn = document.getElementById('overlayAcceptBtn');
+        
+        function checkCookieConsent() {
+            const cookieAccepted = localStorage.getItem('cookieAccepted');
+            
+            if (cookieAccepted === 'true') {
+                websiteOverlay.style.display = 'none';
+                return true;
+            } else {
+                websiteOverlay.style.display = 'flex';
+                return false;
+            }
+        }
+        
+        function acceptAllCookies() {
+            localStorage.setItem('cookieAccepted', 'true');
+            websiteOverlay.style.display = 'none';
+            location.reload();
+        }
+        
+        overlayAcceptBtn.addEventListener('click', acceptAllCookies);
+        
+        // Cart icon click handler
         cartIcon.addEventListener('click', function() {
             if (!checkCookieConsent()) {
                 websiteOverlay.style.display = 'flex';
@@ -1885,7 +1807,6 @@
             });
         }
         
-        // Display search results
         function displaySearchResults(platforms) {
             searchResults.innerHTML = '';
             
@@ -1935,7 +1856,6 @@
             searchResults.style.display = 'block';
         }
         
-        // Scroll to platform card in the grid
         function scrollToPlatformCard(platformName) {
             const platformCards = document.querySelectorAll('.platform-card');
             
@@ -1992,7 +1912,7 @@
             }
         });
 
-        // Google Login - Check cookie consent first
+        // Google Login
         googleLoginBtn.addEventListener('click', function() {
             if (!checkCookieConsent()) {
                 websiteOverlay.style.display = 'flex';
@@ -2017,6 +1937,7 @@
                 })
                 .catch((error) => {
                     console.error("Login error:", error);
+                    alert("Login failed: " + error.message);
                 });
         });
 
@@ -2082,25 +2003,15 @@
                     status: 'pending',
                     orderDate: new Date().toISOString(),
                     timestamp: firebase.database.ServerValue.TIMESTAMP,
-                    userId: user.uid
+                    userId: user.uid,
+                    userEmail: user.email || '',
+                    userDisplayName: user.displayName || ''
                 };
                 
-                if (user.email) {
-                    orderData.userEmail = user.email;
-                }
-                
-                if (user.displayName && !purchaseUserName.value.trim()) {
-                    orderData.userName = user.displayName;
-                }
-                
                 const newOrderRef = database.ref('transactions').push();
+                await newOrderRef.set(orderData);
                 
-                try {
-                    await newOrderRef.set(orderData);
-                    console.log("Order saved successfully");
-                } catch (dbError) {
-                    console.error("Database error:", dbError);
-                }
+                console.log("Order saved successfully");
                 
                 purchaseForm.reset();
                 
@@ -2184,24 +2095,12 @@
                 .then((snapshot) => {
                     if (!snapshot.exists()) {
                         const userData = {
-                            basicInfo: {
-                                fullName: user.displayName || '',
-                                email: user.email || '',
-                                phone: '',
-                                joinDate: firebase.database.ServerValue.TIMESTAMP
-                            },
-                            premiumStatus: {
-                                isPremium: false,
-                                subscriptionType: 'none',
-                                startDate: null,
-                                endDate: null
-                            },
+                            fullName: user.displayName || '',
+                            email: user.email || '',
+                            photoURL: user.photoURL || '',
+                            joinDate: firebase.database.ServerValue.TIMESTAMP,
                             lastLogin: firebase.database.ServerValue.TIMESTAMP
                         };
-                        
-                        if (user.photoURL) {
-                            userData.basicInfo.photoURL = user.photoURL;
-                        }
                         
                         return database.ref('users/' + userId).set(userData);
                     } else {
@@ -2242,7 +2141,7 @@
             const user = auth.currentUser;
             if (!user) return;
             
-            database.ref('users/' + user.uid + '/basicInfo').once('value')
+            database.ref('users/' + user.uid).once('value')
                 .then((snapshot) => {
                     const userData = snapshot.val();
                     
@@ -2288,7 +2187,6 @@
             }
         }
 
-        // Function to show initial avatar with colored background
         function showInitialAvatar(userName) {
             const firstName = userName ? userName.charAt(0).toUpperCase() : "U";
             const color = getColorFromName(userName);
@@ -2587,7 +2485,6 @@
             platformsGrid.appendChild(platformCard);
         }
 
-        // Page Load Animation functions
         function animatePlatformCards() {
             const cards = document.querySelectorAll('.platform-card');
             cards.forEach((card, index) => {
@@ -2602,7 +2499,6 @@
             });
         }
         
-        // Initialize auth state
         function initializeAuth() {
             auth.onAuthStateChanged((user) => {
                 if (user) {
@@ -2614,7 +2510,6 @@
             });
         }
         
-        // Load platforms when page loads
         document.addEventListener('DOMContentLoaded', function() {
             const hasAccepted = checkCookieConsent();
             
