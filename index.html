@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Easy Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -1663,15 +1664,12 @@
             const cookieAccepted = localStorage.getItem('cookieAccepted');
             
             if (cookieAccepted === 'true') {
-                // User has accepted cookies, hide overlay
                 websiteOverlay.style.display = 'none';
                 return true;
             } else if (cookieAccepted === 'false') {
-                // User has rejected cookies, show overlay
                 websiteOverlay.style.display = 'flex';
                 return false;
             } else {
-                // First time user, show overlay
                 websiteOverlay.style.display = 'flex';
                 return false;
             }
@@ -1682,13 +1680,10 @@
             localStorage.setItem('cookieAccepted', 'true');
             websiteOverlay.style.display = 'none';
             
-            // Also set a cookie with 30 days expiry
             setCookie('user_consent', 'accepted_all', 30);
             
-            // Log to console (for testing)
             console.log('Cookies accepted');
             
-            // Reload the page to enable all features
             location.reload();
         }
         
@@ -1722,9 +1717,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const hasAccepted = checkCookieConsent();
             
-            // If user hasn't accepted cookies, disable website functionality
             if (!hasAccepted) {
-                // Disable all interactive elements
                 document.querySelectorAll('button, input, a').forEach(element => {
                     if (element.id !== 'overlayAcceptBtn' && !element.classList.contains('cookie-link')) {
                         element.style.pointerEvents = 'none';
@@ -1732,7 +1725,6 @@
                     }
                 });
             } else {
-                // Enable all interactive elements
                 document.querySelectorAll('button, input, a').forEach(element => {
                     element.style.pointerEvents = 'auto';
                     element.style.opacity = '1';
@@ -1740,20 +1732,22 @@
             }
         });
 
-        // Firebase Configuration
+        // Firebase Configuration - আপনার দেওয়া কনফিগারেশন
         const firebaseConfig = {
-            apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
-            authDomain: "top-up-4db01.firebaseapp.com",
-            databaseURL: "https://top-up-4db01-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "top-up-4db01",
-            storageBucket: "top-up-4db01.appspot.com",
-            messagingSenderId: "264548197473",
-            appId: "1:264548197473:web:abcd1234efgh5678"
+            apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
+            authDomain: "easy-premium.firebaseapp.com",
+            databaseURL: "https://easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "easy-premium",
+            storageBucket: "easy-premium.firebasestorage.app",
+            messagingSenderId: "155891252265",
+            appId: "1:155891252265:web:77ab41de24231e8e5ef038",
+            measurementId: "G-CHL8K8HRPX"
         };
 
         // Initialize Firebase
         try {
             firebase.initializeApp(firebaseConfig);
+            console.log("Firebase initialized successfully");
         } catch (error) {
             console.log("Firebase already initialized");
         }
@@ -1802,14 +1796,12 @@
 
         // Function to generate color based on name
         function getColorFromName(name) {
-            // List of attractive colors
             const colors = [
                 '#FF6B6B', '#4ECDC4', '#FFD166', '#06D6A0', '#118AB2',
                 '#EF476F', '#FFD166', '#06D6A0', '#118AB2', '#073B4C',
                 '#7209B7', '#3A86FF', '#FB5607', '#8338EC', '#FF006E'
             ];
             
-            // Get the first character's code to pick a color
             if (!name || name.length === 0) return colors[0];
             
             const charCode = name.charCodeAt(0);
@@ -1825,10 +1817,8 @@
             }
             
             if (!auth.currentUser) {
-                // Show login modal if not logged in
                 loginModal.style.display = 'flex';
             } else {
-                // Show profile modal
                 loadUserProfile();
                 profileModal.style.display = 'flex';
             }
@@ -1844,7 +1834,6 @@
                     return;
                 }
                 
-                // Filter platforms based on search term
                 const filteredPlatforms = allPlatforms.filter(platform => {
                     const name = platform.name ? platform.name.toLowerCase() : '';
                     const description = platform.description ? platform.description.toLowerCase() : '';
@@ -1860,7 +1849,6 @@
                 displaySearchResults(filteredPlatforms);
             });
             
-            // Search button click
             searchBtn.addEventListener('click', function() {
                 const searchTerm = searchInput.value.toLowerCase().trim();
                 
@@ -1869,7 +1857,6 @@
                     return;
                 }
                 
-                // Filter platforms based on search term
                 const filteredPlatforms = allPlatforms.filter(platform => {
                     const name = platform.name ? platform.name.toLowerCase() : '';
                     const description = platform.description ? platform.description.toLowerCase() : '';
@@ -1885,14 +1872,12 @@
                 displaySearchResults(filteredPlatforms);
             });
             
-            // Close search results when clicking outside
             document.addEventListener('click', function(event) {
                 if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
                     searchResults.style.display = 'none';
                 }
             });
             
-            // Handle Enter key in search
             searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     searchBtn.click();
@@ -1910,7 +1895,6 @@
                 return;
             }
             
-            // Platform icon class mapping
             const iconClasses = {
                 'youtube': 'fab fa-youtube youtube',
                 'facebook': 'fab fa-facebook-f facebook',
@@ -1939,9 +1923,7 @@
                     <div class="search-result-price">${platform.price || '৳ 100'}</div>
                 `;
                 
-                // Click event to select this platform
                 resultItem.addEventListener('click', function() {
-                    // Scroll to the platform card in the grid
                     scrollToPlatformCard(platform.name);
                     searchResults.style.display = 'none';
                     searchInput.value = '';
@@ -1960,17 +1942,14 @@
             platformCards.forEach(card => {
                 const nameElement = card.querySelector('.platform-name');
                 if (nameElement && nameElement.textContent === platformName) {
-                    // Highlight the card
                     card.style.borderColor = '#ff5722';
                     card.style.boxShadow = '0 0 20px rgba(255, 87, 34, 0.7)';
                     
-                    // Scroll to the card
                     card.scrollIntoView({ 
                         behavior: 'smooth', 
                         block: 'center' 
                     });
                     
-                    // Remove highlight after 3 seconds
                     setTimeout(() => {
                         card.style.borderColor = '';
                         card.style.boxShadow = '';
@@ -2027,13 +2006,10 @@
                     const user = result.user;
                     loginModal.style.display = 'none';
                     
-                    // Save user data
                     saveUserData(user);
                     
-                    // Update cart badge
                     updateCartBadge(user.uid);
                     
-                    // If there was a pending purchase, show purchase form now
                     if (pendingPurchase) {
                         showPurchaseForm(pendingPurchase);
                         pendingPurchase = null;
@@ -2048,9 +2024,7 @@
         logoutBtnProfile.addEventListener('click', function() {
             auth.signOut().then(() => {
                 profileModal.style.display = 'none';
-                // Clear user data
                 userOrders = [];
-                // Hide cart badge
                 cartBadge.style.display = 'none';
             }).catch((error) => {
                 console.error("Logout error:", error);
@@ -2063,11 +2037,10 @@
             currentPurchaseInfo = null;
         });
 
-        // Purchase Form Submission - NO CONFIRMATION MESSAGES
+        // Purchase Form Submission
         purchaseForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Check cookie consent first
             if (!checkCookieConsent()) {
                 websiteOverlay.style.display = 'flex';
                 return;
@@ -2075,7 +2048,6 @@
             
             if (!currentPurchaseInfo) return;
             
-            // Basic validation
             if (!purchaseUserName.value.trim()) {
                 purchaseUserName.focus();
                 return;
@@ -2091,15 +2063,16 @@
                 return;
             }
             
-            // Disable submit button
             purchaseSubmitBtn.disabled = true;
             purchaseSubmitBtn.textContent = 'PROCESSING...';
             
             try {
-                // Get current user
                 const user = auth.currentUser;
                 
-                // Prepare order data
+                if (!user) {
+                    throw new Error("User not authenticated");
+                }
+                
                 const orderData = {
                     userName: purchaseUserName.value.trim(),
                     phoneNumber: purchasePhoneNumber.value.trim(),
@@ -2108,69 +2081,62 @@
                     price: currentPurchaseInfo.price,
                     status: 'pending',
                     orderDate: new Date().toISOString(),
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    userId: user.uid
                 };
                 
-                // Add user info if logged in
-                if (user) {
-                    orderData.userId = user.uid;
+                if (user.email) {
                     orderData.userEmail = user.email;
-                    orderData.userName = user.displayName || purchaseUserName.value.trim();
                 }
                 
-                // Try to save order to Firebase
-                const newOrderRef = database.ref('orders').push();
-                await newOrderRef.set(orderData);
+                if (user.displayName && !purchaseUserName.value.trim()) {
+                    orderData.userName = user.displayName;
+                }
                 
-                // NO SUCCESS MESSAGE - directly proceed
+                const newOrderRef = database.ref('transactions').push();
                 
-                // Reset form immediately
+                try {
+                    await newOrderRef.set(orderData);
+                    console.log("Order saved successfully");
+                } catch (dbError) {
+                    console.error("Database error:", dbError);
+                }
+                
                 purchaseForm.reset();
                 
-                // Open Pay.html in new tab immediately
-                window.open(`https://easy-premium.com/Pay.html?platform=${encodeURIComponent(currentPurchaseInfo.platformName)}&price=${encodeURIComponent(currentPurchaseInfo.price)}&orderId=${newOrderRef.key}`, '_blank');
+                const orderId = newOrderRef.key || Date.now().toString();
+                window.open(`https://easy-premium.com/Pay.html?platform=${encodeURIComponent(currentPurchaseInfo.platformName)}&price=${encodeURIComponent(currentPurchaseInfo.price)}&orderId=${orderId}`, '_blank');
                 
-                // Close modal immediately
                 purchaseModal.style.display = 'none';
                 currentPurchaseInfo = null;
                 
-                // Update cart badge if user is logged in
-                if (user) {
-                    updateCartBadge(user.uid);
-                }
+                updateCartBadge(user.uid);
                 
-                // Re-enable submit button
                 purchaseSubmitBtn.disabled = false;
                 purchaseSubmitBtn.textContent = 'CONFIRM ORDER';
                 
             } catch (error) {
-                // Silent fail - no error messages shown
                 console.error("Error:", error);
                 
-                // Open Pay.html directly even if Firebase fails
                 window.open(`https://easy-premium.com/Pay.html?platform=${encodeURIComponent(currentPurchaseInfo.platformName)}&price=${encodeURIComponent(currentPurchaseInfo.price)}`, '_blank');
                 
-                // Reset form and close modal
                 purchaseForm.reset();
                 purchaseModal.style.display = 'none';
                 currentPurchaseInfo = null;
                 
-                // Re-enable submit button
                 purchaseSubmitBtn.disabled = false;
                 purchaseSubmitBtn.textContent = 'CONFIRM ORDER';
             }
         });
 
-        // Function to handle purchase (with login check AND cookie check)
+        // Function to handle purchase
         function handlePurchase(platformCard) {
-            // First check cookie consent
             if (!checkCookieConsent()) {
                 websiteOverlay.style.display = 'flex';
                 return;
             }
             
             if (!auth.currentUser) {
-                // User not logged in, store purchase info and show login modal
                 const platformName = platformCard.querySelector('.platform-name').textContent;
                 const price = platformCard.querySelector('.price').textContent;
                 
@@ -2180,10 +2146,8 @@
                     platformCard: platformCard
                 };
                 
-                // Show login modal
                 loginModal.style.display = 'flex';
             } else {
-                // User is logged in, show purchase form
                 showPurchaseForm({
                     platformName: platformCard.querySelector('.platform-name').textContent,
                     price: platformCard.querySelector('.price').textContent,
@@ -2196,11 +2160,9 @@
         function showPurchaseForm(purchaseData) {
             currentPurchaseInfo = purchaseData;
             
-            // Set platform info in form header
             purchasePlatformName.textContent = purchaseData.platformName;
             purchasePlatformPrice.textContent = `Price: ${purchaseData.price}`;
             
-            // Auto-fill user name if available
             const user = auth.currentUser;
             if (user && user.displayName) {
                 purchaseUserName.value = user.displayName;
@@ -2208,28 +2170,46 @@
                 purchaseUserName.value = '';
             }
             
-            // Clear other fields
             purchasePhoneNumber.value = '';
             purchaseWhatsappNumber.value = '';
             
-            // Show purchase modal
             purchaseModal.style.display = 'flex';
         }
 
         // Save user data to Firebase Database
         function saveUserData(user) {
             const userId = user.uid;
-            const userData = {
-                name: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL,
-                joinDate: firebase.database.ServerValue.TIMESTAMP,
-                lastLogin: firebase.database.ServerValue.TIMESTAMP
-            };
             
-            database.ref('users/' + userId).set(userData)
+            database.ref('users/' + userId).once('value')
+                .then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        const userData = {
+                            basicInfo: {
+                                fullName: user.displayName || '',
+                                email: user.email || '',
+                                phone: '',
+                                joinDate: firebase.database.ServerValue.TIMESTAMP
+                            },
+                            premiumStatus: {
+                                isPremium: false,
+                                subscriptionType: 'none',
+                                startDate: null,
+                                endDate: null
+                            },
+                            lastLogin: firebase.database.ServerValue.TIMESTAMP
+                        };
+                        
+                        if (user.photoURL) {
+                            userData.basicInfo.photoURL = user.photoURL;
+                        }
+                        
+                        return database.ref('users/' + userId).set(userData);
+                    } else {
+                        return database.ref('users/' + userId + '/lastLogin').set(firebase.database.ServerValue.TIMESTAMP);
+                    }
+                })
                 .then(() => {
-                    console.log("User data saved successfully");
+                    console.log("User data saved/updated successfully");
                 })
                 .catch((error) => {
                     console.error("Error saving user data:", error);
@@ -2240,7 +2220,7 @@
         function updateCartBadge(userId) {
             if (!userId) return;
             
-            database.ref('orders').orderByChild('userId').equalTo(userId).once('value')
+            database.ref('transactions').orderByChild('userId').equalTo(userId).once('value')
                 .then((snapshot) => {
                     const ordersData = snapshot.val();
                     if (ordersData) {
@@ -2253,6 +2233,7 @@
                 })
                 .catch((error) => {
                     console.error("Error updating cart badge:", error);
+                    cartBadge.style.display = 'none';
                 });
         }
 
@@ -2261,32 +2242,50 @@
             const user = auth.currentUser;
             if (!user) return;
             
-            // Set basic user info
-            const userName = user.displayName || "User";
-            profileName.textContent = userName;
-            profileEmail.textContent = user.email;
-            
-            // Clear and set profile avatar
+            database.ref('users/' + user.uid + '/basicInfo').once('value')
+                .then((snapshot) => {
+                    const userData = snapshot.val();
+                    
+                    if (userData) {
+                        profileName.textContent = userData.fullName || user.displayName || "User";
+                        profileEmail.textContent = userData.email || user.email || "No email";
+                    } else {
+                        profileName.textContent = user.displayName || "User";
+                        profileEmail.textContent = user.email || "No email";
+                    }
+                    
+                    setProfileAvatar(user, userData);
+                    
+                    loadUserOrders(user.uid);
+                })
+                .catch((error) => {
+                    console.error("Error loading user data:", error);
+                    profileName.textContent = user.displayName || "User";
+                    profileEmail.textContent = user.email || "No email";
+                    setProfileAvatar(user, null);
+                    loadUserOrders(user.uid);
+                });
+        }
+
+        // Set profile avatar
+        function setProfileAvatar(user, userData) {
             profileAvatar.innerHTML = '';
             
-            if (user.photoURL) {
-                // If user has profile photo, show it
+            const photoURL = (userData && userData.photoURL) || user.photoURL;
+            const userName = (userData && userData.fullName) || user.displayName || "User";
+            
+            if (photoURL) {
                 const img = document.createElement('img');
-                img.src = user.photoURL;
+                img.src = photoURL;
                 img.alt = userName;
                 img.className = 'profile-avatar-img';
                 img.onerror = function() {
-                    // If image fails to load, show initial
                     showInitialAvatar(userName);
                 };
                 profileAvatar.appendChild(img);
             } else {
-                // If no photo, show initial with colored background
                 showInitialAvatar(userName);
             }
-            
-            // Load user orders
-            loadUserOrders(user.uid);
         }
 
         // Function to show initial avatar with colored background
@@ -2302,7 +2301,7 @@
         function loadUserOrders(userId) {
             ordersList.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>অর্ডার লোড হচ্ছে...</p></div>';
             
-            database.ref('orders').orderByChild('userId').equalTo(userId).once('value')
+            database.ref('transactions').orderByChild('userId').equalTo(userId).once('value')
                 .then((snapshot) => {
                     userOrders = [];
                     let ordersData = snapshot.val();
@@ -2312,22 +2311,21 @@
                         return;
                     }
                     
-                    // Convert to array and sort by date
                     const ordersArray = Object.entries(ordersData).map(([key, value]) => {
                         return { id: key, ...value };
                     });
                     
                     ordersArray.sort((a, b) => {
-                        return new Date(b.orderDate) - new Date(a.orderDate);
+                        const timeA = a.timestamp || new Date(a.orderDate).getTime();
+                        const timeB = b.timestamp || new Date(b.orderDate).getTime();
+                        return timeB - timeA;
                     });
                     
                     userOrders = ordersArray;
                     
-                    // Update cart badge
                     cartBadge.textContent = ordersArray.length;
                     cartBadge.style.display = 'flex';
                     
-                    // Display orders
                     displayOrders(ordersArray);
                 })
                 .catch((error) => {
@@ -2343,7 +2341,6 @@
                 return;
             }
             
-            // Create table view for desktop
             let tableHTML = `
                 <div class="orders-table-container">
                     <table class="orders-table">
@@ -2358,14 +2355,19 @@
                         <tbody>
             `;
             
-            // Create cards view for mobile
             let cardsHTML = '<div class="orders-cards">';
             
             orders.forEach(order => {
-                const orderDate = new Date(order.orderDate);
+                let orderDate;
+                if (order.orderDate) {
+                    orderDate = new Date(order.orderDate);
+                } else if (order.timestamp) {
+                    orderDate = new Date(order.timestamp);
+                } else {
+                    orderDate = new Date();
+                }
                 const formattedDate = orderDate.toLocaleDateString('bn-BD');
                 
-                // Status mapping with Bangla text
                 let statusClass = 'status-pending';
                 let statusText = 'পেন্ডিং';
                 
@@ -2380,25 +2382,22 @@
                     statusText = 'পেমেন্ট';
                 }
                 
-                // Extract price value
-                let priceValue = order.price;
-                if (order.price && order.price.includes('৳')) {
-                    priceValue = order.price;
-                } else if (order.price) {
-                    priceValue = `৳ ${order.price}`;
+                let priceValue = order.price || '৳ -';
+                if (priceValue && !priceValue.includes('৳')) {
+                    priceValue = `৳ ${priceValue}`;
                 }
                 
-                // Table row
+                const platformName = order.platform || 'Unknown';
+                
                 tableHTML += `
                     <tr>
                         <td>${formattedDate}</td>
-                        <td>${order.platform}</td>
+                        <td>${platformName}</td>
                         <td>${priceValue}</td>
                         <td class="${statusClass}">${statusText}</td>
                     </tr>
                 `;
                 
-                // Card for mobile
                 cardsHTML += `
                     <div class="order-card">
                         <div class="order-card-row">
@@ -2407,7 +2406,7 @@
                         </div>
                         <div class="order-card-row">
                             <div class="order-card-label">প্ল্যাটফর্ম</div>
-                            <div class="order-card-value">${order.platform}</div>
+                            <div class="order-card-value">${platformName}</div>
                         </div>
                         <div class="order-card-row">
                             <div class="order-card-label">দাম</div>
@@ -2429,7 +2428,6 @@
             
             cardsHTML += '</div>';
             
-            // Combine both views - mobile will show cards, desktop will show table
             ordersList.innerHTML = tableHTML + cardsHTML;
         }
 
@@ -2438,31 +2436,25 @@
             const platformsGrid = document.getElementById('platforms-grid');
             platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে...</p></div>';
 
-            // Reference to platforms in Firebase
-            const platformsRef = database.ref('platforms');
+            const platformsRef = database.ref('publicData/pricingPlans');
             
             platformsRef.on('value', (snapshot) => {
                 const platformsData = snapshot.val();
                 platformsGrid.innerHTML = '';
 
                 if (!platformsData) {
-                    // Use default platforms if Firebase is empty
                     createDefaultPlatforms();
                     return;
                 }
 
-                // Convert object to array
                 allPlatforms = Object.values(platformsData);
                 
-                // Sort platforms by order if available
                 allPlatforms.sort((a, b) => (a.order || 0) - (b.order || 0));
 
-                // Create platform cards
                 allPlatforms.forEach(platform => {
                     createPlatformCard(platform);
                 });
 
-                // Add event listeners to buy buttons
                 document.querySelectorAll('.platform-card .buy-button').forEach(button => {
                     button.addEventListener('click', function(e) {
                         e.stopPropagation();
@@ -2471,14 +2463,11 @@
                     });
                 });
 
-                // Initialize search functionality
                 initializeSearch();
                 
-                // Animate cards after loading
                 animatePlatformCards();
             }, (error) => {
                 console.error("Error loading platforms:", error);
-                // Create default platforms if Firebase fails
                 createDefaultPlatforms();
             });
         }
@@ -2523,7 +2512,6 @@
                 createPlatformCard(platform);
             });
             
-            // Add event listeners to buy buttons
             document.querySelectorAll('.platform-card .buy-button').forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -2532,7 +2520,6 @@
                 });
             });
             
-            // Initialize search functionality
             initializeSearch();
             
             animatePlatformCards();
@@ -2545,7 +2532,6 @@
             platformCard.className = 'platform-card';
             platformCard.setAttribute('data-platform-name', platform.name);
             
-            // Platform icon class mapping
             const iconClasses = {
                 'youtube': 'fab fa-youtube youtube',
                 'facebook': 'fab fa-facebook-f facebook',
@@ -2616,16 +2602,26 @@
             });
         }
         
+        // Initialize auth state
+        function initializeAuth() {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    console.log("User is signed in:", user.uid);
+                    updateCartBadge(user.uid);
+                } else {
+                    console.log("No user signed in");
+                }
+            });
+        }
+        
         // Load platforms when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            // Check cookie consent first
             const hasAccepted = checkCookieConsent();
             
             if (hasAccepted) {
-                // Only load platforms if cookies are accepted
+                initializeAuth();
                 loadPlatformsFromFirebase();
             } else {
-                // Show loading message for platforms
                 const platformsGrid = document.getElementById('platforms-grid');
                 platformsGrid.innerHTML = `
                     <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
