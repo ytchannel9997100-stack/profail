@@ -104,7 +104,7 @@
         /* Header */
         .header {
             background: rgba(0, 0, 0, 0.8);
-            padding: 1px 20px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -119,6 +119,7 @@
             display: flex;
             align-items: center;
             gap: 30px;
+            flex: 1;
         }
         
         .logo {
@@ -136,18 +137,80 @@
             color: #00bcd4;
         }
         
-        .three-dots-icon {
+        /* 3D Shopping Cart Icon */
+        .cart-icon-container {
             cursor: pointer;
-            font-size: 1.8rem;
-            color: #ff9800;
             transition: all 0.3s;
-            padding: 5px;
-            border-radius: 50%;
+            position: relative;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .three-dots-icon:hover {
-            background: rgba(255, 152, 0, 0.2);
-            transform: scale(1.1);
+        .cart-3d-icon {
+            font-size: 2rem;
+            color: #ffffff;
+            text-shadow: 
+                0 1px 0 #ccc,
+                0 2px 0 #c9c9c9,
+                0 3px 0 #bbb,
+                0 4px 0 #b9b9b9,
+                0 5px 0 #aaa,
+                0 6px 1px rgba(0,0,0,.1),
+                0 0 5px rgba(0,0,0,.1),
+                0 1px 3px rgba(0,0,0,.3),
+                0 3px 5px rgba(0,0,0,.2),
+                0 5px 10px rgba(0,0,0,.25),
+                0 10px 10px rgba(0,0,0,.2),
+                0 20px 20px rgba(0,0,0,.15);
+            transition: all 0.3s;
+            transform: perspective(500px) rotateX(10deg);
+            background: linear-gradient(145deg, #ffffff, #e6e6e6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .cart-icon-container:hover .cart-3d-icon {
+            transform: perspective(500px) rotateX(0deg) translateY(-5px);
+            text-shadow: 
+                0 1px 0 #ccc,
+                0 2px 0 #c9c9c9,
+                0 3px 0 #bbb,
+                0 4px 0 #b9b9b9,
+                0 5px 0 #aaa,
+                0 6px 1px rgba(0,0,0,.1),
+                0 0 5px rgba(0,0,0,.1),
+                0 1px 3px rgba(0,0,0,.3),
+                0 3px 5px rgba(0,0,0,.2),
+                0 5px 10px rgba(0,0,0,.25),
+                0 10px 10px rgba(0,0,0,.2),
+                0 20px 20px rgba(0,0,0,.15),
+                0 0 20px rgba(255, 152, 0, 0.5);
+            background: linear-gradient(145deg, #ff9800, #ff5722);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+        
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: linear-gradient(45deg, #ff5722, #ff9800);
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(255, 87, 34, 0.5);
+            border: 2px solid #1a1a2e;
+            z-index: 10;
         }
         
         .nav-links {
@@ -922,25 +985,51 @@
         /* Responsive */
         @media (max-width: 768px) {
             .header {
-                flex-direction: column;
+                flex-direction: row;
                 padding: 15px 20px;
+                justify-content: space-between;
             }
             
             .header-left {
-                flex-direction: column;
                 gap: 15px;
             }
             
+            .logo {
+                font-size: 1.3rem;
+            }
+            
             .nav-links {
-                margin-top: 15px;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 15px;
+                display: none;
             }
             
             /* Hide search bar on mobile */
             .search-container {
                 display: none;
+            }
+            
+            .cart-3d-icon {
+                font-size: 1.8rem;
+                text-shadow: 
+                    0 1px 0 #ccc,
+                    0 2px 0 #c9c9c9,
+                    0 3px 0 #bbb,
+                    0 4px 0 #b9b9b9,
+                    0 5px 0 #aaa,
+                    0 6px 1px rgba(0,0,0,.1),
+                    0 0 5px rgba(0,0,0,.1),
+                    0 1px 3px rgba(0,0,0,.3),
+                    0 3px 5px rgba(0,0,0,.2);
+            }
+            
+            .cart-icon-container {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .cart-badge {
+                width: 20px;
+                height: 20px;
+                font-size: 0.7rem;
             }
             
             .hero {
@@ -1173,6 +1262,29 @@
                 min-width: auto;
                 text-align: left;
             }
+            
+            .cart-3d-icon {
+                font-size: 1.6rem;
+                text-shadow: 
+                    0 1px 0 #ccc,
+                    0 2px 0 #c9c9c9,
+                    0 3px 0 #bbb,
+                    0 4px 0 #b9b9b9,
+                    0 5px 0 #aaa,
+                    0 6px 1px rgba(0,0,0,.1),
+                    0 0 5px rgba(0,0,0,.1);
+            }
+            
+            .cart-icon-container {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .cart-badge {
+                width: 18px;
+                height: 18px;
+                font-size: 0.6rem;
+            }
         }
         
         /* Platform Specific Colors */
@@ -1295,7 +1407,6 @@
     <header class="header">
         <div class="header-left">
             <div class="logo">
-                <i class="fas fa-ellipsis-v three-dots-icon" id="threeDotsIcon"></i>
                 EASY<span>PREMIUM</span>
             </div>
             
@@ -1312,6 +1423,13 @@
                 </div>
             </div>
         </div>
+        
+        <!-- 3D Shopping Cart Icon for Profile -->
+        <div class="cart-icon-container" id="cartIcon">
+            <i class="fas fa-shopping-cart cart-3d-icon"></i>
+            <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+        </div>
+        
         <nav class="nav-links">
             <!-- Navigation links have been removed as requested -->
         </nav>
@@ -1465,7 +1583,6 @@
         const closeLoginBtn = document.getElementById('closeLoginBtn');
         
         const profileModal = document.getElementById('profileModal');
-        const threeDotsIcon = document.getElementById('threeDotsIcon');
         const profileName = document.getElementById('profileName');
         const profileEmail = document.getElementById('profileEmail');
         const profileAvatar = document.getElementById('profileAvatar');
@@ -1488,6 +1605,10 @@
         const searchInput = document.getElementById('searchInput');
         const searchBtn = document.getElementById('searchBtn');
         const searchResults = document.getElementById('searchResults');
+        
+        // 3D Cart icon element
+        const cartIcon = document.getElementById('cartIcon');
+        const cartBadge = document.getElementById('cartBadge');
 
         // Variables
         let pendingPurchase = null;
@@ -1511,6 +1632,23 @@
             const colorIndex = charCode % colors.length;
             return colors[colorIndex];
         }
+
+        // 3D Cart icon click handler
+        cartIcon.addEventListener('click', function() {
+            if (!checkCookieConsent()) {
+                websiteOverlay.style.display = 'flex';
+                return;
+            }
+            
+            if (!auth.currentUser) {
+                // Show login modal if not logged in
+                loginModal.style.display = 'flex';
+            } else {
+                // Show profile modal
+                loadUserProfile();
+                profileModal.style.display = 'flex';
+            }
+        });
 
         // Search functionality
         function initializeSearch() {
@@ -1657,23 +1795,6 @@
             });
         }
 
-        // Three dots icon click handler
-        threeDotsIcon.addEventListener('click', function() {
-            if (!checkCookieConsent()) {
-                websiteOverlay.style.display = 'flex';
-                return;
-            }
-            
-            if (!auth.currentUser) {
-                // Show login modal if not logged in
-                loginModal.style.display = 'flex';
-            } else {
-                // Show profile modal
-                loadUserProfile();
-                profileModal.style.display = 'flex';
-            }
-        });
-
         // Delete Account Button
         deleteAccountBtn.addEventListener('click', function() {
             if (confirm("আপনি কি নিশ্চিত যে আপনি আপনার অ্যাকাউন্ট ডিলিট করতে চান? এই একশনটি irreversible হবে।")) {
@@ -1725,6 +1846,9 @@
                     // Save user data
                     saveUserData(user);
                     
+                    // Update cart badge
+                    updateCartBadge(user.uid);
+                    
                     // If there was a pending purchase, show purchase form now
                     if (pendingPurchase) {
                         showPurchaseForm(pendingPurchase);
@@ -1742,6 +1866,8 @@
                 profileModal.style.display = 'none';
                 // Clear user data
                 userOrders = [];
+                // Hide cart badge
+                cartBadge.style.display = 'none';
             }).catch((error) => {
                 console.error("Logout error:", error);
             });
@@ -1823,6 +1949,11 @@
                 // Close modal immediately
                 purchaseModal.style.display = 'none';
                 currentPurchaseInfo = null;
+                
+                // Update cart badge if user is logged in
+                if (user) {
+                    updateCartBadge(user.uid);
+                }
                 
                 // Re-enable submit button
                 purchaseSubmitBtn.disabled = false;
@@ -1921,6 +2052,26 @@
                 });
         }
 
+        // Update cart badge
+        function updateCartBadge(userId) {
+            if (!userId) return;
+            
+            database.ref('orders').orderByChild('userId').equalTo(userId).once('value')
+                .then((snapshot) => {
+                    const ordersData = snapshot.val();
+                    if (ordersData) {
+                        const orderCount = Object.keys(ordersData).length;
+                        cartBadge.textContent = orderCount;
+                        cartBadge.style.display = 'flex';
+                    } else {
+                        cartBadge.style.display = 'none';
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error updating cart badge:", error);
+                });
+        }
+
         // Load user profile data
         function loadUserProfile() {
             const user = auth.currentUser;
@@ -1987,6 +2138,10 @@
                     });
                     
                     userOrders = ordersArray;
+                    
+                    // Update cart badge
+                    cartBadge.textContent = ordersArray.length;
+                    cartBadge.style.display = 'flex';
                     
                     // Display orders
                     displayOrders(ordersArray);
