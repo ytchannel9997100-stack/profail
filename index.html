@@ -10,7 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
-        /* আপনার পুরাতন CSS একই রাখুন */
         * {
             margin: 0;
             padding: 0;
@@ -123,7 +122,7 @@
             flex: 1;
         }
         
-        /* লোগো স্টাইলিং */
+        /* নতুন লোগো স্টাইলিং */
         .logo {
             display: flex;
             align-items: center;
@@ -220,7 +219,7 @@
             color: #ff9800;
         }
         
-        /* CART ICON */
+        /* MODERN CART ICON - UPDATED */
         .cart-icon-container {
             cursor: pointer;
             transition: all 0.3s;
@@ -601,7 +600,7 @@
         .orders-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px;
+            min-width: 600px; /* Minimum width for table */
         }
         
         .orders-table th {
@@ -727,7 +726,7 @@
             border: 2px solid #ff9800;
         }
         
-        /* লগইন মডালে লোগো */
+        /* লগইন মডালে লোগো আপডেট */
         .login-logo {
             display: flex;
             align-items: center;
@@ -1127,6 +1126,7 @@
                 gap: 15px;
             }
             
+            /* মোবাইলে লোগো স্টাইলিং */
             .logo-icon {
                 width: 45px;
                 height: 45px;
@@ -1148,6 +1148,7 @@
                 display: none;
             }
             
+            /* Hide search bar on mobile */
             .search-container {
                 display: none;
             }
@@ -1262,6 +1263,7 @@
                 justify-content: flex-end;
             }
             
+            /* Show cards and hide table on mobile */
             .orders-table-container {
                 display: none;
             }
@@ -1270,6 +1272,7 @@
                 display: flex;
             }
             
+            /* লগইন মডালের লোগো মোবাইল স্টাইলিং */
             .login-logo {
                 gap: 10px;
                 flex-direction: column;
@@ -1319,12 +1322,23 @@
             }
         }
         
+        /* For tablets and larger devices, show search bar */
         @media (min-width: 769px) {
             .search-container {
                 display: block;
             }
+            
+            /* Adjust header layout for search bar */
+            .header {
+                padding: 10px 20px;
+            }
+            
+            .header-left {
+                flex: 1;
+            }
         }
         
+        /* Extra small screens */
         @media (max-width: 480px) {
             .hero {
                 padding: 25px 12px;
@@ -1351,6 +1365,7 @@
                 gap: 12px;
             }
             
+            /* এক্সট্রা ছোট স্ক্রিনে লোগো স্টাইলিং */
             .logo-icon {
                 width: 40px;
                 height: 40px;
@@ -1458,13 +1473,13 @@
         }
 
         .profile-content {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
     </style>
 </head>
 <body>
-    <!-- Website Overlay -->
+    <!-- Website Overlay (when cookies not accepted) -->
     <div id="websiteOverlay" class="website-overlay">
         <div class="overlay-content">
             <div class="overlay-message">
@@ -1504,7 +1519,9 @@
         <div class="profile-content">
             <div class="profile-header">
                 <div class="user-info-container">
-                    <div class="profile-avatar" id="profileAvatar"></div>
+                    <div class="profile-avatar" id="profileAvatar">
+                        <!-- Profile picture or initial will be added here -->
+                    </div>
                     <div class="user-details">
                         <div class="profile-name" id="profileName">Loading...</div>
                         <div class="profile-email" id="profileEmail">Loading...</div>
@@ -1565,6 +1582,7 @@
     <!-- Header -->
     <header class="header">
         <div class="header-left">
+            <!-- নতুন লোগো -->
             <a href="#" class="logo">
                 <div class="logo-icon">
                     <i class="fas fa-crown"></i>
@@ -1575,17 +1593,21 @@
                 </div>
             </a>
             
+            <!-- Search Bar for Desktop and Tablet -->
             <div class="search-container">
                 <div class="search-wrapper">
                     <input type="text" id="searchInput" class="search-input" placeholder="প্ল্যাটফর্ম বা প্যাকেজ সার্চ করুন...">
                     <button id="searchBtn" class="search-btn">
                         <i class="fas fa-search"></i>
                     </button>
-                    <div id="searchResults" class="search-results"></div>
+                    <div id="searchResults" class="search-results">
+                        <!-- Search results will be populated here -->
+                    </div>
                 </div>
             </div>
         </div>
         
+        <!-- MODERN CART ICON -->
         <div class="cart-icon-container" id="cartIcon">
             <div class="cart-modern-icon">
                 <i class="fas fa-shopping-cart"></i>
@@ -1593,7 +1615,9 @@
             <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
         </div>
         
-        <nav class="nav-links"></nav>
+        <nav class="nav-links">
+            <!-- Navigation links have been removed as requested -->
+        </nav>
     </header>
 
     <!-- Hero Section -->
@@ -1606,6 +1630,7 @@
     <section id="platforms" class="platforms-section">
         <h2 class="section-title"></h2>
         <div id="platforms-grid" class="platforms-grid">
+            <!-- Platforms will be loaded from Firebase here -->
             <div class="loading-spinner">
                 <div class="spinner"></div>
                 <p>প্ল্যাটফর্ম লোড হচ্ছে...</p>
@@ -1682,7 +1707,7 @@
         const searchBtn = document.getElementById('searchBtn');
         const searchResults = document.getElementById('searchResults');
         
-        // Cart icon element
+        // MODERN Cart icon element
         const cartIcon = document.getElementById('cartIcon');
         const cartBadge = document.getElementById('cartBadge');
 
@@ -1731,7 +1756,33 @@
         
         overlayAcceptBtn.addEventListener('click', acceptAllCookies);
         
-        // Cart icon click handler
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            const hasAccepted = checkCookieConsent();
+            
+            if (hasAccepted) {
+                initializeAuth();
+                loadPlatformsFromFirebase();
+            } else {
+                const platformsGrid = document.getElementById('platforms-grid');
+                platformsGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
+                        <i class="fas fa-cookie-bite" style="font-size: 2.5rem; color: #ff9800; margin-bottom: 15px;"></i>
+                        <p style="font-size: 1rem;">কুকি সম্মতি প্রদান করুন প্ল্যাটফর্ম দেখতে</p>
+                    </div>
+                `;
+                
+                // Disable all elements except cookie buttons
+                document.querySelectorAll('button, input, a').forEach(element => {
+                    if (element.id !== 'overlayAcceptBtn' && !element.classList.contains('cookie-link')) {
+                        element.style.pointerEvents = 'none';
+                        element.style.opacity = '0.5';
+                    }
+                });
+            }
+        });
+
+        // MODERN Cart icon click handler
         cartIcon.addEventListener('click', function() {
             if (!checkCookieConsent()) {
                 websiteOverlay.style.display = 'flex';
@@ -1807,6 +1858,7 @@
             });
         }
         
+        // Display search results
         function displaySearchResults(platforms) {
             searchResults.innerHTML = '';
             
@@ -1856,6 +1908,7 @@
             searchResults.style.display = 'block';
         }
         
+        // Scroll to platform card in the grid
         function scrollToPlatformCard(platformName) {
             const platformCards = document.querySelectorAll('.platform-card');
             
@@ -1958,7 +2011,7 @@
             currentPurchaseInfo = null;
         });
 
-        // Purchase Form Submission
+        // Purchase Form Submission - শুধুমাত্র Firebase এ সেভ হবে
         purchaseForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -2000,6 +2053,7 @@
                     whatsappNumber: purchaseWhatsappNumber.value.trim(),
                     platform: currentPurchaseInfo.platformName,
                     price: currentPurchaseInfo.price,
+                    platformId: currentPurchaseInfo.platformId,
                     status: 'pending',
                     orderDate: new Date().toISOString(),
                     timestamp: firebase.database.ServerValue.TIMESTAMP,
@@ -2008,15 +2062,16 @@
                     userDisplayName: user.displayName || ''
                 };
                 
+                // শুধুমাত্র Firebase এ সেভ করুন
                 const newOrderRef = database.ref('transactions').push();
                 await newOrderRef.set(orderData);
                 
-                console.log("Order saved successfully");
+                console.log("Order saved successfully to Firebase");
                 
                 purchaseForm.reset();
                 
-                const orderId = newOrderRef.key || Date.now().toString();
-                window.open(`https://easy-premium.com/Pay.html?platform=${encodeURIComponent(currentPurchaseInfo.platformName)}&price=${encodeURIComponent(currentPurchaseInfo.price)}&orderId=${orderId}`, '_blank');
+                // Firebase এ সেভ করার পর ইউজারকে success message দেখান
+                alert("অর্ডার সফলভাবে সংরক্ষণ করা হয়েছে! অর্ডার আইডি: " + newOrderRef.key);
                 
                 purchaseModal.style.display = 'none';
                 currentPurchaseInfo = null;
@@ -2028,12 +2083,7 @@
                 
             } catch (error) {
                 console.error("Error:", error);
-                
-                window.open(`https://easy-premium.com/Pay.html?platform=${encodeURIComponent(currentPurchaseInfo.platformName)}&price=${encodeURIComponent(currentPurchaseInfo.price)}`, '_blank');
-                
-                purchaseForm.reset();
-                purchaseModal.style.display = 'none';
-                currentPurchaseInfo = null;
+                alert("অর্ডার সংরক্ষণে সমস্যা হয়েছে: " + error.message);
                 
                 purchaseSubmitBtn.disabled = false;
                 purchaseSubmitBtn.textContent = 'CONFIRM ORDER';
@@ -2050,10 +2100,12 @@
             if (!auth.currentUser) {
                 const platformName = platformCard.querySelector('.platform-name').textContent;
                 const price = platformCard.querySelector('.price').textContent;
+                const platformId = platformCard.getAttribute('data-platform-id');
                 
                 pendingPurchase = {
                     platformName: platformName,
                     price: price,
+                    platformId: platformId,
                     platformCard: platformCard
                 };
                 
@@ -2062,6 +2114,7 @@
                 showPurchaseForm({
                     platformName: platformCard.querySelector('.platform-name').textContent,
                     price: platformCard.querySelector('.price').textContent,
+                    platformId: platformCard.getAttribute('data-platform-id'),
                     platformCard: platformCard
                 });
             }
@@ -2108,7 +2161,7 @@
                     }
                 })
                 .then(() => {
-                    console.log("User data saved/updated successfully");
+                    console.log("User data saved/updated successfully to Firebase");
                 })
                 .catch((error) => {
                     console.error("Error saving user data:", error);
@@ -2248,6 +2301,7 @@
                                 <th>প্ল্যাটফর্ম</th>
                                 <th>দাম</th>
                                 <th>স্ট্যাটাস</th>
+                                <th>অর্ডার আইডি</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2286,6 +2340,7 @@
                 }
                 
                 const platformName = order.platform || 'Unknown';
+                const orderId = order.id ? order.id.substring(0, 8) + '...' : 'N/A';
                 
                 tableHTML += `
                     <tr>
@@ -2293,6 +2348,7 @@
                         <td>${platformName}</td>
                         <td>${priceValue}</td>
                         <td class="${statusClass}">${statusText}</td>
+                        <td style="font-size: 0.8rem;">${orderId}</td>
                     </tr>
                 `;
                 
@@ -2313,6 +2369,10 @@
                         <div class="order-card-row">
                             <div class="order-card-label">স্ট্যাটাস</div>
                             <div class="order-card-value"><span class="${statusClass}">${statusText}</span></div>
+                        </div>
+                        <div class="order-card-row">
+                            <div class="order-card-label">অর্ডার আইডি</div>
+                            <div class="order-card-value" style="font-size: 0.8rem;">${orderId}</div>
                         </div>
                     </div>
                 `;
@@ -2341,15 +2401,35 @@
                 platformsGrid.innerHTML = '';
 
                 if (!platformsData) {
-                    createDefaultPlatforms();
+                    showNoPlatformsMessage();
                     return;
                 }
 
-                allPlatforms = Object.values(platformsData);
+                allPlatforms = [];
                 
+                // Convert object to array
+                Object.entries(platformsData).forEach(([id, platform]) => {
+                    allPlatforms.push({
+                        id: id,
+                        name: platform.name,
+                        icon: platform.icon,
+                        description: platform.description,
+                        price: platform.price,
+                        features: platform.features || [],
+                        category: platform.category,
+                        order: platform.order || 0,
+                        status: platform.status || 'active',
+                        color: platform.color || '#ff9800'
+                    });
+                });
+                
+                // Sort by order
                 allPlatforms.sort((a, b) => (a.order || 0) - (b.order || 0));
+                
+                // Filter active platforms only
+                const activePlatforms = allPlatforms.filter(platform => platform.status === 'active');
 
-                allPlatforms.forEach(platform => {
+                activePlatforms.forEach(platform => {
                     createPlatformCard(platform);
                 });
 
@@ -2366,61 +2446,21 @@
                 animatePlatformCards();
             }, (error) => {
                 console.error("Error loading platforms:", error);
-                createDefaultPlatforms();
+                showNoPlatformsMessage();
             });
         }
 
-        // Create default platforms if Firebase fails
-        function createDefaultPlatforms() {
+        function showNoPlatformsMessage() {
             const platformsGrid = document.getElementById('platforms-grid');
-            platformsGrid.innerHTML = '';
-            
-            allPlatforms = [
-                {
-                    name: 'YouTube Premium',
-                    icon: 'youtube',
-                    description: 'Ad-free videos, background play, and YouTube Music Premium',
-                    price: '৳ 299/month',
-                    features: ['Ad-free videos', 'Background play', 'YouTube Music Premium', 'Offline downloads']
-                },
-                {
-                    name: 'Facebook Blueprint',
-                    icon: 'facebook',
-                    description: 'Advanced marketing tools and analytics for businesses',
-                    price: '৳ 499/month',
-                    features: ['Advanced analytics', 'Cross-platform integration', 'Priority support', 'Custom tools']
-                },
-                {
-                    name: 'Instagram Blueprint',
-                    icon: 'instagram',
-                    description: 'Perfect for individual creators and influencers',
-                    price: '৳ 399/month',
-                    features: ['Advanced analytics', 'Scheduling features', 'Customer insights', 'Priority posting']
-                },
-                {
-                    name: 'Netflix Premium',
-                    icon: 'netflix',
-                    description: 'Watch Netflix on 4 screens at once in Ultra HD',
-                    price: '৳ 799/month',
-                    features: ['4 screens at once', 'Ultra HD available', 'Watch anywhere', 'Cancel anytime']
-                }
-            ];
-            
-            allPlatforms.forEach(platform => {
-                createPlatformCard(platform);
-            });
-            
-            document.querySelectorAll('.platform-card .buy-button').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const platformCard = this.closest('.platform-card');
-                    handlePurchase(platformCard);
-                });
-            });
-            
-            initializeSearch();
-            
-            animatePlatformCards();
+            platformsGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-box-open" style="font-size: 3.5rem; color: #ff9800; margin-bottom: 20px;"></i>
+                    <h3 style="color: #ff9800; margin-bottom: 15px;">প্ল্যাটফর্ম পাওয়া যায়নি</h3>
+                    <p style="color: #ddd; max-width: 500px; margin: 0 auto;">
+                        বর্তমানে কোনো প্ল্যাটফর্ম পাওয়া যায়নি। দয়া করে কিছুক্ষণ পরে আবার চেষ্টা করুন অথবা অ্যাডমিনের সাথে যোগাযোগ করুন।
+                    </p>
+                </div>
+            `;
         }
 
         // Create a platform card
@@ -2429,6 +2469,7 @@
             const platformCard = document.createElement('div');
             platformCard.className = 'platform-card';
             platformCard.setAttribute('data-platform-name', platform.name);
+            platformCard.setAttribute('data-platform-id', platform.id);
             
             const iconClasses = {
                 'youtube': 'fab fa-youtube youtube',
@@ -2455,7 +2496,7 @@
                     ${platform.description || 'প্রিমিয়াম সেবা পান সবচেয়ে কম দামে।'}
                 </div>
                 <div class="platform-features">
-                    ${platform.features ? platform.features.map(feature => `
+                    ${platform.features && platform.features.length > 0 ? platform.features.map(feature => `
                         <div class="feature">
                             <i class="fas fa-check-circle"></i>
                             <span>${feature}</span>
@@ -2509,23 +2550,6 @@
                 }
             });
         }
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            const hasAccepted = checkCookieConsent();
-            
-            if (hasAccepted) {
-                initializeAuth();
-                loadPlatformsFromFirebase();
-            } else {
-                const platformsGrid = document.getElementById('platforms-grid');
-                platformsGrid.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
-                        <i class="fas fa-cookie-bite" style="font-size: 2.5rem; color: #ff9800; margin-bottom: 15px;"></i>
-                        <p style="font-size: 1rem;">কুকি সম্মতি প্রদান করুন প্ল্যাটফর্ম দেখতে</p>
-                    </div>
-                `;
-            }
-        });
     </script>
 </body>
 </html>
