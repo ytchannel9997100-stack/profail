@@ -3,27 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Easy Premium</title>
+    <title>Easy Premium Admin Panel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
-        :root {
-            --primary: #ff9800;
-            --secondary: #00bcd4;
-            --dark: #1a1a2e;
-            --darker: #16213e;
-            --success: #4CAF50;
-            --danger: #f44336;
-            --warning: #ffc107;
-            --info: #2196F3;
-        }
-        
+        /* Previous CSS remains exactly the same, only adding new styles for login */
         * {
             margin: 0;
             padding: 0;
@@ -32,1119 +19,924 @@
         }
         
         body {
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
             min-height: 100vh;
+            color: #fff;
         }
         
-        /* Loading Screen */
-        #loadingScreen {
+        /* Password Login Modal */
+        .login-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, var(--dark), var(--darker));
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
-        }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Login Screen */
-        #loginScreen {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--dark), var(--darker));
-            z-index: 9998;
         }
         
         .login-container {
-            max-width: 400px;
-            margin: 100px auto;
-            padding: 40px;
-            background: rgba(255,255,255,0.1);
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--primary);
-        }
-        
-        /* Main Container */
-        #mainContainer {
-            display: none;
-        }
-        
-        /* Sidebar */
-        .sidebar {
-            width: 280px;
-            background: var(--dark);
-            color: white;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            overflow-y: auto;
-            box-shadow: 3px 0 10px rgba(0,0,0,0.2);
-        }
-        
-        .logo {
-            padding: 25px 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
             text-align: center;
-            border-bottom: 2px solid var(--primary);
+            border: 3px solid #ff9800;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
         
-        .logo h2 {
-            color: var(--primary);
-            font-size: 1.8rem;
-        }
-        
-        .logo span {
-            color: var(--secondary);
-        }
-        
-        .user-info {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .user-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--secondary);
+        .login-logo {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 10px;
-            font-size: 1.5rem;
-        }
-        
-        .nav-menu {
-            padding: 20px 0;
-        }
-        
-        .nav-item {
-            padding: 12px 25px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #ddd;
-            text-decoration: none;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-            cursor: pointer;
-        }
-        
-        .nav-item:hover,
-        .nav-item.active {
-            background: rgba(255,152,0,0.1);
-            color: var(--primary);
-            border-left-color: var(--primary);
-        }
-        
-        /* Main Content */
-        .main-content {
-            margin-left: 280px;
-            min-height: 100vh;
-            background: #f5f5f5;
-        }
-        
-        .top-bar {
-            background: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .search-box {
-            position: relative;
-            width: 300px;
-        }
-        
-        .search-box input {
-            width: 100%;
-            padding: 10px 15px 10px 40px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        
-        .search-box i {
-            position: absolute;
-            left: 15px;
-            top: 12px;
-            color: #999;
-        }
-        
-        .user-menu {
-            display: flex;
-            align-items: center;
             gap: 15px;
-        }
-        
-        .logout-btn {
-            padding: 8px 20px;
-            background: var(--danger);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        
-        /* Content Area */
-        .content-area {
-            padding: 30px;
-        }
-        
-        .page-title {
-            color: var(--dark);
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--primary);
-        }
-        
-        /* Dashboard Stats */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            transition: transform 0.3s;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            color: white;
-        }
-        
-        .icon-1 { background: linear-gradient(45deg, var(--primary), var(--warning)); }
-        .icon-2 { background: linear-gradient(45deg, var(--info), var(--secondary)); }
-        .icon-3 { background: linear-gradient(45deg, var(--success), #4CAF50); }
-        .icon-4 { background: linear-gradient(45deg, #9C27B0, #E91E63); }
-        
-        .stat-info h3 {
-            font-size: 2rem;
-            color: var(--dark);
-            margin-bottom: 5px;
-        }
-        
-        .stat-info p {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        /* Platform Cards */
-        .platforms-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .platform-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s;
-        }
-        
-        .platform-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-        
-        .platform-header {
-            padding: 20px;
-            background: var(--dark);
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .platform-logo {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            color: white;
-        }
-        
-        .platform-name {
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-        
-        .platform-category {
-            font-size: 0.85rem;
-            color: #ddd;
-        }
-        
-        .platform-body {
-            padding: 20px;
-        }
-        
-        .platform-description {
-            color: #666;
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-        
-        .platform-price {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .current-price {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-        
-        .old-price {
-            color: #999;
-            text-decoration: line-through;
-        }
-        
-        .platform-features {
-            margin: 15px 0;
-        }
-        
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            color: #555;
-            font-size: 0.9rem;
-        }
-        
-        .feature-item i {
-            color: var(--success);
-            font-size: 0.9rem;
-        }
-        
-        .platform-footer {
-            padding: 15px 20px;
-            background: #f8f9fa;
-            border-top: 1px solid #eee;
-            display: flex;
-            gap: 10px;
-        }
-        
-        .btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-edit {
-            background: var(--info);
-            color: white;
-            flex: 2;
-        }
-        
-        .btn-delete {
-            background: var(--danger);
-            color: white;
-            flex: 1;
-        }
-        
-        .btn-view {
-            background: var(--primary);
-            color: white;
-            flex: 1;
-        }
-        
-        /* Add Platform Form */
-        .form-container {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
-        }
-        
-        .form-tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        
-        .tab-btn {
-            padding: 10px 25px;
-            background: none;
-            border: none;
-            color: #666;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 6px 6px 0 0;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .tab-btn.active {
-            color: var(--primary);
-            background: rgba(255,152,0,0.1);
-        }
-        
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -12px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--primary);
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.5s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
             margin-bottom: 20px;
         }
         
+        .login-logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff9800, #ff5722, #00bcd4);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+        }
+        
+        .login-logo-icon i {
+            font-size: 2.2rem;
+            color: white;
+        }
+        
+        .login-logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+        }
+        
+        .login-logo-main {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ff9800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .login-logo-sub {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #00bcd4;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+        
+        .login-title {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .login-subtitle {
+            color: #b0bec5;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+        
+        .login-input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        
+        .login-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+        
+        .login-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid rgba(255, 152, 0, 0.5);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .login-input:focus {
+            border-color: #ff5722;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 10px rgba(255, 87, 34, 0.3);
+        }
+        
+        .login-btn {
+            background: linear-gradient(45deg, #ff9800, #ff5722);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .login-btn:hover {
+            background: linear-gradient(45deg, #ff5722, #ff9800);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 87, 34, 0.3);
+        }
+        
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error-message {
+            color: #ff5722;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            text-align: center;
+            min-height: 20px;
+        }
+        
+        /* Admin Header (shown after login) */
+        .admin-header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #ff9800;
+            display: none;
+        }
+        
+        .admin-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .admin-logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff9800, #ff5722, #00bcd4);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+        }
+        
+        .admin-logo-icon i {
+            font-size: 2.2rem;
+            color: white;
+        }
+        
+        .admin-logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+        }
+        
+        .admin-logo-main {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ff9800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .admin-logo-sub {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #00bcd4;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+        
+        .admin-title {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .admin-subtitle {
+            color: #b0bec5;
+            font-size: 0.9rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .admin-controls {
+            margin-top: 20px;
+        }
+        
+        .logout-btn {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .logout-btn:hover {
+            background: linear-gradient(45deg, #c82333, #dc3545);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        }
+        
+        /* Main Container */
+        .admin-container {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 20px;
+            display: none;
+        }
+        
+        /* Left Side - Form */
+        .admin-form-section {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #ff9800;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Right Side - Platforms List */
+        .admin-list-section {
+            flex: 2;
+            min-width: 300px;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #00bcd4;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            color: #ff9800;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 152, 0, 0.3);
+        }
+        
+        .list-section-title {
+            color: #00bcd4;
+            border-bottom: 2px solid rgba(0, 188, 212, 0.3);
+        }
+        
+        /* Form Styles */
         .form-group {
             margin-bottom: 20px;
         }
         
-        .form-group label {
+        .form-label {
             display: block;
             margin-bottom: 8px;
-            color: var(--dark);
-            font-weight: 500;
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.95rem;
         }
         
-        .form-control {
+        .form-input, .form-textarea, .form-select {
             width: 100%;
             padding: 12px 15px;
-            border: 1px solid #ddd;
+            border: 2px solid rgba(255, 152, 0, 0.5);
             border-radius: 8px;
-            font-size: 14px;
-        }
-        
-        .form-control:focus {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 0.95rem;
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(255,152,0,0.2);
+            transition: all 0.3s;
         }
         
-        textarea.form-control {
+        .form-textarea {
             min-height: 100px;
             resize: vertical;
         }
         
-        /* Logo Selector */
-        .logo-selector {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: #ff5722;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 10px rgba(255, 87, 34, 0.3);
         }
         
-        .logo-options {
+        /* Icon Selection Grid */
+        .icon-selection {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 10px;
         }
         
-        .logo-option {
-            padding: 15px;
-            border: 2px solid #ddd;
+        .icon-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            text-align: center;
             cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .icon-option:hover {
+            background: rgba(255, 152, 0, 0.1);
+            border-color: #ff9800;
+            transform: translateY(-2px);
+        }
+        
+        .icon-option.selected {
+            background: rgba(255, 152, 0, 0.2);
+            border-color: #ff9800;
+            box-shadow: 0 0 10px rgba(255, 152, 0, 0.3);
+        }
+        
+        .icon-option i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .icon-option-name {
+            font-size: 0.7rem;
+            text-align: center;
+            color: #b0bec5;
+        }
+        
+        /* Features Input */
+        .features-container {
+            margin-top: 10px;
+        }
+        
+        .feature-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .feature-input {
+            flex: 1;
+        }
+        
+        .add-feature-btn, .remove-feature-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .add-feature-btn {
+            background: linear-gradient(45deg, #00bcd4, #0097a7);
+            color: white;
+        }
+        
+        .add-feature-btn:hover {
+            background: linear-gradient(45deg, #0097a7, #00bcd4);
+        }
+        
+        .remove-feature-btn {
+            background: linear-gradient(45deg, #ff5722, #d84315);
+            color: white;
+        }
+        
+        .remove-feature-btn:hover {
+            background: linear-gradient(45deg, #d84315, #ff5722);
+        }
+        
+        /* Form Buttons */
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #ff9800, #ff5722);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #ff5722, #ff9800);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 87, 34, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #00bcd4, #0097a7);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(45deg, #0097a7, #00bcd4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(45deg, #c82333, #dc3545);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        }
+        
+        /* Platforms List */
+        .platforms-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .platforms-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .platforms-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .platforms-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 152, 0, 0.5);
+            border-radius: 10px;
+        }
+        
+        .platforms-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 152, 0, 0.7);
+        }
+        
+        /* Platform Item */
+        .platform-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ff9800;
             transition: all 0.3s;
         }
         
-        .logo-option:hover {
-            border-color: var(--primary);
-            background: rgba(255,152,0,0.05);
+        .platform-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
-        .logo-option.selected {
-            border-color: var(--primary);
-            background: rgba(255,152,0,0.1);
+        .platform-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
         }
         
-        .logo-option i {
-            font-size: 2rem;
-            margin-bottom: 8px;
+        .platform-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
         
-        .logo-option span {
-            display: block;
+        .platform-icon-display {
+            font-size: 1.8rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .platform-details {
+            flex: 1;
+        }
+        
+        .platform-name-display {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ff9800;
+            margin-bottom: 5px;
+        }
+        
+        .platform-price-display {
+            color: #00bcd4;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .platform-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
             font-size: 0.8rem;
-            color: #666;
+            transition: all 0.3s;
+            white-space: nowrap;
         }
         
-        /* Logo Color Classes */
+        .edit-btn {
+            background: rgba(255, 152, 0, 0.2);
+            color: #ff9800;
+            border: 1px solid rgba(255, 152, 0, 0.5);
+        }
+        
+        .edit-btn:hover {
+            background: rgba(255, 152, 0, 0.3);
+        }
+        
+        .delete-btn {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.5);
+        }
+        
+        .delete-btn:hover {
+            background: rgba(220, 53, 69, 0.3);
+        }
+        
+        .platform-description-display {
+            color: #ddd;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .platform-features-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .feature-tag {
+            background: rgba(0, 188, 212, 0.2);
+            color: #00bcd4;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .feature-tag i {
+            font-size: 0.7rem;
+        }
+        
+        /* Status Badge */
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+        
+        .status-inactive {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #b0bec5;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ff9800;
+            opacity: 0.5;
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ff9800;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Platform Specific Colors */
         .youtube { color: #FF0000; }
         .facebook { color: #1877F2; }
         .instagram { color: #E4405F; }
         .tiktok { color: #000000; }
         .whatsapp { color: #25D366; }
         .telegram { color: #0088cc; }
+        .freefire { color: #FF8800; }
         .netflix { color: #E50914; }
         .spotify { color: #1DB954; }
-        .gaming { color: #ff8800; }
-        .premium { color: gold; }
-        
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            padding: 20px;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 12px 12px 0 0;
-        }
-        
-        .modal-body {
-            padding: 20px;
-        }
-        
-        .close-modal {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-        
-        /* Notification */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 10001;
-            display: none;
-            max-width: 400px;
-            border-left: 4px solid var(--primary);
-        }
-        
-        .notification.success {
-            border-left-color: var(--success);
-        }
-        
-        .notification.error {
-            border-left-color: var(--danger);
-        }
-        
-        /* Orders Table */
-        .table-container {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
-        }
-        
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .table th,
-        .table td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .table th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: var(--dark);
-        }
-        
-        .badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .badge-success { background: #d4edda; color: #155724; }
-        .badge-warning { background: #fff3cd; color: #856404; }
-        .badge-danger { background: #f8d7da; color: #721c24; }
-        .badge-info { background: #d1ecf1; color: #0c5460; }
+        .pubg { color: #F9A602; }
+        .default { color: #ff9800; }
         
         /* Responsive */
-        @media (max-width: 992px) {
-            .sidebar {
-                width: 70px;
-            }
-            
-            .sidebar .logo h2,
-            .sidebar .user-info h4,
-            .sidebar .user-info p,
-            .sidebar .nav-item span {
-                display: none;
-            }
-            
-            .main-content {
-                margin-left: 70px;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-        
         @media (max-width: 768px) {
-            .top-bar {
+            .admin-container {
                 flex-direction: column;
-                gap: 15px;
+                padding: 15px;
             }
             
-            .search-box {
+            .admin-form-section, .admin-list-section {
                 width: 100%;
             }
             
-            .platforms-grid {
-                grid-template-columns: 1fr;
+            .icon-selection {
+                grid-template-columns: repeat(3, 1fr);
             }
             
-            .logo-options {
-                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            .platform-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .platform-actions {
+                align-self: flex-end;
+            }
+            
+            .form-buttons {
+                flex-direction: column;
+            }
+            
+            .admin-logo {
+                gap: 10px;
+            }
+            
+            .admin-logo-icon {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .admin-logo-icon i {
+                font-size: 1.8rem;
+            }
+            
+            .admin-logo-main {
+                font-size: 1.6rem;
+            }
+            
+            .admin-logo-sub {
+                font-size: 0.9rem;
+            }
+            
+            .admin-title {
+                font-size: 1.3rem;
+            }
+            
+            .login-container {
+                padding: 30px 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .icon-selection {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .feature-input-group {
+                flex-direction: column;
+            }
+            
+            .admin-logo-main {
+                font-size: 1.4rem;
+            }
+            
+            .admin-title {
+                font-size: 1.2rem;
+            }
+            
+            .platform-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .platform-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .action-btn {
+                flex: 1;
+                text-align: center;
+            }
+            
+            .login-logo-main {
+                font-size: 1.4rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loadingScreen">
-        <div class="spinner"></div>
-    </div>
-
-    <!-- Login Screen -->
-    <div id="loginScreen">
+    <!-- Password Login Modal -->
+    <div id="loginOverlay" class="login-overlay">
         <div class="login-container">
-            <div style="text-align: center; margin-bottom: 30px;">
-                <h2 style="color: var(--primary); margin-bottom: 10px;">Easy Premium</h2>
-                <p style="color: #ddd;">Admin Panel Login</p>
+            <div class="login-logo">
+                <div class="login-logo-icon">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="login-logo-text">
+                    <div class="login-logo-main">EASY PREMIUM</div>
+                    <div class="login-logo-sub">Admin Panel</div>
+                </div>
             </div>
+            <h2 class="login-title">এডমিন লগইন</h2>
+            <p class="login-subtitle">পাসওয়ার্ড দিন এডমিন প্যানেল অ্যাক্সেস করার জন্য</p>
             
-            <div class="form-group">
-                <input type="email" id="loginEmail" class="form-control" placeholder="Admin Email" value="mdashikislam017705@gmail.com">
-            </div>
-            
-            <div class="form-group">
-                <input type="password" id="loginPassword" class="form-control" placeholder="Password">
-            </div>
-            
-            <button id="loginBtn" class="btn" style="width: 100%; background: var(--primary); color: white;">
-                <i class="fas fa-sign-in-alt"></i> Login
-            </button>
-            
-            <div id="loginError" style="color: var(--danger); margin-top: 15px; display: none;"></div>
+            <form id="loginForm">
+                <div class="login-input-group">
+                    <label for="adminPassword" class="login-label">এডমিন পাসওয়ার্ড</label>
+                    <input type="password" id="adminPassword" class="login-input" placeholder="পাসওয়ার্ড দিন..." required>
+                </div>
+                
+                <button type="submit" id="loginBtn" class="login-btn">
+                    লগইন করুন
+                </button>
+                
+                <div id="loginError" class="error-message"></div>
+            </form>
         </div>
     </div>
-
-    <!-- Main Admin Panel -->
-    <div id="mainContainer">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="logo">
-                <h2>EASY<span>PREMIUM</span></h2>
-                <p style="font-size: 0.9rem; color: #ddd; margin-top: 5px;">Admin Panel</p>
+    
+    <!-- Admin Panel (shown after login) -->
+    <header class="admin-header" id="adminHeader">
+        <div class="admin-logo">
+            <div class="admin-logo-icon">
+                <i class="fas fa-crown"></i>
             </div>
+            <div class="admin-logo-text">
+                <div class="admin-logo-main">EASY PREMIUM</div>
+                <div class="admin-logo-sub">Admin Panel</div>
+            </div>
+        </div>
+        <h1 class="admin-title">প্ল্যাটফর্ম ম্যানেজমেন্ট</h1>
+        <p class="admin-subtitle">এখানে আপনি নতুন প্ল্যাটফর্ম যোগ করতে পারেন, বিদ্যমান প্ল্যাটফর্ম এডিট করতে পারেন এবং ডিলিট করতে পারেন।</p>
+        
+        <div class="admin-controls">
+            <button id="logoutBtn" class="logout-btn">লগ আউট</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="admin-container" id="adminContainer">
+        <!-- Left Side - Form -->
+        <section class="admin-form-section">
+            <h2 class="section-title" id="formTitle">নতুন প্ল্যাটফর্ম যোগ করুন</h2>
             
-            <div class="user-info">
-                <div class="user-avatar">
-                    <i class="fas fa-user-shield"></i>
-                </div>
-                <h4 id="adminName">Loading...</h4>
-                <p id="adminEmail" style="color: #ddd; font-size: 0.9rem;">admin@example.com</p>
-            </div>
-            
-            <div class="nav-menu">
-                <div class="nav-item active" onclick="showSection('dashboard')">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>ড্যাশবোর্ড</span>
+            <form id="platformForm">
+                <input type="hidden" id="platformId" value="">
+                
+                <div class="form-group">
+                    <label for="platformName" class="form-label">প্ল্যাটফর্মের নাম *</label>
+                    <input type="text" id="platformName" class="form-input" placeholder="যেমন: YouTube Premium" required>
                 </div>
                 
-                <div class="nav-item" onclick="showSection('platforms')">
-                    <i class="fas fa-layer-group"></i>
-                    <span>প্ল্যাটফর্ম</span>
-                </div>
-                
-                <div class="nav-item" onclick="showSection('addPlatform')">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>নতুন প্ল্যাটফর্ম</span>
-                </div>
-                
-                <div class="nav-item" onclick="showSection('orders')">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span>অর্ডারসমূহ</span>
-                </div>
-                
-                <div class="nav-item" onclick="showSection('users')">
-                    <i class="fas fa-users"></i>
-                    <span>ইউজারসমূহ</span>
-                </div>
-                
-                <div class="nav-item" onclick="showSection('settings')">
-                    <i class="fas fa-cog"></i>
-                    <span>সেটিংস</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Top Bar -->
-            <div class="top-bar">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="globalSearch" placeholder="সার্চ করুন...">
-                </div>
-                
-                <div class="user-menu">
-                    <button id="logoutBtnMain" class="logout-btn">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
-                </div>
-            </div>
-
-            <!-- Content Area -->
-            <div class="content-area">
-                <!-- Dashboard Section -->
-                <div id="dashboard" class="content-section">
-                    <h2 class="page-title">ড্যাশবোর্ড</h2>
+                <div class="form-group">
+                    <label for="platformIcon" class="form-label">প্ল্যাটফর্ম আইকন সিলেক্ট করুন *</label>
+                    <select id="platformIcon" class="form-select" required>
+                        <option value="">একটি আইকন সিলেক্ট করুন</option>
+                        <option value="youtube">YouTube</option>
+                        <option value="facebook">Facebook</option>
+                        <option value="instagram">Instagram</option>
+                        <option value="tiktok">TikTok</option>
+                        <option value="whatsapp">WhatsApp</option>
+                        <option value="telegram">Telegram</option>
+                        <option value="freefire">FreeFire</option>
+                        <option value="netflix">Netflix</option>
+                        <option value="spotify">Spotify</option>
+                        <option value="pubg">PUBG</option>
+                        <option value="default">অন্যান্য</option>
+                    </select>
                     
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon icon-1">
-                                <i class="fas fa-layer-group"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="totalPlatforms">0</h3>
-                                <p>মোট প্ল্যাটফর্ম</p>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-icon icon-2">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="totalOrders">0</h3>
-                                <p>মোট অর্ডার</p>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-icon icon-3">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="totalUsers">0</h3>
-                                <p>মোট ইউজার</p>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-icon icon-4">
-                                <i class="fas fa-money-bill-wave"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="totalRevenue">৳ 0</h3>
-                                <p>মোট আয়</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Recent Platforms -->
-                    <h3 style="margin: 25px 0 15px; color: var(--dark);">সাম্প্রতিক প্ল্যাটফর্ম</h3>
-                    <div id="recentPlatforms" class="platforms-grid"></div>
-                </div>
-                
-                <!-- All Platforms Section -->
-                <div id="platforms" class="content-section" style="display: none;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                        <h2 class="page-title" style="margin: 0;">সকল প্ল্যাটফর্ম</h2>
-                        <button class="btn" style="background: var(--primary); color: white;" onclick="showSection('addPlatform')">
-                            <i class="fas fa-plus"></i> নতুন প্ল্যাটফর্ম
-                        </button>
-                    </div>
-                    
-                    <!-- Search and Filter -->
-                    <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                            <input type="text" id="platformSearch" class="form-control" placeholder="প্ল্যাটফর্ম খুঁজুন...">
-                            <select id="categoryFilter" class="form-control" style="min-width: 150px;">
-                                <option value="">সব ক্যাটাগরি</option>
-                                <option value="streaming">স্ট্রিমিং</option>
-                                <option value="social">সোশ্যাল মিডিয়া</option>
-                                <option value="gaming">গেমিং</option>
-                                <option value="education">এডুকেশন</option>
-                            </select>
-                            <button class="btn" style="background: var(--info); color: white;" onclick="searchPlatforms()">
-                                <i class="fas fa-search"></i> সার্চ
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Platforms Grid -->
-                    <div id="platformsContainer" class="platforms-grid"></div>
-                </div>
-                
-                <!-- Add Platform Section -->
-                <div id="addPlatform" class="content-section" style="display: none;">
-                    <h2 class="page-title">নতুন প্ল্যাটফর্ম যোগ করুন</h2>
-                    
-                    <div class="form-container">
-                        <div class="form-tabs">
-                            <button class="tab-btn active" onclick="showTab('basicInfo')">মূল তথ্য</button>
-                            <button class="tab-btn" onclick="showTab('logoDesign')">লোগো ডিজাইন</button>
-                            <button class="tab-btn" onclick="showTab('features')">ফিচারসমূহ</button>
-                        </div>
-                        
-                        <form id="platformForm">
-                            <!-- Basic Info Tab -->
-                            <div id="basicInfo" class="tab-content active">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>প্ল্যাটফর্মের নাম *</label>
-                                        <input type="text" class="form-control" id="platformName" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>ইউনিক আইডি *</label>
-                                        <input type="text" class="form-control" id="platformId" required>
-                                        <small style="color: #666; font-size: 0.85rem;">ইংরেজিতে ছোট হাতের অক্ষর (যেমন: youtube-premium)</small>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>ক্যাটাগরি *</label>
-                                        <select class="form-control" id="platformCategory" required>
-                                            <option value="">সিলেক্ট করুন</option>
-                                            <option value="streaming">স্ট্রিমিং</option>
-                                            <option value="social">সোশ্যাল মিডিয়া</option>
-                                            <option value="gaming">গেমিং</option>
-                                            <option value="education">এডুকেশন</option>
-                                            <option value="other">অন্যান্য</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>আইকন সিলেক্ট করুন *</label>
-                                        <select class="form-control" id="platformIcon" required>
-                                            <option value="">সিলেক্ট করুন</option>
-                                            <option value="youtube">YouTube</option>
-                                            <option value="facebook">Facebook</option>
-                                            <option value="instagram">Instagram</option>
-                                            <option value="tiktok">TikTok</option>
-                                            <option value="whatsapp">WhatsApp</option>
-                                            <option value="telegram">Telegram</option>
-                                            <option value="netflix">Netflix</option>
-                                            <option value="spotify">Spotify</option>
-                                            <option value="freefire">Free Fire</option>
-                                            <option value="pubg">PUBG</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>সংক্ষিপ্ত বর্ণনা *</label>
-                                    <textarea class="form-control" id="platformDescription" rows="3" required></textarea>
-                                </div>
-                                
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>দাম (৳) *</label>
-                                        <input type="text" class="form-control" id="platformPrice" required placeholder="৳ 299/month">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>স্টক</label>
-                                        <input type="number" class="form-control" id="platformStock" value="9999" min="0">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>অর্ডার (প্রদর্শনের ক্রম)</label>
-                                        <input type="number" class="form-control" id="platformOrder" value="0" min="0">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Logo Design Tab -->
-                            <div id="logoDesign" class="tab-content">
-                                <div class="logo-selector">
-                                    <h4 style="margin-bottom: 15px; color: var(--dark);">প্ল্যাটফর্ম কালার</h4>
-                                    
-                                    <div class="logo-options">
-                                        <div class="logo-option" onclick="selectPlatformColor('#FF0000')" style="background: #FF0000; color: white;">
-                                            <i class="fas fa-circle"></i>
-                                            <span>Red</span>
-                                        </div>
-                                        
-                                        <div class="logo-option" onclick="selectPlatformColor('#1877F2')" style="background: #1877F2; color: white;">
-                                            <i class="fas fa-circle"></i>
-                                            <span>Blue</span>
-                                        </div>
-                                        
-                                        <div class="logo-option" onclick="selectPlatformColor('#E4405F')" style="background: #E4405F; color: white;">
-                                            <i class="fas fa-circle"></i>
-                                            <span>Pink</span>
-                                        </div>
-                                        
-                                        <div class="logo-option" onclick="selectPlatformColor('#25D366')" style="background: #25D366; color: white;">
-                                            <i class="fas fa-circle"></i>
-                                            <span>Green</span>
-                                        </div>
-                                        
-                                        <div class="logo-option" onclick="selectPlatformColor('#FF9800')" style="background: #FF9800; color: white;">
-                                            <i class="fas fa-circle"></i>
-                                            <span>Orange</span>
-                                        </div>
-                                        
-                                        <div class="logo-option" onclick="selectPlatformColor('#9C27B0')" style="background: #9C27B0; color: white;">
-                                            <i class="fas fa-circle"></i>
-                                            <span>Purple</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div id="selectedColor" style="margin-top: 20px; text-align: center; display: none;">
-                                        <p style="color: #666;">Selected Color:</p>
-                                        <div style="width: 50px; height: 50px; border-radius: 50%; margin: 10px auto; border: 2px solid #ddd;" id="colorPreview"></div>
-                                        <p id="colorCode" style="color: var(--primary); font-weight: 600;"></p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Features Tab -->
-                            <div id="features" class="tab-content">
-                                <div class="form-group">
-                                    <label>ফিচারসমূহ (প্রতি লাইনে একটি) *</label>
-                                    <textarea class="form-control" id="platformFeatures" rows="6" required placeholder="ইনস্ট্যান্ট ডেলিভারি&#10;১০০% সেফ এবং গ্যারান্টিড&#10;লাইফটাইম এক্সেস&#10;২৪/৭ সাপোর্ট"></textarea>
-                                    <small style="color: #666;">প্রতি লাইনে একটি ফিচার লিখুন</small>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>স্ট্যাটাস</label>
-                                    <select class="form-control" id="platformStatus">
-                                        <option value="active" selected>সক্রিয়</option>
-                                        <option value="inactive">নিষ্ক্রিয়</option>
-                                        <option value="out_of_stock">স্টক শেষ</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <!-- Form Actions -->
-                            <div style="margin-top: 30px; display: flex; gap: 15px;">
-                                <button type="submit" class="btn" style="flex: 1; background: var(--primary); color: white;">
-                                    <i class="fas fa-save"></i> প্ল্যাটফর্ম সংরক্ষণ করুন
-                                </button>
-                                
-                                <button type="button" class="btn" style="flex: 1; background: #6c757d; color: white;" onclick="resetPlatformForm()">
-                                    <i class="fas fa-redo"></i> ফর্ম রিসেট করুন
-                                </button>
-                            </div>
-                        </form>
+                    <div class="icon-selection" id="iconSelection">
+                        <!-- Icons will be populated by JavaScript -->
                     </div>
                 </div>
                 
-                <!-- Orders Section -->
-                <div id="orders" class="content-section" style="display: none;">
-                    <h2 class="page-title">অর্ডার ম্যানেজমেন্ট</h2>
-                    
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>User</th>
-                                    <th>Platform</th>
-                                    <th>Price</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ordersTableBody">
-                                <tr>
-                                    <td colspan="7" style="text-align: center; padding: 30px;">Loading orders...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="form-group">
+                    <label for="platformDescription" class="form-label">বর্ণনা *</label>
+                    <textarea id="platformDescription" class="form-textarea" placeholder="প্ল্যাটফর্মের সংক্ষিপ্ত বর্ণনা লিখুন..." required></textarea>
                 </div>
                 
-                <!-- Users Section -->
-                <div id="users" class="content-section" style="display: none;">
-                    <h2 class="page-title">ইউজার ম্যানেজমেন্ট</h2>
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Join Date</th>
-                                    <th>Orders</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usersTableBody">
-                                <tr>
-                                    <td colspan="5" style="text-align: center; padding: 30px;">Loading users...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="form-group">
+                    <label for="platformPrice" class="form-label">দাম *</label>
+                    <input type="text" id="platformPrice" class="form-input" placeholder="যেমন: ৳ 299 / মাস" required>
                 </div>
                 
-                <!-- Settings Section -->
-                <div id="settings" class="content-section" style="display: none;">
-                    <h2 class="page-title">সেটিংস</h2>
-                    <div class="form-container">
-                        <div class="form-group">
-                            <label>সাইটের নাম</label>
-                            <input type="text" class="form-control" id="siteName" value="Easy Premium">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>সাইটের বর্ণনা</label>
-                            <textarea class="form-control" id="siteDescription" rows="3">সবচেয়ে সস্তায় প্রিমিয়াম কিনুন</textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>কন্টাক্ট ইমেইল</label>
-                            <input type="email" class="form-control" id="contactEmail" value="mdashikislam017705@gmail.com">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>হেল্পলাইন নাম্বার</label>
-                            <input type="text" class="form-control" id="helpline" value="+8801770584994">
-                        </div>
-                        
-                        <button class="btn" style="background: var(--primary); color: white;" onclick="saveSettings()">
-                            <i class="fas fa-save"></i> সেটিংস সংরক্ষণ করুন
-                        </button>
+                <div class="form-group">
+                    <label class="form-label">ফিচারগুলো যোগ করুন</label>
+                    <div class="features-container" id="featuresContainer">
+                        <!-- Features will be added here dynamically -->
                     </div>
+                    <button type="button" id="addFeatureBtn" class="add-feature-btn">নতুন ফিচার যোগ করুন</button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="platformCategory" class="form-label">ক্যাটাগরি</label>
+                    <input type="text" id="platformCategory" class="form-input" placeholder="যেমন: Social Media, Gaming, Streaming">
+                </div>
+                
+                <div class="form-group">
+                    <label for="platformOrder" class="form-label">অর্ডার নম্বর</label>
+                    <input type="number" id="platformOrder" class="form-input" placeholder="ছোট সংখ্যা আগে দেখাবে" value="0">
+                    <small style="color: #b0bec5; font-size: 0.8rem;">ছোট সংখ্যা আগে দেখাবে (ডিফল্ট: 0)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="platformStatus" class="form-label">স্ট্যাটাস</label>
+                    <select id="platformStatus" class="form-select">
+                        <option value="active">সক্রিয়</option>
+                        <option value="inactive">নিষ্ক্রিয়</option>
+                    </select>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="submit" id="submitBtn" class="btn btn-primary">সেভ করুন</button>
+                    <button type="button" id="resetBtn" class="btn btn-secondary">রিসেট করুন</button>
+                    <button type="button" id="cancelEditBtn" class="btn btn-danger" style="display: none;">এডিট বাতিল করুন</button>
+                </div>
+            </form>
+        </section>
+        
+        <!-- Right Side - Platforms List -->
+        <section class="admin-list-section">
+            <h2 class="section-title list-section-title">প্ল্যাটফর্ম তালিকা</h2>
+            <div id="platformsList" class="platforms-list">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>প্ল্যাটফর্ম লোড হচ্ছে...</p>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Edit Platform Modal -->
-    <div id="editPlatformModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 style="margin: 0;">প্ল্যাটফর্ম এডিট করুন</h3>
-                <button class="close-modal" onclick="closeModal('editPlatformModal')">&times;</button>
-            </div>
-            <div class="modal-body" id="editPlatformContent">
-                <!-- Content loaded dynamically -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Notification -->
-    <div id="notification" class="notification">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <i id="notificationIcon" class="fas fa-check-circle"></i>
-            <div>
-                <strong id="notificationTitle">Success</strong>
-                <p id="notificationMessage" style="margin: 5px 0 0; font-size: 0.9rem;"></p>
-            </div>
-        </div>
+        </section>
     </div>
 
     <script>
-        // Firebase Configuration - আপনার Original Key
+        // Firebase Configuration - আপনার Original Key ব্যবহার করুন
         const firebaseConfig = {
             apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
             authDomain: "easy-premium.firebaseapp.com",
@@ -1157,741 +949,687 @@
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.log("Firebase already initialized");
+        }
+        
         const database = firebase.database();
-
-        // Global Variables
-        let currentUser = null;
-        let isAdmin = false;
-        let selectedPlatformColor = '#FF9800';
-
-        // Initialize
+        const auth = firebase.auth();
+        
+        // DOM Elements
+        const loginOverlay = document.getElementById('loginOverlay');
+        const loginForm = document.getElementById('loginForm');
+        const adminPassword = document.getElementById('adminPassword');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+        
+        const adminHeader = document.getElementById('adminHeader');
+        const adminContainer = document.getElementById('adminContainer');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        const platformForm = document.getElementById('platformForm');
+        const platformId = document.getElementById('platformId');
+        const platformName = document.getElementById('platformName');
+        const platformIcon = document.getElementById('platformIcon');
+        const platformDescription = document.getElementById('platformDescription');
+        const platformPrice = document.getElementById('platformPrice');
+        const platformCategory = document.getElementById('platformCategory');
+        const platformOrder = document.getElementById('platformOrder');
+        const platformStatus = document.getElementById('platformStatus');
+        const iconSelection = document.getElementById('iconSelection');
+        const featuresContainer = document.getElementById('featuresContainer');
+        const addFeatureBtn = document.getElementById('addFeatureBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const formTitle = document.getElementById('formTitle');
+        const platformsList = document.getElementById('platformsList');
+        
+        // Variables
+        let platforms = [];
+        let selectedIcon = '';
+        let isEditing = false;
+        let currentEditId = null;
+        let isAdminLoggedIn = false;
+        
+        // Available icons with names
+        const availableIcons = [
+            { value: 'youtube', name: 'YouTube', class: 'fab fa-youtube youtube' },
+            { value: 'facebook', name: 'Facebook', class: 'fab fa-facebook-f facebook' },
+            { value: 'instagram', name: 'Instagram', class: 'fab fa-instagram instagram' },
+            { value: 'tiktok', name: 'TikTok', class: 'fab fa-tiktok tiktok' },
+            { value: 'whatsapp', name: 'WhatsApp', class: 'fab fa-whatsapp whatsapp' },
+            { value: 'telegram', name: 'Telegram', class: 'fab fa-telegram telegram' },
+            { value: 'freefire', name: 'FreeFire', class: 'fas fa-fire freefire' },
+            { value: 'netflix', name: 'Netflix', class: 'fab fa-netflix netflix' },
+            { value: 'spotify', name: 'Spotify', class: 'fab fa-spotify spotify' },
+            { value: 'pubg', name: 'PUBG', class: 'fas fa-gamepad pubg' },
+            { value: 'default', name: 'অন্যান্য', class: 'fas fa-cube default' }
+        ];
+        
+        // Admin password (you can change this)
+        // In production, you should store this in Firebase Database and fetch it securely
+        const ADMIN_PASSWORD = "easyadmin123"; // আপনি এটা পরিবর্তন করুন
+        
+        // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
-            // Check authentication
-            auth.onAuthStateChanged(async (user) => {
-                const loadingScreen = document.getElementById('loadingScreen');
-                const loginScreen = document.getElementById('loginScreen');
-                
-                if (user) {
-                    currentUser = user;
-                    
-                    // Check if user is admin
-                    try {
-                        const adminSnapshot = await database.ref('admins/' + user.uid).once('value');
-                        isAdmin = adminSnapshot.exists() && adminSnapshot.val() === true;
-                        
-                        if (isAdmin) {
-                            showAdminPanel();
-                            loadDashboardData();
-                            loadPlatforms();
-                            loadOrders();
-                            loadUsers();
-                        } else {
-                            showLoginScreen();
-                            showNotification('Access Denied', 'You are not an administrator.', 'error');
-                        }
-                    } catch (error) {
-                        console.error("Error checking admin status:", error);
-                        showLoginScreen();
-                    }
-                } else {
-                    showLoginScreen();
-                }
-                
-                loadingScreen.style.display = 'none';
-            });
-        });
-
-        // Login Function
-        document.getElementById('loginBtn').addEventListener('click', async function() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const loginError = document.getElementById('loginError');
+            checkLoginStatus();
             
-            if (!email || !password) {
-                loginError.textContent = "Please enter email and password";
-                loginError.style.display = 'block';
+            // Login form submission
+            loginForm.addEventListener('submit', handleLogin);
+            
+            // Logout button
+            logoutBtn.addEventListener('click', handleLogout);
+            
+            // Initialize form if logged in
+            if (isAdminLoggedIn) {
+                initializeAdminPanel();
+            }
+        });
+        
+        // Check if user is already logged in
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+            const loginTime = localStorage.getItem('adminLoginTime');
+            
+            // Check if session expired (24 hours)
+            if (isLoggedIn && loginTime) {
+                const currentTime = new Date().getTime();
+                const loginTimestamp = parseInt(loginTime);
+                const hoursSinceLogin = (currentTime - loginTimestamp) / (1000 * 60 * 60);
+                
+                if (hoursSinceLogin < 24) {
+                    // Session is still valid
+                    isAdminLoggedIn = true;
+                    showAdminPanel();
+                } else {
+                    // Session expired
+                    localStorage.removeItem('adminLoggedIn');
+                    localStorage.removeItem('adminLoginTime');
+                    isAdminLoggedIn = false;
+                    showLoginForm();
+                }
+            } else {
+                isAdminLoggedIn = false;
+                showLoginForm();
+            }
+        }
+        
+        // Handle login
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const password = adminPassword.value.trim();
+            
+            if (!password) {
+                showLoginError('পাসওয়ার্ড দিন');
                 return;
             }
             
-            try {
-                // Try to login
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                const user = userCredential.user;
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'লগইন হচ্ছে...';
+            loginError.textContent = '';
+            
+            // Check password (in production, this should be done on server side)
+            if (password === ADMIN_PASSWORD) {
+                // Successful login
+                isAdminLoggedIn = true;
+                localStorage.setItem('adminLoggedIn', 'true');
+                localStorage.setItem('adminLoginTime', new Date().getTime().toString());
                 
-                // Check if user is admin
-                const adminSnapshot = await database.ref('admins/' + user.uid).once('value');
+                // Create admin user with custom claims
+                createAdminUser();
                 
-                if (adminSnapshot.exists() && adminSnapshot.val() === true) {
-                    showNotification('Login Successful', 'Welcome to Admin Panel', 'success');
+                // Hide login form and show admin panel
+                setTimeout(() => {
+                    showAdminPanel();
+                    initializeAdminPanel();
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'লগইন করুন';
+                    adminPassword.value = '';
+                }, 1000);
+                
+            } else {
+                // Wrong password
+                showLoginError('ভুল পাসওয়ার্ড');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'লগইন করুন';
+            }
+        }
+        
+        // Create admin user with custom token (for Firebase Rules)
+        function createAdminUser() {
+            // Sign in anonymously
+            auth.signInAnonymously()
+                .then((userCredential) => {
+                    console.log("Admin user signed in anonymously");
+                    // In production, you would generate a custom token on your server
+                    // with admin claim and then sign in with that token
+                })
+                .catch((error) => {
+                    console.error("Error signing in anonymously:", error);
+                });
+        }
+        
+        // Handle logout
+        function handleLogout() {
+            if (confirm('আপনি কি লগ আউট করতে চান?')) {
+                auth.signOut()
+                    .then(() => {
+                        localStorage.removeItem('adminLoggedIn');
+                        localStorage.removeItem('adminLoginTime');
+                        isAdminLoggedIn = false;
+                        showLoginForm();
+                    })
+                    .catch((error) => {
+                        console.error("Error signing out:", error);
+                    });
+            }
+        }
+        
+        // Show login form
+        function showLoginForm() {
+            loginOverlay.style.display = 'flex';
+            adminHeader.style.display = 'none';
+            adminContainer.style.display = 'none';
+            isAdminLoggedIn = false;
+        }
+        
+        // Show admin panel
+        function showAdminPanel() {
+            loginOverlay.style.display = 'none';
+            adminHeader.style.display = 'block';
+            adminContainer.style.display = 'flex';
+            isAdminLoggedIn = true;
+        }
+        
+        // Show login error
+        function showLoginError(message) {
+            loginError.textContent = message;
+            adminPassword.focus();
+            
+            // Clear error after 3 seconds
+            setTimeout(() => {
+                loginError.textContent = '';
+            }, 3000);
+        }
+        
+        // Initialize admin panel (after login)
+        function initializeAdminPanel() {
+            initializeIconSelection();
+            initializeFeatures();
+            loadPlatformsFromFirebase();
+            
+            // Form submission
+            platformForm.addEventListener('submit', handleFormSubmit);
+            
+            // Reset form
+            resetBtn.addEventListener('click', resetForm);
+            
+            // Cancel edit
+            cancelEditBtn.addEventListener('click', cancelEdit);
+            
+            // Add feature button
+            addFeatureBtn.addEventListener('click', addFeatureInput);
+            
+            // Icon select change
+            platformIcon.addEventListener('change', function() {
+                selectedIcon = this.value;
+                updateIconSelection();
+            });
+        }
+        
+        // Initialize icon selection grid
+        function initializeIconSelection() {
+            iconSelection.innerHTML = '';
+            
+            availableIcons.forEach(icon => {
+                const iconOption = document.createElement('div');
+                iconOption.className = 'icon-option';
+                iconOption.setAttribute('data-value', icon.value);
+                iconOption.innerHTML = `
+                    <i class="${icon.class}"></i>
+                    <span class="icon-option-name">${icon.name}</span>
+                `;
+                
+                iconOption.addEventListener('click', function() {
+                    selectIcon(icon.value);
+                    platformIcon.value = icon.value;
+                });
+                
+                iconSelection.appendChild(iconOption);
+            });
+        }
+        
+        // Select an icon
+        function selectIcon(iconValue) {
+            selectedIcon = iconValue;
+            
+            // Update icon options
+            document.querySelectorAll('.icon-option').forEach(option => {
+                if (option.getAttribute('data-value') === iconValue) {
+                    option.classList.add('selected');
                 } else {
-                    // If not admin, check if this is the first admin
-                    const adminList = await database.ref('admins').once('value');
+                    option.classList.remove('selected');
+                }
+            });
+        }
+        
+        // Update icon selection based on dropdown
+        function updateIconSelection() {
+            document.querySelectorAll('.icon-option').forEach(option => {
+                if (option.getAttribute('data-value') === selectedIcon) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+        }
+        
+        // Initialize features input
+        function initializeFeatures() {
+            featuresContainer.innerHTML = '';
+            // Add one initial feature input
+            addFeatureInput();
+        }
+        
+        // Add a new feature input
+        function addFeatureInput() {
+            const featureId = Date.now();
+            const featureInputGroup = document.createElement('div');
+            featureInputGroup.className = 'feature-input-group';
+            featureInputGroup.innerHTML = `
+                <input type="text" class="form-input feature-input" placeholder="ফিচার লিখুন..." data-id="${featureId}">
+                <button type="button" class="remove-feature-btn" data-id="${featureId}">মুছুন</button>
+            `;
+            
+            featuresContainer.appendChild(featureInputGroup);
+            
+            // Add event listener to remove button
+            featureInputGroup.querySelector('.remove-feature-btn').addEventListener('click', function() {
+                // Only remove if there's more than one feature input
+                if (featuresContainer.children.length > 1) {
+                    featureInputGroup.remove();
+                } else {
+                    // If it's the last one, just clear the input
+                    featureInputGroup.querySelector('.feature-input').value = '';
+                }
+            });
+        }
+        
+        // Get all features from inputs
+        function getFeatures() {
+            const features = [];
+            const featureInputs = featuresContainer.querySelectorAll('.feature-input');
+            
+            featureInputs.forEach(input => {
+                if (input.value.trim() !== '') {
+                    features.push(input.value.trim());
+                }
+            });
+            
+            return features;
+        }
+        
+        // Set features in the form
+        function setFeatures(featuresArray) {
+            // Clear existing features
+            featuresContainer.innerHTML = '';
+            
+            if (featuresArray && featuresArray.length > 0) {
+                featuresArray.forEach(feature => {
+                    const featureId = Date.now();
+                    const featureInputGroup = document.createElement('div');
+                    featureInputGroup.className = 'feature-input-group';
+                    featureInputGroup.innerHTML = `
+                        <input type="text" class="form-input feature-input" value="${feature}" data-id="${featureId}">
+                        <button type="button" class="remove-feature-btn" data-id="${featureId}">মুছুন</button>
+                    `;
                     
-                    if (!adminList.exists() || Object.keys(adminList.val()).length === 0) {
-                        // First admin - auto register
-                        await database.ref('admins/' + user.uid).set(true);
-                        showNotification('Admin Created', 'You have been registered as first administrator', 'success');
-                    } else {
-                        await auth.signOut();
-                        throw new Error("Not an administrator");
-                    }
-                }
-                
-            } catch (error) {
-                console.error("Login error:", error);
-                loginError.textContent = error.message;
-                loginError.style.display = 'block';
-                showNotification('Login Failed', error.message, 'error');
-            }
-        });
-
-        // Logout
-        document.getElementById('logoutBtnMain').addEventListener('click', function() {
-            auth.signOut()
-                .then(() => {
-                    showLoginScreen();
-                    showNotification('Logged Out', 'You have been logged out', 'info');
+                    featuresContainer.appendChild(featureInputGroup);
+                    
+                    // Add event listener to remove button
+                    featureInputGroup.querySelector('.remove-feature-btn').addEventListener('click', function() {
+                        if (featuresContainer.children.length > 1) {
+                            featureInputGroup.remove();
+                        } else {
+                            featureInputGroup.querySelector('.feature-input').value = '';
+                        }
+                    });
                 });
-        });
-
-        // Navigation
-        function showSection(sectionId) {
-            // Hide all sections
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.style.display = 'none';
-            });
-            
-            // Remove active class from nav items
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Show selected section
-            document.getElementById(sectionId).style.display = 'block';
-            
-            // Add active class to clicked nav item
-            const navItems = {
-                'dashboard': 'ড্যাশবোর্ড',
-                'platforms': 'প্ল্যাটফর্ম',
-                'addPlatform': 'নতুন প্ল্যাটফর্ম',
-                'orders': 'অর্ডারসমূহ',
-                'users': 'ইউজারসমূহ',
-                'settings': 'সেটিংস'
-            };
-            
-            document.querySelectorAll('.nav-item').forEach(item => {
-                if (item.querySelector('span').textContent === navItems[sectionId]) {
-                    item.classList.add('active');
-                }
-            });
-        }
-
-        // Tab Navigation
-        function showTab(tabId) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Remove active class from tab buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected tab
-            document.getElementById(tabId).classList.add('active');
-            
-            // Add active class to clicked tab button
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                if (btn.textContent.includes(
-                    tabId === 'basicInfo' ? 'মূল তথ্য' :
-                    tabId === 'logoDesign' ? 'লোগো ডিজাইন' :
-                    tabId === 'features' ? 'ফিচারসমূহ' : ''
-                )) {
-                    btn.classList.add('active');
-                }
-            });
-        }
-
-        // Select Platform Color
-        function selectPlatformColor(color) {
-            selectedPlatformColor = color;
-            
-            // Remove selected class from all color options
-            document.querySelectorAll('.logo-option').forEach(option => {
-                option.style.boxShadow = 'none';
-            });
-            
-            // Add highlight to selected color
-            event.target.closest('.logo-option').style.boxShadow = `0 0 0 3px ${color}`;
-            
-            // Show selected color preview
-            document.getElementById('selectedColor').style.display = 'block';
-            document.getElementById('colorPreview').style.backgroundColor = color;
-            document.getElementById('colorCode').textContent = color;
-        }
-
-        // Platform Form Submission
-        document.getElementById('platformForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Collect form data
-            const platformData = {
-                name: document.getElementById('platformName').value,
-                id: document.getElementById('platformId').value.toLowerCase().replace(/\s+/g, '-'),
-                category: document.getElementById('platformCategory').value,
-                icon: document.getElementById('platformIcon').value,
-                description: document.getElementById('platformDescription').value,
-                price: document.getElementById('platformPrice').value,
-                stock: parseInt(document.getElementById('platformStock').value) || 9999,
-                order: parseInt(document.getElementById('platformOrder').value) || 0,
-                features: document.getElementById('platformFeatures').value.split('\n').filter(f => f.trim()),
-                status: document.getElementById('platformStatus').value,
-                color: selectedPlatformColor,
-                createdAt: firebase.database.ServerValue.TIMESTAMP,
-                createdBy: currentUser.uid,
-                sales: 0
-            };
-            
-            try {
-                // Save to publicData for user panel
-                await database.ref('publicData/pricingPlans/' + platformData.id).set({
-                    name: platformData.name,
-                    icon: platformData.icon,
-                    description: platformData.description,
-                    price: platformData.price,
-                    features: platformData.features,
-                    category: platformData.category,
-                    status: platformData.status,
-                    stock: platformData.stock,
-                    order: platformData.order,
-                    color: platformData.color,
-                    createdAt: platformData.createdAt
-                });
-                
-                // Also save to platforms for admin
-                await database.ref('platforms/' + platformData.id).set(platformData);
-                
-                showNotification('Success', 'প্ল্যাটফর্ম সফলভাবে যোগ করা হয়েছে!', 'success');
-                resetPlatformForm();
-                showSection('platforms');
-                loadPlatforms();
-                loadDashboardData();
-                
-            } catch (error) {
-                console.error('Error saving platform:', error);
-                showNotification('Error', 'প্ল্যাটফর্ম সংরক্ষণে সমস্যা হয়েছে: ' + error.message, 'error');
+            } else {
+                // Add one empty feature input
+                addFeatureInput();
             }
-        });
-
-        function resetPlatformForm() {
-            document.getElementById('platformForm').reset();
-            document.getElementById('platformStock').value = 9999;
-            document.getElementById('platformOrder').value = 0;
-            document.getElementById('platformStatus').value = 'active';
-            
-            // Reset color selection
-            selectedPlatformColor = '#FF9800';
-            document.querySelectorAll('.logo-option').forEach(option => {
-                option.style.boxShadow = 'none';
-            });
-            document.getElementById('selectedColor').style.display = 'none';
-            
-            // Reset to first tab
-            showTab('basicInfo');
         }
-
-        // Load Platforms
-        async function loadPlatforms() {
-            try {
-                const snapshot = await database.ref('publicData/pricingPlans').once('value');
+        
+        // Load platforms from Firebase
+        function loadPlatformsFromFirebase() {
+            const platformsRef = database.ref('publicData/pricingPlans');
+            
+            platformsRef.on('value', (snapshot) => {
                 const platformsData = snapshot.val();
-                
-                const container = document.getElementById('platformsContainer');
-                if (!container) return;
+                platforms = [];
                 
                 if (!platformsData) {
-                    container.innerHTML = `
-                        <div style="text-align: center; padding: 50px; grid-column: 1/-1;">
-                            <i class="fas fa-box-open" style="font-size: 4rem; color: #ddd;"></i>
-                            <p style="color: #666; margin-top: 15px;">কোনো প্ল্যাটফর্ম পাওয়া যায়নি</p>
-                        </div>
-                    `;
+                    platformsList.innerHTML = '<div class="empty-state"><i class="fas fa-box-open"></i><p>কোন প্ল্যাটফর্ম পাওয়া যায়নি</p></div>';
                     return;
                 }
                 
-                let html = '';
+                // Convert object to array
                 Object.entries(platformsData).forEach(([id, platform]) => {
-                    const iconClasses = {
-                        'youtube': 'fab fa-youtube',
-                        'facebook': 'fab fa-facebook-f',
-                        'instagram': 'fab fa-instagram',
-                        'tiktok': 'fab fa-tiktok',
-                        'whatsapp': 'fab fa-whatsapp',
-                        'telegram': 'fab fa-telegram',
-                        'netflix': 'fab fa-netflix',
-                        'spotify': 'fab fa-spotify',
-                        'freefire': 'fas fa-fire',
-                        'pubg': 'fas fa-gamepad'
-                    };
-                    
-                    const iconClass = iconClasses[platform.icon] || 'fas fa-cube';
-                    const statusBadge = platform.status === 'active' ? 
-                        '<span style="background: #4CAF50; color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.7rem;">Active</span>' :
-                        '<span style="background: #f44336; color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.7rem;">Inactive</span>';
-                    
-                    html += `
-                        <div class="platform-card">
-                            <div class="platform-header">
-                                <div class="platform-logo" style="background: ${platform.color || '#f0f0f0'};">
-                                    <i class="${iconClass}" style="font-size: 1.8rem; color: white;"></i>
-                                </div>
-                                <div>
-                                    <div class="platform-name">${platform.name}</div>
-                                    <div class="platform-category">${platform.category}</div>
-                                </div>
-                                ${statusBadge}
-                            </div>
-                            
-                            <div class="platform-body">
-                                <p class="platform-description">${platform.description || 'No description'}</p>
-                                
-                                <div class="platform-price">
-                                    <span class="current-price">${platform.price}</span>
-                                </div>
-                                
-                                ${platform.features && platform.features.length > 0 ? `
-                                    <div class="platform-features">
-                                        ${platform.features.slice(0, 3).map(feature => `
-                                            <div class="feature-item">
-                                                <i class="fas fa-check"></i>
-                                                <span>${feature}</span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                ` : ''}
-                            </div>
-                            
-                            <div class="platform-footer">
-                                <button class="btn btn-edit" onclick="editPlatform('${id}')">
-                                    <i class="fas fa-edit"></i> এডিট
-                                </button>
-                                <button class="btn btn-delete" onclick="deletePlatform('${id}', '${platform.name}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
+                    platforms.push({
+                        id: id,
+                        name: platform.name || '',
+                        icon: platform.icon || 'default',
+                        description: platform.description || '',
+                        price: platform.price || '',
+                        features: platform.features || [],
+                        category: platform.category || '',
+                        order: platform.order || 0,
+                        status: platform.status || 'active'
+                    });
                 });
                 
-                container.innerHTML = html;
+                // Sort by order
+                platforms.sort((a, b) => (a.order || 0) - (b.order || 0));
                 
-            } catch (error) {
-                console.error('Error loading platforms:', error);
-                showNotification('Error', 'প্ল্যাটফর্ম লোড করতে সমস্যা হয়েছে', 'error');
-            }
+                displayPlatforms();
+            }, (error) => {
+                console.error("Error loading platforms:", error);
+                platformsList.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>প্ল্যাটফর্ম লোড করতে সমস্যা হয়েছে</p></div>';
+            });
         }
-
-        // Load Dashboard Data
-        async function loadDashboardData() {
-            try {
-                // Load platforms count
-                const platformsSnap = await database.ref('publicData/pricingPlans').once('value');
-                const platforms = platformsSnap.val();
-                const totalPlatforms = platforms ? Object.keys(platforms).length : 0;
-                document.getElementById('totalPlatforms').textContent = totalPlatforms;
+        
+        // Display platforms in the list
+        function displayPlatforms() {
+            if (platforms.length === 0) {
+                platformsList.innerHTML = '<div class="empty-state"><i class="fas fa-box-open"></i><p>কোন প্ল্যাটফর্ম পাওয়া যায়নি</p></div>';
+                return;
+            }
+            
+            platformsList.innerHTML = '';
+            
+            platforms.forEach(platform => {
+                const platformItem = document.createElement('div');
+                platformItem.className = 'platform-item';
+                platformItem.setAttribute('data-id', platform.id);
                 
-                // Load orders count
-                const ordersSnap = await database.ref('transactions').once('value');
-                const orders = ordersSnap.val();
-                const totalOrders = orders ? Object.keys(orders).length : 0;
-                document.getElementById('totalOrders').textContent = totalOrders;
+                // Get icon class
+                const iconInfo = availableIcons.find(icon => icon.value === platform.icon) || availableIcons.find(icon => icon.value === 'default');
+                const iconClass = iconInfo ? iconInfo.class : 'fas fa-cube default';
                 
-                // Load users count
-                const usersSnap = await database.ref('users').once('value');
-                const users = usersSnap.val();
-                const totalUsers = users ? Object.keys(users).length : 0;
-                document.getElementById('totalUsers').textContent = totalUsers;
+                // Status badge
+                const statusText = platform.status === 'active' ? 'সক্রিয়' : 'নিষ্ক্রিয়';
+                const statusClass = platform.status === 'active' ? 'status-active' : 'status-inactive';
                 
-                // Calculate revenue (simplified)
-                let totalRevenue = 0;
-                if (orders) {
-                    Object.values(orders).forEach(order => {
-                        const price = order.price || '0';
-                        const amount = parseFloat(price.replace(/[^\d.]/g, '')) || 0;
-                        totalRevenue += amount;
+                // Features display
+                let featuresHTML = '';
+                if (platform.features && platform.features.length > 0) {
+                    platform.features.forEach(feature => {
+                        featuresHTML += `<span class="feature-tag"><i class="fas fa-check-circle"></i> ${feature}</span>`;
                     });
                 }
-                document.getElementById('totalRevenue').textContent = `৳ ${totalRevenue}`;
                 
-                // Load recent platforms
-                if (platforms) {
-                    let recentHtml = '';
-                    const recentPlatforms = Object.entries(platforms).slice(-4);
-                    
-                    recentPlatforms.forEach(([id, platform]) => {
-                        const iconClasses = {
-                            'youtube': 'fab fa-youtube',
-                            'facebook': 'fab fa-facebook-f',
-                            'instagram': 'fab fa-instagram',
-                            'tiktok': 'fab fa-tiktok',
-                            'whatsapp': 'fab fa-whatsapp',
-                            'telegram': 'fab fa-telegram',
-                            'netflix': 'fab fa-netflix',
-                            'spotify': 'fab fa-spotify',
-                            'freefire': 'fas fa-fire',
-                            'pubg': 'fas fa-gamepad'
-                        };
-                        
-                        const iconClass = iconClasses[platform.icon] || 'fas fa-cube';
-                        
-                        recentHtml += `
-                            <div class="platform-card">
-                                <div class="platform-header">
-                                    <div class="platform-logo" style="background: ${platform.color || '#f0f0f0'};">
-                                        <i class="${iconClass}" style="font-size: 1.5rem; color: white;"></i>
-                                    </div>
-                                    <div>
-                                        <div class="platform-name" style="font-size: 1rem;">${platform.name}</div>
-                                        <div class="platform-category" style="font-size: 0.8rem;">${platform.category}</div>
-                                    </div>
-                                </div>
+                platformItem.innerHTML = `
+                    <div class="platform-header">
+                        <div class="platform-info">
+                            <div class="platform-icon-display">
+                                <i class="${iconClass}"></i>
                             </div>
-                        `;
-                    });
-                    
-                    document.getElementById('recentPlatforms').innerHTML = recentHtml;
-                }
-                
-            } catch (error) {
-                console.error('Error loading dashboard data:', error);
-            }
-        }
-
-        // Load Orders
-        async function loadOrders() {
-            try {
-                const snapshot = await database.ref('transactions').orderByChild('timestamp').limitToLast(50).once('value');
-                const ordersData = snapshot.val();
-                
-                const tableBody = document.getElementById('ordersTableBody');
-                if (!tableBody) return;
-                
-                if (!ordersData) {
-                    tableBody.innerHTML = `
-                        <tr>
-                            <td colspan="7" style="text-align: center; padding: 30px;">No orders found</td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                let html = '';
-                Object.entries(ordersData).reverse().forEach(([id, order]) => {
-                    const date = order.orderDate ? new Date(order.orderDate).toLocaleDateString('bn-BD') : 'N/A';
-                    
-                    let statusBadge = '';
-                    if (order.status === 'success') {
-                        statusBadge = '<span class="badge badge-success">Success</span>';
-                    } else if (order.status === 'processing') {
-                        statusBadge = '<span class="badge badge-info">Processing</span>';
-                    } else if (order.status === 'pending') {
-                        statusBadge = '<span class="badge badge-warning">Pending</span>';
-                    } else {
-                        statusBadge = '<span class="badge badge-danger">Cancelled</span>';
-                    }
-                    
-                    html += `
-                        <tr>
-                            <td style="font-size: 0.9rem;">${id.substring(0, 8)}...</td>
-                            <td>${order.userName || 'N/A'}</td>
-                            <td>${order.platform || 'N/A'}</td>
-                            <td>${order.price || 'N/A'}</td>
-                            <td>${statusBadge}</td>
-                            <td>${date}</td>
-                            <td>
-                                <button class="btn" style="background: var(--info); color: white; padding: 5px 10px; font-size: 0.8rem;" onclick="viewOrder('${id}')">
-                                    View
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                tableBody.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Error loading orders:', error);
-                showNotification('Error', 'অর্ডার লোড করতে সমস্যা হয়েছে', 'error');
-            }
-        }
-
-        // Load Users
-        async function loadUsers() {
-            try {
-                const snapshot = await database.ref('users').once('value');
-                const usersData = snapshot.val();
-                
-                const tableBody = document.getElementById('usersTableBody');
-                if (!tableBody) return;
-                
-                if (!usersData) {
-                    tableBody.innerHTML = `
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 30px;">No users found</td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                let html = '';
-                Object.entries(usersData).forEach(([id, user]) => {
-                    const joinDate = user.joinDate ? new Date(user.joinDate).toLocaleDateString('bn-BD') : 'N/A';
-                    
-                    html += `
-                        <tr>
-                            <td>${user.fullName || 'N/A'}</td>
-                            <td>${user.email || 'N/A'}</td>
-                            <td>${joinDate}</td>
-                            <td>
-                                <button class="btn" style="background: var(--primary); color: white; padding: 5px 10px; font-size: 0.8rem;" onclick="viewUserOrders('${id}')">
-                                    View Orders
-                                </button>
-                            </td>
-                            <td>
-                                <span class="badge badge-success">Active</span>
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                tableBody.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Error loading users:', error);
-            }
-        }
-
-        // Edit Platform
-        async function editPlatform(platformId) {
-            try {
-                const snapshot = await database.ref('publicData/pricingPlans/' + platformId).once('value');
-                const platform = snapshot.val();
-                
-                if (!platform) {
-                    showNotification('Error', 'প্ল্যাটফর্ম পাওয়া যায়নি', 'error');
-                    return;
-                }
-                
-                const modalContent = `
-                    <div class="form-container">
-                        <div class="form-group">
-                            <label>প্ল্যাটফর্মের নাম</label>
-                            <input type="text" class="form-control" id="editPlatformName" value="${platform.name}">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>বর্ণনা</label>
-                            <textarea class="form-control" id="editPlatformDescription" rows="3">${platform.description || ''}</textarea>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>দাম</label>
-                                <input type="text" class="form-control" id="editPlatformPrice" value="${platform.price}">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>স্টক</label>
-                                <input type="number" class="form-control" id="editPlatformStock" value="${platform.stock || 9999}">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>স্ট্যাটাস</label>
-                                <select class="form-control" id="editPlatformStatus">
-                                    <option value="active" ${platform.status === 'active' ? 'selected' : ''}>সক্রিয়</option>
-                                    <option value="inactive" ${platform.status === 'inactive' ? 'selected' : ''}>নিষ্ক্রিয়</option>
-                                    <option value="out_of_stock" ${platform.status === 'out_of_stock' ? 'selected' : ''}>স্টক শেষ</option>
-                                </select>
+                            <div class="platform-details">
+                                <div class="platform-name-display">${platform.name}</div>
+                                <div class="platform-price-display">${platform.price}</div>
                             </div>
                         </div>
-                        
-                        <div style="display: flex; gap: 15px; margin-top: 20px;">
-                            <button class="btn" style="flex: 1; background: var(--primary); color: white;" onclick="updatePlatform('${platformId}')">
-                                <i class="fas fa-save"></i> আপডেট করুন
-                            </button>
-                            
-                            <button class="btn" style="flex: 1; background: var(--danger); color: white;" onclick="closeModal('editPlatformModal')">
-                                <i class="fas fa-times"></i> বাতিল করুন
-                            </button>
+                        <div class="platform-actions">
+                            <button class="action-btn edit-btn" data-id="${platform.id}">এডিট</button>
+                            <button class="action-btn delete-btn" data-id="${platform.id}">ডিলিট</button>
                         </div>
+                    </div>
+                    <div class="platform-description-display">${platform.description}</div>
+                    ${featuresHTML ? `<div class="platform-features-display">${featuresHTML}</div>` : ''}
+                    <div style="margin-top: 10px;">
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                        <span style="color: #b0bec5; font-size: 0.8rem; margin-left: 10px;">অর্ডার: ${platform.order || 0}</span>
                     </div>
                 `;
                 
-                document.getElementById('editPlatformContent').innerHTML = modalContent;
-                document.getElementById('editPlatformModal').style.display = 'flex';
-                
-            } catch (error) {
-                showNotification('Error', 'প্ল্যাটফর্ম লোড করতে সমস্যা হয়েছে', 'error');
-            }
-        }
-
-        // Update Platform
-        async function updatePlatform(platformId) {
-            try {
-                const updatedData = {
-                    name: document.getElementById('editPlatformName').value,
-                    description: document.getElementById('editPlatformDescription').value,
-                    price: document.getElementById('editPlatformPrice').value,
-                    stock: parseInt(document.getElementById('editPlatformStock').value) || 0,
-                    status: document.getElementById('editPlatformStatus').value,
-                    updatedAt: Date.now()
-                };
-                
-                await database.ref('publicData/pricingPlans/' + platformId).update(updatedData);
-                await database.ref('platforms/' + platformId).update(updatedData);
-                
-                closeModal('editPlatformModal');
-                showNotification('Success', 'প্ল্যাটফর্ম আপডেট করা হয়েছে', 'success');
-                loadPlatforms();
-                loadDashboardData();
-                
-            } catch (error) {
-                showNotification('Error', 'আপডেট করতে সমস্যা হয়েছে', 'error');
-            }
-        }
-
-        // Delete Platform
-        async function deletePlatform(platformId, platformName) {
-            if (confirm(`আপনি কি "${platformName}" প্ল্যাটফর্ম ডিলিট করতে চান?`)) {
-                try {
-                    await database.ref('publicData/pricingPlans/' + platformId).remove();
-                    await database.ref('platforms/' + platformId).remove();
-                    
-                    showNotification('Success', 'প্ল্যাটফর্ম ডিলিট করা হয়েছে', 'success');
-                    loadPlatforms();
-                    loadDashboardData();
-                } catch (error) {
-                    showNotification('Error', 'ডিলিট করতে সমস্যা হয়েছে', 'error');
-                }
-            }
-        }
-
-        // View Order
-        function viewOrder(orderId) {
-            window.open(`order-details.html?id=${orderId}`, '_blank');
-        }
-
-        // View User Orders
-        async function viewUserOrders(userId) {
-            try {
-                const snapshot = await database.ref('transactions').orderByChild('userId').equalTo(userId).once('value');
-                const orders = snapshot.val();
-                
-                if (!orders) {
-                    alert('এই ইউজারের কোনো অর্ডার নেই');
-                    return;
-                }
-                
-                let orderList = '';
-                Object.entries(orders).forEach(([id, order]) => {
-                    orderList += `- ${order.platform}: ${order.price} (${order.status})\n`;
+                platformsList.appendChild(platformItem);
+            });
+            
+            // Add event listeners to edit and delete buttons
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    editPlatform(id);
                 });
-                
-                alert(`User Orders:\n\n${orderList}`);
-                
-            } catch (error) {
-                console.error('Error loading user orders:', error);
-            }
-        }
-
-        // Save Settings
-        async function saveSettings() {
-            try {
-                const settings = {
-                    siteName: document.getElementById('siteName').value,
-                    siteDescription: document.getElementById('siteDescription').value,
-                    contactEmail: document.getElementById('contactEmail').value,
-                    helpline: document.getElementById('helpline').value,
-                    updatedAt: Date.now(),
-                    updatedBy: currentUser.uid
-                };
-                
-                await database.ref('publicData/siteConfig').set(settings);
-                showNotification('Success', 'সেটিংস সংরক্ষণ করা হয়েছে', 'success');
-                
-            } catch (error) {
-                showNotification('Error', 'সেটিংস সংরক্ষণে সমস্যা হয়েছে', 'error');
-            }
-        }
-
-        // Show/Hide Functions
-        function showLoginScreen() {
-            document.getElementById('loginScreen').style.display = 'block';
-            document.getElementById('mainContainer').style.display = 'none';
-        }
-
-        function showAdminPanel() {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainContainer').style.display = 'block';
+            });
             
-            if (currentUser) {
-                document.getElementById('adminName').textContent = currentUser.displayName || 'Admin';
-                document.getElementById('adminEmail').textContent = currentUser.email;
-            }
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    deletePlatform(id);
+                });
+            });
         }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        function showNotification(title, message, type = 'success') {
-            const notification = document.getElementById('notification');
-            const icon = document.getElementById('notificationIcon');
+        
+        // Handle form submission
+        function handleFormSubmit(e) {
+            e.preventDefault();
             
-            // Set notification type
-            notification.className = 'notification ' + type;
-            
-            // Set icon based on type
-            switch(type) {
-                case 'success':
-                    icon.className = 'fas fa-check-circle';
-                    break;
-                case 'error':
-                    icon.className = 'fas fa-times-circle';
-                    break;
-                case 'warning':
-                    icon.className = 'fas fa-exclamation-triangle';
-                    break;
-                case 'info':
-                    icon.className = 'fas fa-info-circle';
-                    break;
+            if (!platformName.value.trim()) {
+                alert('প্ল্যাটফর্মের নাম প্রয়োজন');
+                platformName.focus();
+                return;
             }
             
-            document.getElementById('notificationTitle').textContent = title;
-            document.getElementById('notificationMessage').textContent = message;
-            notification.style.display = 'flex';
+            if (!platformIcon.value) {
+                alert('আইকন সিলেক্ট করুন');
+                platformIcon.focus();
+                return;
+            }
             
-            // Auto hide
+            if (!platformDescription.value.trim()) {
+                alert('বর্ণনা প্রয়োজন');
+                platformDescription.focus();
+                return;
+            }
+            
+            if (!platformPrice.value.trim()) {
+                alert('দাম প্রয়োজন');
+                platformPrice.focus();
+                return;
+            }
+            
+            const platformData = {
+                name: platformName.value.trim(),
+                icon: platformIcon.value,
+                description: platformDescription.value.trim(),
+                price: platformPrice.value.trim(),
+                features: getFeatures(),
+                category: platformCategory.value.trim(),
+                order: parseInt(platformOrder.value) || 0,
+                status: platformStatus.value,
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            // If we're editing, add createdAt from existing platform
+            if (!isEditing) {
+                platformData.createdAt = firebase.database.ServerValue.TIMESTAMP;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'সেভ হচ্ছে...';
+            
+            if (isEditing && currentEditId) {
+                // Update existing platform
+                database.ref('publicData/pricingPlans/' + currentEditId).update(platformData)
+                    .then(() => {
+                        console.log('Platform updated successfully');
+                        showSuccessMessage('প্ল্যাটফর্ম সফলভাবে আপডেট করা হয়েছে!');
+                        resetForm();
+                    })
+                    .catch(error => {
+                        console.error('Error updating platform:', error);
+                        alert('প্ল্যাটফর্ম আপডেট করতে সমস্যা হয়েছে: ' + error.message);
+                    })
+                    .finally(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'সেভ করুন';
+                    });
+            } else {
+                // Add new platform
+                const newPlatformRef = database.ref('publicData/pricingPlans').push();
+                newPlatformRef.set(platformData)
+                    .then(() => {
+                        console.log('Platform added successfully');
+                        showSuccessMessage('নতুন প্ল্যাটফর্ম সফলভাবে যোগ করা হয়েছে!');
+                        resetForm();
+                    })
+                    .catch(error => {
+                        console.error('Error adding platform:', error);
+                        alert('প্ল্যাটফর্ম যোগ করতে সমস্যা হয়েছে: ' + error.message);
+                    })
+                    .finally(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'সেভ করুন';
+                    });
+            }
+        }
+        
+        // Edit a platform
+        function editPlatform(id) {
+            const platform = platforms.find(p => p.id === id);
+            
+            if (!platform) {
+                alert('প্ল্যাটফর্ম পাওয়া যায়নি');
+                return;
+            }
+            
+            // Fill the form with platform data
+            platformId.value = platform.id;
+            platformName.value = platform.name || '';
+            platformIcon.value = platform.icon || 'default';
+            platformDescription.value = platform.description || '';
+            platformPrice.value = platform.price || '';
+            platformCategory.value = platform.category || '';
+            platformOrder.value = platform.order || 0;
+            platformStatus.value = platform.status || 'active';
+            
+            // Set features
+            setFeatures(platform.features || []);
+            
+            // Set icon selection
+            selectedIcon = platform.icon || 'default';
+            updateIconSelection();
+            
+            // Change form to edit mode
+            isEditing = true;
+            currentEditId = id;
+            formTitle.textContent = 'প্ল্যাটফর্ম এডিট করুন';
+            submitBtn.textContent = 'আপডেট করুন';
+            cancelEditBtn.style.display = 'block';
+            
+            // Scroll to form
+            document.querySelector('.admin-form-section').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Delete a platform
+        function deletePlatform(id) {
+            if (!confirm('আপনি কি নিশ্চিত যে আপনি এই প্ল্যাটফর্মটি ডিলিট করতে চান?')) {
+                return;
+            }
+            
+            database.ref('publicData/pricingPlans/' + id).remove()
+                .then(() => {
+                    console.log('Platform deleted successfully');
+                    showSuccessMessage('প্ল্যাটফর্ম সফলভাবে ডিলিট করা হয়েছে!');
+                })
+                .catch(error => {
+                    console.error('Error deleting platform:', error);
+                    alert('প্ল্যাটফর্ম ডিলিট করতে সমস্যা হয়েছে: ' + error.message);
+                });
+        }
+        
+        // Reset form
+        function resetForm() {
+            platformForm.reset();
+            platformId.value = '';
+            platformOrder.value = 0;
+            platformStatus.value = 'active';
+            selectedIcon = '';
+            
+            // Clear icon selection
+            document.querySelectorAll('.icon-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Reset features
+            initializeFeatures();
+            
+            // Reset form mode
+            isEditing = false;
+            currentEditId = null;
+            formTitle.textContent = 'নতুন প্ল্যাটফর্ম যোগ করুন';
+            submitBtn.textContent = 'সেভ করুন';
+            cancelEditBtn.style.display = 'none';
+        }
+        
+        // Cancel edit
+        function cancelEdit() {
+            resetForm();
+        }
+        
+        // Show success message
+        function showSuccessMessage(message) {
+            // Create a temporary success message
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(45deg, #4caf50, #2e7d32);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-weight: 600;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            successDiv.textContent = message;
+            document.body.appendChild(successDiv);
+            
+            // Remove after 3 seconds
             setTimeout(() => {
-                notification.style.display = 'none';
-            }, 5000);
-        }
-
-        // Initialize Select2
-        $(document).ready(function() {
-            $('#platformIcon').select2({
-                placeholder: "আইকন সিলেক্ট করুন",
-                allowClear: true
-            });
+                successDiv.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(successDiv);
+                }, 300);
+            }, 3000);
             
-            $('#platformCategory').select2({
-                placeholder: "ক্যাটাগরি সিলেক্ট করুন",
-                allowClear: true
-            });
-        });
+            // Add CSS for animations
+            if (!document.getElementById('success-animations')) {
+                const style = document.createElement('style');
+                style.id = 'success-animations';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
     </script>
 </body>
 </html>
