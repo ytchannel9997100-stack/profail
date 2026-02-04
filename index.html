@@ -1655,103 +1655,18 @@
     </footer>
 
     <script>
-        // Cookie Consent Logic
-        const websiteOverlay = document.getElementById('websiteOverlay');
-        const overlayAcceptBtn = document.getElementById('overlayAcceptBtn');
-        
-        // Check if user has already accepted cookies
-        function checkCookieConsent() {
-            const cookieAccepted = localStorage.getItem('cookieAccepted');
-            
-            if (cookieAccepted === 'true') {
-                websiteOverlay.style.display = 'none';
-                return true;
-            } else if (cookieAccepted === 'false') {
-                websiteOverlay.style.display = 'flex';
-                return false;
-            } else {
-                websiteOverlay.style.display = 'flex';
-                return false;
-            }
-        }
-        
-        // Accept all cookies
-        function acceptAllCookies() {
-            localStorage.setItem('cookieAccepted', 'true');
-            websiteOverlay.style.display = 'none';
-            
-            setCookie('user_consent', 'accepted_all', 30);
-            
-            console.log('Cookies accepted');
-            
-            location.reload();
-        }
-        
-        // Set a cookie
-        function setCookie(name, value, days) {
-            let expires = "";
-            if (days) {
-                const date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                expires = "; expires=" + date.toUTCString();
-            }
-            document.cookie = name + "=" + (value || "") + expires + "; path=/";
-        }
-        
-        // Get a cookie
-        function getCookie(name) {
-            const nameEQ = name + "=";
-            const ca = document.cookie.split(';');
-            for(let i = 0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-            }
-            return null;
-        }
-        
-        // Event listener for cookie button
-        overlayAcceptBtn.addEventListener('click', acceptAllCookies);
-        
-        // Check cookie consent on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const hasAccepted = checkCookieConsent();
-            
-            if (!hasAccepted) {
-                document.querySelectorAll('button, input, a').forEach(element => {
-                    if (element.id !== 'overlayAcceptBtn' && !element.classList.contains('cookie-link')) {
-                        element.style.pointerEvents = 'none';
-                        element.style.opacity = '0.5';
-                    }
-                });
-            } else {
-                document.querySelectorAll('button, input, a').forEach(element => {
-                    element.style.pointerEvents = 'auto';
-                    element.style.opacity = '1';
-                });
-            }
-        });
-
-        // Firebase Configuration - আপনার দেওয়া কনফিগারেশন
+        // Firebase Configuration - নতুন কনফিগারেশন
         const firebaseConfig = {
-            apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
-            authDomain: "easy-premium.firebaseapp.com",
-            databaseURL: "https://easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "easy-premium",
-            storageBucket: "easy-premium.firebasestorage.app",
-            messagingSenderId: "155891252265",
-            appId: "1:155891252265:web:77ab41de24231e8e5ef038",
-            measurementId: "G-CHL8K8HRPX"
+            apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
+            authDomain: "top-up-4db01.firebaseapp.com",
+            projectId: "top-up-4db01",
+            databaseURL: "https://top-up-4db01-default-rtdb.asia-southeast1.firebasedatabase.app",
+            storageBucket: "top-up-4db01.appspot.com",
+            appId: "1:264548197473:web:abcd1234efgh5678"
         };
 
         // Initialize Firebase
-        try {
-            firebase.initializeApp(firebaseConfig);
-            console.log("Firebase initialized successfully");
-        } catch (error) {
-            console.log("Firebase already initialized");
-        }
-        
+        firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const auth = firebase.auth();
 
@@ -1838,7 +1753,7 @@
                     const name = platform.name ? platform.name.toLowerCase() : '';
                     const description = platform.description ? platform.description.toLowerCase() : '';
                     const features = platform.features ? platform.features.join(' ').toLowerCase() : '';
-                    const price = platform.price ? platform.price.toLowerCase() : '';
+                    const price = platform.price ? platform.price.toString().toLowerCase() : '';
                     
                     return name.includes(searchTerm) || 
                            description.includes(searchTerm) || 
@@ -1861,7 +1776,7 @@
                     const name = platform.name ? platform.name.toLowerCase() : '';
                     const description = platform.description ? platform.description.toLowerCase() : '';
                     const features = platform.features ? platform.features.join(' ').toLowerCase() : '';
-                    const price = platform.price ? platform.price.toLowerCase() : '';
+                    const price = platform.price ? platform.price.toString().toLowerCase() : '';
                     
                     return name.includes(searchTerm) || 
                            description.includes(searchTerm) || 
@@ -1920,7 +1835,7 @@
                         <div class="search-result-name">${platform.name || 'প্ল্যাটফর্ম'}</div>
                         <div class="search-result-desc">${platform.description || 'প্রিমিয়াম সেবা পান সবচেয়ে কম দামে।'}</div>
                     </div>
-                    <div class="search-result-price">${platform.price || '৳ 100'}</div>
+                    <div class="search-result-price">${platform.currency || '৳'} ${platform.price || '100'}</div>
                 `;
                 
                 resultItem.addEventListener('click', function() {
@@ -2079,6 +1994,7 @@
                     whatsappNumber: purchaseWhatsappNumber.value.trim(),
                     platform: currentPurchaseInfo.platformName,
                     price: currentPurchaseInfo.price,
+                    platformId: currentPurchaseInfo.platformId,
                     status: 'pending',
                     orderDate: new Date().toISOString(),
                     timestamp: firebase.database.ServerValue.TIMESTAMP,
@@ -2093,11 +2009,29 @@
                     orderData.userName = user.displayName;
                 }
                 
-                const newOrderRef = database.ref('transactions').push();
+                const newOrderRef = database.ref('orders').push();
                 
                 try {
                     await newOrderRef.set(orderData);
                     console.log("Order saved successfully");
+                    
+                    // Platform sales count update
+                    if (currentPurchaseInfo.platformId) {
+                        const platformRef = database.ref('platforms/' + currentPurchaseInfo.platformId);
+                        const platformSnap = await platformRef.once('value');
+                        const platformData = platformSnap.val();
+                        
+                        if (platformData) {
+                            const currentSales = platformData.sales || 0;
+                            const currentStock = platformData.stock || 9999;
+                            
+                            await platformRef.update({
+                                sales: currentSales + 1,
+                                stock: Math.max(0, currentStock - 1),
+                                updatedAt: firebase.database.ServerValue.TIMESTAMP
+                            });
+                        }
+                    }
                 } catch (dbError) {
                     console.error("Database error:", dbError);
                 }
@@ -2130,7 +2064,7 @@
         });
 
         // Function to handle purchase
-        function handlePurchase(platformCard) {
+        function handlePurchase(platformCard, platformId) {
             if (!checkCookieConsent()) {
                 websiteOverlay.style.display = 'flex';
                 return;
@@ -2143,6 +2077,7 @@
                 pendingPurchase = {
                     platformName: platformName,
                     price: price,
+                    platformId: platformId,
                     platformCard: platformCard
                 };
                 
@@ -2151,6 +2086,7 @@
                 showPurchaseForm({
                     platformName: platformCard.querySelector('.platform-name').textContent,
                     price: platformCard.querySelector('.price').textContent,
+                    platformId: platformId,
                     platformCard: platformCard
                 });
             }
@@ -2184,24 +2120,17 @@
                 .then((snapshot) => {
                     if (!snapshot.exists()) {
                         const userData = {
-                            basicInfo: {
-                                fullName: user.displayName || '',
-                                email: user.email || '',
-                                phone: '',
-                                joinDate: firebase.database.ServerValue.TIMESTAMP
-                            },
-                            premiumStatus: {
-                                isPremium: false,
-                                subscriptionType: 'none',
-                                startDate: null,
-                                endDate: null
-                            },
-                            lastLogin: firebase.database.ServerValue.TIMESTAMP
+                            name: user.displayName || '',
+                            email: user.email || '',
+                            photoURL: user.photoURL || '',
+                            phone: '',
+                            address: '',
+                            createdAt: firebase.database.ServerValue.TIMESTAMP,
+                            lastLogin: firebase.database.ServerValue.TIMESTAMP,
+                            totalSpent: 0,
+                            orderCount: 0,
+                            status: 'active'
                         };
-                        
-                        if (user.photoURL) {
-                            userData.basicInfo.photoURL = user.photoURL;
-                        }
                         
                         return database.ref('users/' + userId).set(userData);
                     } else {
@@ -2220,7 +2149,7 @@
         function updateCartBadge(userId) {
             if (!userId) return;
             
-            database.ref('transactions').orderByChild('userId').equalTo(userId).once('value')
+            database.ref('orders').orderByChild('userId').equalTo(userId).once('value')
                 .then((snapshot) => {
                     const ordersData = snapshot.val();
                     if (ordersData) {
@@ -2242,12 +2171,12 @@
             const user = auth.currentUser;
             if (!user) return;
             
-            database.ref('users/' + user.uid + '/basicInfo').once('value')
+            database.ref('users/' + user.uid).once('value')
                 .then((snapshot) => {
                     const userData = snapshot.val();
                     
                     if (userData) {
-                        profileName.textContent = userData.fullName || user.displayName || "User";
+                        profileName.textContent = userData.name || user.displayName || "User";
                         profileEmail.textContent = userData.email || user.email || "No email";
                     } else {
                         profileName.textContent = user.displayName || "User";
@@ -2272,7 +2201,7 @@
             profileAvatar.innerHTML = '';
             
             const photoURL = (userData && userData.photoURL) || user.photoURL;
-            const userName = (userData && userData.fullName) || user.displayName || "User";
+            const userName = (userData && userData.name) || user.displayName || "User";
             
             if (photoURL) {
                 const img = document.createElement('img');
@@ -2301,7 +2230,7 @@
         function loadUserOrders(userId) {
             ordersList.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>অর্ডার লোড হচ্ছে...</p></div>';
             
-            database.ref('transactions').orderByChild('userId').equalTo(userId).once('value')
+            database.ref('orders').orderByChild('userId').equalTo(userId).once('value')
                 .then((snapshot) => {
                     userOrders = [];
                     let ordersData = snapshot.val();
@@ -2383,254 +2312,4 @@
                 }
                 
                 let priceValue = order.price || '৳ -';
-                if (priceValue && !priceValue.includes('৳')) {
-                    priceValue = `৳ ${priceValue}`;
-                }
-                
-                const platformName = order.platform || 'Unknown';
-                
-                tableHTML += `
-                    <tr>
-                        <td>${formattedDate}</td>
-                        <td>${platformName}</td>
-                        <td>${priceValue}</td>
-                        <td class="${statusClass}">${statusText}</td>
-                    </tr>
-                `;
-                
-                cardsHTML += `
-                    <div class="order-card">
-                        <div class="order-card-row">
-                            <div class="order-card-label">তারিখ</div>
-                            <div class="order-card-value">${formattedDate}</div>
-                        </div>
-                        <div class="order-card-row">
-                            <div class="order-card-label">প্ল্যাটফর্ম</div>
-                            <div class="order-card-value">${platformName}</div>
-                        </div>
-                        <div class="order-card-row">
-                            <div class="order-card-label">দাম</div>
-                            <div class="order-card-value">${priceValue}</div>
-                        </div>
-                        <div class="order-card-row">
-                            <div class="order-card-label">স্ট্যাটাস</div>
-                            <div class="order-card-value"><span class="${statusClass}">${statusText}</span></div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            tableHTML += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            
-            cardsHTML += '</div>';
-            
-            ordersList.innerHTML = tableHTML + cardsHTML;
-        }
-
-        // Function to load platforms from Firebase
-        function loadPlatformsFromFirebase() {
-            const platformsGrid = document.getElementById('platforms-grid');
-            platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে...</p></div>';
-
-            const platformsRef = database.ref('publicData/pricingPlans');
-            
-            platformsRef.on('value', (snapshot) => {
-                const platformsData = snapshot.val();
-                platformsGrid.innerHTML = '';
-
-                if (!platformsData) {
-                    createDefaultPlatforms();
-                    return;
-                }
-
-                allPlatforms = Object.values(platformsData);
-                
-                allPlatforms.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-                allPlatforms.forEach(platform => {
-                    createPlatformCard(platform);
-                });
-
-                document.querySelectorAll('.platform-card .buy-button').forEach(button => {
-                    button.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const platformCard = this.closest('.platform-card');
-                        handlePurchase(platformCard);
-                    });
-                });
-
-                initializeSearch();
-                
-                animatePlatformCards();
-            }, (error) => {
-                console.error("Error loading platforms:", error);
-                createDefaultPlatforms();
-            });
-        }
-
-        // Create default platforms if Firebase fails
-        function createDefaultPlatforms() {
-            const platformsGrid = document.getElementById('platforms-grid');
-            platformsGrid.innerHTML = '';
-            
-            allPlatforms = [
-                {
-                    name: 'YouTube Premium',
-                    icon: 'youtube',
-                    description: 'Ad-free videos, background play, and YouTube Music Premium',
-                    price: '৳ 299/month',
-                    features: ['Ad-free videos', 'Background play', 'YouTube Music Premium', 'Offline downloads']
-                },
-                {
-                    name: 'Facebook Blueprint',
-                    icon: 'facebook',
-                    description: 'Advanced marketing tools and analytics for businesses',
-                    price: '৳ 499/month',
-                    features: ['Advanced analytics', 'Cross-platform integration', 'Priority support', 'Custom tools']
-                },
-                {
-                    name: 'Instagram Blueprint',
-                    icon: 'instagram',
-                    description: 'Perfect for individual creators and influencers',
-                    price: '৳ 399/month',
-                    features: ['Advanced analytics', 'Scheduling features', 'Customer insights', 'Priority posting']
-                },
-                {
-                    name: 'Netflix Premium',
-                    icon: 'netflix',
-                    description: 'Watch Netflix on 4 screens at once in Ultra HD',
-                    price: '৳ 799/month',
-                    features: ['4 screens at once', 'Ultra HD available', 'Watch anywhere', 'Cancel anytime']
-                }
-            ];
-            
-            allPlatforms.forEach(platform => {
-                createPlatformCard(platform);
-            });
-            
-            document.querySelectorAll('.platform-card .buy-button').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const platformCard = this.closest('.platform-card');
-                    handlePurchase(platformCard);
-                });
-            });
-            
-            initializeSearch();
-            
-            animatePlatformCards();
-        }
-
-        // Create a platform card
-        function createPlatformCard(platform) {
-            const platformsGrid = document.getElementById('platforms-grid');
-            const platformCard = document.createElement('div');
-            platformCard.className = 'platform-card';
-            platformCard.setAttribute('data-platform-name', platform.name);
-            
-            const iconClasses = {
-                'youtube': 'fab fa-youtube youtube',
-                'facebook': 'fab fa-facebook-f facebook',
-                'instagram': 'fab fa-instagram instagram',
-                'tiktok': 'fab fa-tiktok tiktok',
-                'whatsapp': 'fab fa-whatsapp whatsapp',
-                'telegram': 'fab fa-telegram telegram',
-                'freefire': 'fas fa-fire freefire',
-                'netflix': 'fab fa-netflix netflix',
-                'spotify': 'fab fa-spotify spotify',
-                'pubg': 'fas fa-gamepad pubg',
-                'default': 'fas fa-cube'
-            };
-
-            const iconClass = iconClasses[platform.icon] || iconClasses.default;
-
-            platformCard.innerHTML = `
-                <div class="platform-header">
-                    <i class="${iconClass} platform-icon"></i>
-                    <div class="platform-name">${platform.name || 'প্ল্যাটফর্ম'}</div>
-                </div>
-                <div class="platform-description">
-                    ${platform.description || 'প্রিমিয়াম সেবা পান সবচেয়ে কম দামে।'}
-                </div>
-                <div class="platform-features">
-                    ${platform.features ? platform.features.map(feature => `
-                        <div class="feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>${feature}</span>
-                        </div>
-                    `).join('') : `
-                        <div class="feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>ইনস্ট্যান্ট ডেলিভারি</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>১০০% সেফ</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>গ্যারান্টিড</span>
-                        </div>
-                    `}
-                </div>
-                <div class="platform-price">
-                    <div class="price">${platform.price || '৳ 100'}</div>
-                    <div class="price-desc">বাল্ক অর্ডারে ডিস্কাউন্ট</div>
-                </div>
-                <button class="buy-button">কিনুন</button>
-            `;
-
-            platformsGrid.appendChild(platformCard);
-        }
-
-        // Page Load Animation functions
-        function animatePlatformCards() {
-            const cards = document.querySelectorAll('.platform-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.5s, transform 0.5s';
-                
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 150);
-            });
-        }
-        
-        // Initialize auth state
-        function initializeAuth() {
-            auth.onAuthStateChanged((user) => {
-                if (user) {
-                    console.log("User is signed in:", user.uid);
-                    updateCartBadge(user.uid);
-                } else {
-                    console.log("No user signed in");
-                }
-            });
-        }
-        
-        // Load platforms when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            const hasAccepted = checkCookieConsent();
-            
-            if (hasAccepted) {
-                initializeAuth();
-                loadPlatformsFromFirebase();
-            } else {
-                const platformsGrid = document.getElementById('platforms-grid');
-                platformsGrid.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
-                        <i class="fas fa-cookie-bite" style="font-size: 2.5rem; color: #ff9800; margin-bottom: 15px;"></i>
-                        <p style="font-size: 1rem;">কুকি সম্মতি প্রদান করুন প্ল্যাটফর্ম দেখতে</p>
-                    </div>
-                `;
-            }
-        });
-    </script>
-</body>
-</html>
+                if (price
