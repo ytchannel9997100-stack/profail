@@ -6,10 +6,10 @@
     <title>Admin Panel - Easy Premium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <style>
@@ -22,14 +22,6 @@
             --danger: #f44336;
             --warning: #ffc107;
             --info: #2196F3;
-            --youtube: #FF0000;
-            --facebook: #1877F2;
-            --instagram: #E4405F;
-            --tiktok: #000000;
-            --whatsapp: #25D366;
-            --telegram: #0088cc;
-            --netflix: #E50914;
-            --spotify: #1DB954;
         }
         
         * {
@@ -553,98 +545,16 @@
         }
         
         /* Logo Color Classes */
-        .youtube { color: var(--youtube); }
-        .facebook { color: var(--facebook); }
-        .instagram { color: var(--instagram); }
-        .tiktok { color: var(--tiktok); }
-        .whatsapp { color: var(--whatsapp); }
-        .telegram { color: var(--telegram); }
-        .netflix { color: var(--netflix); }
-        .spotify { color: var(--spotify); }
+        .youtube { color: #FF0000; }
+        .facebook { color: #1877F2; }
+        .instagram { color: #E4405F; }
+        .tiktok { color: #000000; }
+        .whatsapp { color: #25D366; }
+        .telegram { color: #0088cc; }
+        .netflix { color: #E50914; }
+        .spotify { color: #1DB954; }
         .gaming { color: #ff8800; }
         .premium { color: gold; }
-        
-        /* File Upload */
-        .file-upload {
-            border: 2px dashed #ddd;
-            border-radius: 10px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 15px;
-        }
-        
-        .file-upload:hover {
-            border-color: var(--primary);
-            background: rgba(255,152,0,0.05);
-        }
-        
-        .file-upload i {
-            font-size: 3rem;
-            color: var(--secondary);
-            margin-bottom: 15px;
-        }
-        
-        .preview-container {
-            margin-top: 20px;
-            text-align: center;
-        }
-        
-        .preview-image {
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 10px;
-            border: 2px solid var(--primary);
-        }
-        
-        /* Features Input */
-        .features-input .feature-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .add-feature-btn {
-            background: var(--success);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        /* Badge Selector */
-        .badge-options {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
-        
-        .badge-option {
-            padding: 8px 15px;
-            border: 2px solid #ddd;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-        }
-        
-        .badge-option:hover {
-            border-color: var(--primary);
-        }
-        
-        .badge-option.selected {
-            border-color: var(--primary);
-            background: rgba(255,152,0,0.1);
-            color: var(--primary);
-            font-weight: 600;
-        }
         
         /* Modal */
         .modal {
@@ -809,7 +719,7 @@
             </div>
             
             <div class="form-group">
-                <input type="email" id="loginEmail" class="form-control" placeholder="Admin Email">
+                <input type="email" id="loginEmail" class="form-control" placeholder="Admin Email" value="mdashikislam017705@gmail.com">
             </div>
             
             <div class="form-group">
@@ -865,11 +775,6 @@
                 <div class="nav-item" onclick="showSection('users')">
                     <i class="fas fa-users"></i>
                     <span>ইউজারসমূহ</span>
-                </div>
-                
-                <div class="nav-item" onclick="showSection('categories')">
-                    <i class="fas fa-tags"></i>
-                    <span>ক্যাটাগরিসমূহ</span>
                 </div>
                 
                 <div class="nav-item" onclick="showSection('settings')">
@@ -945,9 +850,7 @@
                     
                     <!-- Recent Platforms -->
                     <h3 style="margin: 25px 0 15px; color: var(--dark);">সাম্প্রতিক প্ল্যাটফর্ম</h3>
-                    <div id="recentPlatforms" class="platforms-grid">
-                        <!-- Will be loaded by JavaScript -->
-                    </div>
+                    <div id="recentPlatforms" class="platforms-grid"></div>
                 </div>
                 
                 <!-- All Platforms Section -->
@@ -965,6 +868,10 @@
                             <input type="text" id="platformSearch" class="form-control" placeholder="প্ল্যাটফর্ম খুঁজুন...">
                             <select id="categoryFilter" class="form-control" style="min-width: 150px;">
                                 <option value="">সব ক্যাটাগরি</option>
+                                <option value="streaming">স্ট্রিমিং</option>
+                                <option value="social">সোশ্যাল মিডিয়া</option>
+                                <option value="gaming">গেমিং</option>
+                                <option value="education">এডুকেশন</option>
                             </select>
                             <button class="btn" style="background: var(--info); color: white;" onclick="searchPlatforms()">
                                 <i class="fas fa-search"></i> সার্চ
@@ -973,9 +880,7 @@
                     </div>
                     
                     <!-- Platforms Grid -->
-                    <div id="platformsContainer" class="platforms-grid">
-                        <!-- Will be loaded by JavaScript -->
-                    </div>
+                    <div id="platformsContainer" class="platforms-grid"></div>
                 </div>
                 
                 <!-- Add Platform Section -->
@@ -987,7 +892,6 @@
                             <button class="tab-btn active" onclick="showTab('basicInfo')">মূল তথ্য</button>
                             <button class="tab-btn" onclick="showTab('logoDesign')">লোগো ডিজাইন</button>
                             <button class="tab-btn" onclick="showTab('features')">ফিচারসমূহ</button>
-                            <button class="tab-btn" onclick="showTab('advanced')">অ্যাডভান্সড</button>
                         </div>
                         
                         <form id="platformForm">
@@ -999,9 +903,9 @@
                                         <input type="text" class="form-control" id="platformName" required>
                                     </div>
                                     <div class="form-group">
-                                        <label>ইউনিক স্লাগ *</label>
-                                        <input type="text" class="form-control" id="platformSlug" required>
-                                        <small style="color: #666; font-size: 0.85rem;">ইংরেজিতে ছোট হাতের অক্ষর, হাইফেন (যেমন: youtube-premium)</small>
+                                        <label>ইউনিক আইডি *</label>
+                                        <input type="text" class="form-control" id="platformId" required>
+                                        <small style="color: #666; font-size: 0.85rem;">ইংরেজিতে ছোট হাতের অক্ষর (যেমন: youtube-premium)</small>
                                     </div>
                                 </div>
                                 
@@ -1014,23 +918,23 @@
                                             <option value="social">সোশ্যাল মিডিয়া</option>
                                             <option value="gaming">গেমিং</option>
                                             <option value="education">এডুকেশন</option>
-                                            <option value="productivity">প্রোডাক্টিভিটি</option>
-                                            <option value="entertainment">এন্টারটেইনমেন্ট</option>
                                             <option value="other">অন্যান্য</option>
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label>প্ল্যাটফর্ম টাইপ *</label>
-                                        <select class="form-control" id="platformType" required>
+                                        <label>আইকন সিলেক্ট করুন *</label>
+                                        <select class="form-control" id="platformIcon" required>
                                             <option value="">সিলেক্ট করুন</option>
-                                            <option value="premium">প্রিমিয়াম একাউন্ট</option>
-                                            <option value="diamond">ডায়মন্ড</option>
-                                            <option value="coin">কয়েন</option>
-                                            <option value="gem">জেম</option>
-                                            <option value="subscription">সাবস্ক্রিপশন</option>
-                                            <option value="membership">মেম্বারশিপ</option>
-                                            <option value="vip">VIP</option>
-                                            <option value="other">অন্যান্য</option>
+                                            <option value="youtube">YouTube</option>
+                                            <option value="facebook">Facebook</option>
+                                            <option value="instagram">Instagram</option>
+                                            <option value="tiktok">TikTok</option>
+                                            <option value="whatsapp">WhatsApp</option>
+                                            <option value="telegram">Telegram</option>
+                                            <option value="netflix">Netflix</option>
+                                            <option value="spotify">Spotify</option>
+                                            <option value="freefire">Free Fire</option>
+                                            <option value="pubg">PUBG</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1043,30 +947,15 @@
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>দাম (৳) *</label>
-                                        <input type="number" class="form-control" id="platformPrice" required min="0">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>পুরাতন দাম (যদি থাকে)</label>
-                                        <input type="number" class="form-control" id="platformOldPrice" min="0">
+                                        <input type="text" class="form-control" id="platformPrice" required placeholder="৳ 299/month">
                                     </div>
                                     <div class="form-group">
                                         <label>স্টক</label>
                                         <input type="number" class="form-control" id="platformStock" value="9999" min="0">
                                     </div>
-                                </div>
-                                
-                                <div class="form-row">
                                     <div class="form-group">
-                                        <label>ডেলিভারি সময়</label>
-                                        <input type="text" class="form-control" id="deliveryTime" placeholder="যেমন: 5-10 মিনিট">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>ভ্যালিডিটি (দিন)</label>
-                                        <input type="number" class="form-control" id="validity" min="0" placeholder="30">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>ওয়ারেন্টি (দিন)</label>
-                                        <input type="number" class="form-control" id="warranty" min="0" placeholder="7">
+                                        <label>অর্ডার (প্রদর্শনের ক্রম)</label>
+                                        <input type="number" class="form-control" id="platformOrder" value="0" min="0">
                                     </div>
                                 </div>
                             </div>
@@ -1074,204 +963,37 @@
                             <!-- Logo Design Tab -->
                             <div id="logoDesign" class="tab-content">
                                 <div class="logo-selector">
-                                    <h4 style="margin-bottom: 15px; color: var(--dark);">লোগো সিলেক্ট করুন</h4>
-                                    
-                                    <div class="form-group">
-                                        <label>লোগো টাইপ</label>
-                                        <select class="form-control" id="logoType" onchange="toggleLogoOptions()">
-                                            <option value="icon">আইকন সিলেক্ট করুন</option>
-                                            <option value="image">ইমেজ আপলোড করুন</option>
-                                            <option value="url">ইমেজ URL ব্যবহার করুন</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <!-- Icon Selection -->
-                                    <div id="iconSelector" class="logo-selector">
-                                        <p style="color: #666; margin-bottom: 15px;">সোশ্যাল মিডিয়া এবং প্ল্যাটফর্ম লোগো সিলেক্ট করুন:</p>
-                                        
-                                        <div class="logo-options">
-                                            <!-- Social Media Icons -->
-                                            <div class="logo-option" onclick="selectLogo('fab fa-youtube', 'youtube')">
-                                                <i class="fab fa-youtube youtube"></i>
-                                                <span>YouTube</span>
-                                            </div>
-                                            
-                                            <div class="logo-option" onclick="selectLogo('fab fa-facebook', 'facebook')">
-                                                <i class="fab fa-facebook facebook"></i>
-                                                <span>Facebook</span>
-                                            </div>
-                                            
-                                            <div class="logo-option" onclick="selectLogo('fab fa-instagram', 'instagram')">
-                                                <i class="fab fa-instagram instagram"></i>
-                                                <span>Instagram</span>
-                                            </div>
-                                            
-                                            <div class="logo-option" onclick="selectLogo('fab fa-tiktok', 'tiktok')">
-                                                <i class="fab fa-tiktok tiktok"></i>
-                                                <span>TikTok</span>
-                                            </div>
-                                            
-                                            <div class="logo-option" onclick="selectLogo('fab fa-whatsapp', 'whatsapp')">
-                                                <i class="fab fa-whatsapp whatsapp"></i>
-                                                <span>WhatsApp</span>
-                                            </div>
-                                            
-                                            <div class="logo-option" onclick="selectLogo('fab fa-telegram', 'telegram')">
-                                                <i class="fab fa-telegram telegram"></i>
-                                                <span>Telegram</span>
-                                            </div>
-                                            
-                                            <div class="logo-option" onclick="selectLogo('fab fa-twitter', 'twitter')">
-                                                <i class="fab fa-twitter" style="color: #1DA1F2;"></i>
-                                                <span>Twitter</span>
-                                            </div>
-                                            
-                                            <div class="logo-option" onclick="selectLogo('fab fa-discord', 'discord')">
-                                                <i class="fab fa-discord" style="color: #5865F2;"></i>
-                                                <span>Discord</span>
-                                            </div>
-                                            
-                                            <!-- Streaming Services -->
-                                            <div class="logo-option" onclick="selectLogo('fab fa-netflix', 'netflix')">
-                                                <i class="fab fa-netflix netflix"></i>
-                                                <span>Netflix</span>
-                                            </div>
-                                            
-                                            <div class="logo-option" onclick="selectLogo('fab fa-spotify', 'spotify')">
-                                                <i class="fab fa-spotify spotify"></i>
-                                                <span>Spotify</span>
-                                            </div>
-                                            
-                                            <div class="logo-option" onclick="selectLogo('fab fa-amazon', 'amazon')">
-                                                <i class="fab fa-amazon" style="color: #FF9900;"></i>
-                                                <span>Amazon</span>
-                                            </div>
-                                            
-                                            <!-- Gaming -->
-                                            <div class="logo-option" onclick="selectLogo('fas fa-gamepad', 'gaming')">
-                                                <i class="fas fa-gamepad gaming"></i>
-                                                <span>Gaming</span>
-                                            </div>
-                                            
-                                            <div class="logo-option" onclick="selectLogo('fas fa-fire', 'gaming')">
-                                                <i class="fas fa-fire gaming"></i>
-                                                <span>Free Fire</span>
-                                            </div>
-                                            
-                                            <div class="logo-option" onclick="selectLogo('fas fa-crown', 'premium')">
-                                                <i class="fas fa-crown premium"></i>
-                                                <span>Premium</span>
-                                            </div>
-                                            
-                                            <!-- General Icons -->
-                                            <div class="logo-option" onclick="selectLogo('fas fa-star', 'premium')">
-                                                <i class="fas fa-star" style="color: gold;"></i>
-                                                <span>Star</span>
-                                            </div>
-                                            
-                                            <div class="logo-option" onclick="selectLogo('fas fa-bolt', 'premium')">
-                                                <i class="fas fa-bolt" style="color: #ffcc00;"></i>
-                                                <span>Fast</span>
-                                            </div>
-                                            
-                                            <div class="logo-option" onclick="selectLogo('fas fa-shield-alt', 'premium')">
-                                                <i class="fas fa-shield-alt" style="color: #4CAF50;"></i>
-                                                <span>Secure</span>
-                                            </div>
-                                            
-                                            <div class="logo-option" onclick="selectLogo('fas fa-rocket', 'premium')">
-                                                <i class="fas fa-rocket" style="color: #E91E63;"></i>
-                                                <span>Instant</span>
-                                            </div>
-                                        </div>
-                                        
-                                        <div id="selectedIcon" style="margin-top: 20px; text-align: center; display: none;">
-                                            <p style="color: #666;">Selected Icon:</p>
-                                            <i id="selectedIconPreview" style="font-size: 3rem; margin: 10px 0;"></i>
-                                            <p id="selectedIconName" style="color: var(--primary); font-weight: 600;"></p>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Image Upload -->
-                                    <div id="imageUpload" class="logo-selector" style="display: none;">
-                                        <p style="color: #666; margin-bottom: 15px;">কাস্টম লোগো ইমেজ আপলোড করুন:</p>
-                                        
-                                        <div class="file-upload" onclick="document.getElementById('logoFile').click()">
-                                            <i class="fas fa-cloud-upload-alt"></i>
-                                            <p>লোগো ইমেজ আপলোড করুন</p>
-                                            <small>PNG, JPG, SVG (Max: 2MB)</small>
-                                        </div>
-                                        <input type="file" id="logoFile" accept="image/*" style="display: none;" onchange="previewLogoImage(event)">
-                                        
-                                        <div id="imagePreview" class="preview-container" style="display: none;">
-                                            <img id="previewImage" class="preview-image" alt="Logo Preview">
-                                            <button type="button" class="btn" style="margin-top: 10px; background: var(--danger); color: white;" onclick="removeLogoImage()">
-                                                <i class="fas fa-trash"></i> রিমুভ করুন
-                                            </button>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- URL Input -->
-                                    <div id="urlUpload" class="logo-selector" style="display: none;">
-                                        <p style="color: #666; margin-bottom: 15px;">লোগো ইমেজ URL লিখুন:</p>
-                                        
-                                        <div class="form-group">
-                                            <input type="url" class="form-control" id="logoUrl" placeholder="https://example.com/logo.png">
-                                        </div>
-                                        
-                                        <button type="button" class="btn" style="background: var(--info); color: white;" onclick="previewUrlLogo()">
-                                            <i class="fas fa-eye"></i> প্রিভিউ দেখুন
-                                        </button>
-                                        
-                                        <div id="urlPreview" class="preview-container" style="display: none;">
-                                            <img id="previewUrlImage" class="preview-image" alt="Logo Preview">
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Color Selection -->
-                                <div class="logo-selector" style="margin-top: 20px;">
-                                    <h4 style="margin-bottom: 15px; color: var(--dark);">লোগো কালার সিলেক্ট করুন</h4>
+                                    <h4 style="margin-bottom: 15px; color: var(--dark);">প্ল্যাটফর্ম কালার</h4>
                                     
                                     <div class="logo-options">
-                                        <div class="logo-option" onclick="selectLogoColor('#FF0000')" style="background: #FF0000; color: white;">
+                                        <div class="logo-option" onclick="selectPlatformColor('#FF0000')" style="background: #FF0000; color: white;">
                                             <i class="fas fa-circle"></i>
                                             <span>Red</span>
                                         </div>
                                         
-                                        <div class="logo-option" onclick="selectLogoColor('#1877F2')" style="background: #1877F2; color: white;">
+                                        <div class="logo-option" onclick="selectPlatformColor('#1877F2')" style="background: #1877F2; color: white;">
                                             <i class="fas fa-circle"></i>
                                             <span>Blue</span>
                                         </div>
                                         
-                                        <div class="logo-option" onclick="selectLogoColor('#E4405F')" style="background: #E4405F; color: white;">
+                                        <div class="logo-option" onclick="selectPlatformColor('#E4405F')" style="background: #E4405F; color: white;">
                                             <i class="fas fa-circle"></i>
                                             <span>Pink</span>
                                         </div>
                                         
-                                        <div class="logo-option" onclick="selectLogoColor('#25D366')" style="background: #25D366; color: white;">
+                                        <div class="logo-option" onclick="selectPlatformColor('#25D366')" style="background: #25D366; color: white;">
                                             <i class="fas fa-circle"></i>
                                             <span>Green</span>
                                         </div>
                                         
-                                        <div class="logo-option" onclick="selectLogoColor('#FF9800')" style="background: #FF9800; color: white;">
+                                        <div class="logo-option" onclick="selectPlatformColor('#FF9800')" style="background: #FF9800; color: white;">
                                             <i class="fas fa-circle"></i>
                                             <span>Orange</span>
                                         </div>
                                         
-                                        <div class="logo-option" onclick="selectLogoColor('#9C27B0')" style="background: #9C27B0; color: white;">
+                                        <div class="logo-option" onclick="selectPlatformColor('#9C27B0')" style="background: #9C27B0; color: white;">
                                             <i class="fas fa-circle"></i>
                                             <span>Purple</span>
-                                        </div>
-                                        
-                                        <div class="logo-option" onclick="selectLogoColor('#000000')" style="background: #000000; color: white;">
-                                            <i class="fas fa-circle"></i>
-                                            <span>Black</span>
-                                        </div>
-                                        
-                                        <div class="logo-option" onclick="selectLogoColor('#FFFFFF')" style="background: #FFFFFF; color: #000; border: 1px solid #ddd;">
-                                            <i class="fas fa-circle"></i>
-                                            <span>White</span>
                                         </div>
                                     </div>
                                     
@@ -1286,69 +1008,18 @@
                             <!-- Features Tab -->
                             <div id="features" class="tab-content">
                                 <div class="form-group">
-                                    <label>ফিচারসমূহ যোগ করুন (প্রতি লাইনে একটি)</label>
-                                    <textarea class="form-control" id="platformFeatures" rows="6" placeholder="ইনস্ট্যান্ট ডেলিভারি&#10;১০০% সেফ এবং গ্যারান্টিড&#10;লাইফটাইম এক্সেস&#10;২৪/৭ সাপোর্ট&#10;নো-ব্যান প্রোটেকশন"></textarea>
+                                    <label>ফিচারসমূহ (প্রতি লাইনে একটি) *</label>
+                                    <textarea class="form-control" id="platformFeatures" rows="6" required placeholder="ইনস্ট্যান্ট ডেলিভারি&#10;১০০% সেফ এবং গ্যারান্টিড&#10;লাইফটাইম এক্সেস&#10;২৪/৭ সাপোর্ট"></textarea>
                                     <small style="color: #666;">প্রতি লাইনে একটি ফিচার লিখুন</small>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label>বিশেষ ফিচার (কমা দ্বারা আলাদা করুন)</label>
-                                    <input type="text" class="form-control" id="specialFeatures" placeholder="গ্যারান্টিড, ১০০% সেফ, ইনস্ট্যান্ট ডেলিভারি, অটো রিনিউ">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>বিশেষ নোট/নির্দেশনা</label>
-                                    <textarea class="form-control" id="platformNotes" rows="4" placeholder="ক্রেতার জন্য বিশেষ নির্দেশনা..."></textarea>
-                                </div>
-                            </div>
-                            
-                            <!-- Advanced Tab -->
-                            <div id="advanced" class="tab-content">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>স্ট্যাটাস</label>
-                                        <select class="form-control" id="platformStatus">
-                                            <option value="active" selected>সক্রিয়</option>
-                                            <option value="inactive">নিষ্ক্রিয়</option>
-                                            <option value="coming_soon">শীঘ্রই আসছে</option>
-                                            <option value="out_of_stock">স্টক শেষ</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label>বেড্জ</label>
-                                        <div class="badge-options">
-                                            <div class="badge-option" onclick="selectBadge('new')">নতুন</div>
-                                            <div class="badge-option" onclick="selectBadge('hot')">হট</div>
-                                            <div class="badge-option" onclick="selectBadge('premium')">প্রিমিয়াম</div>
-                                            <div class="badge-option" onclick="selectBadge('best_seller')">বেস্ট সেলার</div>
-                                            <div class="badge-option" onclick="selectBadge('discount')">ডিস্কাউন্ট</div>
-                                            <div class="badge-option" onclick="selectBadge('trending')">ট্রেন্ডিং</div>
-                                        </div>
-                                        <input type="hidden" id="selectedBadge" value="">
-                                    </div>
-                                </div>
-                                
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>ডিস্কাউন্ট (%)</label>
-                                        <input type="number" class="form-control" id="discount" min="0" max="100" placeholder="20">
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label>প্রিয়রিটি</label>
-                                        <select class="form-control" id="priority">
-                                            <option value="1">সাধারণ (1)</option>
-                                            <option value="2">মাধ্যম (2)</option>
-                                            <option value="3">উচ্চ (3)</option>
-                                            <option value="4">সর্বোচ্চ (4)</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>মেটা ট্যাগস (SEO)</label>
-                                    <textarea class="form-control" id="metaTags" rows="3" placeholder="meta keywords for SEO"></textarea>
+                                    <label>স্ট্যাটাস</label>
+                                    <select class="form-control" id="platformStatus">
+                                        <option value="active" selected>সক্রিয়</option>
+                                        <option value="inactive">নিষ্ক্রিয়</option>
+                                        <option value="out_of_stock">স্টক শেষ</option>
+                                    </select>
                                 </div>
                             </div>
                             
@@ -1370,14 +1041,80 @@
                 <div id="orders" class="content-section" style="display: none;">
                     <h2 class="page-title">অর্ডার ম্যানেজমেন্ট</h2>
                     
-                    <!-- Orders will be loaded here -->
-                    <div id="ordersContainer">
-                        Loading orders...
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>User</th>
+                                    <th>Platform</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 30px;">Loading orders...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 
-                <!-- Other sections (users, categories, settings) -->
-                <!-- ... (previous code for other sections) -->
+                <!-- Users Section -->
+                <div id="users" class="content-section" style="display: none;">
+                    <h2 class="page-title">ইউজার ম্যানেজমেন্ট</h2>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Join Date</th>
+                                    <th>Orders</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 30px;">Loading users...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Settings Section -->
+                <div id="settings" class="content-section" style="display: none;">
+                    <h2 class="page-title">সেটিংস</h2>
+                    <div class="form-container">
+                        <div class="form-group">
+                            <label>সাইটের নাম</label>
+                            <input type="text" class="form-control" id="siteName" value="Easy Premium">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>সাইটের বর্ণনা</label>
+                            <textarea class="form-control" id="siteDescription" rows="3">সবচেয়ে সস্তায় প্রিমিয়াম কিনুন</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>কন্টাক্ট ইমেইল</label>
+                            <input type="email" class="form-control" id="contactEmail" value="mdashikislam017705@gmail.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>হেল্পলাইন নাম্বার</label>
+                            <input type="text" class="form-control" id="helpline" value="+8801770584994">
+                        </div>
+                        
+                        <button class="btn" style="background: var(--primary); color: white;" onclick="saveSettings()">
+                            <i class="fas fa-save"></i> সেটিংস সংরক্ষণ করুন
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1407,49 +1144,56 @@
     </div>
 
     <script>
-        // Firebase Configuration
+        // Firebase Configuration - আপনার Original Key
         const firebaseConfig = {
-            apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
-            authDomain: "top-up-4db01.firebaseapp.com",
-            projectId: "top-up-4db01",
-            databaseURL: "https://top-up-4db01-default-rtdb.asia-southeast1.firebasedatabase.app",
-            storageBucket: "top-up-4db01.appspot.com",
-            appId: "1:264548197473:web:abcd1234efgh5678"
+            apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
+            authDomain: "easy-premium.firebaseapp.com",
+            databaseURL: "https://easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "easy-premium",
+            storageBucket: "easy-premium.firebasestorage.app",
+            messagingSenderId: "155891252265",
+            appId: "1:155891252265:web:77ab41de24231e8e5ef038",
+            measurementId: "G-CHL8K8HRPX"
         };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const database = firebase.database();
-        const storage = firebase.storage();
 
         // Global Variables
         let currentUser = null;
         let isAdmin = false;
-        let selectedIcon = null;
-        let selectedIconClass = null;
-        let selectedColor = null;
-        let selectedBadge = null;
-        let logoImageFile = null;
-        let logoImageUrl = null;
+        let selectedPlatformColor = '#FF9800';
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             // Check authentication
             auth.onAuthStateChanged(async (user) => {
+                const loadingScreen = document.getElementById('loadingScreen');
+                const loginScreen = document.getElementById('loginScreen');
+                
                 if (user) {
                     currentUser = user;
                     
                     // Check if user is admin
-                    const adminSnapshot = await database.ref('admins/' + user.uid).once('value');
-                    isAdmin = adminSnapshot.exists() && adminSnapshot.val() === true;
-                    
-                    if (isAdmin) {
-                        showAdminPanel();
-                        loadDashboardData();
-                    } else {
+                    try {
+                        const adminSnapshot = await database.ref('admins/' + user.uid).once('value');
+                        isAdmin = adminSnapshot.exists() && adminSnapshot.val() === true;
+                        
+                        if (isAdmin) {
+                            showAdminPanel();
+                            loadDashboardData();
+                            loadPlatforms();
+                            loadOrders();
+                            loadUsers();
+                        } else {
+                            showLoginScreen();
+                            showNotification('Access Denied', 'You are not an administrator.', 'error');
+                        }
+                    } catch (error) {
+                        console.error("Error checking admin status:", error);
                         showLoginScreen();
-                        showNotification('Access Denied', 'You are not an administrator.', 'error');
                     }
                 } else {
                     showLoginScreen();
@@ -1459,18 +1203,48 @@
             });
         });
 
-        // Login
-        document.getElementById('loginBtn').addEventListener('click', function() {
+        // Login Function
+        document.getElementById('loginBtn').addEventListener('click', async function() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
+            const loginError = document.getElementById('loginError');
             
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
+            if (!email || !password) {
+                loginError.textContent = "Please enter email and password";
+                loginError.style.display = 'block';
+                return;
+            }
+            
+            try {
+                // Try to login
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Check if user is admin
+                const adminSnapshot = await database.ref('admins/' + user.uid).once('value');
+                
+                if (adminSnapshot.exists() && adminSnapshot.val() === true) {
                     showNotification('Login Successful', 'Welcome to Admin Panel', 'success');
-                })
-                .catch((error) => {
-                    showNotification('Login Failed', error.message, 'error');
-                });
+                } else {
+                    // If not admin, check if this is the first admin
+                    const adminList = await database.ref('admins').once('value');
+                    
+                    if (!adminList.exists() || Object.keys(adminList.val()).length === 0) {
+                        // First admin - auto register
+                        await database.ref('admins/' + user.uid).set(true);
+                        showNotification('Admin Created', 'You have been registered as first administrator', 'success');
+                    } else {
+                        await auth.signOut();
+                        throw new Error("Not an administrator");
+                    }
+                }
+                
+            } catch (error) {
+                console.error("Login error:", error);
+                loginError.textContent = error.message;
+                loginError.style.display = 'block';
+                showNotification('Login Failed', error.message, 'error');
+            }
         });
 
         // Logout
@@ -1498,16 +1272,17 @@
             document.getElementById(sectionId).style.display = 'block';
             
             // Add active class to clicked nav item
+            const navItems = {
+                'dashboard': 'ড্যাশবোর্ড',
+                'platforms': 'প্ল্যাটফর্ম',
+                'addPlatform': 'নতুন প্ল্যাটফর্ম',
+                'orders': 'অর্ডারসমূহ',
+                'users': 'ইউজারসমূহ',
+                'settings': 'সেটিংস'
+            };
+            
             document.querySelectorAll('.nav-item').forEach(item => {
-                if (item.querySelector('span').textContent.includes(
-                    sectionId === 'dashboard' ? 'ড্যাশবোর্ড' :
-                    sectionId === 'platforms' ? 'প্ল্যাটফর্ম' :
-                    sectionId === 'addPlatform' ? 'নতুন প্ল্যাটফর্ম' :
-                    sectionId === 'orders' ? 'অর্ডারসমূহ' :
-                    sectionId === 'users' ? 'ইউজারসমূহ' :
-                    sectionId === 'categories' ? 'ক্যাটাগরিসমূহ' :
-                    sectionId === 'settings' ? 'সেটিংস' : ''
-                )) {
+                if (item.querySelector('span').textContent === navItems[sectionId]) {
                     item.classList.add('active');
                 }
             });
@@ -1533,48 +1308,16 @@
                 if (btn.textContent.includes(
                     tabId === 'basicInfo' ? 'মূল তথ্য' :
                     tabId === 'logoDesign' ? 'লোগো ডিজাইন' :
-                    tabId === 'features' ? 'ফিচারসমূহ' :
-                    tabId === 'advanced' ? 'অ্যাডভান্সড' : ''
+                    tabId === 'features' ? 'ফিচারসমূহ' : ''
                 )) {
                     btn.classList.add('active');
                 }
             });
         }
 
-        // Logo Selection Functions
-        function selectLogo(iconClass, platformName) {
-            selectedIcon = iconClass;
-            selectedIconClass = platformName;
-            
-            // Remove selected class from all options
-            document.querySelectorAll('.logo-option').forEach(option => {
-                option.classList.remove('selected');
-            });
-            
-            // Add selected class to clicked option
-            event.target.closest('.logo-option').classList.add('selected');
-            
-            // Show selected icon preview
-            document.getElementById('selectedIcon').style.display = 'block';
-            document.getElementById('selectedIconPreview').className = `${iconClass} ${platformName}`;
-            document.getElementById('selectedIconPreview').style.fontSize = '3rem';
-            document.getElementById('selectedIconName').textContent = platformName.charAt(0).toUpperCase() + platformName.slice(1);
-            
-            // Auto select color based on platform
-            switch(platformName) {
-                case 'youtube': selectLogoColor('#FF0000'); break;
-                case 'facebook': selectLogoColor('#1877F2'); break;
-                case 'instagram': selectLogoColor('#E4405F'); break;
-                case 'whatsapp': selectLogoColor('#25D366'); break;
-                case 'telegram': selectLogoColor('#0088cc'); break;
-                case 'netflix': selectLogoColor('#E50914'); break;
-                case 'spotify': selectLogoColor('#1DB954'); break;
-                default: selectLogoColor('#FF9800'); break;
-            }
-        }
-
-        function selectLogoColor(color) {
-            selectedColor = color;
+        // Select Platform Color
+        function selectPlatformColor(color) {
+            selectedPlatformColor = color;
             
             // Remove selected class from all color options
             document.querySelectorAll('.logo-option').forEach(option => {
@@ -1590,66 +1333,6 @@
             document.getElementById('colorCode').textContent = color;
         }
 
-        function selectBadge(badgeType) {
-            selectedBadge = badgeType;
-            
-            // Remove selected class from all badges
-            document.querySelectorAll('.badge-option').forEach(option => {
-                option.classList.remove('selected');
-            });
-            
-            // Add selected class to clicked badge
-            event.target.classList.add('selected');
-            document.getElementById('selectedBadge').value = badgeType;
-        }
-
-        function toggleLogoOptions() {
-            const logoType = document.getElementById('logoType').value;
-            
-            // Hide all options
-            document.getElementById('iconSelector').style.display = 'none';
-            document.getElementById('imageUpload').style.display = 'none';
-            document.getElementById('urlUpload').style.display = 'none';
-            
-            // Show selected option
-            if (logoType === 'icon') {
-                document.getElementById('iconSelector').style.display = 'block';
-            } else if (logoType === 'image') {
-                document.getElementById('imageUpload').style.display = 'block';
-            } else if (logoType === 'url') {
-                document.getElementById('urlUpload').style.display = 'block';
-            }
-        }
-
-        // Image Upload Functions
-        function previewLogoImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-                logoImageFile = file;
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('imagePreview').style.display = 'block';
-                    document.getElementById('previewImage').src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function removeLogoImage() {
-            logoImageFile = null;
-            document.getElementById('imagePreview').style.display = 'none';
-            document.getElementById('logoFile').value = '';
-        }
-
-        function previewUrlLogo() {
-            const url = document.getElementById('logoUrl').value;
-            if (url) {
-                logoImageUrl = url;
-                document.getElementById('urlPreview').style.display = 'block';
-                document.getElementById('previewUrlImage').src = url;
-            }
-        }
-
         // Platform Form Submission
         document.getElementById('platformForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -1657,52 +1340,45 @@
             // Collect form data
             const platformData = {
                 name: document.getElementById('platformName').value,
-                slug: document.getElementById('platformSlug').value.toLowerCase().replace(/\s+/g, '-'),
+                id: document.getElementById('platformId').value.toLowerCase().replace(/\s+/g, '-'),
                 category: document.getElementById('platformCategory').value,
-                type: document.getElementById('platformType').value,
+                icon: document.getElementById('platformIcon').value,
                 description: document.getElementById('platformDescription').value,
-                price: parseFloat(document.getElementById('platformPrice').value) || 0,
-                oldPrice: parseFloat(document.getElementById('platformOldPrice').value) || null,
+                price: document.getElementById('platformPrice').value,
                 stock: parseInt(document.getElementById('platformStock').value) || 9999,
-                deliveryTime: document.getElementById('deliveryTime').value,
-                validity: parseInt(document.getElementById('validity').value) || null,
-                warranty: parseInt(document.getElementById('warranty').value) || null,
+                order: parseInt(document.getElementById('platformOrder').value) || 0,
                 features: document.getElementById('platformFeatures').value.split('\n').filter(f => f.trim()),
-                specialFeatures: document.getElementById('specialFeatures').value,
-                notes: document.getElementById('platformNotes').value,
                 status: document.getElementById('platformStatus').value,
-                badge: selectedBadge || '',
-                discount: parseInt(document.getElementById('discount').value) || null,
-                priority: parseInt(document.getElementById('priority').value) || 1,
-                metaTags: document.getElementById('metaTags').value,
-                logoType: document.getElementById('logoType').value,
-                platformIcon: selectedIcon || '',
-                iconColor: selectedColor || '#FF9800',
+                color: selectedPlatformColor,
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
                 createdBy: currentUser.uid,
-                sales: 0,
-                views: 0,
-                rating: 5.0
+                sales: 0
             };
             
             try {
-                // Upload logo image if selected
-                if (document.getElementById('logoType').value === 'image' && logoImageFile) {
-                    const storageRef = storage.ref().child(`platforms/logos/${platformData.slug}_${Date.now()}`);
-                    await storageRef.put(logoImageFile);
-                    platformData.logoUrl = await storageRef.getDownloadURL();
-                } else if (document.getElementById('logoType').value === 'url') {
-                    platformData.logoUrl = document.getElementById('logoUrl').value;
-                }
+                // Save to publicData for user panel
+                await database.ref('publicData/pricingPlans/' + platformData.id).set({
+                    name: platformData.name,
+                    icon: platformData.icon,
+                    description: platformData.description,
+                    price: platformData.price,
+                    features: platformData.features,
+                    category: platformData.category,
+                    status: platformData.status,
+                    stock: platformData.stock,
+                    order: platformData.order,
+                    color: platformData.color,
+                    createdAt: platformData.createdAt
+                });
                 
-                // Save to Firebase
-                const newPlatformRef = database.ref('platforms').push();
-                await newPlatformRef.set(platformData);
+                // Also save to platforms for admin
+                await database.ref('platforms/' + platformData.id).set(platformData);
                 
                 showNotification('Success', 'প্ল্যাটফর্ম সফলভাবে যোগ করা হয়েছে!', 'success');
                 resetPlatformForm();
                 showSection('platforms');
                 loadPlatforms();
+                loadDashboardData();
                 
             } catch (error) {
                 console.error('Error saving platform:', error);
@@ -1713,26 +1389,15 @@
         function resetPlatformForm() {
             document.getElementById('platformForm').reset();
             document.getElementById('platformStock').value = 9999;
-            selectedIcon = null;
-            selectedColor = null;
-            selectedBadge = null;
-            logoImageFile = null;
-            logoImageUrl = null;
+            document.getElementById('platformOrder').value = 0;
+            document.getElementById('platformStatus').value = 'active';
             
-            // Reset logo selections
+            // Reset color selection
+            selectedPlatformColor = '#FF9800';
             document.querySelectorAll('.logo-option').forEach(option => {
-                option.classList.remove('selected');
                 option.style.boxShadow = 'none';
             });
-            
-            document.getElementById('selectedIcon').style.display = 'none';
             document.getElementById('selectedColor').style.display = 'none';
-            document.querySelectorAll('.badge-option').forEach(option => {
-                option.classList.remove('selected');
-            });
-            
-            document.getElementById('imagePreview').style.display = 'none';
-            document.getElementById('urlPreview').style.display = 'none';
             
             // Reset to first tab
             showTab('basicInfo');
@@ -1741,11 +1406,14 @@
         // Load Platforms
         async function loadPlatforms() {
             try {
-                const snapshot = await database.ref('platforms').orderByChild('createdAt').limitToLast(20).once('value');
-                const platforms = snapshot.val();
+                const snapshot = await database.ref('publicData/pricingPlans').once('value');
+                const platformsData = snapshot.val();
                 
-                if (!platforms) {
-                    document.getElementById('platformsContainer').innerHTML = `
+                const container = document.getElementById('platformsContainer');
+                if (!container) return;
+                
+                if (!platformsData) {
+                    container.innerHTML = `
                         <div style="text-align: center; padding: 50px; grid-column: 1/-1;">
                             <i class="fas fa-box-open" style="font-size: 4rem; color: #ddd;"></i>
                             <p style="color: #666; margin-top: 15px;">কোনো প্ল্যাটফর্ম পাওয়া যায়নি</p>
@@ -1755,44 +1423,43 @@
                 }
                 
                 let html = '';
-                Object.entries(platforms).forEach(([id, platform]) => {
-                    const badge = platform.badge ? `
-                        <span style="position: absolute; top: 10px; right: 10px; background: var(--primary); color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600;">
-                            ${platform.badge}
-                        </span>
-                    ` : '';
+                Object.entries(platformsData).forEach(([id, platform]) => {
+                    const iconClasses = {
+                        'youtube': 'fab fa-youtube',
+                        'facebook': 'fab fa-facebook-f',
+                        'instagram': 'fab fa-instagram',
+                        'tiktok': 'fab fa-tiktok',
+                        'whatsapp': 'fab fa-whatsapp',
+                        'telegram': 'fab fa-telegram',
+                        'netflix': 'fab fa-netflix',
+                        'spotify': 'fab fa-spotify',
+                        'freefire': 'fas fa-fire',
+                        'pubg': 'fas fa-gamepad'
+                    };
                     
-                    // Determine logo display
-                    let logoDisplay = '';
-                    if (platform.logoUrl) {
-                        logoDisplay = `<img src="${platform.logoUrl}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover;">`;
-                    } else if (platform.platformIcon) {
-                        const iconClass = platform.platformIcon;
-                        const iconColor = platform.iconColor || '#FF9800';
-                        logoDisplay = `<i class="${iconClass}" style="font-size: 2rem; color: ${iconColor};"></i>`;
-                    } else {
-                        logoDisplay = `<i class="fas fa-cube" style="font-size: 2rem; color: #666;"></i>`;
-                    }
+                    const iconClass = iconClasses[platform.icon] || 'fas fa-cube';
+                    const statusBadge = platform.status === 'active' ? 
+                        '<span style="background: #4CAF50; color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.7rem;">Active</span>' :
+                        '<span style="background: #f44336; color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.7rem;">Inactive</span>';
                     
                     html += `
                         <div class="platform-card">
                             <div class="platform-header">
-                                <div class="platform-logo" style="background: ${platform.iconColor || '#f0f0f0'};">
-                                    ${logoDisplay}
+                                <div class="platform-logo" style="background: ${platform.color || '#f0f0f0'};">
+                                    <i class="${iconClass}" style="font-size: 1.8rem; color: white;"></i>
                                 </div>
                                 <div>
                                     <div class="platform-name">${platform.name}</div>
-                                    <div class="platform-category">${platform.category} • ${platform.type}</div>
+                                    <div class="platform-category">${platform.category}</div>
                                 </div>
-                                ${badge}
+                                ${statusBadge}
                             </div>
                             
                             <div class="platform-body">
                                 <p class="platform-description">${platform.description || 'No description'}</p>
                                 
                                 <div class="platform-price">
-                                    <span class="current-price">৳ ${platform.price}</span>
-                                    ${platform.oldPrice ? `<span class="old-price">৳ ${platform.oldPrice}</span>` : ''}
+                                    <span class="current-price">${platform.price}</span>
                                 </div>
                                 
                                 ${platform.features && platform.features.length > 0 ? `
@@ -1814,15 +1481,12 @@
                                 <button class="btn btn-delete" onclick="deletePlatform('${id}', '${platform.name}')">
                                     <i class="fas fa-trash"></i>
                                 </button>
-                                <button class="btn btn-view" onclick="viewPlatform('${id}')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
                             </div>
                         </div>
                     `;
                 });
                 
-                document.getElementById('platformsContainer').innerHTML = html;
+                container.innerHTML = html;
                 
             } catch (error) {
                 console.error('Error loading platforms:', error);
@@ -1833,9 +1497,34 @@
         // Load Dashboard Data
         async function loadDashboardData() {
             try {
-                const platformsSnap = await database.ref('platforms').once('value');
+                // Load platforms count
+                const platformsSnap = await database.ref('publicData/pricingPlans').once('value');
                 const platforms = platformsSnap.val();
-                document.getElementById('totalPlatforms').textContent = platforms ? Object.keys(platforms).length : 0;
+                const totalPlatforms = platforms ? Object.keys(platforms).length : 0;
+                document.getElementById('totalPlatforms').textContent = totalPlatforms;
+                
+                // Load orders count
+                const ordersSnap = await database.ref('transactions').once('value');
+                const orders = ordersSnap.val();
+                const totalOrders = orders ? Object.keys(orders).length : 0;
+                document.getElementById('totalOrders').textContent = totalOrders;
+                
+                // Load users count
+                const usersSnap = await database.ref('users').once('value');
+                const users = usersSnap.val();
+                const totalUsers = users ? Object.keys(users).length : 0;
+                document.getElementById('totalUsers').textContent = totalUsers;
+                
+                // Calculate revenue (simplified)
+                let totalRevenue = 0;
+                if (orders) {
+                    Object.values(orders).forEach(order => {
+                        const price = order.price || '0';
+                        const amount = parseFloat(price.replace(/[^\d.]/g, '')) || 0;
+                        totalRevenue += amount;
+                    });
+                }
+                document.getElementById('totalRevenue').textContent = `৳ ${totalRevenue}`;
                 
                 // Load recent platforms
                 if (platforms) {
@@ -1843,18 +1532,30 @@
                     const recentPlatforms = Object.entries(platforms).slice(-4);
                     
                     recentPlatforms.forEach(([id, platform]) => {
+                        const iconClasses = {
+                            'youtube': 'fab fa-youtube',
+                            'facebook': 'fab fa-facebook-f',
+                            'instagram': 'fab fa-instagram',
+                            'tiktok': 'fab fa-tiktok',
+                            'whatsapp': 'fab fa-whatsapp',
+                            'telegram': 'fab fa-telegram',
+                            'netflix': 'fab fa-netflix',
+                            'spotify': 'fab fa-spotify',
+                            'freefire': 'fas fa-fire',
+                            'pubg': 'fas fa-gamepad'
+                        };
+                        
+                        const iconClass = iconClasses[platform.icon] || 'fas fa-cube';
+                        
                         recentHtml += `
                             <div class="platform-card">
                                 <div class="platform-header">
-                                    <div class="platform-logo" style="background: ${platform.iconColor || '#f0f0f0'};">
-                                        ${platform.platformIcon ? 
-                                            `<i class="${platform.platformIcon}" style="font-size: 1.5rem; color: ${platform.iconColor || '#666'}"></i>` : 
-                                            `<i class="fas fa-cube" style="font-size: 1.5rem; color: #666;"></i>`
-                                        }
+                                    <div class="platform-logo" style="background: ${platform.color || '#f0f0f0'};">
+                                        <i class="${iconClass}" style="font-size: 1.5rem; color: white;"></i>
                                     </div>
                                     <div>
-                                        <div class="platform-name">${platform.name}</div>
-                                        <div class="platform-category">${platform.category}</div>
+                                        <div class="platform-name" style="font-size: 1rem;">${platform.name}</div>
+                                        <div class="platform-category" style="font-size: 0.8rem;">${platform.category}</div>
                                     </div>
                                 </div>
                             </div>
@@ -1869,17 +1570,196 @@
             }
         }
 
+        // Load Orders
+        async function loadOrders() {
+            try {
+                const snapshot = await database.ref('transactions').orderByChild('timestamp').limitToLast(50).once('value');
+                const ordersData = snapshot.val();
+                
+                const tableBody = document.getElementById('ordersTableBody');
+                if (!tableBody) return;
+                
+                if (!ordersData) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 30px;">No orders found</td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                Object.entries(ordersData).reverse().forEach(([id, order]) => {
+                    const date = order.orderDate ? new Date(order.orderDate).toLocaleDateString('bn-BD') : 'N/A';
+                    
+                    let statusBadge = '';
+                    if (order.status === 'success') {
+                        statusBadge = '<span class="badge badge-success">Success</span>';
+                    } else if (order.status === 'processing') {
+                        statusBadge = '<span class="badge badge-info">Processing</span>';
+                    } else if (order.status === 'pending') {
+                        statusBadge = '<span class="badge badge-warning">Pending</span>';
+                    } else {
+                        statusBadge = '<span class="badge badge-danger">Cancelled</span>';
+                    }
+                    
+                    html += `
+                        <tr>
+                            <td style="font-size: 0.9rem;">${id.substring(0, 8)}...</td>
+                            <td>${order.userName || 'N/A'}</td>
+                            <td>${order.platform || 'N/A'}</td>
+                            <td>${order.price || 'N/A'}</td>
+                            <td>${statusBadge}</td>
+                            <td>${date}</td>
+                            <td>
+                                <button class="btn" style="background: var(--info); color: white; padding: 5px 10px; font-size: 0.8rem;" onclick="viewOrder('${id}')">
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                tableBody.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                showNotification('Error', 'অর্ডার লোড করতে সমস্যা হয়েছে', 'error');
+            }
+        }
+
+        // Load Users
+        async function loadUsers() {
+            try {
+                const snapshot = await database.ref('users').once('value');
+                const usersData = snapshot.val();
+                
+                const tableBody = document.getElementById('usersTableBody');
+                if (!tableBody) return;
+                
+                if (!usersData) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 30px;">No users found</td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                Object.entries(usersData).forEach(([id, user]) => {
+                    const joinDate = user.joinDate ? new Date(user.joinDate).toLocaleDateString('bn-BD') : 'N/A';
+                    
+                    html += `
+                        <tr>
+                            <td>${user.fullName || 'N/A'}</td>
+                            <td>${user.email || 'N/A'}</td>
+                            <td>${joinDate}</td>
+                            <td>
+                                <button class="btn" style="background: var(--primary); color: white; padding: 5px 10px; font-size: 0.8rem;" onclick="viewUserOrders('${id}')">
+                                    View Orders
+                                </button>
+                            </td>
+                            <td>
+                                <span class="badge badge-success">Active</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                tableBody.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
         // Edit Platform
         async function editPlatform(platformId) {
             try {
-                const snapshot = await database.ref('platforms/' + platformId).once('value');
+                const snapshot = await database.ref('publicData/pricingPlans/' + platformId).once('value');
                 const platform = snapshot.val();
                 
-                // Load edit form in modal
-                // ... (edit form implementation)
+                if (!platform) {
+                    showNotification('Error', 'প্ল্যাটফর্ম পাওয়া যায়নি', 'error');
+                    return;
+                }
+                
+                const modalContent = `
+                    <div class="form-container">
+                        <div class="form-group">
+                            <label>প্ল্যাটফর্মের নাম</label>
+                            <input type="text" class="form-control" id="editPlatformName" value="${platform.name}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>বর্ণনা</label>
+                            <textarea class="form-control" id="editPlatformDescription" rows="3">${platform.description || ''}</textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>দাম</label>
+                                <input type="text" class="form-control" id="editPlatformPrice" value="${platform.price}">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>স্টক</label>
+                                <input type="number" class="form-control" id="editPlatformStock" value="${platform.stock || 9999}">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>স্ট্যাটাস</label>
+                                <select class="form-control" id="editPlatformStatus">
+                                    <option value="active" ${platform.status === 'active' ? 'selected' : ''}>সক্রিয়</option>
+                                    <option value="inactive" ${platform.status === 'inactive' ? 'selected' : ''}>নিষ্ক্রিয়</option>
+                                    <option value="out_of_stock" ${platform.status === 'out_of_stock' ? 'selected' : ''}>স্টক শেষ</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 15px; margin-top: 20px;">
+                            <button class="btn" style="flex: 1; background: var(--primary); color: white;" onclick="updatePlatform('${platformId}')">
+                                <i class="fas fa-save"></i> আপডেট করুন
+                            </button>
+                            
+                            <button class="btn" style="flex: 1; background: var(--danger); color: white;" onclick="closeModal('editPlatformModal')">
+                                <i class="fas fa-times"></i> বাতিল করুন
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('editPlatformContent').innerHTML = modalContent;
+                document.getElementById('editPlatformModal').style.display = 'flex';
                 
             } catch (error) {
                 showNotification('Error', 'প্ল্যাটফর্ম লোড করতে সমস্যা হয়েছে', 'error');
+            }
+        }
+
+        // Update Platform
+        async function updatePlatform(platformId) {
+            try {
+                const updatedData = {
+                    name: document.getElementById('editPlatformName').value,
+                    description: document.getElementById('editPlatformDescription').value,
+                    price: document.getElementById('editPlatformPrice').value,
+                    stock: parseInt(document.getElementById('editPlatformStock').value) || 0,
+                    status: document.getElementById('editPlatformStatus').value,
+                    updatedAt: Date.now()
+                };
+                
+                await database.ref('publicData/pricingPlans/' + platformId).update(updatedData);
+                await database.ref('platforms/' + platformId).update(updatedData);
+                
+                closeModal('editPlatformModal');
+                showNotification('Success', 'প্ল্যাটফর্ম আপডেট করা হয়েছে', 'success');
+                loadPlatforms();
+                loadDashboardData();
+                
+            } catch (error) {
+                showNotification('Error', 'আপডেট করতে সমস্যা হয়েছে', 'error');
             }
         }
 
@@ -1887,7 +1767,9 @@
         async function deletePlatform(platformId, platformName) {
             if (confirm(`আপনি কি "${platformName}" প্ল্যাটফর্ম ডিলিট করতে চান?`)) {
                 try {
+                    await database.ref('publicData/pricingPlans/' + platformId).remove();
                     await database.ref('platforms/' + platformId).remove();
+                    
                     showNotification('Success', 'প্ল্যাটফর্ম ডিলিট করা হয়েছে', 'success');
                     loadPlatforms();
                     loadDashboardData();
@@ -1897,9 +1779,52 @@
             }
         }
 
-        // View Platform
-        function viewPlatform(platformId) {
-            window.open(`platform-details.html?id=${platformId}`, '_blank');
+        // View Order
+        function viewOrder(orderId) {
+            window.open(`order-details.html?id=${orderId}`, '_blank');
+        }
+
+        // View User Orders
+        async function viewUserOrders(userId) {
+            try {
+                const snapshot = await database.ref('transactions').orderByChild('userId').equalTo(userId).once('value');
+                const orders = snapshot.val();
+                
+                if (!orders) {
+                    alert('এই ইউজারের কোনো অর্ডার নেই');
+                    return;
+                }
+                
+                let orderList = '';
+                Object.entries(orders).forEach(([id, order]) => {
+                    orderList += `- ${order.platform}: ${order.price} (${order.status})\n`;
+                });
+                
+                alert(`User Orders:\n\n${orderList}`);
+                
+            } catch (error) {
+                console.error('Error loading user orders:', error);
+            }
+        }
+
+        // Save Settings
+        async function saveSettings() {
+            try {
+                const settings = {
+                    siteName: document.getElementById('siteName').value,
+                    siteDescription: document.getElementById('siteDescription').value,
+                    contactEmail: document.getElementById('contactEmail').value,
+                    helpline: document.getElementById('helpline').value,
+                    updatedAt: Date.now(),
+                    updatedBy: currentUser.uid
+                };
+                
+                await database.ref('publicData/siteConfig').set(settings);
+                showNotification('Success', 'সেটিংস সংরক্ষণ করা হয়েছে', 'success');
+                
+            } catch (error) {
+                showNotification('Error', 'সেটিংস সংরক্ষণে সমস্যা হয়েছে', 'error');
+            }
         }
 
         // Show/Hide Functions
@@ -1933,19 +1858,15 @@
             switch(type) {
                 case 'success':
                     icon.className = 'fas fa-check-circle';
-                    icon.style.color = 'var(--success)';
                     break;
                 case 'error':
                     icon.className = 'fas fa-times-circle';
-                    icon.style.color = 'var(--danger)';
                     break;
                 case 'warning':
                     icon.className = 'fas fa-exclamation-triangle';
-                    icon.style.color = 'var(--warning)';
                     break;
                 case 'info':
                     icon.className = 'fas fa-info-circle';
-                    icon.style.color = 'var(--info)';
                     break;
             }
             
@@ -1958,6 +1879,19 @@
                 notification.style.display = 'none';
             }, 5000);
         }
+
+        // Initialize Select2
+        $(document).ready(function() {
+            $('#platformIcon').select2({
+                placeholder: "আইকন সিলেক্ট করুন",
+                allowClear: true
+            });
+            
+            $('#platformCategory').select2({
+                placeholder: "ক্যাটাগরি সিলেক্ট করুন",
+                allowClear: true
+            });
+        });
     </script>
 </body>
 </html>
