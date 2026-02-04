@@ -104,7 +104,7 @@
         /* Header */
         .header {
             background: rgba(0, 0, 0, 0.8);
-            padding: 10px 10px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -170,6 +170,131 @@
         .nav-link:hover {
             background: rgba(255, 152, 0, 0.2);
             color: #ff9800;
+        }
+        
+        /* Search Bar */
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            margin-left: 20px;
+            position: relative;
+        }
+        
+        .search-wrapper {
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border-radius: 25px;
+            border: 2px solid #ff9800;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(255, 152, 0, 0.4);
+            border-color: #ff5722;
+        }
+        
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+        }
+        
+        .search-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: #ff9800;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            padding: 5px;
+        }
+        
+        .search-btn:hover {
+            color: #ff5722;
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        /* Search Results */
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 46, 0.95);
+            border-radius: 10px;
+            margin-top: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1001;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid #ff9800;
+            display: none;
+        }
+        
+        .search-result-item {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .search-result-item:hover {
+            background: rgba(255, 152, 0, 0.1);
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .search-result-icon {
+            font-size: 1.5rem;
+            min-width: 30px;
+        }
+        
+        .search-result-content {
+            flex: 1;
+        }
+        
+        .search-result-name {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+        
+        .search-result-desc {
+            font-size: 0.8rem;
+            color: #b0bec5;
+            line-height: 1.4;
+        }
+        
+        .search-result-price {
+            font-weight: 700;
+            color: #ff9800;
+            font-size: 1rem;
+            white-space: nowrap;
+        }
+        
+        .no-results {
+            padding: 20px;
+            text-align: center;
+            color: #b0bec5;
+            font-size: 0.9rem;
         }
         
         /* Profile Modal */
@@ -813,6 +938,11 @@
                 gap: 15px;
             }
             
+            /* Hide search bar on mobile */
+            .search-container {
+                display: none;
+            }
+            
             .hero {
                 padding: 30px 15px;
                 min-height: 200px;
@@ -946,6 +1076,22 @@
             
             .social-link {
                 font-size: 1.2rem;
+            }
+        }
+        
+        /* For tablets and larger devices, show search bar */
+        @media (min-width: 769px) {
+            .search-container {
+                display: block;
+            }
+            
+            /* Adjust header layout for search bar */
+            .header {
+                padding: 10px 20px;
+            }
+            
+            .header-left {
+                flex: 1;
             }
         }
         
@@ -1152,6 +1298,19 @@
                 <i class="fas fa-ellipsis-v three-dots-icon" id="threeDotsIcon"></i>
                 EASY<span>PREMIUM</span>
             </div>
+            
+            <!-- Search Bar for Desktop and Tablet -->
+            <div class="search-container">
+                <div class="search-wrapper">
+                    <input type="text" id="searchInput" class="search-input" placeholder="প্ল্যাটফর্ম বা প্যাকেজ সার্চ করুন...">
+                    <button id="searchBtn" class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <div id="searchResults" class="search-results">
+                        <!-- Search results will be populated here -->
+                    </div>
+                </div>
+            </div>
         </div>
         <nav class="nav-links">
             <!-- Navigation links have been removed as requested -->
@@ -1324,11 +1483,17 @@
         const purchaseWhatsappNumber = document.getElementById('purchaseWhatsappNumber');
         const purchaseSubmitBtn = document.getElementById('purchaseSubmitBtn');
         const purchaseCancelBtn = document.getElementById('purchaseCancelBtn');
+        
+        // Search elements
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const searchResults = document.getElementById('searchResults');
 
         // Variables
         let pendingPurchase = null;
         let currentPurchaseInfo = null;
         let userOrders = [];
+        let allPlatforms = [];
 
         // Function to generate color based on name
         function getColorFromName(name) {
@@ -1345,6 +1510,151 @@
             const charCode = name.charCodeAt(0);
             const colorIndex = charCode % colors.length;
             return colors[colorIndex];
+        }
+
+        // Search functionality
+        function initializeSearch() {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                
+                if (searchTerm.length === 0) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                // Filter platforms based on search term
+                const filteredPlatforms = allPlatforms.filter(platform => {
+                    const name = platform.name ? platform.name.toLowerCase() : '';
+                    const description = platform.description ? platform.description.toLowerCase() : '';
+                    const features = platform.features ? platform.features.join(' ').toLowerCase() : '';
+                    const price = platform.price ? platform.price.toLowerCase() : '';
+                    
+                    return name.includes(searchTerm) || 
+                           description.includes(searchTerm) || 
+                           features.includes(searchTerm) ||
+                           price.includes(searchTerm);
+                });
+                
+                displaySearchResults(filteredPlatforms);
+            });
+            
+            // Search button click
+            searchBtn.addEventListener('click', function() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                
+                if (searchTerm.length === 0) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                // Filter platforms based on search term
+                const filteredPlatforms = allPlatforms.filter(platform => {
+                    const name = platform.name ? platform.name.toLowerCase() : '';
+                    const description = platform.description ? platform.description.toLowerCase() : '';
+                    const features = platform.features ? platform.features.join(' ').toLowerCase() : '';
+                    const price = platform.price ? platform.price.toLowerCase() : '';
+                    
+                    return name.includes(searchTerm) || 
+                           description.includes(searchTerm) || 
+                           features.includes(searchTerm) ||
+                           price.includes(searchTerm);
+                });
+                
+                displaySearchResults(filteredPlatforms);
+            });
+            
+            // Close search results when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+                    searchResults.style.display = 'none';
+                }
+            });
+            
+            // Handle Enter key in search
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchBtn.click();
+                }
+            });
+        }
+        
+        // Display search results
+        function displaySearchResults(platforms) {
+            searchResults.innerHTML = '';
+            
+            if (platforms.length === 0) {
+                searchResults.innerHTML = '<div class="no-results">কোন ফলাফল পাওয়া যায়নি</div>';
+                searchResults.style.display = 'block';
+                return;
+            }
+            
+            // Platform icon class mapping
+            const iconClasses = {
+                'youtube': 'fab fa-youtube youtube',
+                'facebook': 'fab fa-facebook-f facebook',
+                'instagram': 'fab fa-instagram instagram',
+                'tiktok': 'fab fa-tiktok tiktok',
+                'whatsapp': 'fab fa-whatsapp whatsapp',
+                'telegram': 'fab fa-telegram telegram',
+                'freefire': 'fas fa-fire freefire',
+                'netflix': 'fab fa-netflix netflix',
+                'spotify': 'fab fa-spotify spotify',
+                'pubg': 'fas fa-gamepad pubg',
+                'default': 'fas fa-cube'
+            };
+            
+            platforms.forEach(platform => {
+                const iconClass = iconClasses[platform.icon] || iconClasses.default;
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = 'search-result-item';
+                resultItem.innerHTML = `
+                    <i class="${iconClass} search-result-icon"></i>
+                    <div class="search-result-content">
+                        <div class="search-result-name">${platform.name || 'প্ল্যাটফর্ম'}</div>
+                        <div class="search-result-desc">${platform.description || 'প্রিমিয়াম সেবা পান সবচেয়ে কম দামে।'}</div>
+                    </div>
+                    <div class="search-result-price">${platform.price || '৳ 100'}</div>
+                `;
+                
+                // Click event to select this platform
+                resultItem.addEventListener('click', function() {
+                    // Scroll to the platform card in the grid
+                    scrollToPlatformCard(platform.name);
+                    searchResults.style.display = 'none';
+                    searchInput.value = '';
+                });
+                
+                searchResults.appendChild(resultItem);
+            });
+            
+            searchResults.style.display = 'block';
+        }
+        
+        // Scroll to platform card in the grid
+        function scrollToPlatformCard(platformName) {
+            const platformCards = document.querySelectorAll('.platform-card');
+            
+            platformCards.forEach(card => {
+                const nameElement = card.querySelector('.platform-name');
+                if (nameElement && nameElement.textContent === platformName) {
+                    // Highlight the card
+                    card.style.borderColor = '#ff5722';
+                    card.style.boxShadow = '0 0 20px rgba(255, 87, 34, 0.7)';
+                    
+                    // Scroll to the card
+                    card.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                    
+                    // Remove highlight after 3 seconds
+                    setTimeout(() => {
+                        card.style.borderColor = '';
+                        card.style.boxShadow = '';
+                    }, 3000);
+                }
+            });
         }
 
         // Three dots icon click handler
@@ -1803,13 +2113,13 @@
                 }
 
                 // Convert object to array
-                const platformsArray = Object.values(platformsData);
+                allPlatforms = Object.values(platformsData);
                 
                 // Sort platforms by order if available
-                platformsArray.sort((a, b) => (a.order || 0) - (b.order || 0));
+                allPlatforms.sort((a, b) => (a.order || 0) - (b.order || 0));
 
                 // Create platform cards
-                platformsArray.forEach(platform => {
+                allPlatforms.forEach(platform => {
                     createPlatformCard(platform);
                 });
 
@@ -1822,6 +2132,9 @@
                     });
                 });
 
+                // Initialize search functionality
+                initializeSearch();
+                
                 // Animate cards after loading
                 animatePlatformCards();
             }, (error) => {
@@ -1836,7 +2149,7 @@
             const platformsGrid = document.getElementById('platforms-grid');
             platformsGrid.innerHTML = '';
             
-            const defaultPlatforms = [
+            allPlatforms = [
                 {
                     name: 'YouTube Premium',
                     icon: 'youtube',
@@ -1867,7 +2180,7 @@
                 }
             ];
             
-            defaultPlatforms.forEach(platform => {
+            allPlatforms.forEach(platform => {
                 createPlatformCard(platform);
             });
             
@@ -1880,6 +2193,9 @@
                 });
             });
             
+            // Initialize search functionality
+            initializeSearch();
+            
             animatePlatformCards();
         }
 
@@ -1888,6 +2204,7 @@
             const platformsGrid = document.getElementById('platforms-grid');
             const platformCard = document.createElement('div');
             platformCard.className = 'platform-card';
+            platformCard.setAttribute('data-platform-name', platform.name);
             
             // Platform icon class mapping
             const iconClasses = {
