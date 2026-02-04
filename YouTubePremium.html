@@ -1,409 +1,275 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Premium</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Add Admin - Easy Premium</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
         }
         
         body {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             padding: 20px;
         }
         
-        .main-header {
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid #ff9800;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        h1 {
+            color: #ff9800;
             text-align: center;
             margin-bottom: 30px;
-            color: #FF0000;
-            width: 100%;
-            max-width: 400px;
+            font-size: 2rem;
         }
         
-        .main-header h1 {
-            font-size: 28px;
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #fff;
             margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .main-header h1 i {
-            font-size: 32px;
-        }
-        
-        .main-subtitle {
-            font-size: 16px;
-            color: #666;
-            line-height: 1.4;
-        }
-        
-        .plans-container {
-            width: 100%;
-            max-width: 1200px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-        
-        .plan-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .plan-header {
-            background: #FF0000;
-            color: white;
-            padding: 25px 20px;
-            text-align: center;
-        }
-        
-        .plan-title {
-            font-size: 20px;
             font-weight: 600;
         }
         
-        .plan-content {
-            padding: 20px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .price-section {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .price-label {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        
-        .price {
-            display: flex;
-            align-items: baseline;
-            gap: 5px;
-        }
-        
-        .currency {
-            font-size: 14px;
-            color: #333;
-            font-weight: 500;
-        }
-        
-        .amount {
-            font-size: 28px;
-            font-weight: 700;
-            color: #FF0000;
-        }
-        
-        .period {
-            font-size: 16px;
-            color: #666;
-        }
-        
-        .features {
-            margin-bottom: 20px;
-        }
-        
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-            font-size: 14px;
-            color: #444;
-        }
-        
-        .feature-item i {
-            color: #4CAF50;
-            font-size: 16px;
-        }
-        
-        .terms {
-            font-size: 12px;
-            color: #666;
-            line-height: 1.4;
-            margin-bottom: 20px;
-            flex-grow: 1;
-        }
-        
-        .buy-now-btn {
+        input {
             width: 100%;
-            background: #FF0000;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #ff9800;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ff9800, #ff5722);
             color: white;
             border: none;
             border-radius: 8px;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: background 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            text-decoration: none;
-            text-align: center;
+            margin-top: 20px;
+            transition: all 0.3s;
         }
         
-        .buy-now-btn:hover {
-            background: #CC0000;
+        button:hover {
+            background: linear-gradient(45deg, #ff5722, #ff9800);
         }
         
-        .plan-footer {
-            padding: 15px 20px;
-            text-align: center;
-            border-top: 1px solid #eee;
-            font-size: 12px;
-            color: #666;
-            line-height: 1.4;
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
         }
         
-        /* Responsive Design */
-        @media (max-width: 992px) {
-            .plans-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .plans-container .plan-card:last-child {
-                grid-column: span 2;
-                max-width: 400px;
-                margin: 0 auto;
-            }
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            border-left: 4px solid #4CAF50;
+            color: #4CAF50;
+            display: block;
         }
         
-        @media (max-width: 768px) {
-            .plans-container {
-                grid-template-columns: 1fr;
-                max-width: 400px;
-            }
-            
-            .plans-container .plan-card:last-child {
-                grid-column: span 1;
-            }
-            
-            .main-header h1 {
-                font-size: 24px;
-            }
-            
-            .main-subtitle {
-                font-size: 14px;
-            }
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            border-left: 4px solid #f44336;
+            color: #f44336;
+            display: block;
+        }
+        
+        .uid-display {
+            background: rgba(0, 188, 212, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            color: #00bcd4;
+            word-break: break-all;
         }
     </style>
 </head>
 <body>
-    <div class="main-header">
-        <h1><i class="fab fa-youtube"></i> YouTube Premium</h1>
-        <p class="main-subtitle">বিজ্ঞাপন-মুক্ত ভিডিও, ব্যাকগ্রাউন্ডে চালানো এবং অফলাইন দেখার সুবিধা নিন</p>
-    </div>
-    
-    <div class="plans-container">
-        <!-- Student Plan -->
-        <div class="plan-card">
-            <div class="plan-header">
-                <div class="plan-title">Student</div>
-            </div>
-            
-            <div class="plan-content">
-                <div class="price-section">
-                    <div class="price-label">Monthly</div>
-                    <div class="price">
-                        <span class="currency">BDT</span>
-                        <span class="amount">139.00</span>
-                        <span class="period">/month</span>
-                    </div>
-                </div>
-                
-                <div class="features">
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>বিজ্ঞাপন-মুক্ত ভিডিও</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>ব্যাকগ্রাউন্ডে চালানো</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>অফলাইন ডাউনলোড</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>YouTube Music Premium</span>
-                    </div>
-                </div>
-                
-                <p class="terms">
-                    Eligible students only. Annual verification required. Restrictions apply.
-                </p>
-                
-                <a href="https://example.com/buy-student" target="_blank" class="buy-now-btn">
-                    <i class="fab fa-youtube"></i>
-                    Buy Now
-                </a>
-            </div>
-            
-            <div class="plan-footer">
-                যে কোনো সময় বাতিল করতে পারেন। প্রতি মাসে BDT 139.00 চার্জ প্রয়োগ হবে।
+    <div class="container">
+        <h1>Add Admin to Easy Premium</h1>
+        
+        <!-- Current User UID -->
+        <div id="currentUserInfo" style="display: none;">
+            <h3 style="color: #00bcd4; margin-bottom: 10px;">Current User:</h3>
+            <div class="uid-display">
+                <strong>UID:</strong> <span id="currentUID"></span><br>
+                <strong>Email:</strong> <span id="currentEmail"></span>
             </div>
         </div>
         
-        <!-- Individual Plan -->
-        <div class="plan-card">
-            <div class="plan-header">
-                <div class="plan-title">Individual</div>
+        <!-- Login Form -->
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Admin Email</label>
+                <input type="email" id="email" placeholder="admin@example.com" required>
             </div>
             
-            <div class="plan-content">
-                <div class="price-section">
-                    <div class="price-label">Monthly</div>
-                    <div class="price">
-                        <span class="currency">BDT</span>
-                        <span class="amount">239.00</span>
-                        <span class="period">/month</span>
-                    </div>
-                </div>
-                
-                <div class="features">
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>বিজ্ঞাপন-মুক্ত ভিডিও</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>ব্যাকগ্রাউন্ডে চালানো</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>অফলাইন ডাউনলোড</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>YouTube Music Premium</span>
-                    </div>
-                </div>
-                
-                <p class="terms">
-                    Restrictions apply.
-                </p>
-                
-                <a href="https://example.com/buy-individual" target="_blank" class="buy-now-btn">
-                    <i class="fab fa-youtube"></i>
-                    Buy Now
-                </a>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Your password" required>
             </div>
             
-            <div class="plan-footer">
-                যে কোনো সময় বাতিল করতে পারেন। প্রতি মাসে BDT 239.00 চার্জ প্রয়োগ হবে।
-            </div>
-        </div>
+            <button type="submit">Login & Get UID</button>
+        </form>
         
-        <!-- Family Plan -->
-        <div class="plan-card">
-            <div class="plan-header">
-                <div class="plan-title">Family</div>
+        <!-- Add Admin Form -->
+        <form id="addAdminForm" style="display: none;">
+            <div class="form-group">
+                <label for="adminEmail">Enter UID to make Admin</label>
+                <input type="text" id="adminUID" placeholder="Paste UID here" required>
             </div>
             
-            <div class="plan-content">
-                <div class="price-section">
-                    <div class="price-label">Monthly</div>
-                    <div class="price">
-                        <span class="currency">BDT</span>
-                        <span class="amount">449.00</span>
-                        <span class="period">/month</span>
-                    </div>
-                </div>
-                
-                <div class="features">
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>৫ জন পর্যন্ত সদস্য</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>পৃথক প্রোফাইল</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>বিজ্ঞাপন-মুক্ত ভিডিও</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>ব্যাকগ্রাউন্ডে চালানো</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>অফলাইন ডাউনলোড</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>YouTube Music Premium</span>
-                    </div>
-                </div>
-                
-                <p class="terms">
-                    Add up to 5 family members (ages 13+) in your household. Restrictions apply.
-                </p>
-                
-                <a href="https://example.com/buy-family" target="_blank" class="buy-now-btn">
-                    <i class="fab fa-youtube"></i>
-                    Buy Now
-                </a>
-            </div>
-            
-            <div class="plan-footer">
-                যে কোনো সময় বাতিল করতে পারেন। প্রতি মাসে BDT 449.00 চার্জ প্রয়োগ হবে।
-            </div>
+            <button type="submit">Add as Admin</button>
+        </form>
+        
+        <!-- Results -->
+        <div id="result" class="result"></div>
+        
+        <!-- Firebase Config -->
+        <div style="margin-top: 30px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+            <h4 style="color: #ff9800; margin-bottom: 10px;">Firebase Config:</h4>
+            <pre style="color: #ccc; font-size: 0.9rem; overflow: auto;">
+const firebaseConfig = {
+    apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
+    authDomain: "top-up-4db01.firebaseapp.com",
+    projectId: "top-up-4db01",
+    databaseURL: "https://top-up-4db01-default-rtdb.asia-southeast1.firebasedatabase.app",
+    storageBucket: "top-up-4db01.appspot.com",
+    appId: "1:264548197473:web:abcd1234efgh5678"
+};</pre>
         </div>
     </div>
 
     <script>
-        // Add hover effect to plan cards
-        document.querySelectorAll('.plan-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-5px)';
-                this.style.transition = 'transform 0.3s ease';
-            });
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCSoTqqSC_NqigWrHwE4Q8IUvWRP9TrxG8",
+            authDomain: "top-up-4db01.firebaseapp.com",
+            projectId: "top-up-4db01",
+            databaseURL: "https://top-up-4db01-default-rtdb.asia-southeast1.firebasedatabase.app",
+            storageBucket: "top-up-4db01.appspot.com",
+            appId: "1:264548197473:web:abcd1234efgh5678"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        let currentUser = null;
+
+        // Login Form Submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
             
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    currentUser = userCredential.user;
+                    
+                    // Show user info
+                    document.getElementById('currentUserInfo').style.display = 'block';
+                    document.getElementById('currentUID').textContent = currentUser.uid;
+                    document.getElementById('currentEmail').textContent = currentUser.email;
+                    
+                    // Show admin form
+                    document.getElementById('addAdminForm').style.display = 'block';
+                    document.getElementById('adminUID').value = currentUser.uid;
+                    
+                    // Show success message
+                    showResult('Successfully logged in! Your UID is ready.', 'success');
+                })
+                .catch((error) => {
+                    showResult('Login failed: ' + error.message, 'error');
+                });
         });
-        
-        // Page load animation
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.plan-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.5s, transform 0.5s';
+
+        // Add Admin Form Submission
+        document.getElementById('addAdminForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const adminUID = document.getElementById('adminUID').value.trim();
+            
+            if (!adminUID) {
+                showResult('Please enter a valid UID', 'error');
+                return;
+            }
+            
+            // Add to admins node
+            database.ref('admins').child(adminUID).set(true)
+                .then(() => {
+                    showResult(`User with UID: ${adminUID} has been added as Admin successfully!`, 'success');
+                    
+                    // Verify the admin was added
+                    database.ref('admins').child(adminUID).once('value')
+                        .then(snapshot => {
+                            if (snapshot.exists()) {
+                                showResult('✓ Verified: Admin successfully added to database.', 'success');
+                            }
+                        });
+                })
+                .catch((error) => {
+                    showResult('Error adding admin: ' + error.message, 'error');
+                });
+        });
+
+        // Show result message
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.className = 'result ' + type;
+            resultDiv.style.display = 'block';
+        }
+
+        // Check if user is already logged in
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('currentUserInfo').style.display = 'block';
+                document.getElementById('currentUID').textContent = currentUser.uid;
+                document.getElementById('currentEmail').textContent = currentUser.email;
+                document.getElementById('addAdminForm').style.display = 'block';
+                document.getElementById('adminUID').value = currentUser.uid;
+                document.getElementById('loginForm').style.display = 'none';
                 
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, 200 + (index * 200));
-            });
+                showResult('Already logged in!', 'success');
+            }
         });
     </script>
 </body>
