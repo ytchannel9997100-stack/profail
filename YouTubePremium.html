@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
+        /* আপনার আগের CSS একই রাখুন */
         * {
             margin: 0;
             padding: 0;
@@ -439,7 +440,7 @@
             margin-bottom: 5px;
         }
         
-        /* Orders Table */
+        /* Orders Table - IMPROVED */
         .orders-table {
             width: 100%;
             background: rgba(255, 255, 255, 0.05);
@@ -471,9 +472,33 @@
             color: #ff9800;
         }
         
-        .status-completed {
+        .status-processing {
             background: rgba(0, 188, 212, 0.2);
             color: #00bcd4;
+        }
+        
+        .status-completed {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+        
+        /* WhatsApp Button */
+        .whatsapp-btn {
+            background: rgba(37, 211, 102, 0.2);
+            color: #25D366;
+            border: 1px solid #25D366;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .whatsapp-btn:hover {
+            background: rgba(37, 211, 102, 0.3);
         }
         
         /* Admin Settings */
@@ -768,7 +793,7 @@
                 </div>
             </section>
             
-            <!-- Orders Management Section -->
+            <!-- Orders Management Section - IMPROVED -->
             <section class="section" id="ordersSection">
                 <h2 class="section-title">অর্ডার ম্যানেজমেন্ট</h2>
                 
@@ -796,6 +821,7 @@
                             <tr>
                                 <th>অর্ডার আইডি</th>
                                 <th>গ্রাহক</th>
+                                <th>WhatsApp</th>
                                 <th>প্ল্যাটফর্ম</th>
                                 <th>দাম</th>
                                 <th>তারিখ</th>
@@ -805,7 +831,7 @@
                         </thead>
                         <tbody id="ordersTable">
                             <tr>
-                                <td colspan="7" style="text-align: center; padding: 40px;">
+                                <td colspan="8" style="text-align: center; padding: 40px;">
                                     <p>লোড হচ্ছে...</p>
                                 </td>
                             </tr>
@@ -879,7 +905,7 @@
     </div>
 
     <script>
-        // Firebase Configuration - আপনার Original Key
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
             authDomain: "easy-premium.firebaseapp.com",
@@ -957,9 +983,9 @@
         let currentAdminEmail = null;
         let isSuperAdmin = false;
         
-        // Allowed Admin Emails - এখানে সব Admin এর Email যোগ করুন
+        // Allowed Admin Emails
         const ALLOWED_ADMIN_EMAILS = [
-            'mdashikislam017705@gmail.com',  // Super Admin (আপনি)
+            'mdashikislam017705@gmail.com',  // Super Admin
             'mdsojib1388888@gmail.com',      // Regular Admin
             'admin@easy-premium.com'
         ];
@@ -984,13 +1010,8 @@
         });
         
         function initializeApp() {
-            // Check if already logged in
             checkAdminAuth();
-            
-            // Setup event listeners
             setupEventListeners();
-            
-            // Initialize icon grid
             initializeIconGrid();
         }
         
@@ -1000,31 +1021,20 @@
                 if (user) {
                     console.log("User logged in:", user.email);
                     
-                    // Check if this email is allowed
                     if (ALLOWED_ADMIN_EMAILS.includes(user.email)) {
                         currentAdminEmail = user.email;
-                        
-                        // Check if super admin (first email in list)
                         isSuperAdmin = (user.email === ALLOWED_ADMIN_EMAILS[0]);
-                        console.log("Is Super Admin:", isSuperAdmin);
                         
-                        // Load admin data
                         await loadAdminData(user);
-                        
-                        // Show admin panel
                         showAdminPanel();
-                        
-                        // Initialize admin panel
                         initializeAdminPanel();
                     } else {
-                        // Not an admin email, sign out
                         console.log("Email not allowed:", user.email);
                         await auth.signOut();
                         showLoginScreen();
                         showToast('এই Gmail এড্রেস এডমিন এক্সেস নেই', 'error');
                     }
                 } else {
-                    // No user logged in
                     showLoginScreen();
                 }
             });
@@ -1032,37 +1042,23 @@
         
         // Setup event listeners
         function setupEventListeners() {
-            // Google login
             googleLoginBtn.addEventListener('click', handleGoogleLogin);
-            
-            // Logout
             logoutBtn.addEventListener('click', handleLogout);
             
-            // Navigation buttons
             navButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const sectionId = this.getAttribute('data-section');
                     showSection(sectionId);
                     
-                    // Update active state
                     navButtons.forEach(btn => btn.classList.remove('active'));
                     this.classList.add('active');
                 });
             });
             
-            // Platform form submission
             platformForm.addEventListener('submit', handlePlatformFormSubmit);
-            
-            // Add admin form submission
             addAdminForm.addEventListener('submit', handleAddAdminFormSubmit);
-            
-            // System settings form submission
             systemSettingsForm.addEventListener('submit', handleSystemSettingsSubmit);
-            
-            // Order filter change
             orderFilter.addEventListener('change', loadOrders);
-            
-            // Order search
             orderSearch.addEventListener('input', loadOrders);
         }
         
@@ -1071,13 +1067,9 @@
             try {
                 const provider = new firebase.auth.GoogleAuthProvider();
                 const result = await auth.signInWithPopup(provider);
-                
                 const user = result.user;
-                console.log("Google login successful:", user.email);
                 
-                // Check if this email is allowed
                 if (!ALLOWED_ADMIN_EMAILS.includes(user.email)) {
-                    console.log("Email not in allowed list:", user.email);
                     await auth.signOut();
                     showToast('এই Gmail এড্রেস এডমিন এক্সেস নেই', 'error');
                     return;
@@ -1085,10 +1077,7 @@
                 
                 currentAdminEmail = user.email;
                 isSuperAdmin = (user.email === ALLOWED_ADMIN_EMAILS[0]);
-                
-                // Save admin login info
                 await saveAdminLogin(user);
-                
                 showToast('সফলভাবে লগইন হয়েছে!', 'success');
                 
             } catch (error) {
@@ -1110,11 +1099,9 @@
         
         // Load admin data
         async function loadAdminData(user) {
-            // Update UI with admin info
             adminName.textContent = user.displayName || user.email;
             adminEmail.textContent = user.email;
             
-            // Set avatar
             if (user.photoURL) {
                 adminAvatar.innerHTML = `<img src="${user.photoURL}" alt="${user.displayName}" style="width: 100%; height: 100%; border-radius: 50%;">`;
             } else {
@@ -1122,15 +1109,11 @@
                 adminAvatar.innerHTML = `<span style="font-size: 1.2rem;">${initial}</span>`;
             }
             
-            // Load admin users if super admin
             if (isSuperAdmin) {
                 loadAdminUsers();
             } else {
-                // Hide Admin Management section for regular admins
                 const adminNavBtn = document.querySelector('[data-section="admins"]');
-                if (adminNavBtn) {
-                    adminNavBtn.style.display = 'none';
-                }
+                if (adminNavBtn) adminNavBtn.style.display = 'none';
             }
         }
         
@@ -1141,12 +1124,10 @@
                 const snapshot = await adminRef.once('value');
                 
                 if (snapshot.exists()) {
-                    // Update only lastLogin
                     await adminRef.update({
                         lastLogin: firebase.database.ServerValue.TIMESTAMP
                     });
                 } else {
-                    // This is a new admin, so we need to add them
                     const loginData = {
                         email: user.email,
                         name: user.displayName || '',
@@ -1161,7 +1142,6 @@
                     await adminRef.set(loginData);
                 }
                 
-                // Log the login
                 await database.ref('adminLogs').push({
                     action: 'admin_login',
                     email: user.email,
@@ -1193,7 +1173,6 @@
             sections.forEach(section => {
                 section.classList.remove('active');
             });
-            
             document.getElementById(sectionId + 'Section').classList.add('active');
         }
         
@@ -1204,7 +1183,6 @@
             loadStats();
             loadSystemSettings();
             
-            // Show/Hide admin management based on super admin status
             const adminNavBtn = document.querySelector('[data-section="admins"]');
             if (adminNavBtn) {
                 adminNavBtn.style.display = isSuperAdmin ? 'flex' : 'none';
@@ -1225,12 +1203,9 @@
                 `;
                 
                 iconOption.addEventListener('click', function() {
-                    // Remove selected class from all icons
                     document.querySelectorAll('.icon-option').forEach(opt => {
                         opt.classList.remove('selected');
                     });
-                    
-                    // Add selected class to clicked icon
                     this.classList.add('selected');
                     selectedIcon = icon.id;
                 });
@@ -1238,7 +1213,6 @@
                 iconGrid.appendChild(iconOption);
             });
             
-            // Select first icon by default
             if (iconGrid.firstChild) {
                 iconGrid.firstChild.classList.add('selected');
             }
@@ -1257,7 +1231,6 @@
                     return;
                 }
                 
-                // Convert to array
                 Object.entries(data).forEach(([id, platform]) => {
                     platforms.push({
                         id: id,
@@ -1265,9 +1238,7 @@
                     });
                 });
                 
-                // Sort by order if available
                 platforms.sort((a, b) => (a.order || 0) - (b.order || 0));
-                
                 displayPlatforms();
             });
         }
@@ -1282,12 +1253,10 @@
             }
             
             platforms.forEach(platform => {
-                const platformCard = document.createElement('div');
-                platformCard.className = 'platform-card';
-                
-                // Find icon
                 const iconInfo = platformIcons.find(icon => icon.id === platform.icon) || platformIcons[0];
                 
+                const platformCard = document.createElement('div');
+                platformCard.className = 'platform-card';
                 platformCard.innerHTML = `
                     <div class="platform-header">
                         <div class="platform-icon">
@@ -1314,7 +1283,6 @@
                 platformsGrid.appendChild(platformCard);
             });
             
-            // Add event listeners to buttons
             document.querySelectorAll('.btn-edit').forEach(button => {
                 button.addEventListener('click', function() {
                     const platformId = this.getAttribute('data-id');
@@ -1339,14 +1307,12 @@
                 return;
             }
             
-            // Fill form
             platformId.value = platform.id;
             platformName.value = platform.name || '';
             platformPrice.value = platform.price || '';
             platformDescription.value = platform.description || '';
             selectedIcon = platform.icon || 'youtube';
             
-            // Select icon
             document.querySelectorAll('.icon-option').forEach(opt => {
                 opt.classList.remove('selected');
                 if (opt.getAttribute('data-icon') === selectedIcon) {
@@ -1354,10 +1320,7 @@
                 }
             });
             
-            // Update form title
             document.getElementById('formTitle').textContent = 'প্ল্যাটফর্ম এডিট করুন';
-            
-            // Scroll to form
             document.getElementById('platformsSection').scrollIntoView({ behavior: 'smooth' });
         }
         
@@ -1398,19 +1361,15 @@
             
             try {
                 if (platformId.value) {
-                    // Update existing platform
                     await database.ref(`publicData/pricingPlans/${platformId.value}`).update(platformData);
                     showToast('প্ল্যাটফর্ম সফলভাবে আপডেট হয়েছে', 'success');
                 } else {
-                    // Add new platform
                     platformData.createdAt = firebase.database.ServerValue.TIMESTAMP;
                     platformData.createdBy = currentAdminEmail;
-                    
                     await database.ref('publicData/pricingPlans').push(platformData);
                     showToast('নতুন প্ল্যাটফর্ম সফলভাবে যোগ হয়েছে', 'success');
                 }
                 
-                // Reset form
                 resetPlatformForm();
                 
             } catch (error) {
@@ -1425,7 +1384,6 @@
             platformId.value = '';
             selectedIcon = 'youtube';
             
-            // Reset icon selection
             document.querySelectorAll('.icon-option').forEach(opt => {
                 opt.classList.remove('selected');
             });
@@ -1433,25 +1391,23 @@
                 iconGrid.firstChild.classList.add('selected');
             }
             
-            // Update form title
             document.getElementById('formTitle').textContent = 'নতুন প্ল্যাটফর্ম যোগ করুন';
         }
         
-        // Load orders
+        // Load orders - FIXED VERSION
         function loadOrders() {
-            ordersTable.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;"><p>লোড হচ্ছে...</p></td></tr>';
+            ordersTable.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;"><p>লোড হচ্ছে...</p></td></tr>';
             
             database.ref('transactions').on('value', (snapshot) => {
                 const data = snapshot.val();
                 orders = [];
                 
                 if (!data) {
-                    ordersTable.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;"><p>কোন অর্ডার পাওয়া যায়নি</p></td></tr>';
+                    ordersTable.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;"><p>কোন অর্ডার পাওয়া যায়নি</p></td></tr>';
                     updateOrderStats([]);
                     return;
                 }
                 
-                // Convert to array
                 Object.entries(data).forEach(([id, order]) => {
                     orders.push({
                         id: id,
@@ -1467,14 +1423,18 @@
                 if (filterValue === 'pending') {
                     filteredOrders = filteredOrders.filter(order => order.status === 'pending');
                 } else if (filterValue === 'completed') {
-                    filteredOrders = filteredOrders.filter(order => order.status === 'completed' || order.status === 'success');
+                    filteredOrders = filteredOrders.filter(order => 
+                        order.status === 'completed' || order.status === 'success'
+                    );
                 }
                 
                 if (searchValue) {
                     filteredOrders = filteredOrders.filter(order => 
                         order.id.toLowerCase().includes(searchValue) ||
                         (order.userName && order.userName.toLowerCase().includes(searchValue)) ||
-                        (order.platform && order.platform.toLowerCase().includes(searchValue))
+                        (order.platform && order.platform.toLowerCase().includes(searchValue)) ||
+                        (order.phoneNumber && order.phoneNumber.includes(searchValue)) ||
+                        (order.whatsappNumber && order.whatsappNumber.includes(searchValue))
                     );
                 }
                 
@@ -1486,10 +1446,10 @@
             });
         }
         
-        // Display orders
+        // Display orders - FIXED VERSION
         function displayOrders(ordersList) {
             if (ordersList.length === 0) {
-                ordersTable.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;"><p>কোন অর্ডার পাওয়া যায়নি</p></td></tr>';
+                ordersTable.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;"><p>কোন অর্ডার পাওয়া যায়নি</p></td></tr>';
                 return;
             }
             
@@ -1497,8 +1457,22 @@
             
             ordersList.forEach(order => {
                 const orderDate = order.orderDate ? new Date(order.orderDate).toLocaleDateString('bn-BD') : 'তারিখ নেই';
-                const statusClass = (order.status === 'pending') ? 'status-pending' : 'status-completed';
-                const statusText = (order.status === 'pending') ? 'পেন্ডিং' : 'সম্পূর্ণ';
+                
+                let statusClass = 'status-pending';
+                let statusText = 'পেন্ডিং';
+                
+                if (order.status === 'completed' || order.status === 'success') {
+                    statusClass = 'status-completed';
+                    statusText = 'সম্পূর্ণ';
+                } else if (order.status === 'processing') {
+                    statusClass = 'status-processing';
+                    statusText = 'প্রসেসিং';
+                }
+                
+                // WhatsApp number - FIXED
+                const whatsappNumber = order.whatsappNumber || order.phoneNumber || 'নাম্বার নেই';
+                const cleanWhatsappNumber = whatsappNumber.replace(/\D/g, ''); // Remove non-digit characters
+                const whatsappLink = `https://wa.me/${cleanWhatsappNumber}`;
                 
                 html += `
                     <tr>
@@ -1507,13 +1481,21 @@
                             <div style="font-weight: 600;">${order.userName || 'নাম নেই'}</div>
                             <div style="font-size: 0.8rem; color: #b0bec5;">${order.phoneNumber || 'নাম্বার নেই'}</div>
                         </td>
+                        <td>
+                            <a href="${whatsappLink}" target="_blank" class="whatsapp-btn">
+                                <i class="fab fa-whatsapp"></i> ${whatsappNumber}
+                            </a>
+                        </td>
                         <td>${order.platform || 'প্ল্যাটফর্ম নেই'}</td>
                         <td>${order.price || '৳ -'}</td>
                         <td>${orderDate}</td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                         <td>
-                            <button class="btn-sm btn-edit" onclick="updateOrderStatus('${order.id}', '${order.status === 'pending' ? 'completed' : 'pending'}')">
-                                ${order.status === 'pending' ? 'সম্পূর্ণ করুন' : 'পেন্ডিং করুন'}
+                            <button class="btn-sm btn-edit" onclick="updateOrderStatus('${order.id}', 'completed')">
+                                সম্পূর্ণ করুন
+                            </button>
+                            <button class="btn-sm btn-delete" onclick="updateOrderStatus('${order.id}', 'pending')" style="margin-top: 5px;">
+                                পেন্ডিং করুন
                             </button>
                         </td>
                     </tr>
@@ -1523,19 +1505,70 @@
             ordersTable.innerHTML = html;
         }
         
-        // Update order status
+        // Update order status - FIXED VERSION
         function updateOrderStatus(orderId, newStatus) {
-            database.ref(`transactions/${orderId}`).update({
+            // First update in transactions
+            const updates = {
                 status: newStatus,
                 updatedAt: firebase.database.ServerValue.TIMESTAMP,
                 updatedBy: currentAdminEmail
-            })
-            .then(() => {
-                showToast('অর্ডার স্ট্যাটাস আপডেট হয়েছে', 'success');
-            })
-            .catch(error => {
-                console.error("Update order error:", error);
-                showToast('আপডেট করতে সমস্যা হয়েছে', 'error');
+            };
+            
+            database.ref(`transactions/${orderId}`).update(updates)
+                .then(() => {
+                    // Also update in userOrders if userId exists
+                    const order = orders.find(o => o.id === orderId);
+                    if (order && order.userId) {
+                        return database.ref(`userOrders/${order.userId}/${orderId}`).update({
+                            status: newStatus,
+                            updatedAt: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    }
+                })
+                .then(() => {
+                    showToast('অর্ডার স্ট্যাটাস আপডেট হয়েছে', 'success');
+                    // Send WhatsApp notification if completed
+                    if (newStatus === 'completed') {
+                        sendWhatsAppNotification(orderId);
+                    }
+                })
+                .catch(error => {
+                    console.error("Update order error:", error);
+                    showToast('আপডেট করতে সমস্যা হয়েছে', 'error');
+                });
+        }
+        
+        // Send WhatsApp notification
+        function sendWhatsAppNotification(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            const whatsappNumber = order.whatsappNumber || order.phoneNumber;
+            if (!whatsappNumber) return;
+            
+            const cleanNumber = whatsappNumber.replace(/\D/g, '');
+            const message = encodeURIComponent(
+                `🎉 আপনার অর্ডার সফলভাবে সম্পূর্ণ হয়েছে!\n\n` +
+                `অর্ডার আইডি: ${order.id}\n` +
+                `প্ল্যাটফর্ম: ${order.platform}\n` +
+                `দাম: ${order.price}\n` +
+                `স্ট্যাটাস: ✅ সম্পূর্ণ\n\n` +
+                `ধন্যবাদ! Easy Premium সাথে থাকার জন্য।`
+            );
+            
+            const whatsappUrl = `https://wa.me/${cleanNumber}?text=${message}`;
+            
+            // Open WhatsApp in new tab
+            window.open(whatsappUrl, '_blank');
+            
+            // Log the notification
+            database.ref('adminLogs').push({
+                action: 'whatsapp_notification',
+                orderId: orderId,
+                phoneNumber: whatsappNumber,
+                status: 'completed',
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                sentBy: currentAdminEmail
             });
         }
         
@@ -1553,7 +1586,6 @@
                     return;
                 }
                 
-                // Convert to array
                 Object.entries(data).forEach(([id, admin]) => {
                     adminUsers.push({
                         id: id,
@@ -1613,7 +1645,6 @@
                 return;
             }
             
-            // Check if already in allowed list
             if (ALLOWED_ADMIN_EMAILS.includes(email)) {
                 showToast('এই Gmail ইতিমধ্যেই এডমিন হিসেবে আছে', 'error');
                 return;
@@ -1628,9 +1659,7 @@
                     status: 'active'
                 };
                 
-                // Create a unique ID from email
                 const adminId = email.replace(/[^a-zA-Z0-9]/g, '_');
-                
                 await database.ref(`adminUsers/${adminId}`).set(adminData);
                 
                 showToast('এডমিন সফলভাবে যোগ হয়েছে', 'success');
@@ -1703,30 +1732,24 @@
         
         // Load stats
         function loadStats() {
-            // Platform count
             database.ref('publicData/pricingPlans').once('value')
                 .then(snapshot => {
                     const data = snapshot.val();
                     totalPlatforms.textContent = data ? Object.keys(data).length : 0;
                 });
             
-            // Order stats handled in loadOrders()
-            
-            // Admin count
             database.ref('adminUsers').once('value')
                 .then(snapshot => {
                     const data = snapshot.val();
                     adminCount.textContent = data ? Object.keys(data).length : 0;
                 });
             
-            // System info
             updateSystemInfo();
         }
         
         // Update order stats
         function updateOrderStats(ordersList) {
             totalOrders.textContent = ordersList.length;
-            
             const pending = ordersList.filter(order => order.status === 'pending').length;
             pendingOrders.textContent = pending;
         }
@@ -1751,13 +1774,11 @@
         
         // Show toast notification
         function showToast(message, type = 'info') {
-            // Remove existing toast
             const existingToast = document.querySelector('.toast');
             if (existingToast) {
                 existingToast.remove();
             }
             
-            // Create new toast
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.textContent = message;
@@ -1765,7 +1786,6 @@
             
             document.body.appendChild(toast);
             
-            // Remove after 3 seconds
             setTimeout(() => {
                 if (toast.parentNode) {
                     toast.style.animation = 'slideIn 0.3s ease reverse';
