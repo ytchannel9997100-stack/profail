@@ -725,7 +725,6 @@
             border: 2px solid #ff9800;
         }
         
-        /* লগইন মডালে লোগো আপডেট */
         .login-logo {
             display: flex;
             align-items: center;
@@ -1457,6 +1456,14 @@
         .netflix { color: #E50914; }
         .spotify { color: #1DB954; }
         .pubg { color: #F9A602; }
+        /* নতুন প্ল্যাটফর্মগুলোর জন্য কালার যুক্ত করুন */
+        .discord { color: #5865F2; }
+        .amazon { color: #FF9900; }
+        .microsoft { color: #00A4EF; }
+        .adobe { color: #FF0000; }
+        .canva { color: #00C4CC; }
+        .google { color: #4285F4; }
+        .linkedin { color: #0077B5; }
 
         .profile-content::-webkit-scrollbar {
             display: none;
@@ -1858,22 +1865,33 @@
                 return;
             }
             
-            const iconClasses = {
-                'youtube': 'fab fa-youtube youtube',
-                'facebook': 'fab fa-facebook-f facebook',
-                'instagram': 'fab fa-instagram instagram',
-                'tiktok': 'fab fa-tiktok tiktok',
-                'whatsapp': 'fab fa-whatsapp whatsapp',
-                'telegram': 'fab fa-telegram telegram',
-                'freefire': 'fas fa-fire freefire',
-                'netflix': 'fab fa-netflix netflix',
-                'spotify': 'fab fa-spotify spotify',
-                'pubg': 'fas fa-gamepad pubg',
-                'default': 'fas fa-cube'
-            };
+            // আইকন ম্যাপিং ফাংশন
+            function getIconClass(iconName) {
+                const iconMap = {
+                    'youtube': 'fab fa-youtube youtube',
+                    'facebook': 'fab fa-facebook-f facebook',
+                    'instagram': 'fab fa-instagram instagram',
+                    'tiktok': 'fab fa-tiktok tiktok',
+                    'whatsapp': 'fab fa-whatsapp whatsapp',
+                    'telegram': 'fab fa-telegram telegram',
+                    'freefire': 'fas fa-fire freefire',
+                    'netflix': 'fab fa-netflix netflix',
+                    'spotify': 'fab fa-spotify spotify',
+                    'pubg': 'fas fa-gamepad pubg',
+                    'discord': 'fab fa-discord discord',
+                    'amazon': 'fab fa-amazon amazon',
+                    'microsoft': 'fab fa-microsoft microsoft',
+                    'adobe': 'fab fa-adobe adobe',
+                    'canva': 'fas fa-paint-brush canva',  // canva এর জন্য paint-brush আইকন
+                    'google': 'fab fa-google google',
+                    'linkedin': 'fab fa-linkedin linkedin'
+                };
+                
+                return iconMap[iconName] || 'fas fa-cube';
+            }
             
             platforms.forEach(platform => {
-                const iconClass = iconClasses[platform.icon] || iconClasses.default;
+                const iconClass = getIconClass(platform.icon);
                 
                 const resultItem = document.createElement('div');
                 resultItem.className = 'search-result-item';
@@ -2742,21 +2760,32 @@
             platformCard.setAttribute('data-platform-name', platform.name);
             platformCard.setAttribute('data-platform-id', platform.id);
             
-            const iconClasses = {
-                'youtube': 'fab fa-youtube youtube',
-                'facebook': 'fab fa-facebook-f facebook',
-                'instagram': 'fab fa-instagram instagram',
-                'tiktok': 'fab fa-tiktok tiktok',
-                'whatsapp': 'fab fa-whatsapp whatsapp',
-                'telegram': 'fab fa-telegram telegram',
-                'freefire': 'fas fa-fire freefire',
-                'netflix': 'fab fa-netflix netflix',
-                'spotify': 'fab fa-spotify spotify',
-                'pubg': 'fas fa-gamepad pubg',
-                'default': 'fas fa-cube'
-            };
+            // আইকন ম্যাপিং ফাংশন
+            function getIconClass(iconName) {
+                const iconMap = {
+                    'youtube': 'fab fa-youtube youtube',
+                    'facebook': 'fab fa-facebook-f facebook',
+                    'instagram': 'fab fa-instagram instagram',
+                    'tiktok': 'fab fa-tiktok tiktok',
+                    'whatsapp': 'fab fa-whatsapp whatsapp',
+                    'telegram': 'fab fa-telegram telegram',
+                    'freefire': 'fas fa-fire freefire',
+                    'netflix': 'fab fa-netflix netflix',
+                    'spotify': 'fab fa-spotify spotify',
+                    'pubg': 'fas fa-gamepad pubg',
+                    'discord': 'fab fa-discord discord',
+                    'amazon': 'fab fa-amazon amazon',
+                    'microsoft': 'fab fa-microsoft microsoft',
+                    'adobe': 'fab fa-adobe adobe',
+                    'canva': 'fas fa-paint-brush canva',  // canva এর জন্য paint-brush আইকন
+                    'google': 'fab fa-google google',
+                    'linkedin': 'fab fa-linkedin linkedin'
+                };
+                
+                return iconMap[iconName] || 'fas fa-cube';
+            }
 
-            const iconClass = iconClasses[platform.icon] || iconClasses.default;
+            const iconClass = getIconClass(platform.icon);
 
             platformCard.innerHTML = `
                 <div class="platform-header">
