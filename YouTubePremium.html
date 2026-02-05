@@ -240,6 +240,34 @@
             color: white;
         }
         
+        /* Stats Cards */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stats-card {
+            background: rgba(255, 152, 0, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ff9800;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #b0bec5;
+        }
+        
         /* Platforms Management */
         .platforms-grid {
             display: grid;
@@ -376,13 +404,6 @@
             border-color: #ff5722;
             background: rgba(255, 255, 255, 0.15);
             box-shadow: 0 0 10px rgba(255, 87, 34, 0.3);
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
         }
         
         /* Icon Selection */
@@ -713,16 +734,14 @@
                     <form id="platformForm">
                         <input type="hidden" id="platformId" value="">
                         
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">প্ল্যাটফর্মের নাম *</label>
-                                <input type="text" id="platformName" class="form-input" placeholder="যেমন: YouTube Premium" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">দাম *</label>
-                                <input type="text" id="platformPrice" class="form-input" placeholder="যেমন: ৳ 299 / মাস" required>
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label">প্ল্যাটফর্মের নাম *</label>
+                            <input type="text" id="platformName" class="form-input" placeholder="যেমন: YouTube Premium" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">দাম *</label>
+                            <input type="text" id="platformPrice" class="form-input" placeholder="যেমন: ৳ 299 / মাস" required>
                         </div>
                         
                         <div class="form-group">
@@ -735,26 +754,6 @@
                         <div class="form-group">
                             <label class="form-label">বর্ণনা *</label>
                             <textarea id="platformDescription" class="form-textarea" placeholder="প্ল্যাটফর্মের সংক্ষিপ্ত বর্ণনা লিখুন..." required></textarea>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">ক্যাটাগরি</label>
-                                <input type="text" id="platformCategory" class="form-input" placeholder="যেমন: Social Media">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">অর্ডার</label>
-                                <input type="number" id="platformOrder" class="form-input" value="0">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">স্ট্যাটাস</label>
-                                <select id="platformStatus" class="form-select">
-                                    <option value="active">সক্রিয়</option>
-                                    <option value="inactive">নিষ্ক্রিয়</option>
-                                </select>
-                            </div>
                         </div>
                         
                         <div style="display: flex; gap: 15px; margin-top: 20px;">
@@ -773,20 +772,21 @@
             <section class="section" id="ordersSection">
                 <h2 class="section-title">অর্ডার ম্যানেজমেন্ট</h2>
                 
-                <div class="form-row" style="margin-bottom: 20px;">
-                    <div class="form-group">
-                        <label class="form-label">অর্ডার ফিল্টার</label>
-                        <select id="orderFilter" class="form-select">
-                            <option value="all">সব অর্ডার</option>
-                            <option value="pending">পেন্ডিং</option>
-                            <option value="completed">সম্পূর্ণ</option>
-                            <option value="today">আজকের অর্ডার</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">অর্ডার আইডি সার্চ</label>
-                        <input type="text" id="orderSearch" class="form-input" placeholder="অর্ডার আইডি লিখুন...">
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label class="form-label">অর্ডার ফিল্টার</label>
+                            <select id="orderFilter" class="form-select">
+                                <option value="all">সব অর্ডার</option>
+                                <option value="pending">পেন্ডিং</option>
+                                <option value="completed">সম্পূর্ণ</option>
+                            </select>
+                        </div>
+                        
+                        <div style="flex: 1; min-width: 200px;">
+                            <label class="form-label">অর্ডার আইডি সার্চ</label>
+                            <input type="text" id="orderSearch" class="form-input" placeholder="অর্ডার আইডি লিখুন...">
+                        </div>
                     </div>
                 </div>
                 
@@ -822,16 +822,14 @@
                     <h3 style="color: #00bcd4; margin-bottom: 20px;">নতুন এডমিন যোগ করুন</h3>
                     
                     <form id="addAdminForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Gmail এড্রেস *</label>
-                                <input type="email" id="adminEmailInput" class="form-input" placeholder="admin@example.com" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">এডমিন নাম</label>
-                                <input type="text" id="adminNameInput" class="form-input" placeholder="এডমিনের নাম">
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label">Gmail এড্রেস *</label>
+                            <input type="email" id="adminEmailInput" class="form-input" placeholder="admin@example.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">এডমিন নাম</label>
+                            <input type="text" id="adminNameInput" class="form-input" placeholder="এডমিনের নাম">
                         </div>
                         
                         <button type="submit" class="nav-btn" style="background: #00bcd4;">
@@ -926,9 +924,6 @@
         const platformPrice = document.getElementById('platformPrice');
         const iconGrid = document.getElementById('iconGrid');
         const platformDescription = document.getElementById('platformDescription');
-        const platformCategory = document.getElementById('platformCategory');
-        const platformOrder = document.getElementById('platformOrder');
-        const platformStatus = document.getElementById('platformStatus');
         
         // Orders Management Elements
         const ordersTable = document.getElementById('ordersTable');
@@ -962,10 +957,10 @@
         let currentAdminEmail = null;
         let isSuperAdmin = false;
         
-        // Allowed Admin Emails (আপনি এখানে আপনার Gmail এড্রেস যোগ করুন)
+        // Allowed Admin Emails - এখানে সব Admin এর Email যোগ করুন
         const ALLOWED_ADMIN_EMAILS = [
-            'mdashikislam017705@gmail.com',
-            'your-admin@gmail.com',
+            'mdashikislam017705@gmail.com',  // Super Admin (আপনি)
+            'mdsojib1388888@gmail.com',      // Regular Admin
             'admin@easy-premium.com'
         ];
         
@@ -980,9 +975,7 @@
             { id: 'freefire', name: 'Free Fire', icon: 'fas fa-fire', color: '#FF4500' },
             { id: 'netflix', name: 'Netflix', icon: 'fas fa-tv', color: '#E50914' },
             { id: 'spotify', name: 'Spotify', icon: 'fab fa-spotify', color: '#1DB954' },
-            { id: 'pubg', name: 'PUBG', icon: 'fas fa-gamepad', color: '#FFA500' },
-            { id: 'steam', name: 'Steam', icon: 'fab fa-steam', color: '#171A21' },
-            { id: 'discord', name: 'Discord', icon: 'fab fa-discord', color: '#5865F2' }
+            { id: 'pubg', name: 'PUBG', icon: 'fas fa-gamepad', color: '#FFA500' }
         ];
 
         // Initialize on page load
@@ -1005,12 +998,15 @@
         function checkAdminAuth() {
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
+                    console.log("User logged in:", user.email);
+                    
                     // Check if this email is allowed
                     if (ALLOWED_ADMIN_EMAILS.includes(user.email)) {
                         currentAdminEmail = user.email;
                         
                         // Check if super admin (first email in list)
                         isSuperAdmin = (user.email === ALLOWED_ADMIN_EMAILS[0]);
+                        console.log("Is Super Admin:", isSuperAdmin);
                         
                         // Load admin data
                         await loadAdminData(user);
@@ -1022,6 +1018,7 @@
                         initializeAdminPanel();
                     } else {
                         // Not an admin email, sign out
+                        console.log("Email not allowed:", user.email);
                         await auth.signOut();
                         showLoginScreen();
                         showToast('এই Gmail এড্রেস এডমিন এক্সেস নেই', 'error');
@@ -1076,9 +1073,11 @@
                 const result = await auth.signInWithPopup(provider);
                 
                 const user = result.user;
+                console.log("Google login successful:", user.email);
                 
                 // Check if this email is allowed
                 if (!ALLOWED_ADMIN_EMAILS.includes(user.email)) {
+                    console.log("Email not in allowed list:", user.email);
                     await auth.signOut();
                     showToast('এই Gmail এড্রেস এডমিন এক্সেস নেই', 'error');
                     return;
@@ -1126,22 +1125,41 @@
             // Load admin users if super admin
             if (isSuperAdmin) {
                 loadAdminUsers();
+            } else {
+                // Hide Admin Management section for regular admins
+                const adminNavBtn = document.querySelector('[data-section="admins"]');
+                if (adminNavBtn) {
+                    adminNavBtn.style.display = 'none';
+                }
             }
         }
         
         // Save admin login info
         async function saveAdminLogin(user) {
             try {
-                const loginData = {
-                    email: user.email,
-                    name: user.displayName || '',
-                    photoURL: user.photoURL || '',
-                    lastLogin: firebase.database.ServerValue.TIMESTAMP,
-                    uid: user.uid
-                };
+                const adminRef = database.ref(`adminUsers/${user.uid}`);
+                const snapshot = await adminRef.once('value');
                 
-                // Save to database
-                await database.ref(`adminUsers/${user.uid}`).set(loginData);
+                if (snapshot.exists()) {
+                    // Update only lastLogin
+                    await adminRef.update({
+                        lastLogin: firebase.database.ServerValue.TIMESTAMP
+                    });
+                } else {
+                    // This is a new admin, so we need to add them
+                    const loginData = {
+                        email: user.email,
+                        name: user.displayName || '',
+                        photoURL: user.photoURL || '',
+                        lastLogin: firebase.database.ServerValue.TIMESTAMP,
+                        uid: user.uid,
+                        addedBy: isSuperAdmin ? 'system' : currentAdminEmail,
+                        addedAt: firebase.database.ServerValue.TIMESTAMP,
+                        status: 'active'
+                    };
+                    
+                    await adminRef.set(loginData);
+                }
                 
                 // Log the login
                 await database.ref('adminLogs').push({
@@ -1247,7 +1265,7 @@
                     });
                 });
                 
-                // Sort by order
+                // Sort by order if available
                 platforms.sort((a, b) => (a.order || 0) - (b.order || 0));
                 
                 displayPlatforms();
@@ -1326,12 +1344,9 @@
             platformName.value = platform.name || '';
             platformPrice.value = platform.price || '';
             platformDescription.value = platform.description || '';
-            platformCategory.value = platform.category || '';
-            platformOrder.value = platform.order || 0;
-            platformStatus.value = platform.status || 'active';
+            selectedIcon = platform.icon || 'youtube';
             
             // Select icon
-            selectedIcon = platform.icon || 'youtube';
             document.querySelectorAll('.icon-option').forEach(opt => {
                 opt.classList.remove('selected');
                 if (opt.getAttribute('data-icon') === selectedIcon) {
@@ -1376,11 +1391,9 @@
                 price: platformPrice.value.trim(),
                 icon: selectedIcon,
                 description: platformDescription.value.trim(),
-                category: platformCategory.value.trim(),
-                order: parseInt(platformOrder.value) || 0,
-                status: platformStatus.value,
                 updatedAt: firebase.database.ServerValue.TIMESTAMP,
-                updatedBy: currentAdminEmail
+                updatedBy: currentAdminEmail,
+                status: 'active'
             };
             
             try {
@@ -1410,8 +1423,6 @@
         function resetPlatformForm() {
             platformForm.reset();
             platformId.value = '';
-            platformOrder.value = 0;
-            platformStatus.value = 'active';
             selectedIcon = 'youtube';
             
             // Reset icon selection
@@ -1457,12 +1468,6 @@
                     filteredOrders = filteredOrders.filter(order => order.status === 'pending');
                 } else if (filterValue === 'completed') {
                     filteredOrders = filteredOrders.filter(order => order.status === 'completed' || order.status === 'success');
-                } else if (filterValue === 'today') {
-                    const today = new Date().toISOString().split('T')[0];
-                    filteredOrders = filteredOrders.filter(order => {
-                        const orderDate = order.orderDate ? order.orderDate.split('T')[0] : '';
-                        return orderDate === today;
-                    });
                 }
                 
                 if (searchValue) {
@@ -1615,8 +1620,6 @@
             }
             
             try {
-                // In a real app, you would use Firebase Functions to add admin
-                // For now, we'll just add to database
                 const adminData = {
                     email: email,
                     name: name || '',
