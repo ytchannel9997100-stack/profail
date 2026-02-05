@@ -10,7 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
-        /* আপনার পুরানো CSS একদম অপরিবর্তিত */
         * {
             margin: 0;
             padding: 0;
@@ -123,7 +122,6 @@
             flex: 1;
         }
         
-        /* নতুন লোগো স্টাইলিং */
         .logo {
             display: flex;
             align-items: center;
@@ -220,7 +218,7 @@
             color: #ff9800;
         }
         
-        /* MODERN CART ICON - UPDATED */
+        /* MODERN CART ICON */
         .cart-icon-container {
             cursor: pointer;
             transition: all 0.3s;
@@ -601,7 +599,7 @@
         .orders-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px; /* Minimum width for table */
+            min-width: 600px;
         }
         
         .orders-table th {
@@ -1127,7 +1125,6 @@
                 gap: 15px;
             }
             
-            /* মোবাইলে লোগো স্টাইলিং */
             .logo-icon {
                 width: 45px;
                 height: 45px;
@@ -1149,7 +1146,6 @@
                 display: none;
             }
             
-            /* Hide search bar on mobile */
             .search-container {
                 display: none;
             }
@@ -1264,7 +1260,6 @@
                 justify-content: flex-end;
             }
             
-            /* Show cards and hide table on mobile */
             .orders-table-container {
                 display: none;
             }
@@ -1273,7 +1268,6 @@
                 display: flex;
             }
             
-            /* লগইন মডালের লোগো মোবাইল স্টাইলিং */
             .login-logo {
                 gap: 10px;
                 flex-direction: column;
@@ -1323,13 +1317,11 @@
             }
         }
         
-        /* For tablets and larger devices, show search bar */
         @media (min-width: 769px) {
             .search-container {
                 display: block;
             }
             
-            /* Adjust header layout for search bar */
             .header {
                 padding: 10px 20px;
             }
@@ -1339,7 +1331,6 @@
             }
         }
         
-        /* Extra small screens */
         @media (max-width: 480px) {
             .hero {
                 padding: 25px 12px;
@@ -1366,7 +1357,6 @@
                 gap: 12px;
             }
             
-            /* এক্সট্রা ছোট স্ক্রিনে লোগো স্টাইলিং */
             .logo-icon {
                 width: 40px;
                 height: 40px;
@@ -1468,14 +1458,13 @@
         .spotify { color: #1DB954; }
         .pubg { color: #F9A602; }
 
-        /* Hide scrollbar for profile modal */
         .profile-content::-webkit-scrollbar {
             display: none;
         }
 
         .profile-content {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 </head>
@@ -1565,7 +1554,7 @@
                     
                     <div class="form-group">
                         <label class="form-label">ফোন নম্বর</label>
-                        input type="tel" class="form-input" id="purchasePhoneNumber" placeholder="আপনার ফোন নম্বর" required>
+                        <input type="tel" class="form-input" id="purchasePhoneNumber" placeholder="আপনার ফোন নম্বর" required>
                     </div>
                     
                     <div class="form-group">
@@ -1656,9 +1645,7 @@
     </footer>
 
     <script>
-        // ===================== IMPORTANT FIXES =====================
-        
-        // 1. প্রথমে Firebase Configuration চেক করুন
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
             authDomain: "easy-premium.firebaseapp.com",
@@ -1670,31 +1657,16 @@
             measurementId: "G-CHL8K8HRPX"
         };
 
-        // 2. Firebase ইনিশিয়ালাইজেশনে ডিবাগিং যোগ করুন
+        // Initialize Firebase
         try {
-            // আগের অ্যাপস ডিলিট করুন (যদি থাকে)
-            try {
-                firebase.apps.forEach(app => {
-                    if (app.name === '[DEFAULT]') {
-                        app.delete();
-                    }
-                });
-            } catch (e) {
-                console.log("No previous apps to delete");
-            }
-            
-            // নতুনভাবে ইনিশিয়ালাইজ করুন
             firebase.initializeApp(firebaseConfig);
-            console.log("✅ Firebase initialized successfully");
+            console.log("Firebase initialized successfully");
         } catch (error) {
-            console.error("❌ Firebase initialization error:", error);
+            console.log("Firebase already initialized");
         }
         
         const database = firebase.database();
         const auth = firebase.auth();
-        
-        // 3. Authentication স্টেট চেক করুন
-        console.log("Initial auth state:", auth.currentUser);
 
         // DOM Elements
         const loginModal = document.getElementById('loginModal');
@@ -1815,92 +1787,151 @@
             }
         });
 
-        // ===================== FIXED GOOGLE LOGIN =====================
+        // Search functionality
+        function initializeSearch() {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                
+                if (searchTerm.length === 0) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                const filteredPlatforms = allPlatforms.filter(platform => {
+                    const name = platform.name ? platform.name.toLowerCase() : '';
+                    const description = platform.description ? platform.description.toLowerCase() : '';
+                    const features = platform.features ? platform.features.join(' ').toLowerCase() : '';
+                    const price = platform.price ? platform.price.toLowerCase() : '';
+                    
+                    return name.includes(searchTerm) || 
+                           description.includes(searchTerm) || 
+                           features.includes(searchTerm) ||
+                           price.includes(searchTerm);
+                });
+                
+                displaySearchResults(filteredPlatforms);
+            });
+            
+            searchBtn.addEventListener('click', function() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                
+                if (searchTerm.length === 0) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                const filteredPlatforms = allPlatforms.filter(platform => {
+                    const name = platform.name ? platform.name.toLowerCase() : '';
+                    const description = platform.description ? platform.description.toLowerCase() : '';
+                    const features = platform.features ? platform.features.join(' ').toLowerCase() : '';
+                    const price = platform.price ? platform.price.toLowerCase() : '';
+                    
+                    return name.includes(searchTerm) || 
+                           description.includes(searchTerm) || 
+                           features.includes(searchTerm) ||
+                           price.includes(searchTerm);
+                });
+                
+                displaySearchResults(filteredPlatforms);
+            });
+            
+            document.addEventListener('click', function(event) {
+                if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+                    searchResults.style.display = 'none';
+                }
+            });
+            
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchBtn.click();
+                }
+            });
+        }
         
-        // Google Login Button Event Listener - FIXED VERSION
-        googleLoginBtn.addEventListener('click', async function() {
-            if (!checkCookieConsent()) {
-                websiteOverlay.style.display = 'flex';
+        // Display search results
+        function displaySearchResults(platforms) {
+            searchResults.innerHTML = '';
+            
+            if (platforms.length === 0) {
+                searchResults.innerHTML = '<div class="no-results">কোন ফলাফল পাওয়া যায়নি</div>';
+                searchResults.style.display = 'block';
                 return;
             }
             
-            try {
-                console.log("Google login button clicked");
+            const iconClasses = {
+                'youtube': 'fab fa-youtube youtube',
+                'facebook': 'fab fa-facebook-f facebook',
+                'instagram': 'fab fa-instagram instagram',
+                'tiktok': 'fab fa-tiktok tiktok',
+                'whatsapp': 'fab fa-whatsapp whatsapp',
+                'telegram': 'fab fa-telegram telegram',
+                'freefire': 'fas fa-fire freefire',
+                'netflix': 'fab fa-netflix netflix',
+                'spotify': 'fab fa-spotify spotify',
+                'pubg': 'fas fa-gamepad pubg',
+                'default': 'fas fa-cube'
+            };
+            
+            platforms.forEach(platform => {
+                const iconClass = iconClasses[platform.icon] || iconClasses.default;
                 
-                // Google Provider তৈরি করুন
-                const provider = new firebase.auth.GoogleAuthProvider();
+                const resultItem = document.createElement('div');
+                resultItem.className = 'search-result-item';
+                resultItem.innerHTML = `
+                    <i class="${iconClass} search-result-icon"></i>
+                    <div class="search-result-content">
+                        <div class="search-result-name">${platform.name || 'প্ল্যাটফর্ম'}</div>
+                        <div class="search-result-desc">${platform.description || 'প্রিমিয়াম সেবা পান সবচেয়ে কম দামে।'}</div>
+                    </div>
+                    <div class="search-result-price">${platform.price || '৳ 100'}</div>
+                `;
                 
-                // পপআপ ব্লক চেক করুন
-                provider.setCustomParameters({
-                    prompt: 'select_account'
+                resultItem.addEventListener('click', function() {
+                    scrollToPlatformCard(platform.name);
+                    searchResults.style.display = 'none';
+                    searchInput.value = '';
                 });
                 
-                // Sign in with popup
-                const result = await auth.signInWithPopup(provider);
-                
-                console.log("✅ Google login successful:", result.user);
-                
-                // User data সেভ করুন
-                const user = result.user;
-                const userUID = user.uid;
-                
-                // Database-এ user সেভ করুন
-                const userRef = database.ref(`users/${userUID}`);
-                const snapshot = await userRef.once('value');
-                
-                if (!snapshot.exists()) {
-                    // নতুন user তৈরি করুন
-                    const userData = {
-                        uid: userUID,
-                        email: user.email || '',
-                        displayName: user.displayName || '',
-                        photoURL: user.photoURL || '',
-                        createdAt: firebase.database.ServerValue.TIMESTAMP,
-                        lastLogin: firebase.database.ServerValue.TIMESTAMP,
-                        accountType: 'customer',
-                        status: 'active'
-                    };
+                searchResults.appendChild(resultItem);
+            });
+            
+            searchResults.style.display = 'block';
+        }
+        
+        // Scroll to platform card in the grid
+        function scrollToPlatformCard(platformName) {
+            const platformCards = document.querySelectorAll('.platform-card');
+            
+            platformCards.forEach(card => {
+                const nameElement = card.querySelector('.platform-name');
+                if (nameElement && nameElement.textContent === platformName) {
+                    card.style.borderColor = '#ff5722';
+                    card.style.boxShadow = '0 0 20px rgba(255, 87, 34, 0.7)';
                     
-                    await userRef.set(userData);
-                    console.log("New user created in database");
-                } else {
-                    // Update last login
-                    await userRef.child('lastLogin').set(firebase.database.ServerValue.TIMESTAMP);
-                    console.log("Existing user updated");
+                    card.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                    
+                    setTimeout(() => {
+                        card.style.borderColor = '';
+                        card.style.boxShadow = '';
+                    }, 3000);
                 }
-                
-                // লগইন মডাল বন্ধ করুন
-                loginModal.style.display = 'none';
-                
-                // Cart badge আপডেট করুন
-                updateCartBadge(userUID);
-                
-                // যদি pending purchase থাকে
-                if (pendingPurchase) {
-                    showPurchaseForm(pendingPurchase);
-                    pendingPurchase = null;
-                }
-                
-                // Success alert
-                alert("লগইন সফল হয়েছে! আপনাকে স্বাগতম " + (user.displayName || user.email));
-                
-            } catch (error) {
-                console.error("❌ Google login error:", error);
-                
-                // Specific error messages
-                let errorMessage = "লগইন ব্যর্থ হয়েছে। ";
-                
-                if (error.code === 'auth/popup-blocked') {
-                    errorMessage += "পপআপ ব্লক করা হয়েছে। অনুগ্রহ করে পপআপ ব্লকার বন্ধ করুন।";
-                } else if (error.code === 'auth/popup-closed-by-user') {
-                    errorMessage += "লগইন পপআপ বন্ধ করা হয়েছে।";
-                } else if (error.code === 'auth/cancelled-popup-request') {
-                    errorMessage += "লগইন বাতিল করা হয়েছে।";
-                } else {
-                    errorMessage += error.message;
-                }
-                
-                alert(errorMessage);
+            });
+        }
+
+        // Delete Account Button
+        deleteAccountBtn.addEventListener('click', function() {
+            if (confirm("আপনি কি নিশ্চিত যে আপনি আপনার অ্যাকাউন্ট ডিলিট করতে চান? এই একশনটি irreversible হবে।")) {
+                window.open('https://easy-premium.com/AccountDelete.html', '_blank');
+            }
+        });
+
+        // Close Profile Modal when clicking outside
+        profileModal.addEventListener('click', function(e) {
+            if (e.target === profileModal) {
+                profileModal.style.display = 'none';
             }
         });
 
@@ -1910,63 +1941,502 @@
             pendingPurchase = null;
         });
 
-        // ===================== AUTH STATE LISTENER =====================
+        // Close modals when clicking outside
+        loginModal.addEventListener('click', function(e) {
+            if (e.target === loginModal) {
+                loginModal.style.display = 'none';
+                pendingPurchase = null;
+            }
+        });
+
+        purchaseModal.addEventListener('click', function(e) {
+            if (e.target === purchaseModal) {
+                purchaseModal.style.display = 'none';
+            }
+        });
+
+        // ===================== FIXED LOGIN SYSTEM =====================
         
-        function initializeAuth() {
-            // Auth state change listener
-            auth.onAuthStateChanged(async (user) => {
-                console.log("Auth state changed:", user ? "User logged in" : "No user");
-                
-                if (user) {
-                    console.log("User details:", {
-                        uid: user.uid,
-                        email: user.email,
-                        displayName: user.displayName
+        // User Registration & Login System
+        class EasyPremiumAuthSystem {
+            constructor() {
+                this.currentUserUID = null;
+                this.currentUserData = null;
+            }
+            
+            // Google Sign In - FIXED VERSION
+            async signInWithGoogle() {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.addScope('profile');
+                    provider.addScope('email');
+                    
+                    // Set custom parameters for better UX
+                    provider.setCustomParameters({
+                        prompt: 'select_account'
                     });
                     
-                    // Automatically update cart badge
-                    updateCartBadge(user.uid);
-                } else {
-                    console.log("User signed out");
-                    cartBadge.style.display = 'none';
+                    console.log("Starting Google sign in...");
+                    const result = await auth.signInWithPopup(provider);
+                    
+                    console.log("Google sign in successful:", result.user);
+                    this.currentUserUID = result.user.uid;
+                    
+                    // Create or update user in database with UID
+                    await this.createOrUpdateUserInDatabase(result.user);
+                    
+                    console.log("User logged in with UID:", this.currentUserUID);
+                    return { success: true, user: result.user };
+                    
+                } catch (error) {
+                    console.error("Google Sign In Error:", error);
+                    console.error("Error code:", error.code);
+                    console.error("Error message:", error.message);
+                    console.error("Error email:", error.email);
+                    console.error("Error credential:", error.credential);
+                    
+                    // Check for specific errors
+                    if (error.code === 'auth/popup-blocked') {
+                        return { success: false, error: 'পপআপ ব্লক করা হয়েছে। দয়া করে ব্রাউজার সেটিংস চেক করুন।' };
+                    } else if (error.code === 'auth/popup-closed-by-user') {
+                        return { success: false, error: 'লগইন পপআপ বন্ধ করা হয়েছে।' };
+                    } else if (error.code === 'auth/cancelled-popup-request') {
+                        return { success: false, error: 'লগইন রিকোয়েস্ট বাতিল হয়েছে।' };
+                    } else if (error.code === 'auth/account-exists-with-different-credential') {
+                        return { success: false, error: 'এই ইমেইল অন্য অ্যাকাউন্টের সাথে যুক্ত আছে।' };
+                    } else {
+                        return { success: false, error: error.message };
+                    }
                 }
-            });
+            }
+            
+            // Create or update user in database with UID
+            async createOrUpdateUserInDatabase(firebaseUser) {
+                const userUID = firebaseUser.uid;
+                
+                try {
+                    // Check if user exists in database
+                    const userRef = database.ref(`users/${userUID}`);
+                    const snapshot = await userRef.once('value');
+                    
+                    if (!snapshot.exists()) {
+                        // Create new user with UID
+                        const userData = {
+                            uid: userUID,
+                            email: firebaseUser.email || '',
+                            displayName: firebaseUser.displayName || '',
+                            photoURL: firebaseUser.photoURL || '',
+                            createdAt: firebase.database.ServerValue.TIMESTAMP,
+                            lastLogin: firebase.database.ServerValue.TIMESTAMP,
+                            accountType: 'customer',
+                            status: 'active'
+                        };
+                        
+                        await userRef.set(userData);
+                        console.log("New user created with UID:", userUID);
+                    } else {
+                        // Update last login
+                        await userRef.child('lastLogin').set(firebase.database.ServerValue.TIMESTAMP);
+                    }
+                    
+                    // Store user data locally
+                    const userSnap = await userRef.once('value');
+                    this.currentUserData = userSnap.val() || {
+                        uid: userUID,
+                        email: firebaseUser.email,
+                        displayName: firebaseUser.displayName
+                    };
+                    
+                } catch (error) {
+                    console.error("Error in createOrUpdateUserInDatabase:", error);
+                    // Still store basic user data locally even if DB fails
+                    this.currentUserData = {
+                        uid: userUID,
+                        email: firebaseUser.email,
+                        displayName: firebaseUser.displayName
+                    };
+                }
+            }
+            
+            // Get current user UID
+            getCurrentUID() {
+                return this.currentUserUID || (auth.currentUser ? auth.currentUser.uid : null);
+            }
+            
+            // Check if user is authenticated
+            isAuthenticated() {
+                return !!this.getCurrentUID();
+            }
+            
+            // Sign out
+            async signOut() {
+                try {
+                    await auth.signOut();
+                    this.currentUserUID = null;
+                    this.currentUserData = null;
+                    
+                    console.log("User signed out");
+                    return { success: true };
+                    
+                } catch (error) {
+                    console.error("Sign Out Error:", error);
+                    return { success: false, error: error.message };
+                }
+            }
+            
+            // Get user data
+            async getUserData() {
+                const uid = this.getCurrentUID();
+                if (!uid) return null;
+                
+                try {
+                    const userRef = database.ref(`users/${uid}`);
+                    const snapshot = await userRef.once('value');
+                    
+                    if (snapshot.exists()) {
+                        this.currentUserData = snapshot.val();
+                        return this.currentUserData;
+                    }
+                    
+                    return null;
+                    
+                } catch (error) {
+                    console.error("Error getting user data:", error);
+                    return null;
+                }
+            }
+        }
+        
+        // UID-based Data Access System
+        class UIDDataProtectionSystem {
+            constructor() {
+                this.authSystem = new EasyPremiumAuthSystem();
+            }
+            
+            // Create order with UID protection
+            async createOrder(orderData) {
+                const userUID = this.authSystem.getCurrentUID();
+                
+                if (!userUID) {
+                    throw new Error("User must be logged in to create order");
+                }
+                
+                // Get user data
+                const userData = await this.authSystem.getUserData();
+                
+                const orderWithUID = {
+                    ...orderData,
+                    userId: userUID,
+                    userEmail: userData?.email || '',
+                    userName: userData?.displayName || orderData.userName || '',
+                    orderDate: new Date().toISOString(),
+                    status: 'pending',
+                    orderId: this.generateOrderId(),
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
+                
+                try {
+                    // Store in transactions
+                    const transactionRef = database.ref('transactions').push();
+                    await transactionRef.set(orderWithUID);
+                    
+                    // Also store in user's personal orders collection
+                    const userOrderRef = database.ref(`userOrders/${userUID}/${transactionRef.key}`);
+                    await userOrderRef.set({
+                        orderId: transactionRef.key,
+                        platform: orderData.platform,
+                        price: orderData.price,
+                        status: 'pending',
+                        orderDate: orderWithUID.orderDate,
+                        platformId: orderData.platformId
+                    });
+                    
+                    return {
+                        success: true,
+                        orderId: transactionRef.key,
+                        userId: userUID
+                    };
+                    
+                } catch (error) {
+                    console.error("Order creation error:", error);
+                    throw error;
+                }
+            }
+            
+            // Get user's orders
+            async getUserOrders() {
+                const userUID = this.authSystem.getCurrentUID();
+                
+                if (!userUID) {
+                    console.log("No user UID found");
+                    return [];
+                }
+                
+                try {
+                    const snapshot = await database.ref(`userOrders/${userUID}`).once('value');
+                    
+                    const orders = [];
+                    snapshot.forEach(child => {
+                        orders.push({
+                            id: child.key,
+                            ...child.val()
+                        });
+                    });
+                    
+                    // Sort by date (newest first)
+                    orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+                    
+                    return orders;
+                    
+                } catch (error) {
+                    console.error("Error getting user orders:", error);
+                    return [];
+                }
+            }
+            
+            // Update order status
+            async updateOrderStatus(orderId, newStatus) {
+                const userUID = this.authSystem.getCurrentUID();
+                
+                if (!userUID) {
+                    throw new Error("User not authenticated");
+                }
+                
+                try {
+                    // First check if this order belongs to the user
+                    const orderRef = database.ref(`userOrders/${userUID}/${orderId}`);
+                    const snapshot = await orderRef.once('value');
+                    
+                    if (!snapshot.exists()) {
+                        throw new Error("Order not found or you don't have permission");
+                    }
+                    
+                    // Update status in user's orders
+                    await orderRef.update({
+                        status: newStatus,
+                        updatedAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+                    
+                    return { success: true };
+                    
+                } catch (error) {
+                    console.error("Error updating order:", error);
+                    throw error;
+                }
+            }
+            
+            // Get user's profile
+            async getUserProfile() {
+                return await this.authSystem.getUserData();
+            }
+            
+            // Helper function to generate order ID
+            generateOrderId() {
+                const timestamp = Date.now();
+                const random = Math.random().toString(36).substr(2, 9).toUpperCase();
+                return `EP-${timestamp}-${random}`;
+            }
+        }
+        
+        // Initialize auth and data protection systems
+        const authSystem = new EasyPremiumAuthSystem();
+        const dataProtectionSystem = new UIDDataProtectionSystem();
+        
+        // ===================== FIXED LOGIN EVENT LISTENER =====================
+        
+        // Google Login - FIXED VERSION
+        googleLoginBtn.addEventListener('click', async function() {
+            if (!checkCookieConsent()) {
+                websiteOverlay.style.display = 'flex';
+                return;
+            }
+            
+            // Show loading state
+            const originalText = googleLoginBtn.innerHTML;
+            googleLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> লগইন হচ্ছে...';
+            googleLoginBtn.disabled = true;
+            
+            try {
+                console.log("Google login button clicked");
+                const result = await authSystem.signInWithGoogle();
+                
+                if (result.success) {
+                    console.log("Login successful, closing modal");
+                    loginModal.style.display = 'none';
+                    
+                    // Update cart badge with user's UID
+                    updateCartBadge(authSystem.getCurrentUID());
+                    
+                    // If there was a pending purchase, show purchase form
+                    if (pendingPurchase) {
+                        showPurchaseForm(pendingPurchase);
+                        pendingPurchase = null;
+                    }
+                    
+                    // Show success message
+                    setTimeout(() => {
+                        alert("লগইন সফল হয়েছে! স্বাগতম " + (result.user.displayName || result.user.email));
+                    }, 500);
+                    
+                } else {
+                    alert("লগইন ব্যর্থ: " + result.error);
+                }
+                
+            } catch (error) {
+                console.error("Login error:", error);
+                alert("লগইন ব্যর্থ: " + error.message);
+            } finally {
+                // Reset button state
+                googleLoginBtn.innerHTML = originalText;
+                googleLoginBtn.disabled = false;
+            }
+        });
+
+        // Logout function
+        logoutBtnProfile.addEventListener('click', async function() {
+            try {
+                await authSystem.signOut();
+                profileModal.style.display = 'none';
+                userOrders = [];
+                cartBadge.style.display = 'none';
+                console.log("User logged out successfully");
+            } catch (error) {
+                console.error("Logout error:", error);
+            }
+        });
+
+        // Purchase Form Submission
+        purchaseForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!checkCookieConsent()) {
+                websiteOverlay.style.display = 'flex';
+                return;
+            }
+            
+            if (!currentPurchaseInfo) return;
+            
+            if (!purchaseUserName.value.trim()) {
+                purchaseUserName.focus();
+                return;
+            }
+            
+            if (!purchasePhoneNumber.value.trim()) {
+                purchasePhoneNumber.focus();
+                return;
+            }
+            
+            if (!purchaseWhatsappNumber.value.trim()) {
+                purchaseWhatsappNumber.focus();
+                return;
+            }
+            
+            purchaseSubmitBtn.disabled = true;
+            purchaseSubmitBtn.textContent = 'প্রসেসিং...';
+            
+            try {
+                // Create order with UID protection
+                const orderData = {
+                    userName: purchaseUserName.value.trim(),
+                    phoneNumber: purchasePhoneNumber.value.trim(),
+                    whatsappNumber: purchaseWhatsappNumber.value.trim(),
+                    platform: currentPurchaseInfo.platformName,
+                    price: currentPurchaseInfo.price,
+                    platformId: currentPurchaseInfo.platformId
+                };
+                
+                const result = await dataProtectionSystem.createOrder(orderData);
+                
+                if (result.success) {
+                    console.log("Order created successfully with ID:", result.orderId);
+                    
+                    // Reset form
+                    purchaseForm.reset();
+                    
+                    // Show success message
+                    alert(`অর্ডার সফলভাবে তৈরি হয়েছে! অর্ডার আইডি: ${result.orderId}`);
+                    
+                    purchaseModal.style.display = 'none';
+                    currentPurchaseInfo = null;
+                    
+                    // Update cart badge
+                    updateCartBadge(result.userId);
+                    
+                    purchaseSubmitBtn.disabled = false;
+                    purchaseSubmitBtn.textContent = 'অর্ডার কনফার্ম করুন';
+                    
+                } else {
+                    throw new Error("Order creation failed");
+                }
+                
+            } catch (error) {
+                console.error("Error creating order:", error);
+                alert("অর্ডার তৈরি করতে সমস্যা হয়েছে: " + error.message);
+                
+                purchaseSubmitBtn.disabled = false;
+                purchaseSubmitBtn.textContent = 'অর্ডার কনফার্ম করুন';
+            }
+        });
+
+        // Function to handle purchase
+        function handlePurchase(platformCard) {
+            if (!checkCookieConsent()) {
+                websiteOverlay.style.display = 'flex';
+                return;
+            }
+            
+            const userUID = authSystem.getCurrentUID();
+            
+            if (!userUID) {
+                const platformName = platformCard.querySelector('.platform-name').textContent;
+                const price = platformCard.querySelector('.price').textContent;
+                const platformId = platformCard.getAttribute('data-platform-id');
+                
+                pendingPurchase = {
+                    platformName: platformName,
+                    price: price,
+                    platformId: platformId,
+                    platformCard: platformCard
+                };
+                
+                loginModal.style.display = 'flex';
+            } else {
+                showPurchaseForm({
+                    platformName: platformCard.querySelector('.platform-name').textContent,
+                    price: platformCard.querySelector('.price').textContent,
+                    platformId: platformCard.getAttribute('data-platform-id'),
+                    platformCard: platformCard
+                });
+            }
         }
 
-        // ===================== PROFILE FUNCTIONS =====================
-        
         // Load user profile data
         async function loadUserProfile() {
-            const user = auth.currentUser;
+            const userUID = authSystem.getCurrentUID();
             
-            if (!user) {
-                console.log("No user found");
+            if (!userUID) {
+                console.log("No user UID found");
                 return;
             }
             
             try {
-                // Get user data from database
-                const userRef = database.ref(`users/${user.uid}`);
-                const snapshot = await userRef.once('value');
+                // Get user data with UID
+                const userData = await dataProtectionSystem.getUserProfile();
                 
-                let userData = snapshot.val();
-                
-                if (!userData) {
-                    userData = {
-                        displayName: user.displayName || user.email,
-                        email: user.email
-                    };
+                if (userData) {
+                    profileName.textContent = userData.displayName || userData.email || "User";
+                    profileEmail.textContent = userData.email || "No email";
+                    
+                    // Set profile avatar
+                    setProfileAvatar(userData);
+                    
+                    // Load user's orders
+                    await loadUserOrders(userUID);
+                } else {
+                    profileName.textContent = "User";
+                    profileEmail.textContent = "No email";
+                    setProfileAvatar(null);
                 }
-                
-                // Update profile display
-                profileName.textContent = userData.displayName || userData.email || "User";
-                profileEmail.textContent = userData.email || "No email";
-                
-                // Set profile avatar
-                setProfileAvatar(userData);
-                
-                // Load user's orders
-                await loadUserOrders(user.uid);
                 
             } catch (error) {
                 console.error("Error loading user profile:", error);
@@ -1975,42 +2445,11 @@
             }
         }
 
-        // Set profile avatar
-        function setProfileAvatar(userData) {
-            profileAvatar.innerHTML = '';
-            
-            if (userData && userData.photoURL) {
-                const img = document.createElement('img');
-                img.src = userData.photoURL;
-                img.alt = userData.displayName || "User";
-                img.className = 'profile-avatar-img';
-                img.onerror = function() {
-                    showInitialAvatar(userData.displayName || userData.email);
-                };
-                profileAvatar.appendChild(img);
-            } else {
-                const userName = userData ? (userData.displayName || userData.email || "User") : "User";
-                showInitialAvatar(userName);
-            }
-        }
-
-        // Show initial avatar
-        function showInitialAvatar(userName) {
-            const firstName = userName ? userName.charAt(0).toUpperCase() : "U";
-            const color = getColorFromName(userName);
-            
-            profileAvatar.style.background = color;
-            profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: bold;">${firstName}</span>`;
-        }
-
-        // ===================== ORDERS FUNCTIONS =====================
-        
         // Load user orders
         async function loadUserOrders(userUID) {
             ordersList.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>অর্ডার লোড হচ্ছে...</p></div>';
             
             try {
-                // Get from userOrders
                 const snapshot = await database.ref(`userOrders/${userUID}`).once('value');
                 
                 const orders = [];
@@ -2147,12 +2586,37 @@
             ordersList.innerHTML = tableHTML + cardsHTML;
         }
 
+        // Set profile avatar
+        function setProfileAvatar(userData) {
+            profileAvatar.innerHTML = '';
+            
+            if (userData && userData.photoURL) {
+                const img = document.createElement('img');
+                img.src = userData.photoURL;
+                img.alt = userData.displayName || "User";
+                img.className = 'profile-avatar-img';
+                img.onerror = function() {
+                    showInitialAvatar(userData.displayName || userData.email);
+                };
+                profileAvatar.appendChild(img);
+            } else {
+                const userName = userData ? (userData.displayName || userData.email || "User") : "User";
+                showInitialAvatar(userName);
+            }
+        }
+
+        // Show initial avatar
+        function showInitialAvatar(userName) {
+            const firstName = userName ? userName.charAt(0).toUpperCase() : "U";
+            const color = getColorFromName(userName);
+            
+            profileAvatar.style.background = color;
+            profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: bold;">${firstName}</span>`;
+        }
+
         // Update cart badge
         async function updateCartBadge(userId) {
-            if (!userId) {
-                cartBadge.style.display = 'none';
-                return;
-            }
+            if (!userId) return;
             
             try {
                 const snapshot = await database.ref(`userOrders/${userId}`).once('value');
@@ -2171,8 +2635,6 @@
             }
         }
 
-        // ===================== PURCHASE FUNCTIONS =====================
-        
         // Show purchase form
         function showPurchaseForm(purchaseData) {
             currentPurchaseInfo = purchaseData;
@@ -2180,9 +2642,14 @@
             purchasePlatformName.textContent = purchaseData.platformName;
             purchasePlatformPrice.textContent = `দাম: ${purchaseData.price}`;
             
-            const user = auth.currentUser;
-            if (user) {
-                purchaseUserName.value = user.displayName || '';
+            const userUID = authSystem.getCurrentUID();
+            if (userUID) {
+                // Try to get user name from stored data
+                if (authSystem.currentUserData && authSystem.currentUserData.displayName) {
+                    purchaseUserName.value = authSystem.currentUserData.displayName;
+                } else {
+                    purchaseUserName.value = '';
+                }
             } else {
                 purchaseUserName.value = '';
             }
@@ -2193,139 +2660,6 @@
             purchaseModal.style.display = 'flex';
         }
 
-        // Purchase Form Submission
-        purchaseForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (!checkCookieConsent()) {
-                websiteOverlay.style.display = 'flex';
-                return;
-            }
-            
-            if (!currentPurchaseInfo) return;
-            
-            if (!purchaseUserName.value.trim()) {
-                purchaseUserName.focus();
-                return;
-            }
-            
-            if (!purchasePhoneNumber.value.trim()) {
-                purchasePhoneNumber.focus();
-                return;
-            }
-            
-            if (!purchaseWhatsappNumber.value.trim()) {
-                purchaseWhatsappNumber.focus();
-                return;
-            }
-            
-            purchaseSubmitBtn.disabled = true;
-            purchaseSubmitBtn.textContent = 'প্রসেসিং...';
-            
-            try {
-                const user = auth.currentUser;
-                if (!user) {
-                    throw new Error("User must be logged in");
-                }
-                
-                // Create order data
-                const orderData = {
-                    userName: purchaseUserName.value.trim(),
-                    phoneNumber: purchasePhoneNumber.value.trim(),
-                    whatsappNumber: purchaseWhatsappNumber.value.trim(),
-                    platform: currentPurchaseInfo.platformName,
-                    price: currentPurchaseInfo.price,
-                    platformId: currentPurchaseInfo.platformId,
-                    userId: user.uid,
-                    userEmail: user.email || '',
-                    orderDate: new Date().toISOString(),
-                    status: 'pending',
-                    orderId: generateOrderId(),
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                };
-                
-                // Store in transactions
-                const transactionRef = database.ref('transactions').push();
-                await transactionRef.set(orderData);
-                
-                // Store in user's personal orders
-                const userOrderRef = database.ref(`userOrders/${user.uid}/${transactionRef.key}`);
-                await userOrderRef.set({
-                    orderId: transactionRef.key,
-                    platform: orderData.platform,
-                    price: orderData.price,
-                    status: 'pending',
-                    orderDate: orderData.orderDate,
-                    platformId: orderData.platformId
-                });
-                
-                console.log("Order created successfully with ID:", transactionRef.key);
-                
-                // Reset form
-                purchaseForm.reset();
-                
-                // Show success message
-                alert(`অর্ডার সফলভাবে তৈরি হয়েছে! অর্ডার আইডি: ${transactionRef.key}`);
-                
-                purchaseModal.style.display = 'none';
-                currentPurchaseInfo = null;
-                
-                // Update cart badge
-                updateCartBadge(user.uid);
-                
-                purchaseSubmitBtn.disabled = false;
-                purchaseSubmitBtn.textContent = 'অর্ডার কনফার্ম করুন';
-                
-            } catch (error) {
-                console.error("Error creating order:", error);
-                alert("অর্ডার তৈরি করতে সমস্যা হয়েছে: " + error.message);
-                
-                purchaseSubmitBtn.disabled = false;
-                purchaseSubmitBtn.textContent = 'অর্ডার কনফার্ম করুন';
-            }
-        });
-
-        // Generate order ID
-        function generateOrderId() {
-            const timestamp = Date.now();
-            const random = Math.random().toString(36).substr(2, 9).toUpperCase();
-            return `EP-${timestamp}-${random}`;
-        }
-
-        // Handle purchase
-        function handlePurchase(platformCard) {
-            if (!checkCookieConsent()) {
-                websiteOverlay.style.display = 'flex';
-                return;
-            }
-            
-            const user = auth.currentUser;
-            
-            if (!user) {
-                const platformName = platformCard.querySelector('.platform-name').textContent;
-                const price = platformCard.querySelector('.price').textContent;
-                const platformId = platformCard.getAttribute('data-platform-id');
-                
-                pendingPurchase = {
-                    platformName: platformName,
-                    price: price,
-                    platformId: platformId,
-                    platformCard: platformCard
-                };
-                
-                loginModal.style.display = 'flex';
-            } else {
-                showPurchaseForm({
-                    platformName: platformCard.querySelector('.platform-name').textContent,
-                    price: platformCard.querySelector('.price').textContent,
-                    platformId: platformCard.getAttribute('data-platform-id'),
-                    platformCard: platformCard
-                });
-            }
-        }
-
-        // ===================== PLATFORM FUNCTIONS =====================
-        
         // Function to load platforms from Firebase
         function loadPlatformsFromFirebase() {
             const platformsGrid = document.getElementById('platforms-grid');
@@ -2378,7 +2712,6 @@
                     });
                 });
 
-                // Initialize search
                 initializeSearch();
                 
                 animatePlatformCards();
@@ -2477,208 +2810,35 @@
                 }, index * 150);
             });
         }
-
-        // ===================== SEARCH FUNCTIONALITY =====================
         
-        function initializeSearch() {
-            searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase().trim();
-                
-                if (searchTerm.length === 0) {
-                    searchResults.style.display = 'none';
-                    return;
-                }
-                
-                const filteredPlatforms = allPlatforms.filter(platform => {
-                    const name = platform.name ? platform.name.toLowerCase() : '';
-                    const description = platform.description ? platform.description.toLowerCase() : '';
-                    const features = platform.features ? platform.features.join(' ').toLowerCase() : '';
-                    const price = platform.price ? platform.price.toLowerCase() : '';
+        function initializeAuth() {
+            // Listen for auth state changes
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    console.log("User is signed in with UID:", user.uid);
                     
-                    return name.includes(searchTerm) || 
-                           description.includes(searchTerm) || 
-                           features.includes(searchTerm) ||
-                           price.includes(searchTerm);
-                });
-                
-                displaySearchResults(filteredPlatforms);
-            });
-            
-            searchBtn.addEventListener('click', function() {
-                const searchTerm = searchInput.value.toLowerCase().trim();
-                
-                if (searchTerm.length === 0) {
-                    searchResults.style.display = 'none';
-                    return;
-                }
-                
-                const filteredPlatforms = allPlatforms.filter(platform => {
-                    const name = platform.name ? platform.name.toLowerCase() : '';
-                    const description = platform.description ? platform.description.toLowerCase() : '';
-                    const features = platform.features ? platform.features.join(' ').toLowerCase() : '';
-                    const price = platform.price ? platform.price.toLowerCase() : '';
+                    // Initialize auth system with current user
+                    authSystem.currentUserUID = user.uid;
+                    await authSystem.createOrUpdateUserInDatabase(user);
                     
-                    return name.includes(searchTerm) || 
-                           description.includes(searchTerm) || 
-                           features.includes(searchTerm) ||
-                           price.includes(searchTerm);
-                });
-                
-                displaySearchResults(filteredPlatforms);
-            });
-            
-            document.addEventListener('click', function(event) {
-                if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
-                    searchResults.style.display = 'none';
-                }
-            });
-            
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    searchBtn.click();
+                    // Update cart badge
+                    updateCartBadge(user.uid);
+                } else {
+                    console.log("No user signed in");
+                    authSystem.currentUserUID = null;
+                    authSystem.currentUserData = null;
                 }
             });
         }
         
-        // Display search results
-        function displaySearchResults(platforms) {
-            searchResults.innerHTML = '';
-            
-            if (platforms.length === 0) {
-                searchResults.innerHTML = '<div class="no-results">কোন ফলাফল পাওয়া যায়নি</div>';
-                searchResults.style.display = 'block';
-                return;
-            }
-            
-            const iconClasses = {
-                'youtube': 'fab fa-youtube youtube',
-                'facebook': 'fab fa-facebook-f facebook',
-                'instagram': 'fab fa-instagram instagram',
-                'tiktok': 'fab fa-tiktok tiktok',
-                'whatsapp': 'fab fa-whatsapp whatsapp',
-                'telegram': 'fab fa-telegram telegram',
-                'freefire': 'fas fa-fire freefire',
-                'netflix': 'fab fa-netflix netflix',
-                'spotify': 'fab fa-spotify spotify',
-                'pubg': 'fas fa-gamepad pubg',
-                'default': 'fas fa-cube'
-            };
-            
-            platforms.forEach(platform => {
-                const iconClass = iconClasses[platform.icon] || iconClasses.default;
-                
-                const resultItem = document.createElement('div');
-                resultItem.className = 'search-result-item';
-                resultItem.innerHTML = `
-                    <i class="${iconClass} search-result-icon"></i>
-                    <div class="search-result-content">
-                        <div class="search-result-name">${platform.name || 'প্ল্যাটফর্ম'}</div>
-                        <div class="search-result-desc">${platform.description || 'প্রিমিয়াম সেবা পান সবচেয়ে কম দামে।'}</div>
-                    </div>
-                    <div class="search-result-price">${platform.price || '৳ 100'}</div>
-                `;
-                
-                resultItem.addEventListener('click', function() {
-                    scrollToPlatformCard(platform.name);
-                    searchResults.style.display = 'none';
-                    searchInput.value = '';
-                });
-                
-                searchResults.appendChild(resultItem);
-            });
-            
-            searchResults.style.display = 'block';
-        }
-        
-        // Scroll to platform card in the grid
-        function scrollToPlatformCard(platformName) {
-            const platformCards = document.querySelectorAll('.platform-card');
-            
-            platformCards.forEach(card => {
-                const nameElement = card.querySelector('.platform-name');
-                if (nameElement && nameElement.textContent === platformName) {
-                    card.style.borderColor = '#ff5722';
-                    card.style.boxShadow = '0 0 20px rgba(255, 87, 34, 0.7)';
-                    
-                    card.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'center' 
-                    });
-                    
-                    setTimeout(() => {
-                        card.style.borderColor = '';
-                        card.style.boxShadow = '';
-                    }, 3000);
-                }
-            });
-        }
-
-        // ===================== EVENT LISTENERS =====================
-        
-        // Logout button
-        logoutBtnProfile.addEventListener('click', async function() {
-            try {
-                await auth.signOut();
-                profileModal.style.display = 'none';
-                userOrders = [];
-                cartBadge.style.display = 'none';
-                console.log("User logged out successfully");
-            } catch (error) {
-                console.error("Logout error:", error);
-            }
-        });
-
-        // Delete Account Button
-        deleteAccountBtn.addEventListener('click', function() {
-            if (confirm("আপনি কি নিশ্চিত যে আপনি আপনার অ্যাকাউন্ট ডিলিট করতে চান? এই একশনটি irreversible হবে।")) {
-                window.open('https://easy-premium.com/AccountDelete.html', '_blank');
-            }
-        });
-
         // Cancel purchase button
         purchaseCancelBtn.addEventListener('click', function() {
             purchaseModal.style.display = 'none';
             currentPurchaseInfo = null;
         });
-
-        // Close modals when clicking outside
-        loginModal.addEventListener('click', function(e) {
-            if (e.target === loginModal) {
-                loginModal.style.display = 'none';
-                pendingPurchase = null;
-            }
-        });
-
-        profileModal.addEventListener('click', function(e) {
-            if (e.target === profileModal) {
-                profileModal.style.display = 'none';
-            }
-        });
-
-        purchaseModal.addEventListener('click', function(e) {
-            if (e.target === purchaseModal) {
-                purchaseModal.style.display = 'none';
-            }
-        });
-
-        // ===================== FIREBASE CONSOLE SETUP CHECK =====================
         
-        // এই ফাংশনটি Firebase Console সেটিংস চেক করতে সাহায্য করবে
-        function checkFirebaseSetup() {
-            console.log("=== Firebase Setup Check ===");
-            console.log("1. Firebase Project ID:", firebaseConfig.projectId);
-            console.log("2. Auth Domain:", firebaseConfig.authDomain);
-            console.log("3. Check if Google Sign-In is enabled in Firebase Console");
-            console.log("4. Check authorized domains in Firebase Console:");
-            console.log("   - " + window.location.hostname);
-            console.log("   - " + firebaseConfig.authDomain);
-            console.log("5. Check Firebase Database Rules");
-            console.log("===========================");
-        }
-        
-        // Page load হলে Firebase setup চেক করুন
-        setTimeout(checkFirebaseSetup, 1000);
-
+        // Initialize everything
+        initializeAuth();
     </script>
 </body>
 </html>
