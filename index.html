@@ -2437,8 +2437,8 @@
             ordersList.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>অর্ডার লোড হচ্ছে...</p></div>';
             
             try {
-                // Get from transactions where userId matches
-                const snapshot = await database.ref('transactions').orderByChild('userId').equalTo(userUID).once('value');
+                // Get from userOrders where userId matches (as per your Firebase rules)
+                const snapshot = await database.ref(`userOrders/${userUID}`).once('value');
                 
                 const orders = [];
                 snapshot.forEach(child => {
@@ -2517,7 +2517,7 @@
                 }
                 
                 const platformName = order.platform || 'Unknown';
-                const orderId = order.id ? order.id.substring(0, 8) + '...' : 'N/A';
+                const orderId = order.orderId ? order.orderId.substring(0, 8) + '...' : (order.id ? order.id.substring(0, 8) + '...' : 'N/A');
                 
                 tableHTML += `
                     <tr>
@@ -2602,12 +2602,12 @@
             profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: bold;">${firstName}</span>`;
         }
 
-        // Update cart badge (Modified with UID)
+        // ============ FIXED VERSION: Update cart badge ============
         async function updateCartBadge(userId) {
             if (!userId) return;
             
             try {
-                const snapshot = await database.ref('transactions').orderByChild('userId').equalTo(userId).once('value');
+                const snapshot = await database.ref(`userOrders/${userId}`).once('value');
                 const orderCount = snapshot.numChildren();
                 
                 if (orderCount > 0) {
