@@ -2432,12 +2432,22 @@
             }
         }
 
-        // Load user orders (Modified with UID protection)
+        // ============ FIXED VERSION: Load user orders ============
         async function loadUserOrders(userUID) {
             ordersList.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>অর্ডার লোড হচ্ছে...</p></div>';
             
             try {
-                const orders = await dataProtectionSystem.getUserOrders();
+                // Get from transactions where userId matches
+                const snapshot = await database.ref('transactions').orderByChild('userId').equalTo(userUID).once('value');
+                
+                const orders = [];
+                snapshot.forEach(child => {
+                    orders.push({
+                        id: child.key,
+                        ...child.val()
+                    });
+                });
+                
                 userOrders = orders;
                 
                 if (orders.length === 0) {
@@ -2457,35 +2467,7 @@
             }
         }
 
-        // Set profile avatar (Modified)
-        function setProfileAvatar(userData) {
-            profileAvatar.innerHTML = '';
-            
-            if (userData && userData.photoURL) {
-                const img = document.createElement('img');
-                img.src = userData.photoURL;
-                img.alt = userData.displayName || "User";
-                img.className = 'profile-avatar-img';
-                img.onerror = function() {
-                    showInitialAvatar(userData.displayName || userData.email);
-                };
-                profileAvatar.appendChild(img);
-            } else {
-                const userName = userData ? (userData.displayName || userData.email || "User") : "User";
-                showInitialAvatar(userName);
-            }
-        }
-
-        // Show initial avatar (Same as before)
-        function showInitialAvatar(userName) {
-            const firstName = userName ? userName.charAt(0).toUpperCase() : "U";
-            const color = getColorFromName(userName);
-            
-            profileAvatar.style.background = color;
-            profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: bold;">${firstName}</span>`;
-        }
-
-        // Display orders (Same as before)
+        // ============ FIXED VERSION: Display orders ============
         function displayOrders(orders) {
             if (orders.length === 0) {
                 ordersList.innerHTML = '<div class="no-orders">আপনার কোন অর্ডার নেই</div>';
@@ -2526,10 +2508,7 @@
                     statusText = 'প্রসেসিং';
                 } else if (order.status === 'success' || order.status === 'completed') {
                     statusClass = 'status-success';
-                    statusText = 'সফল';
-                } else if (order.status === 'payment') {
-                    statusClass = 'status-pending';
-                    statusText = 'পেমেন্ট';
+                    statusText = '✅ সফল';
                 }
                 
                 let priceValue = order.price || '৳ -';
@@ -2572,6 +2551,14 @@
                             <div class="order-card-label">অর্ডার আইডি</div>
                             <div class="order-card-value" style="font-size: 0.8rem;">${orderId}</div>
                         </div>
+                        ${order.status === 'completed' || order.status === 'success' ? `
+                        <div class="order-card-row" style="background: rgba(76, 175, 80, 0.1); padding: 10px; border-radius: 5px; margin-top: 10px;">
+                            <div class="order-card-label">নোটিফিকেশন</div>
+                            <div class="order-card-value" style="color: #4caf50; font-weight: bold;">
+                                ✅ আপনার অর্ডার সফলভাবে সম্পূর্ণ হয়েছে!
+                            </div>
+                        </div>
+                        ` : ''}
                     </div>
                 `;
             });
@@ -2587,13 +2574,41 @@
             ordersList.innerHTML = tableHTML + cardsHTML;
         }
 
+        // Set profile avatar (Modified)
+        function setProfileAvatar(userData) {
+            profileAvatar.innerHTML = '';
+            
+            if (userData && userData.photoURL) {
+                const img = document.createElement('img');
+                img.src = userData.photoURL;
+                img.alt = userData.displayName || "User";
+                img.className = 'profile-avatar-img';
+                img.onerror = function() {
+                    showInitialAvatar(userData.displayName || userData.email);
+                };
+                profileAvatar.appendChild(img);
+            } else {
+                const userName = userData ? (userData.displayName || userData.email || "User") : "User";
+                showInitialAvatar(userName);
+            }
+        }
+
+        // Show initial avatar (Same as before)
+        function showInitialAvatar(userName) {
+            const firstName = userName ? userName.charAt(0).toUpperCase() : "U";
+            const color = getColorFromName(userName);
+            
+            profileAvatar.style.background = color;
+            profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: bold;">${firstName}</span>`;
+        }
+
         // Update cart badge (Modified with UID)
         async function updateCartBadge(userId) {
             if (!userId) return;
             
             try {
-                const orders = await dataProtectionSystem.getUserOrders();
-                const orderCount = orders.length;
+                const snapshot = await database.ref('transactions').orderByChild('userId').equalTo(userId).once('value');
+                const orderCount = snapshot.numChildren();
                 
                 if (orderCount > 0) {
                     cartBadge.textContent = orderCount;
@@ -2805,6 +2820,12 @@
                 }
             });
         }
+        
+        // Cancel purchase button
+        purchaseCancelBtn.addEventListener('click', function() {
+            purchaseModal.style.display = 'none';
+            currentPurchaseInfo = null;
+        });
         
         // Initialize everything
         initializeAuth();
