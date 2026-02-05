@@ -1565,7 +1565,7 @@
                     
                     <div class="form-group">
                         <label class="form-label">ফোন নম্বর</label>
-                        <input type="tel" class="form-input" id="purchasePhoneNumber" placeholder="আপনার ফোন নম্বর" required>
+                        input type="tel" class="form-input" id="purchasePhoneNumber" placeholder="আপনার ফোন নম্বর" required>
                     </div>
                     
                     <div class="form-group">
@@ -1656,7 +1656,9 @@
     </footer>
 
     <script>
-        // Firebase Configuration - আপনার Original Key
+        // ===================== IMPORTANT FIXES =====================
+        
+        // 1. প্রথমে Firebase Configuration চেক করুন
         const firebaseConfig = {
             apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
             authDomain: "easy-premium.firebaseapp.com",
@@ -1668,16 +1670,31 @@
             measurementId: "G-CHL8K8HRPX"
         };
 
-        // Initialize Firebase
+        // 2. Firebase ইনিশিয়ালাইজেশনে ডিবাগিং যোগ করুন
         try {
+            // আগের অ্যাপস ডিলিট করুন (যদি থাকে)
+            try {
+                firebase.apps.forEach(app => {
+                    if (app.name === '[DEFAULT]') {
+                        app.delete();
+                    }
+                });
+            } catch (e) {
+                console.log("No previous apps to delete");
+            }
+            
+            // নতুনভাবে ইনিশিয়ালাইজ করুন
             firebase.initializeApp(firebaseConfig);
-            console.log("Firebase initialized successfully");
+            console.log("✅ Firebase initialized successfully");
         } catch (error) {
-            console.log("Firebase already initialized");
+            console.error("❌ Firebase initialization error:", error);
         }
         
         const database = firebase.database();
         const auth = firebase.auth();
+        
+        // 3. Authentication স্টেট চেক করুন
+        console.log("Initial auth state:", auth.currentUser);
 
         // DOM Elements
         const loginModal = document.getElementById('loginModal');
@@ -1798,7 +1815,671 @@
             }
         });
 
-        // Search functionality
+        // ===================== FIXED GOOGLE LOGIN =====================
+        
+        // Google Login Button Event Listener - FIXED VERSION
+        googleLoginBtn.addEventListener('click', async function() {
+            if (!checkCookieConsent()) {
+                websiteOverlay.style.display = 'flex';
+                return;
+            }
+            
+            try {
+                console.log("Google login button clicked");
+                
+                // Google Provider তৈরি করুন
+                const provider = new firebase.auth.GoogleAuthProvider();
+                
+                // পপআপ ব্লক চেক করুন
+                provider.setCustomParameters({
+                    prompt: 'select_account'
+                });
+                
+                // Sign in with popup
+                const result = await auth.signInWithPopup(provider);
+                
+                console.log("✅ Google login successful:", result.user);
+                
+                // User data সেভ করুন
+                const user = result.user;
+                const userUID = user.uid;
+                
+                // Database-এ user সেভ করুন
+                const userRef = database.ref(`users/${userUID}`);
+                const snapshot = await userRef.once('value');
+                
+                if (!snapshot.exists()) {
+                    // নতুন user তৈরি করুন
+                    const userData = {
+                        uid: userUID,
+                        email: user.email || '',
+                        displayName: user.displayName || '',
+                        photoURL: user.photoURL || '',
+                        createdAt: firebase.database.ServerValue.TIMESTAMP,
+                        lastLogin: firebase.database.ServerValue.TIMESTAMP,
+                        accountType: 'customer',
+                        status: 'active'
+                    };
+                    
+                    await userRef.set(userData);
+                    console.log("New user created in database");
+                } else {
+                    // Update last login
+                    await userRef.child('lastLogin').set(firebase.database.ServerValue.TIMESTAMP);
+                    console.log("Existing user updated");
+                }
+                
+                // লগইন মডাল বন্ধ করুন
+                loginModal.style.display = 'none';
+                
+                // Cart badge আপডেট করুন
+                updateCartBadge(userUID);
+                
+                // যদি pending purchase থাকে
+                if (pendingPurchase) {
+                    showPurchaseForm(pendingPurchase);
+                    pendingPurchase = null;
+                }
+                
+                // Success alert
+                alert("লগইন সফল হয়েছে! আপনাকে স্বাগতম " + (user.displayName || user.email));
+                
+            } catch (error) {
+                console.error("❌ Google login error:", error);
+                
+                // Specific error messages
+                let errorMessage = "লগইন ব্যর্থ হয়েছে। ";
+                
+                if (error.code === 'auth/popup-blocked') {
+                    errorMessage += "পপআপ ব্লক করা হয়েছে। অনুগ্রহ করে পপআপ ব্লকার বন্ধ করুন।";
+                } else if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage += "লগইন পপআপ বন্ধ করা হয়েছে।";
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    errorMessage += "লগইন বাতিল করা হয়েছে।";
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                alert(errorMessage);
+            }
+        });
+
+        // Close Login Modal
+        closeLoginBtn.addEventListener('click', function() {
+            loginModal.style.display = 'none';
+            pendingPurchase = null;
+        });
+
+        // ===================== AUTH STATE LISTENER =====================
+        
+        function initializeAuth() {
+            // Auth state change listener
+            auth.onAuthStateChanged(async (user) => {
+                console.log("Auth state changed:", user ? "User logged in" : "No user");
+                
+                if (user) {
+                    console.log("User details:", {
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName
+                    });
+                    
+                    // Automatically update cart badge
+                    updateCartBadge(user.uid);
+                } else {
+                    console.log("User signed out");
+                    cartBadge.style.display = 'none';
+                }
+            });
+        }
+
+        // ===================== PROFILE FUNCTIONS =====================
+        
+        // Load user profile data
+        async function loadUserProfile() {
+            const user = auth.currentUser;
+            
+            if (!user) {
+                console.log("No user found");
+                return;
+            }
+            
+            try {
+                // Get user data from database
+                const userRef = database.ref(`users/${user.uid}`);
+                const snapshot = await userRef.once('value');
+                
+                let userData = snapshot.val();
+                
+                if (!userData) {
+                    userData = {
+                        displayName: user.displayName || user.email,
+                        email: user.email
+                    };
+                }
+                
+                // Update profile display
+                profileName.textContent = userData.displayName || userData.email || "User";
+                profileEmail.textContent = userData.email || "No email";
+                
+                // Set profile avatar
+                setProfileAvatar(userData);
+                
+                // Load user's orders
+                await loadUserOrders(user.uid);
+                
+            } catch (error) {
+                console.error("Error loading user profile:", error);
+                profileName.textContent = "Error";
+                profileEmail.textContent = "Could not load profile";
+            }
+        }
+
+        // Set profile avatar
+        function setProfileAvatar(userData) {
+            profileAvatar.innerHTML = '';
+            
+            if (userData && userData.photoURL) {
+                const img = document.createElement('img');
+                img.src = userData.photoURL;
+                img.alt = userData.displayName || "User";
+                img.className = 'profile-avatar-img';
+                img.onerror = function() {
+                    showInitialAvatar(userData.displayName || userData.email);
+                };
+                profileAvatar.appendChild(img);
+            } else {
+                const userName = userData ? (userData.displayName || userData.email || "User") : "User";
+                showInitialAvatar(userName);
+            }
+        }
+
+        // Show initial avatar
+        function showInitialAvatar(userName) {
+            const firstName = userName ? userName.charAt(0).toUpperCase() : "U";
+            const color = getColorFromName(userName);
+            
+            profileAvatar.style.background = color;
+            profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: bold;">${firstName}</span>`;
+        }
+
+        // ===================== ORDERS FUNCTIONS =====================
+        
+        // Load user orders
+        async function loadUserOrders(userUID) {
+            ordersList.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>অর্ডার লোড হচ্ছে...</p></div>';
+            
+            try {
+                // Get from userOrders
+                const snapshot = await database.ref(`userOrders/${userUID}`).once('value');
+                
+                const orders = [];
+                snapshot.forEach(child => {
+                    orders.push({
+                        id: child.key,
+                        ...child.val()
+                    });
+                });
+                
+                userOrders = orders;
+                
+                if (orders.length === 0) {
+                    ordersList.innerHTML = '<div class="no-orders">আপনার কোন অর্ডার নেই</div>';
+                    return;
+                }
+                
+                displayOrders(orders);
+                
+                // Update cart badge
+                cartBadge.textContent = orders.length;
+                cartBadge.style.display = 'flex';
+                
+            } catch (error) {
+                console.error("Error loading user orders:", error);
+                ordersList.innerHTML = '<div class="no-orders">অর্ডার লোড করতে সমস্যা হয়েছে</div>';
+            }
+        }
+
+        // Display orders
+        function displayOrders(orders) {
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<div class="no-orders">আপনার কোন অর্ডার নেই</div>';
+                return;
+            }
+            
+            let tableHTML = `
+                <div class="orders-table-container">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>তারিখ</th>
+                                <th>প্ল্যাটফর্ম</th>
+                                <th>দাম</th>
+                                <th>স্ট্যাটাস</th>
+                                <th>অর্ডার আইডি</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            let cardsHTML = '<div class="orders-cards">';
+            
+            orders.forEach(order => {
+                let orderDate;
+                if (order.orderDate) {
+                    orderDate = new Date(order.orderDate);
+                } else {
+                    orderDate = new Date();
+                }
+                const formattedDate = orderDate.toLocaleDateString('bn-BD');
+                
+                let statusClass = 'status-pending';
+                let statusText = 'পেন্ডিং';
+                
+                if (order.status === 'processing') {
+                    statusClass = 'status-processing';
+                    statusText = 'প্রসেসিং';
+                } else if (order.status === 'success' || order.status === 'completed') {
+                    statusClass = 'status-success';
+                    statusText = '✅ সফল';
+                }
+                
+                let priceValue = order.price || '৳ -';
+                if (priceValue && !priceValue.includes('৳')) {
+                    priceValue = `৳ ${priceValue}`;
+                }
+                
+                const platformName = order.platform || 'Unknown';
+                const orderId = order.orderId ? order.orderId.substring(0, 8) + '...' : (order.id ? order.id.substring(0, 8) + '...' : 'N/A');
+                
+                tableHTML += `
+                    <tr>
+                        <td>${formattedDate}</td>
+                        <td>${platformName}</td>
+                        <td>${priceValue}</td>
+                        <td class="${statusClass}">${statusText}</td>
+                        <td style="font-size: 0.8rem;">${orderId}</td>
+                    </tr>
+                `;
+                
+                cardsHTML += `
+                    <div class="order-card">
+                        <div class="order-card-row">
+                            <div class="order-card-label">তারিখ</div>
+                            <div class="order-card-value">${formattedDate}</div>
+                        </div>
+                        <div class="order-card-row">
+                            <div class="order-card-label">প্ল্যাটফর্ম</div>
+                            <div class="order-card-value">${platformName}</div>
+                        </div>
+                        <div class="order-card-row">
+                            <div class="order-card-label">দাম</div>
+                            <div class="order-card-value">${priceValue}</div>
+                        </div>
+                        <div class="order-card-row">
+                            <div class="order-card-label">স্ট্যাটাস</div>
+                            <div class="order-card-value"><span class="${statusClass}">${statusText}</span></div>
+                        </div>
+                        <div class="order-card-row">
+                            <div class="order-card-label">অর্ডার আইডি</div>
+                            <div class="order-card-value" style="font-size: 0.8rem;">${orderId}</div>
+                        </div>
+                        ${order.status === 'completed' || order.status === 'success' ? `
+                        <div class="order-card-row" style="background: rgba(76, 175, 80, 0.1); padding: 10px; border-radius: 5px; margin-top: 10px;">
+                            <div class="order-card-label">নোটিফিকেশন</div>
+                            <div class="order-card-value" style="color: #4caf50; font-weight: bold;">
+                                ✅ আপনার অর্ডার সফলভাবে সম্পূর্ণ হয়েছে!
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            tableHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            cardsHTML += '</div>';
+            
+            ordersList.innerHTML = tableHTML + cardsHTML;
+        }
+
+        // Update cart badge
+        async function updateCartBadge(userId) {
+            if (!userId) {
+                cartBadge.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const snapshot = await database.ref(`userOrders/${userId}`).once('value');
+                const orderCount = snapshot.numChildren();
+                
+                if (orderCount > 0) {
+                    cartBadge.textContent = orderCount;
+                    cartBadge.style.display = 'flex';
+                } else {
+                    cartBadge.style.display = 'none';
+                }
+                
+            } catch (error) {
+                console.error("Error updating cart badge:", error);
+                cartBadge.style.display = 'none';
+            }
+        }
+
+        // ===================== PURCHASE FUNCTIONS =====================
+        
+        // Show purchase form
+        function showPurchaseForm(purchaseData) {
+            currentPurchaseInfo = purchaseData;
+            
+            purchasePlatformName.textContent = purchaseData.platformName;
+            purchasePlatformPrice.textContent = `দাম: ${purchaseData.price}`;
+            
+            const user = auth.currentUser;
+            if (user) {
+                purchaseUserName.value = user.displayName || '';
+            } else {
+                purchaseUserName.value = '';
+            }
+            
+            purchasePhoneNumber.value = '';
+            purchaseWhatsappNumber.value = '';
+            
+            purchaseModal.style.display = 'flex';
+        }
+
+        // Purchase Form Submission
+        purchaseForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!checkCookieConsent()) {
+                websiteOverlay.style.display = 'flex';
+                return;
+            }
+            
+            if (!currentPurchaseInfo) return;
+            
+            if (!purchaseUserName.value.trim()) {
+                purchaseUserName.focus();
+                return;
+            }
+            
+            if (!purchasePhoneNumber.value.trim()) {
+                purchasePhoneNumber.focus();
+                return;
+            }
+            
+            if (!purchaseWhatsappNumber.value.trim()) {
+                purchaseWhatsappNumber.focus();
+                return;
+            }
+            
+            purchaseSubmitBtn.disabled = true;
+            purchaseSubmitBtn.textContent = 'প্রসেসিং...';
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    throw new Error("User must be logged in");
+                }
+                
+                // Create order data
+                const orderData = {
+                    userName: purchaseUserName.value.trim(),
+                    phoneNumber: purchasePhoneNumber.value.trim(),
+                    whatsappNumber: purchaseWhatsappNumber.value.trim(),
+                    platform: currentPurchaseInfo.platformName,
+                    price: currentPurchaseInfo.price,
+                    platformId: currentPurchaseInfo.platformId,
+                    userId: user.uid,
+                    userEmail: user.email || '',
+                    orderDate: new Date().toISOString(),
+                    status: 'pending',
+                    orderId: generateOrderId(),
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
+                
+                // Store in transactions
+                const transactionRef = database.ref('transactions').push();
+                await transactionRef.set(orderData);
+                
+                // Store in user's personal orders
+                const userOrderRef = database.ref(`userOrders/${user.uid}/${transactionRef.key}`);
+                await userOrderRef.set({
+                    orderId: transactionRef.key,
+                    platform: orderData.platform,
+                    price: orderData.price,
+                    status: 'pending',
+                    orderDate: orderData.orderDate,
+                    platformId: orderData.platformId
+                });
+                
+                console.log("Order created successfully with ID:", transactionRef.key);
+                
+                // Reset form
+                purchaseForm.reset();
+                
+                // Show success message
+                alert(`অর্ডার সফলভাবে তৈরি হয়েছে! অর্ডার আইডি: ${transactionRef.key}`);
+                
+                purchaseModal.style.display = 'none';
+                currentPurchaseInfo = null;
+                
+                // Update cart badge
+                updateCartBadge(user.uid);
+                
+                purchaseSubmitBtn.disabled = false;
+                purchaseSubmitBtn.textContent = 'অর্ডার কনফার্ম করুন';
+                
+            } catch (error) {
+                console.error("Error creating order:", error);
+                alert("অর্ডার তৈরি করতে সমস্যা হয়েছে: " + error.message);
+                
+                purchaseSubmitBtn.disabled = false;
+                purchaseSubmitBtn.textContent = 'অর্ডার কনফার্ম করুন';
+            }
+        });
+
+        // Generate order ID
+        function generateOrderId() {
+            const timestamp = Date.now();
+            const random = Math.random().toString(36).substr(2, 9).toUpperCase();
+            return `EP-${timestamp}-${random}`;
+        }
+
+        // Handle purchase
+        function handlePurchase(platformCard) {
+            if (!checkCookieConsent()) {
+                websiteOverlay.style.display = 'flex';
+                return;
+            }
+            
+            const user = auth.currentUser;
+            
+            if (!user) {
+                const platformName = platformCard.querySelector('.platform-name').textContent;
+                const price = platformCard.querySelector('.price').textContent;
+                const platformId = platformCard.getAttribute('data-platform-id');
+                
+                pendingPurchase = {
+                    platformName: platformName,
+                    price: price,
+                    platformId: platformId,
+                    platformCard: platformCard
+                };
+                
+                loginModal.style.display = 'flex';
+            } else {
+                showPurchaseForm({
+                    platformName: platformCard.querySelector('.platform-name').textContent,
+                    price: platformCard.querySelector('.price').textContent,
+                    platformId: platformCard.getAttribute('data-platform-id'),
+                    platformCard: platformCard
+                });
+            }
+        }
+
+        // ===================== PLATFORM FUNCTIONS =====================
+        
+        // Function to load platforms from Firebase
+        function loadPlatformsFromFirebase() {
+            const platformsGrid = document.getElementById('platforms-grid');
+            platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে...</p></div>';
+
+            const platformsRef = database.ref('publicData/pricingPlans');
+            
+            platformsRef.on('value', (snapshot) => {
+                const platformsData = snapshot.val();
+                platformsGrid.innerHTML = '';
+
+                if (!platformsData) {
+                    showNoPlatformsMessage();
+                    return;
+                }
+
+                allPlatforms = [];
+                
+                // Convert object to array
+                Object.entries(platformsData).forEach(([id, platform]) => {
+                    allPlatforms.push({
+                        id: id,
+                        name: platform.name,
+                        icon: platform.icon,
+                        description: platform.description,
+                        price: platform.price,
+                        features: platform.features || [],
+                        category: platform.category,
+                        order: platform.order || 0,
+                        status: platform.status || 'active',
+                        color: platform.color || '#ff9800'
+                    });
+                });
+                
+                // Sort by order
+                allPlatforms.sort((a, b) => (a.order || 0) - (b.order || 0));
+                
+                // Filter active platforms only
+                const activePlatforms = allPlatforms.filter(platform => platform.status === 'active');
+
+                activePlatforms.forEach(platform => {
+                    createPlatformCard(platform);
+                });
+
+                document.querySelectorAll('.platform-card .buy-button').forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const platformCard = this.closest('.platform-card');
+                        handlePurchase(platformCard);
+                    });
+                });
+
+                // Initialize search
+                initializeSearch();
+                
+                animatePlatformCards();
+            }, (error) => {
+                console.error("Error loading platforms:", error);
+                showNoPlatformsMessage();
+            });
+        }
+
+        function showNoPlatformsMessage() {
+            const platformsGrid = document.getElementById('platforms-grid');
+            platformsGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-box-open" style="font-size: 3.5rem; color: #ff9800; margin-bottom: 20px;"></i>
+                    <h3 style="color: #ff9800; margin-bottom: 15px;">প্ল্যাটফর্ম পাওয়া যায়নি</h3>
+                    <p style="color: #ddd; max-width: 500px; margin: 0 auto;">
+                        বর্তমানে কোনো প্ল্যাটফর্ম পাওয়া যায়নি। দয়া করে কিছুক্ষণ পরে আবার চেষ্টা করুন অথবা অ্যাডমিনের সাথে যোগাযোগ করুন।
+                    </p>
+                </div>
+            `;
+        }
+
+        // Create a platform card
+        function createPlatformCard(platform) {
+            const platformsGrid = document.getElementById('platforms-grid');
+            const platformCard = document.createElement('div');
+            platformCard.className = 'platform-card';
+            platformCard.setAttribute('data-platform-name', platform.name);
+            platformCard.setAttribute('data-platform-id', platform.id);
+            
+            const iconClasses = {
+                'youtube': 'fab fa-youtube youtube',
+                'facebook': 'fab fa-facebook-f facebook',
+                'instagram': 'fab fa-instagram instagram',
+                'tiktok': 'fab fa-tiktok tiktok',
+                'whatsapp': 'fab fa-whatsapp whatsapp',
+                'telegram': 'fab fa-telegram telegram',
+                'freefire': 'fas fa-fire freefire',
+                'netflix': 'fab fa-netflix netflix',
+                'spotify': 'fab fa-spotify spotify',
+                'pubg': 'fas fa-gamepad pubg',
+                'default': 'fas fa-cube'
+            };
+
+            const iconClass = iconClasses[platform.icon] || iconClasses.default;
+
+            platformCard.innerHTML = `
+                <div class="platform-header">
+                    <i class="${iconClass} platform-icon"></i>
+                    <div class="platform-name">${platform.name || 'প্ল্যাটফর্ম'}</div>
+                </div>
+                <div class="platform-description">
+                    ${platform.description || 'প্রিমিয়াম সেবা পান সবচেয়ে কম দামে।'}
+                </div>
+                <div class="platform-features">
+                    ${platform.features && platform.features.length > 0 ? platform.features.map(feature => `
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>${feature}</span>
+                        </div>
+                    `).join('') : `
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>ইনস্ট্যান্ট ডেলিভারি</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>১০০% সেফ</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>গ্যারান্টিড</span>
+                        </div>
+                    `}
+                </div>
+                <div class="platform-price">
+                    <div class="price">${platform.price || '৳ 100'}</div>
+                    <div class="price-desc">বাল্ক অর্ডারে ডিস্কাউন্ট</div>
+                </div>
+                <button class="buy-button">কিনুন</button>
+            `;
+
+            platformsGrid.appendChild(platformCard);
+        }
+
+        function animatePlatformCards() {
+            const cards = document.querySelectorAll('.platform-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.5s, transform 0.5s';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+        }
+
+        // ===================== SEARCH FUNCTIONALITY =====================
+        
         function initializeSearch() {
             searchInput.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase().trim();
@@ -1932,6 +2613,21 @@
             });
         }
 
+        // ===================== EVENT LISTENERS =====================
+        
+        // Logout button
+        logoutBtnProfile.addEventListener('click', async function() {
+            try {
+                await auth.signOut();
+                profileModal.style.display = 'none';
+                userOrders = [];
+                cartBadge.style.display = 'none';
+                console.log("User logged out successfully");
+            } catch (error) {
+                console.error("Logout error:", error);
+            }
+        });
+
         // Delete Account Button
         deleteAccountBtn.addEventListener('click', function() {
             if (confirm("আপনি কি নিশ্চিত যে আপনি আপনার অ্যাকাউন্ট ডিলিট করতে চান? এই একশনটি irreversible হবে।")) {
@@ -1939,17 +2635,10 @@
             }
         });
 
-        // Close Profile Modal when clicking outside
-        profileModal.addEventListener('click', function(e) {
-            if (e.target === profileModal) {
-                profileModal.style.display = 'none';
-            }
-        });
-
-        // Close Login Modal
-        closeLoginBtn.addEventListener('click', function() {
-            loginModal.style.display = 'none';
-            pendingPurchase = null;
+        // Cancel purchase button
+        purchaseCancelBtn.addEventListener('click', function() {
+            purchaseModal.style.display = 'none';
+            currentPurchaseInfo = null;
         });
 
         // Close modals when clicking outside
@@ -1960,875 +2649,36 @@
             }
         });
 
+        profileModal.addEventListener('click', function(e) {
+            if (e.target === profileModal) {
+                profileModal.style.display = 'none';
+            }
+        });
+
         purchaseModal.addEventListener('click', function(e) {
             if (e.target === purchaseModal) {
                 purchaseModal.style.display = 'none';
             }
         });
 
-        // ===================== UID-BASED SECURITY SYSTEM =====================
+        // ===================== FIREBASE CONSOLE SETUP CHECK =====================
         
-        // User Registration & Login System with UID Protection
-        class EasyPremiumAuthSystem {
-            constructor() {
-                this.currentUserUID = null;
-                this.currentUserData = null;
-            }
-            
-            // Google Sign In with UID protection
-            async signInWithGoogle() {
-                try {
-                    const provider = new firebase.auth.GoogleAuthProvider();
-                    const result = await auth.signInWithPopup(provider);
-                    
-                    this.currentUserUID = result.user.uid;
-                    
-                    // Create or update user in database with UID
-                    await this.createOrUpdateUserInDatabase(result.user);
-                    
-                    console.log("User logged in with UID:", this.currentUserUID);
-                    return { success: true, user: result.user };
-                    
-                } catch (error) {
-                    console.error("Google Sign In Error:", error);
-                    return { success: false, error: error.message };
-                }
-            }
-            
-            // Create or update user in database with UID
-            async createOrUpdateUserInDatabase(firebaseUser) {
-                const userUID = firebaseUser.uid;
-                
-                // Check if user exists in database
-                const userRef = database.ref(`users/${userUID}`);
-                const snapshot = await userRef.once('value');
-                
-                if (!snapshot.exists()) {
-                    // Create new user with UID
-                    const userData = {
-                        uid: userUID,
-                        email: firebaseUser.email || '',
-                        displayName: firebaseUser.displayName || '',
-                        photoURL: firebaseUser.photoURL || '',
-                        createdAt: firebase.database.ServerValue.TIMESTAMP,
-                        lastLogin: firebase.database.ServerValue.TIMESTAMP,
-                        accountType: 'customer',
-                        status: 'active'
-                    };
-                    
-                    await userRef.set(userData);
-                    console.log("New user created with UID:", userUID);
-                } else {
-                    // Update last login
-                    await userRef.child('lastLogin').set(firebase.database.ServerValue.TIMESTAMP);
-                }
-                
-                // Store user data locally
-                this.currentUserData = snapshot.val() || {
-                    uid: userUID,
-                    email: firebaseUser.email,
-                    displayName: firebaseUser.displayName
-                };
-            }
-            
-            // Get current user UID
-            getCurrentUID() {
-                return this.currentUserUID || (auth.currentUser ? auth.currentUser.uid : null);
-            }
-            
-            // Check if user is authenticated
-            isAuthenticated() {
-                return !!this.getCurrentUID();
-            }
-            
-            // Sign out
-            async signOut() {
-                try {
-                    await auth.signOut();
-                    this.currentUserUID = null;
-                    this.currentUserData = null;
-                    
-                    console.log("User signed out");
-                    return { success: true };
-                    
-                } catch (error) {
-                    console.error("Sign Out Error:", error);
-                    return { success: false, error: error.message };
-                }
-            }
-            
-            // Get user data (secured by UID)
-            async getUserData() {
-                const uid = this.getCurrentUID();
-                if (!uid) return null;
-                
-                try {
-                    const userRef = database.ref(`users/${uid}`);
-                    const snapshot = await userRef.once('value');
-                    
-                    if (snapshot.exists()) {
-                        this.currentUserData = snapshot.val();
-                        return this.currentUserData;
-                    }
-                    
-                    return null;
-                    
-                } catch (error) {
-                    console.error("Error getting user data:", error);
-                    return null;
-                }
-            }
+        // এই ফাংশনটি Firebase Console সেটিংস চেক করতে সাহায্য করবে
+        function checkFirebaseSetup() {
+            console.log("=== Firebase Setup Check ===");
+            console.log("1. Firebase Project ID:", firebaseConfig.projectId);
+            console.log("2. Auth Domain:", firebaseConfig.authDomain);
+            console.log("3. Check if Google Sign-In is enabled in Firebase Console");
+            console.log("4. Check authorized domains in Firebase Console:");
+            console.log("   - " + window.location.hostname);
+            console.log("   - " + firebaseConfig.authDomain);
+            console.log("5. Check Firebase Database Rules");
+            console.log("===========================");
         }
         
-        // UID-based Data Access System
-        class UIDDataProtectionSystem {
-            constructor() {
-                this.authSystem = new EasyPremiumAuthSystem();
-            }
-            
-            // Create order with UID protection
-            async createOrder(orderData) {
-                const userUID = this.authSystem.getCurrentUID();
-                
-                if (!userUID) {
-                    throw new Error("User must be logged in to create order");
-                }
-                
-                // Get user data
-                const userData = await this.authSystem.getUserData();
-                
-                const orderWithUID = {
-                    ...orderData,
-                    userId: userUID, // ✅ UID attached for security
-                    userEmail: userData?.email || '',
-                    userName: userData?.displayName || orderData.userName || '',
-                    orderDate: new Date().toISOString(),
-                    status: 'pending',
-                    orderId: this.generateOrderId(),
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                };
-                
-                try {
-                    // Store in transactions (will be filtered by UID in Rules)
-                    const transactionRef = database.ref('transactions').push();
-                    await transactionRef.set(orderWithUID);
-                    
-                    // Also store in user's personal orders collection
-                    const userOrderRef = database.ref(`userOrders/${userUID}/${transactionRef.key}`);
-                    await userOrderRef.set({
-                        orderId: transactionRef.key,
-                        platform: orderData.platform,
-                        price: orderData.price,
-                        status: 'pending',
-                        orderDate: orderWithUID.orderDate,
-                        platformId: orderData.platformId
-                    });
-                    
-                    return {
-                        success: true,
-                        orderId: transactionRef.key,
-                        userId: userUID
-                    };
-                    
-                } catch (error) {
-                    console.error("Order creation error:", error);
-                    throw error;
-                }
-            }
-            
-            // Get user's orders (only their own - UID protected)
-            async getUserOrders() {
-                const userUID = this.authSystem.getCurrentUID();
-                
-                if (!userUID) {
-                    console.log("No user UID found");
-                    return [];
-                }
-                
-                try {
-                    // Get from user's personal orders (secured by UID in Rules)
-                    const snapshot = await database.ref(`userOrders/${userUID}`).once('value');
-                    
-                    const orders = [];
-                    snapshot.forEach(child => {
-                        orders.push({
-                            id: child.key,
-                            ...child.val()
-                        });
-                    });
-                    
-                    // Sort by date (newest first)
-                    orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-                    
-                    return orders;
-                    
-                } catch (error) {
-                    console.error("Error getting user orders:", error);
-                    return [];
-                }
-            }
-            
-            // Update order status (only if user owns it)
-            async updateOrderStatus(orderId, newStatus) {
-                const userUID = this.authSystem.getCurrentUID();
-                
-                if (!userUID) {
-                    throw new Error("User not authenticated");
-                }
-                
-                try {
-                    // First check if this order belongs to the user
-                    const orderRef = database.ref(`userOrders/${userUID}/${orderId}`);
-                    const snapshot = await orderRef.once('value');
-                    
-                    if (!snapshot.exists()) {
-                        throw new Error("Order not found or you don't have permission");
-                    }
-                    
-                    // Update status in user's orders
-                    await orderRef.update({
-                        status: newStatus,
-                        updatedAt: firebase.database.ServerValue.TIMESTAMP
-                    });
-                    
-                    // Also update in main transactions if admin access is needed
-                    const mainOrderRef = database.ref(`transactions/${orderId}`);
-                    await mainOrderRef.update({
-                        status: newStatus,
-                        updatedAt: firebase.database.ServerValue.TIMESTAMP
-                    });
-                    
-                    return { success: true };
-                    
-                } catch (error) {
-                    console.error("Error updating order:", error);
-                    throw error;
-                }
-            }
-            
-            // Get user's profile (only their own)
-            async getUserProfile() {
-                return await this.authSystem.getUserData();
-            }
-            
-            // Update user profile (only their own)
-            async updateUserProfile(profileData) {
-                const userUID = this.authSystem.getCurrentUID();
-                
-                if (!userUID) {
-                    throw new Error("User not authenticated");
-                }
-                
-                try {
-                    const updates = {
-                        ...profileData,
-                        lastUpdated: firebase.database.ServerValue.TIMESTAMP
-                    };
-                    
-                    await database.ref(`users/${userUID}`).update(updates);
-                    return { success: true };
-                    
-                } catch (error) {
-                    console.error("Error updating profile:", error);
-                    throw error;
-                }
-            }
-            
-            // Helper function to generate order ID
-            generateOrderId() {
-                const timestamp = Date.now();
-                const random = Math.random().toString(36).substr(2, 9).toUpperCase();
-                return `EP-${timestamp}-${random}`;
-            }
-        }
-        
-        // Initialize auth and data protection systems
-        const authSystem = new EasyPremiumAuthSystem();
-        const dataProtectionSystem = new UIDDataProtectionSystem();
-        
-        // ===================== MODIFIED FUNCTIONS WITH UID PROTECTION =====================
-        
-        // Google Login (Modified with UID protection)
-        googleLoginBtn.addEventListener('click', async function() {
-            if (!checkCookieConsent()) {
-                websiteOverlay.style.display = 'flex';
-                return;
-            }
-            
-            try {
-                const result = await authSystem.signInWithGoogle();
-                
-                if (result.success) {
-                    loginModal.style.display = 'none';
-                    
-                    // Update cart badge with user's UID
-                    updateCartBadge(authSystem.getCurrentUID());
-                    
-                    // If there was a pending purchase, show purchase form
-                    if (pendingPurchase) {
-                        showPurchaseForm(pendingPurchase);
-                        pendingPurchase = null;
-                    }
-                } else {
-                    alert("Login failed: " + result.error);
-                }
-                
-            } catch (error) {
-                console.error("Login error:", error);
-                alert("Login failed: " + error.message);
-            }
-        });
+        // Page load হলে Firebase setup চেক করুন
+        setTimeout(checkFirebaseSetup, 1000);
 
-        // Logout function (Modified)
-        logoutBtnProfile.addEventListener('click', async function() {
-            try {
-                await authSystem.signOut();
-                profileModal.style.display = 'none';
-                userOrders = [];
-                cartBadge.style.display = 'none';
-                console.log("User logged out successfully");
-            } catch (error) {
-                console.error("Logout error:", error);
-            }
-        });
-
-        // Purchase Form Submission (Modified with UID protection)
-        purchaseForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (!checkCookieConsent()) {
-                websiteOverlay.style.display = 'flex';
-                return;
-            }
-            
-            if (!currentPurchaseInfo) return;
-            
-            if (!purchaseUserName.value.trim()) {
-                purchaseUserName.focus();
-                return;
-            }
-            
-            if (!purchasePhoneNumber.value.trim()) {
-                purchasePhoneNumber.focus();
-                return;
-            }
-            
-            if (!purchaseWhatsappNumber.value.trim()) {
-                purchaseWhatsappNumber.focus();
-                return;
-            }
-            
-            purchaseSubmitBtn.disabled = true;
-            purchaseSubmitBtn.textContent = 'প্রসেসিং...';
-            
-            try {
-                // Create order with UID protection
-                const orderData = {
-                    userName: purchaseUserName.value.trim(),
-                    phoneNumber: purchasePhoneNumber.value.trim(),
-                    whatsappNumber: purchaseWhatsappNumber.value.trim(),
-                    platform: currentPurchaseInfo.platformName,
-                    price: currentPurchaseInfo.price,
-                    platformId: currentPurchaseInfo.platformId
-                };
-                
-                const result = await dataProtectionSystem.createOrder(orderData);
-                
-                if (result.success) {
-                    console.log("Order created successfully with ID:", result.orderId);
-                    
-                    // Reset form
-                    purchaseForm.reset();
-                    
-                    // Show success message
-                    alert(`অর্ডার সফলভাবে তৈরি হয়েছে! অর্ডার আইডি: ${result.orderId}\nআপনার UID: ${result.userId}`);
-                    
-                    purchaseModal.style.display = 'none';
-                    currentPurchaseInfo = null;
-                    
-                    // Update cart badge
-                    updateCartBadge(result.userId);
-                    
-                    purchaseSubmitBtn.disabled = false;
-                    purchaseSubmitBtn.textContent = 'অর্ডার কনফার্ম করুন';
-                    
-                } else {
-                    throw new Error("Order creation failed");
-                }
-                
-            } catch (error) {
-                console.error("Error creating order:", error);
-                alert("অর্ডার তৈরি করতে সমস্যা হয়েছে: " + error.message);
-                
-                purchaseSubmitBtn.disabled = false;
-                purchaseSubmitBtn.textContent = 'অর্ডার কনফার্ম করুন';
-            }
-        });
-
-        // Function to handle purchase (Modified)
-        function handlePurchase(platformCard) {
-            if (!checkCookieConsent()) {
-                websiteOverlay.style.display = 'flex';
-                return;
-            }
-            
-            const userUID = authSystem.getCurrentUID();
-            
-            if (!userUID) {
-                const platformName = platformCard.querySelector('.platform-name').textContent;
-                const price = platformCard.querySelector('.price').textContent;
-                const platformId = platformCard.getAttribute('data-platform-id');
-                
-                pendingPurchase = {
-                    platformName: platformName,
-                    price: price,
-                    platformId: platformId,
-                    platformCard: platformCard
-                };
-                
-                loginModal.style.display = 'flex';
-            } else {
-                showPurchaseForm({
-                    platformName: platformCard.querySelector('.platform-name').textContent,
-                    price: platformCard.querySelector('.price').textContent,
-                    platformId: platformCard.getAttribute('data-platform-id'),
-                    platformCard: platformCard
-                });
-            }
-        }
-
-        // Load user profile data (Modified with UID protection)
-        async function loadUserProfile() {
-            const userUID = authSystem.getCurrentUID();
-            
-            if (!userUID) {
-                console.log("No user UID found");
-                return;
-            }
-            
-            try {
-                // Get user data with UID
-                const userData = await dataProtectionSystem.getUserProfile();
-                
-                if (userData) {
-                    profileName.textContent = userData.displayName || userData.email || "User";
-                    profileEmail.textContent = userData.email || "No email";
-                    
-                    // Set profile avatar
-                    setProfileAvatar(userData);
-                    
-                    // Load user's orders (UID protected)
-                    await loadUserOrders(userUID);
-                } else {
-                    profileName.textContent = "User";
-                    profileEmail.textContent = "No email";
-                    setProfileAvatar(null);
-                }
-                
-            } catch (error) {
-                console.error("Error loading user profile:", error);
-                profileName.textContent = "Error";
-                profileEmail.textContent = "Could not load profile";
-            }
-        }
-
-        // ============ FIXED VERSION: Load user orders ============
-        async function loadUserOrders(userUID) {
-            ordersList.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>অর্ডার লোড হচ্ছে...</p></div>';
-            
-            try {
-                // Get from userOrders where userId matches (as per your Firebase rules)
-                const snapshot = await database.ref(`userOrders/${userUID}`).once('value');
-                
-                const orders = [];
-                snapshot.forEach(child => {
-                    orders.push({
-                        id: child.key,
-                        ...child.val()
-                    });
-                });
-                
-                userOrders = orders;
-                
-                if (orders.length === 0) {
-                    ordersList.innerHTML = '<div class="no-orders">আপনার কোন অর্ডার নেই</div>';
-                    return;
-                }
-                
-                displayOrders(orders);
-                
-                // Update cart badge
-                cartBadge.textContent = orders.length;
-                cartBadge.style.display = 'flex';
-                
-            } catch (error) {
-                console.error("Error loading user orders:", error);
-                ordersList.innerHTML = '<div class="no-orders">অর্ডার লোড করতে সমস্যা হয়েছে</div>';
-            }
-        }
-
-        // ============ FIXED VERSION: Display orders ============
-        function displayOrders(orders) {
-            if (orders.length === 0) {
-                ordersList.innerHTML = '<div class="no-orders">আপনার কোন অর্ডার নেই</div>';
-                return;
-            }
-            
-            let tableHTML = `
-                <div class="orders-table-container">
-                    <table class="orders-table">
-                        <thead>
-                            <tr>
-                                <th>তারিখ</th>
-                                <th>প্ল্যাটফর্ম</th>
-                                <th>দাম</th>
-                                <th>স্ট্যাটাস</th>
-                                <th>অর্ডার আইডি</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            let cardsHTML = '<div class="orders-cards">';
-            
-            orders.forEach(order => {
-                let orderDate;
-                if (order.orderDate) {
-                    orderDate = new Date(order.orderDate);
-                } else {
-                    orderDate = new Date();
-                }
-                const formattedDate = orderDate.toLocaleDateString('bn-BD');
-                
-                let statusClass = 'status-pending';
-                let statusText = 'পেন্ডিং';
-                
-                if (order.status === 'processing') {
-                    statusClass = 'status-processing';
-                    statusText = 'প্রসেসিং';
-                } else if (order.status === 'success' || order.status === 'completed') {
-                    statusClass = 'status-success';
-                    statusText = '✅ সফল';
-                }
-                
-                let priceValue = order.price || '৳ -';
-                if (priceValue && !priceValue.includes('৳')) {
-                    priceValue = `৳ ${priceValue}`;
-                }
-                
-                const platformName = order.platform || 'Unknown';
-                const orderId = order.orderId ? order.orderId.substring(0, 8) + '...' : (order.id ? order.id.substring(0, 8) + '...' : 'N/A');
-                
-                tableHTML += `
-                    <tr>
-                        <td>${formattedDate}</td>
-                        <td>${platformName}</td>
-                        <td>${priceValue}</td>
-                        <td class="${statusClass}">${statusText}</td>
-                        <td style="font-size: 0.8rem;">${orderId}</td>
-                    </tr>
-                `;
-                
-                cardsHTML += `
-                    <div class="order-card">
-                        <div class="order-card-row">
-                            <div class="order-card-label">তারিখ</div>
-                            <div class="order-card-value">${formattedDate}</div>
-                        </div>
-                        <div class="order-card-row">
-                            <div class="order-card-label">প্ল্যাটফর্ম</div>
-                            <div class="order-card-value">${platformName}</div>
-                        </div>
-                        <div class="order-card-row">
-                            <div class="order-card-label">দাম</div>
-                            <div class="order-card-value">${priceValue}</div>
-                        </div>
-                        <div class="order-card-row">
-                            <div class="order-card-label">স্ট্যাটাস</div>
-                            <div class="order-card-value"><span class="${statusClass}">${statusText}</span></div>
-                        </div>
-                        <div class="order-card-row">
-                            <div class="order-card-label">অর্ডার আইডি</div>
-                            <div class="order-card-value" style="font-size: 0.8rem;">${orderId}</div>
-                        </div>
-                        ${order.status === 'completed' || order.status === 'success' ? `
-                        <div class="order-card-row" style="background: rgba(76, 175, 80, 0.1); padding: 10px; border-radius: 5px; margin-top: 10px;">
-                            <div class="order-card-label">নোটিফিকেশন</div>
-                            <div class="order-card-value" style="color: #4caf50; font-weight: bold;">
-                                ✅ আপনার অর্ডার সফলভাবে সম্পূর্ণ হয়েছে!
-                            </div>
-                        </div>
-                        ` : ''}
-                    </div>
-                `;
-            });
-            
-            tableHTML += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            
-            cardsHTML += '</div>';
-            
-            ordersList.innerHTML = tableHTML + cardsHTML;
-        }
-
-        // Set profile avatar (Modified)
-        function setProfileAvatar(userData) {
-            profileAvatar.innerHTML = '';
-            
-            if (userData && userData.photoURL) {
-                const img = document.createElement('img');
-                img.src = userData.photoURL;
-                img.alt = userData.displayName || "User";
-                img.className = 'profile-avatar-img';
-                img.onerror = function() {
-                    showInitialAvatar(userData.displayName || userData.email);
-                };
-                profileAvatar.appendChild(img);
-            } else {
-                const userName = userData ? (userData.displayName || userData.email || "User") : "User";
-                showInitialAvatar(userName);
-            }
-        }
-
-        // Show initial avatar (Same as before)
-        function showInitialAvatar(userName) {
-            const firstName = userName ? userName.charAt(0).toUpperCase() : "U";
-            const color = getColorFromName(userName);
-            
-            profileAvatar.style.background = color;
-            profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: bold;">${firstName}</span>`;
-        }
-
-        // ============ FIXED VERSION: Update cart badge ============
-        async function updateCartBadge(userId) {
-            if (!userId) return;
-            
-            try {
-                const snapshot = await database.ref(`userOrders/${userId}`).once('value');
-                const orderCount = snapshot.numChildren();
-                
-                if (orderCount > 0) {
-                    cartBadge.textContent = orderCount;
-                    cartBadge.style.display = 'flex';
-                } else {
-                    cartBadge.style.display = 'none';
-                }
-                
-            } catch (error) {
-                console.error("Error updating cart badge:", error);
-                cartBadge.style.display = 'none';
-            }
-        }
-
-        // ===================== REST OF THE CODE REMAINS SAME =====================
-        
-        // Show purchase form (Same as before)
-        function showPurchaseForm(purchaseData) {
-            currentPurchaseInfo = purchaseData;
-            
-            purchasePlatformName.textContent = purchaseData.platformName;
-            purchasePlatformPrice.textContent = `দাম: ${purchaseData.price}`;
-            
-            const userUID = authSystem.getCurrentUID();
-            if (userUID) {
-                // Try to get user name from stored data
-                if (authSystem.currentUserData && authSystem.currentUserData.displayName) {
-                    purchaseUserName.value = authSystem.currentUserData.displayName;
-                } else {
-                    purchaseUserName.value = '';
-                }
-            } else {
-                purchaseUserName.value = '';
-            }
-            
-            purchasePhoneNumber.value = '';
-            purchaseWhatsappNumber.value = '';
-            
-            purchaseModal.style.display = 'flex';
-        }
-
-        // Function to load platforms from Firebase (Same as before)
-        function loadPlatformsFromFirebase() {
-            const platformsGrid = document.getElementById('platforms-grid');
-            platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে...</p></div>';
-
-            const platformsRef = database.ref('publicData/pricingPlans');
-            
-            platformsRef.on('value', (snapshot) => {
-                const platformsData = snapshot.val();
-                platformsGrid.innerHTML = '';
-
-                if (!platformsData) {
-                    showNoPlatformsMessage();
-                    return;
-                }
-
-                allPlatforms = [];
-                
-                // Convert object to array
-                Object.entries(platformsData).forEach(([id, platform]) => {
-                    allPlatforms.push({
-                        id: id,
-                        name: platform.name,
-                        icon: platform.icon,
-                        description: platform.description,
-                        price: platform.price,
-                        features: platform.features || [],
-                        category: platform.category,
-                        order: platform.order || 0,
-                        status: platform.status || 'active',
-                        color: platform.color || '#ff9800'
-                    });
-                });
-                
-                // Sort by order
-                allPlatforms.sort((a, b) => (a.order || 0) - (b.order || 0));
-                
-                // Filter active platforms only
-                const activePlatforms = allPlatforms.filter(platform => platform.status === 'active');
-
-                activePlatforms.forEach(platform => {
-                    createPlatformCard(platform);
-                });
-
-                document.querySelectorAll('.platform-card .buy-button').forEach(button => {
-                    button.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const platformCard = this.closest('.platform-card');
-                        handlePurchase(platformCard);
-                    });
-                });
-
-                initializeSearch();
-                
-                animatePlatformCards();
-            }, (error) => {
-                console.error("Error loading platforms:", error);
-                showNoPlatformsMessage();
-            });
-        }
-
-        function showNoPlatformsMessage() {
-            const platformsGrid = document.getElementById('platforms-grid');
-            platformsGrid.innerHTML = `
-                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
-                    <i class="fas fa-box-open" style="font-size: 3.5rem; color: #ff9800; margin-bottom: 20px;"></i>
-                    <h3 style="color: #ff9800; margin-bottom: 15px;">প্ল্যাটফর্ম পাওয়া যায়নি</h3>
-                    <p style="color: #ddd; max-width: 500px; margin: 0 auto;">
-                        বর্তমানে কোনো প্ল্যাটফর্ম পাওয়া যায়নি। দয়া করে কিছুক্ষণ পরে আবার চেষ্টা করুন অথবা অ্যাডমিনের সাথে যোগাযোগ করুন।
-                    </p>
-                </div>
-            `;
-        }
-
-        // Create a platform card (Same as before)
-        function createPlatformCard(platform) {
-            const platformsGrid = document.getElementById('platforms-grid');
-            const platformCard = document.createElement('div');
-            platformCard.className = 'platform-card';
-            platformCard.setAttribute('data-platform-name', platform.name);
-            platformCard.setAttribute('data-platform-id', platform.id);
-            
-            const iconClasses = {
-                'youtube': 'fab fa-youtube youtube',
-                'facebook': 'fab fa-facebook-f facebook',
-                'instagram': 'fab fa-instagram instagram',
-                'tiktok': 'fab fa-tiktok tiktok',
-                'whatsapp': 'fab fa-whatsapp whatsapp',
-                'telegram': 'fab fa-telegram telegram',
-                'freefire': 'fas fa-fire freefire',
-                'netflix': 'fab fa-netflix netflix',
-                'spotify': 'fab fa-spotify spotify',
-                'pubg': 'fas fa-gamepad pubg',
-                'default': 'fas fa-cube'
-            };
-
-            const iconClass = iconClasses[platform.icon] || iconClasses.default;
-
-            platformCard.innerHTML = `
-                <div class="platform-header">
-                    <i class="${iconClass} platform-icon"></i>
-                    <div class="platform-name">${platform.name || 'প্ল্যাটফর্ম'}</div>
-                </div>
-                <div class="platform-description">
-                    ${platform.description || 'প্রিমিয়াম সেবা পান সবচেয়ে কম দামে।'}
-                </div>
-                <div class="platform-features">
-                    ${platform.features && platform.features.length > 0 ? platform.features.map(feature => `
-                        <div class="feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>${feature}</span>
-                        </div>
-                    `).join('') : `
-                        <div class="feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>ইনস্ট্যান্ট ডেলিভারি</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>১০০% সেফ</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>গ্যারান্টিড</span>
-                        </div>
-                    `}
-                </div>
-                <div class="platform-price">
-                    <div class="price">${platform.price || '৳ 100'}</div>
-                    <div class="price-desc">বাল্ক অর্ডারে ডিস্কাউন্ট</div>
-                </div>
-                <button class="buy-button">কিনুন</button>
-            `;
-
-            platformsGrid.appendChild(platformCard);
-        }
-
-        function animatePlatformCards() {
-            const cards = document.querySelectorAll('.platform-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.5s, transform 0.5s';
-                
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 150);
-            });
-        }
-        
-        function initializeAuth() {
-            // Listen for auth state changes
-            auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    console.log("User is signed in with UID:", user.uid);
-                    
-                    // Initialize auth system with current user
-                    authSystem.currentUserUID = user.uid;
-                    await authSystem.createOrUpdateUserInDatabase(user);
-                    
-                    // Update cart badge
-                    updateCartBadge(user.uid);
-                } else {
-                    console.log("No user signed in");
-                    authSystem.currentUserUID = null;
-                    authSystem.currentUserData = null;
-                }
-            });
-        }
-        
-        // Cancel purchase button
-        purchaseCancelBtn.addEventListener('click', function() {
-            purchaseModal.style.display = 'none';
-            currentPurchaseInfo = null;
-        });
-        
-        // Initialize everything
-        initializeAuth();
     </script>
 </body>
 </html>
