@@ -1957,7 +1957,7 @@
                 return;
             }
             
-            // আইকন ম্যাপিং ফাংশন
+            // আইকন ম্যাপিং ফাংশন - Netflix এবং Adobe এর জন্য ফিক্সড
             function getIconClass(iconName) {
                 const iconMap = {
                     'youtube': 'fab fa-youtube youtube',
@@ -1967,23 +1967,28 @@
                     'whatsapp': 'fab fa-whatsapp whatsapp',
                     'telegram': 'fab fa-telegram telegram',
                     'freefire': 'fas fa-fire freefire',
-                    'netflix': 'fab fa-netflix netflix',
+                    'netflix': 'fas fa-film netflix',  // Netflix এর জন্য fa-film আইকন
                     'spotify': 'fab fa-spotify spotify',
                     'pubg': 'fas fa-gamepad pubg',
                     'discord': 'fab fa-discord discord',
                     'amazon': 'fab fa-amazon amazon',
                     'microsoft': 'fab fa-microsoft microsoft',
-                    'adobe': 'fab fa-adobe adobe',
-                    'canva': 'fas fa-paint-brush canva',  // canva এর জন্য paint-brush আইকন
+                    'adobe': 'fas fa-paint-brush adobe',  // Adobe এর জন্য fa-paint-brush আইকন
+                    'canva': 'fas fa-paint-brush canva',
                     'google': 'fab fa-google google',
                     'linkedin': 'fab fa-linkedin linkedin'
                 };
                 
-                return iconMap[iconName] || 'fas fa-cube';
+                // iconName টি লোয়ার কেসে রূপান্তর করে চেক করুন
+                const lowerIconName = iconName ? iconName.toLowerCase() : '';
+                
+                return iconMap[lowerIconName] || 'fas fa-cube';
             }
             
             platforms.forEach(platform => {
-                const iconClass = getIconClass(platform.icon);
+                // platform.icon বা platform.name থেকে আইকন সিলেক্ট করুন
+                const iconSource = platform.icon || platform.name || '';
+                const iconClass = getIconClass(iconSource);
                 
                 const resultItem = document.createElement('div');
                 resultItem.className = 'search-result-item';
@@ -2852,7 +2857,7 @@
             platformCard.setAttribute('data-platform-name', platform.name);
             platformCard.setAttribute('data-platform-id', platform.id);
             
-            // আইকন ম্যাপিং ফাংশন
+            // আইকন ম্যাপিং ফাংশন - Netflix এবং Adobe এর জন্য ফিক্সড
             function getIconClass(iconName) {
                 const iconMap = {
                     'youtube': 'fab fa-youtube youtube',
@@ -2862,22 +2867,27 @@
                     'whatsapp': 'fab fa-whatsapp whatsapp',
                     'telegram': 'fab fa-telegram telegram',
                     'freefire': 'fas fa-fire freefire',
-                    'netflix': 'fab fa-netflix netflix',
+                    'netflix': 'fas fa-film netflix',  // Netflix এর জন্য fa-film আইকন
                     'spotify': 'fab fa-spotify spotify',
                     'pubg': 'fas fa-gamepad pubg',
                     'discord': 'fab fa-discord discord',
                     'amazon': 'fab fa-amazon amazon',
                     'microsoft': 'fab fa-microsoft microsoft',
-                    'adobe': 'fab fa-adobe adobe',
-                    'canva': 'fas fa-paint-brush canva',  // canva এর জন্য paint-brush আইকন
+                    'adobe': 'fas fa-paint-brush adobe',  // Adobe এর জন্য fa-paint-brush আইকন
+                    'canva': 'fas fa-paint-brush canva',
                     'google': 'fab fa-google google',
                     'linkedin': 'fab fa-linkedin linkedin'
                 };
                 
-                return iconMap[iconName] || 'fas fa-cube';
+                // iconName টি লোয়ার কেসে রূপান্তর করে চেক করুন
+                const lowerIconName = iconName ? iconName.toLowerCase() : '';
+                
+                return iconMap[lowerIconName] || 'fas fa-cube';
             }
 
-            const iconClass = getIconClass(platform.icon);
+            // platform.icon বা platform.name থেকে আইকন সিলেক্ট করুন
+            const iconSource = platform.icon || platform.name || '';
+            const iconClass = getIconClass(iconSource);
 
             platformCard.innerHTML = `
                 <div class="platform-header">
