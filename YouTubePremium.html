@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
-        /* আপনার আগের CSS একই রাখুন */
+        /* আপনার আগের CSS একই রাখুন - কোনো পরিবর্তন নেই */
         * {
             margin: 0;
             padding: 0;
@@ -440,7 +440,7 @@
             margin-bottom: 5px;
         }
         
-        /* Orders Table - IMPROVED */
+        /* Orders Table */
         .orders-table {
             width: 100%;
             background: rgba(255, 255, 255, 0.05);
@@ -642,6 +642,13 @@
         .netflix { color: #E50914; }
         .spotify { color: #1DB954; }
         .pubg { color: #F9A602; }
+        .discord { color: #5865F2; }
+        .amazon { color: #FF9900; }
+        .microsoft { color: #00A4EF; }
+        .adobe { color: #FF0000; }
+        .canva { color: #00C4CC; }
+        .google { color: #4285F4; }
+        .linkedin { color: #0077B5; }
     </style>
 </head>
 <body>
@@ -770,6 +777,30 @@
                         </div>
                         
                         <div class="form-group">
+                            <label class="form-label">বর্ণনা *</label>
+                            <textarea id="platformDescription" class="form-textarea" placeholder="প্ল্যাটফর্মের সংক্ষিপ্ত বর্ণনা লিখুন..." required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">ফিচারসমূহ (প্রতি লাইনে একটি করে লিখুন)</label>
+                            <textarea id="platformFeatures" class="form-textarea" placeholder="ফিচার 1\nফিচার 2\nফিচার 3" rows="5"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">ক্যাটাগরি *</label>
+                            <select id="platformCategory" class="form-select" required>
+                                <option value="streaming">স্ট্রিমিং</option>
+                                <option value="social-media">সোশ্যাল মিডিয়া</option>
+                                <option value="messaging">মেসেজিং</option>
+                                <option value="music">মিউজিক</option>
+                                <option value="gaming">গেমিং</option>
+                                <option value="productivity">প্রোডাক্টিভিটি</option>
+                                <option value="storage">স্টোরেজ</option>
+                                <option value="professional">প্রফেশনাল</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
                             <label class="form-label">আইকন সিলেক্ট করুন</label>
                             <div class="icon-grid" id="iconGrid">
                                 <!-- Icons will be loaded here -->
@@ -777,8 +808,16 @@
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">বর্ণনা *</label>
-                            <textarea id="platformDescription" class="form-textarea" placeholder="প্ল্যাটফর্মের সংক্ষিপ্ত বর্ণনা লিখুন..." required></textarea>
+                            <label class="form-label">অর্ডার নম্বর (ছোট থেকে বড় সাজাতে)</label>
+                            <input type="number" id="platformOrder" class="form-input" placeholder="যেমন: 1, 2, 3..." min="1" value="1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">স্ট্যাটাস</label>
+                            <select id="platformStatus" class="form-select">
+                                <option value="active">একটিভ</option>
+                                <option value="inactive">ইনএকটিভ</option>
+                            </select>
                         </div>
                         
                         <div style="display: flex; gap: 15px; margin-top: 20px;">
@@ -793,7 +832,7 @@
                 </div>
             </section>
             
-            <!-- Orders Management Section - IMPROVED -->
+            <!-- Orders Management Section -->
             <section class="section" id="ordersSection">
                 <h2 class="section-title">অর্ডার ম্যানেজমেন্ট</h2>
                 
@@ -950,6 +989,10 @@
         const platformPrice = document.getElementById('platformPrice');
         const iconGrid = document.getElementById('iconGrid');
         const platformDescription = document.getElementById('platformDescription');
+        const platformFeatures = document.getElementById('platformFeatures');
+        const platformCategory = document.getElementById('platformCategory');
+        const platformOrder = document.getElementById('platformOrder');
+        const platformStatus = document.getElementById('platformStatus');
         
         // Orders Management Elements
         const ordersTable = document.getElementById('ordersTable');
@@ -985,23 +1028,30 @@
         
         // Allowed Admin Emails
         const ALLOWED_ADMIN_EMAILS = [
-            'mdashikislam017705@gmail.com',  // Super Admin
-            'mdsojib1388888@gmail.com',      // Regular Admin
+            'mdashikislam017705@gmail.com',
+            'mdsojib1388888@gmail.com',
             'admin@easy-premium.com'
         ];
         
         // Available icons
         const platformIcons = [
             { id: 'youtube', name: 'YouTube', icon: 'fab fa-youtube', color: '#FF0000' },
-            { id: 'facebook', name: 'Facebook', icon: 'fab fa-facebook', color: '#1877F2' },
+            { id: 'facebook', name: 'Facebook', icon: 'fab fa-facebook-f', color: '#1877F2' },
             { id: 'instagram', name: 'Instagram', icon: 'fab fa-instagram', color: '#E4405F' },
             { id: 'tiktok', name: 'TikTok', icon: 'fab fa-tiktok', color: '#000000' },
             { id: 'whatsapp', name: 'WhatsApp', icon: 'fab fa-whatsapp', color: '#25D366' },
             { id: 'telegram', name: 'Telegram', icon: 'fab fa-telegram', color: '#0088cc' },
             { id: 'freefire', name: 'Free Fire', icon: 'fas fa-fire', color: '#FF4500' },
-            { id: 'netflix', name: 'Netflix', icon: 'fas fa-tv', color: '#E50914' },
+            { id: 'netflix', name: 'Netflix', icon: 'fab fa-netflix', color: '#E50914' },
             { id: 'spotify', name: 'Spotify', icon: 'fab fa-spotify', color: '#1DB954' },
-            { id: 'pubg', name: 'PUBG', icon: 'fas fa-gamepad', color: '#FFA500' }
+            { id: 'pubg', name: 'PUBG', icon: 'fas fa-gamepad', color: '#FFA500' },
+            { id: 'discord', name: 'Discord', icon: 'fab fa-discord', color: '#5865F2' },
+            { id: 'amazon', name: 'Amazon', icon: 'fab fa-amazon', color: '#FF9900' },
+            { id: 'microsoft', name: 'Microsoft', icon: 'fab fa-microsoft', color: '#00A4EF' },
+            { id: 'adobe', name: 'Adobe', icon: 'fab fa-adobe', color: '#FF0000' },
+            { id: 'canva', name: 'Canva', icon: 'fas fa-paint-brush', color: '#00C4CC' },
+            { id: 'google', name: 'Google', icon: 'fab fa-google', color: '#4285F4' },
+            { id: 'linkedin', name: 'LinkedIn', icon: 'fab fa-linkedin', color: '#0077B5' }
         ];
 
         // Initialize on page load
@@ -1228,6 +1278,7 @@
                 
                 if (!data) {
                     platformsGrid.innerHTML = '<p style="text-align: center; color: #b0bec5; padding: 40px;">কোন প্ল্যাটফর্ম পাওয়া যায়নি</p>';
+                    updatePlatformCount(0);
                     return;
                 }
                 
@@ -1240,6 +1291,7 @@
                 
                 platforms.sort((a, b) => (a.order || 0) - (b.order || 0));
                 displayPlatforms();
+                updatePlatformCount(platforms.length);
             });
         }
         
@@ -1254,6 +1306,7 @@
             
             platforms.forEach(platform => {
                 const iconInfo = platformIcons.find(icon => icon.id === platform.icon) || platformIcons[0];
+                const featuresList = platform.features ? platform.features.join(', ') : 'কোন ফিচার নেই';
                 
                 const platformCard = document.createElement('div');
                 platformCard.className = 'platform-card';
@@ -1269,6 +1322,9 @@
                     </div>
                     <div class="platform-body">
                         <p style="color: #b0bec5; font-size: 0.9rem; margin-bottom: 10px;">${platform.description || 'কোন বর্ণনা নেই'}</p>
+                        <p style="color: #6c757d; font-size: 0.8rem; margin-bottom: 10px;"><strong>ফিচার:</strong> ${featuresList}</p>
+                        <p style="color: #6c757d; font-size: 0.8rem; margin-bottom: 10px;"><strong>ক্যাটাগরি:</strong> ${platform.category || 'N/A'}</p>
+                        <p style="color: #6c757d; font-size: 0.8rem; margin-bottom: 10px;"><strong>স্ট্যাটাস:</strong> ${platform.status === 'active' ? '✅ একটিভ' : '❌ ইনএকটিভ'}</p>
                         <div class="platform-actions">
                             <button class="btn-sm btn-edit" data-id="${platform.id}">
                                 <i class="fas fa-edit"></i> এডিট
@@ -1311,6 +1367,10 @@
             platformName.value = platform.name || '';
             platformPrice.value = platform.price || '';
             platformDescription.value = platform.description || '';
+            platformFeatures.value = platform.features ? platform.features.join('\n') : '';
+            platformCategory.value = platform.category || 'streaming';
+            platformOrder.value = platform.order || 1;
+            platformStatus.value = platform.status || 'active';
             selectedIcon = platform.icon || 'youtube';
             
             document.querySelectorAll('.icon-option').forEach(opt => {
@@ -1349,14 +1409,21 @@
                 return;
             }
             
+            const featuresArray = platformFeatures.value.trim() 
+                ? platformFeatures.value.trim().split('\n').filter(f => f.trim())
+                : [];
+            
             const platformData = {
                 name: platformName.value.trim(),
                 price: platformPrice.value.trim(),
                 icon: selectedIcon,
                 description: platformDescription.value.trim(),
+                features: featuresArray,
+                category: platformCategory.value,
+                order: parseInt(platformOrder.value) || 1,
+                status: platformStatus.value,
                 updatedAt: firebase.database.ServerValue.TIMESTAMP,
-                updatedBy: currentAdminEmail,
-                status: 'active'
+                updatedBy: currentAdminEmail
             };
             
             try {
@@ -1383,6 +1450,9 @@
             platformForm.reset();
             platformId.value = '';
             selectedIcon = 'youtube';
+            platformOrder.value = 1;
+            platformStatus.value = 'active';
+            platformCategory.value = 'streaming';
             
             document.querySelectorAll('.icon-option').forEach(opt => {
                 opt.classList.remove('selected');
@@ -1394,7 +1464,7 @@
             document.getElementById('formTitle').textContent = 'নতুন প্ল্যাটফর্ম যোগ করুন';
         }
         
-        // Load orders - FIXED VERSION
+        // Load orders
         function loadOrders() {
             ordersTable.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;"><p>লোড হচ্ছে...</p></td></tr>';
             
@@ -1446,7 +1516,7 @@
             });
         }
         
-        // Display orders - FIXED VERSION
+        // Display orders
         function displayOrders(ordersList) {
             if (ordersList.length === 0) {
                 ordersTable.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;"><p>কোন অর্ডার পাওয়া যায়নি</p></td></tr>';
@@ -1469,9 +1539,8 @@
                     statusText = 'প্রসেসিং';
                 }
                 
-                // WhatsApp number - FIXED
                 const whatsappNumber = order.whatsappNumber || order.phoneNumber || 'নাম্বার নেই';
-                const cleanWhatsappNumber = whatsappNumber.replace(/\D/g, ''); // Remove non-digit characters
+                const cleanWhatsappNumber = whatsappNumber.replace(/\D/g, '');
                 const whatsappLink = `https://wa.me/${cleanWhatsappNumber}`;
                 
                 html += `
@@ -1505,9 +1574,8 @@
             ordersTable.innerHTML = html;
         }
         
-        // Update order status - FIXED VERSION
+        // Update order status
         function updateOrderStatus(orderId, newStatus) {
-            // First update in transactions
             const updates = {
                 status: newStatus,
                 updatedAt: firebase.database.ServerValue.TIMESTAMP,
@@ -1516,7 +1584,6 @@
             
             database.ref(`transactions/${orderId}`).update(updates)
                 .then(() => {
-                    // Also update in userOrders if userId exists
                     const order = orders.find(o => o.id === orderId);
                     if (order && order.userId) {
                         return database.ref(`userOrders/${order.userId}/${orderId}`).update({
@@ -1527,7 +1594,6 @@
                 })
                 .then(() => {
                     showToast('অর্ডার স্ট্যাটাস আপডেট হয়েছে', 'success');
-                    // Send WhatsApp notification if completed
                     if (newStatus === 'completed') {
                         sendWhatsAppNotification(orderId);
                     }
@@ -1558,10 +1624,8 @@
             
             const whatsappUrl = `https://wa.me/${cleanNumber}?text=${message}`;
             
-            // Open WhatsApp in new tab
             window.open(whatsappUrl, '_blank');
             
-            // Log the notification
             database.ref('adminLogs').push({
                 action: 'whatsapp_notification',
                 orderId: orderId,
@@ -1754,6 +1818,11 @@
             pendingOrders.textContent = pending;
         }
         
+        // Update platform count
+        function updatePlatformCount(count) {
+            totalPlatforms.textContent = count;
+        }
+        
         // Update admin count
         function updateAdminCount(count) {
             adminCount.textContent = count;
@@ -1767,6 +1836,7 @@
                 <p><strong>এডমিন এড্রেস:</strong> ${currentAdminEmail}</p>
                 <p><strong>স্ট্যাটাস:</strong> ${isSuperAdmin ? 'সুপার এডমিন' : 'এডমিন'}</p>
                 <p><strong>ফায়ারবেস প্রজেক্ট:</strong> Easy Premium</p>
+                <p><strong>ডাটাবেস URL:</strong> ${firebaseConfig.databaseURL}</p>
             `;
             
             systemInfo.innerHTML = info;
