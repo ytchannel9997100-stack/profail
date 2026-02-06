@@ -2621,14 +2621,14 @@
                 const formattedDate = orderDate.toLocaleDateString('bn-BD');
                 
                 let statusClass = 'status-pending';
-                let statusText = 'পেন্ডিং';
+                let statusText = ' পেন্ডিং';
                 
                 if (order.status === 'processing') {
                     statusClass = 'status-processing';
-                    statusText = 'প্রসেসিং';
+                    statusText = ' প্রসেসিং';
                 } else if (order.status === 'success' || order.status === 'completed') {
                     statusClass = 'status-success';
-                    statusText = '✅ সফল';
+                    statusText = ' সফল';
                 }
                 
                 let priceValue = order.price || '৳ -';
@@ -2675,7 +2675,7 @@
                         <div class="order-card-row" style="background: rgba(76, 175, 80, 0.1); padding: 10px; border-radius: 5px; margin-top: 10px;">
                             <div class="order-card-label">নোটিফিকেশন</div>
                             <div class="order-card-value" style="color: #4caf50; font-weight: bold;">
-                                ✅ আপনার অর্ডার সফলভাবে সম্পূর্ণ হয়েছে!
+                                 আপনার অর্ডার সফলভাবে সম্পূর্ণ হয়েছে!
                             </div>
                         </div>
                         ` : ''}
@@ -2909,7 +2909,7 @@
                 </div>
                 <div class="platform-price">
                     <div class="price">${platform.price || '৳ 100'}</div>
-                    <div class="price-desc">বাল্ক অর্ডারে ডিস্কাউন্ট</div>
+                    <div class="price-desc">অনলাইন একাউন্ট নিরাপদ</div>
                 </div>
                 <button class="buy-button">কিনুন</button>
             `;
