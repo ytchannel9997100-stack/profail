@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>অ্যাকাউন্ট ডিলিট - EasyPremium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
    
@@ -344,16 +344,19 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', 'Kalpurush', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         body {
             background: #f0f2f5;
             color: #333;
             min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.5;
         }
         .header {
             background: linear-gradient(135deg, #1a237e, #283593);
             color: white;
-            padding: 20px;
+            padding: 20px 15px;
             text-align: center;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
@@ -361,6 +364,7 @@
             font-size: 1.8rem;
             font-weight: bold;
             margin-bottom: 5px;
+            word-wrap: break-word;
         }
         .logo span {
             color: #ffd600;
@@ -371,15 +375,15 @@
         }
         .container {
             max-width: 800px;
-            margin: 25px auto;
-            padding: 0 20px;
+            margin: 20px auto;
+            padding: 0 15px;
         }
         .info-card {
             background: white;
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             border-left: 5px solid #1a73e8;
         }
         .info-card h2 {
@@ -388,25 +392,28 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 1.4rem;
         }
         .user-card {
             background: #e3f2fd;
-            padding: 20px;
+            padding: 18px;
             border-radius: 10px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             text-align: center;
             border: 2px solid #2196f3;
+            word-break: break-word;
         }
         .user-card h3 {
             color: #0d47a1;
             margin-bottom: 10px;
+            font-size: 1.3rem;
         }
         .action-card {
             background: white;
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             border: 1px solid #ddd;
         }
         .action-title {
@@ -421,6 +428,7 @@
             color: #444;
             line-height: 1.6;
             margin-bottom: 20px;
+            font-size: 0.95rem;
         }
         .warning-box {
             background: #ffebee;
@@ -435,12 +443,13 @@
             align-items: center;
             gap: 8px;
             margin-bottom: 8px;
+            font-size: 1.1rem;
         }
         .btn {
             background: linear-gradient(135deg, #f44336, #d32f2f);
             color: white;
             border: none;
-            padding: 14px 25px;
+            padding: 14px 20px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1rem;
@@ -452,10 +461,14 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            touch-action: manipulation;
         }
         .btn:hover {
             background: linear-gradient(135deg, #d32f2f, #b71c1c);
             transform: translateY(-2px);
+        }
+        .btn:active {
+            transform: translateY(0);
         }
         .btn:disabled {
             opacity: 0.6;
@@ -469,7 +482,7 @@
         }
         #not-logged-in {
             text-align: center;
-            padding: 40px 25px;
+            padding: 30px 20px;
             background: white;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -477,6 +490,7 @@
         #not-logged-in h2 {
             color: #1a237e;
             margin-bottom: 15px;
+            font-size: 1.4rem;
         }
         .login-btn {
             display: inline-block;
@@ -487,6 +501,8 @@
             text-decoration: none;
             font-weight: 600;
             margin-top: 15px;
+            font-size: 1rem;
+            touch-action: manipulation;
         }
         .login-btn:hover {
             background: #1976d2;
@@ -506,10 +522,12 @@
         }
         .loading-content {
             background: white;
-            padding: 30px;
+            padding: 25px;
             border-radius: 10px;
             text-align: center;
             color: #1a237e;
+            max-width: 300px;
+            width: 90%;
         }
         .fa-spinner {
             animation: spin 1s linear infinite;
@@ -530,13 +548,14 @@
             justify-content: center;
             align-items: center;
             z-index: 10000;
+            padding: 15px;
         }
         .alert-content, .confirm-content {
             background: white;
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
             max-width: 500px;
-            width: 90%;
+            width: 100%;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
         .alert-success { border-top: 4px solid #4caf50; }
@@ -545,24 +564,30 @@
         .confirm-content h3, .alert-content h3 {
             color: #1a237e;
             margin-bottom: 15px;
+            font-size: 1.3rem;
         }
         .alert-content p, .confirm-content p {
             color: #444;
             margin-bottom: 20px;
             white-space: pre-line;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
         .alert-content button {
             background: #2196f3;
             color: white;
             border: none;
-            padding: 10px 25px;
+            padding: 12px;
             border-radius: 6px;
             cursor: pointer;
             width: 100%;
+            font-size: 1rem;
+            font-weight: 600;
+            touch-action: manipulation;
         }
         .confirm-buttons {
             display: flex;
-            gap: 15px;
+            gap: 12px;
         }
         .confirm-no, .confirm-yes {
             flex: 1;
@@ -571,6 +596,8 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 1rem;
+            touch-action: manipulation;
         }
         .confirm-no {
             background: #e0e0e0;
@@ -582,16 +609,24 @@
         }
         .option-buttons {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             margin-top: 20px;
         }
         .option-btn {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             border-radius: 6px;
             border: none;
             cursor: pointer;
             font-weight: 600;
+            font-size: 0.95rem;
+            touch-action: manipulation;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 50px;
         }
         .option-data {
             background: #ff9800;
@@ -601,25 +636,177 @@
             background: #f44336;
             color: white;
         }
-        @media (max-width: 600px) {
-            .container {
-                padding: 0 15px;
-            }
-           
-            .action-card {
-                padding: 20px;
-            }
-           
-            .option-buttons {
-                flex-direction: column;
-            }
-        }
         footer {
             text-align: center;
-            padding: 20px;
+            padding: 20px 15px;
             color: #666;
-            margin-top: 40px;
+            margin-top: 30px;
             border-top: 1px solid #ddd;
+            font-size: 0.9rem;
+        }
+        
+        /* মোবাইল অপ্টিমাইজেশন */
+        @media (max-width: 768px) {
+            .container {
+                margin: 15px auto;
+                padding: 0 12px;
+            }
+            
+            .header {
+                padding: 18px 12px;
+            }
+            
+            .logo {
+                font-size: 1.6rem;
+            }
+            
+            .tagline {
+                font-size: 0.95rem;
+            }
+            
+            .info-card, .action-card {
+                padding: 18px;
+                margin-bottom: 18px;
+            }
+            
+            .info-card h2, .action-title {
+                font-size: 1.25rem;
+            }
+            
+            .user-card {
+                padding: 15px;
+                margin-bottom: 18px;
+            }
+            
+            .user-card h3 {
+                font-size: 1.2rem;
+            }
+            
+            .btn {
+                padding: 14px 16px;
+                font-size: 0.95rem;
+            }
+            
+            .action-desc, .warning-box p {
+                font-size: 0.92rem;
+            }
+            
+            .option-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .option-btn {
+                width: 100%;
+                min-height: 48px;
+                font-size: 0.9rem;
+            }
+            
+            .confirm-content, .alert-content {
+                padding: 18px;
+            }
+            
+            .confirm-content h3, .alert-content h3 {
+                font-size: 1.2rem;
+            }
+            
+            .confirm-content p, .alert-content p {
+                font-size: 0.92rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                font-size: 15px;
+            }
+            
+            .container {
+                margin: 12px auto;
+                padding: 0 10px;
+            }
+            
+            .header {
+                padding: 16px 10px;
+            }
+            
+            .logo {
+                font-size: 1.4rem;
+            }
+            
+            .tagline {
+                font-size: 0.9rem;
+            }
+            
+            .info-card, .action-card {
+                padding: 16px;
+                margin-bottom: 16px;
+                border-radius: 10px;
+            }
+            
+            .info-card h2, .action-title {
+                font-size: 1.2rem;
+            }
+            
+            .user-card {
+                padding: 14px;
+            }
+            
+            .user-card h3 {
+                font-size: 1.15rem;
+            }
+            
+            .btn {
+                padding: 13px 14px;
+                font-size: 0.9rem;
+            }
+            
+            .action-desc ul {
+                padding-left: 18px;
+            }
+            
+            .warning-box {
+                padding: 14px;
+            }
+            
+            .login-btn {
+                padding: 12px 20px;
+                font-size: 0.95rem;
+            }
+            
+            .confirm-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .confirm-no, .confirm-yes {
+                padding: 14px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .logo {
+                font-size: 1.3rem;
+            }
+            
+            .info-card h2, .action-title {
+                font-size: 1.15rem;
+            }
+            
+            .btn, .option-btn {
+                font-size: 0.85rem;
+            }
+            
+            .action-desc, .warning-box p {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* ট্যাপ টার্গেট সাইজ বড় */
+        @media (max-width: 768px) {
+            button, .btn, .login-btn, .option-btn, .confirm-no, .confirm-yes, .alert-content button {
+                min-height: 48px;
+                min-width: 48px;
+            }
         }
     </style>
 </head>
@@ -728,23 +915,33 @@
                         <button onclick="window.location.reload()" style="
                             flex: 1;
                             background: white;
-                            padding: 10px;
+                            padding: 12px;
                             border-radius: 6px;
                             border: 1px solid #2196f3;
                             color: #2196f3;
                             cursor: pointer;
+                            font-weight: 600;
+                            font-size: 0.95rem;
+                            min-height: 48px;
                         ">
                             <i class="fas fa-redo"></i> রিফ্রেশ
                         </button>
                         <a href="index.html" style="
                             flex: 1;
                             background: white;
-                            padding: 10px;
+                            padding: 12px;
                             border-radius: 6px;
                             text-decoration: none;
                             color: #1a237e;
                             text-align: center;
                             border: 1px solid #1a237e;
+                            font-weight: 600;
+                            font-size: 0.95rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                            min-height: 48px;
                         ">
                             <i class="fas fa-home"></i> হোম
                         </a>
