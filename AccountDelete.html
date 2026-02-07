@@ -1,38 +1,169 @@
-const { RecaptchaEnterpriseServiceClient } = require('@google-cloud/recaptcha-enterprise');
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>অ্যাকাউন্ট এবং ডাটা ডিলিট - EasyPremium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- reCAPTCHA Enterprise (আপনার নতুন key) -->
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LcvR2MsAAAAAJQ3aDu6YdjuTALAOpCNfRTqY8RJ"></script>
+    
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getDatabase, ref, remove } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-exports.deleteUserAccount = functions.https.onRequest(async (req, res) => {
-    const { idToken, recaptchaToken } = req.body;
+        const firebaseConfig = {
+            apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
+            authDomain: "easy-premium.firebaseapp.com",
+            databaseURL: "https://easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "easy-premium",
+            storageBucket: "easy-premium.firebasestorage.app",
+            messagingSenderId: "155891252265",
+            appId: "1:155891252265:web:77ab41de24231e8e5ef038",
+            measurementId: "G-CHL8K8HRPX"
+        };
 
-    // Verify Firebase ID token first
-    // ... (আপনার আগের কোড)
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
 
-    const client = new RecaptchaEnterpriseServiceClient();
-    const projectPath = client.projectPath('easy-premium');  // আপনার project ID
+        let currentUser = null;
 
-    const request = {
-        assessment: {
-            event: {
-                token: recaptchaToken,
-                siteKey: '6LcvR2MsAAAAAJQ3aDu6YdjuTALAOpCNfRTqY8RJ',
-                expectedAction: 'delete_account'
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            console.log("Auth state changed:", user ? "Logged in - UID: " + user.uid : "Not logged in", user?.email);
+            
+            if (user) {
+                document.getElementById('user-email').textContent = user.email || 'অজানা ইমেইল';
+                document.getElementById('not-logged-in').style.display = 'none';
+                document.getElementById('logged-in-content').style.display = 'block';
+            } else {
+                document.getElementById('not-logged-in').style.display = 'block';
+                document.getElementById('logged-in-content').style.display = 'none';
             }
-        },
-        parent: projectPath
-    };
+        });
 
-    const [response] = await client.createAssessment(request);
+        // শুধু ডাটা ডিলিট (Realtime DB থেকে)
+        async function deleteUserData() {
+            if (!currentUser) {
+                alert("আপনি লগইন করা নেই।");
+                console.error("No user for data delete");
+                return;
+            }
+            if (!confirm("আপনার সকল ডাটা (অর্ডার, ইত্যাদি) মুছে ফেলতে চান? এটি পুনরুদ্ধার করা যাবে না।")) return;
+            
+            try {
+                console.log("Deleting users/" + currentUser.uid);
+                await remove(ref(db, 'users/' + currentUser.uid));
+                console.log("Deleting userOrders/" + currentUser.uid);
+                await remove(ref(db, 'userOrders/' + currentUser.uid));
+                alert("আপনার ডাটা সফলভাবে মুছে ফেলা হয়েছে।");
+            } catch (error) {
+                console.error("Data delete failed:", error.code, error.message);
+                alert("ডাটা ডিলিটে সমস্যা: " + error.message + " (কোড: " + error.code + ")");
+            }
+        }
 
-    if (!response.tokenProperties.valid) {
-        return res.status(400).json({ success: false, error: 'Invalid reCAPTCHA token' });
-    }
+        // সম্পূর্ণ অ্যাকাউন্ট ডিলিট (reCAPTCHA Enterprise + Cloud Function)
+        async function deleteAccount() {
+            if (!currentUser) {
+                alert("আপনি লগইন করা নেই।");
+                return;
+            }
+            if (!confirm("আপনি কি নিশ্চিত? সম্পূর্ণ অ্যাকাউন্ট + সকল ডাটা চিরতরে মুছে যাবে।")) return;
 
-    if (response.riskAnalysis.score < 0.5) {  // আপনার threshold সেট করুন
-        return res.status(403).json({ success: false, error: 'Low reCAPTCHA score' });
-    }
+            grecaptcha.enterprise.ready(async () => {
+                try {
+                    const recaptchaToken = await grecaptcha.enterprise.execute(
+                        '6LcvR2MsAAAAAJQ3aDu6YdjuTALAOpCNfRTqY8RJ',
+                        {action: 'delete_account'}
+                    );
+                    
+                    console.log("reCAPTCHA Enterprise token generated:", recaptchaToken.substring(0, 20) + "...");
 
-    // যদি valid → user delete করুন
-    // admin.auth().deleteUser(uid)
-    // ... ইত্যাদি
+                    const idToken = await currentUser.getIdToken();
+                    
+                    const response = await fetch('https://asia-southeast1-easy-premium.cloudfunctions.net/deleteUserAccount', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idToken, recaptchaToken })
+                    });
+                    
+                    const data = await response.json();
+                    console.log("Cloud Function response:", data);
+                    
+                    if (data.success) {
+                        alert("আপনার অ্যাকাউন্ট সফলভাবে ডিলিট করা হয়েছে। বিদায়!");
+                        window.location.href = "index.html";
+                    } else {
+                        alert("ভেরিফিকেশন ব্যর্থ: " + (data.error || "অজানা সমস্যা"));
+                    }
+                } catch (error) {
+                    console.error("Account delete error:", error);
+                    alert("সমস্যা: " + (error.message || "অজানা ত্রুটি। Console চেক করুন।"));
+                }
+            });
+        }
 
-    res.json({ success: true });
-});
+        window.deleteUserData = deleteUserData;
+        window.deleteAccount = deleteAccount;
+    </script>
+
+    <!-- স্টাইল -->
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:sans-serif; }
+        body { background:#f8fafc; color:#333; }
+        .header { background:linear-gradient(135deg,#1e3a8a,#2563eb); padding:15px 30px; display:flex; justify-content:space-between; align-items:center; color:white; position:sticky; top:0; z-index:10; }
+        .logo-text { font-size:1.6rem; font-weight:bold; }
+        .logo-text span { color:#fbbf24; }
+        .back-btn { color:white; text-decoration:none; padding:10px 20px; border:1px solid white; border-radius:8px; }
+        .main-container { max-width:1200px; margin:30px auto; padding:0 20px; }
+        .hero-section { background:linear-gradient(135deg,#3b82f6,#1d4ed8); color:white; padding:50px 30px; text-align:center; border-radius:15px; margin-bottom:40px; }
+        .section-card { background:white; padding:30px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.1); margin-bottom:30px; }
+        .section-title { font-size:1.8rem; color:#1e3a8a; margin-bottom:15px; }
+        .warning-box { background:#fee2e2; padding:20px; border-radius:10px; margin:20px 0; text-align:center; border-left:5px solid #dc2626; }
+        .delete-btn { background:#dc2626; color:white; border:none; padding:12px 30px; font-size:1.1rem; border-radius:8px; cursor:pointer; }
+        .delete-btn:hover { background:#b91c1c; }
+        .recaptcha-note { font-size:0.95rem; color:#555; text-align:center; margin:15px 0; }
+        #not-logged-in { text-align:center; padding:50px; background:white; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-text">Easy<span>Premium</span></div>
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> ফিরে যান</a>
+    </header>
+    <main class="main-container">
+        <section class="hero-section">
+            <h1>ডাটা এবং অ্যাকাউন্ট ডিলিট</h1>
+            <p>আপনার প্রাইভেসি আমরা সম্মান করি। নিচে আপনি নিজের ডাটা বা সম্পূর্ণ অ্যাকাউন্ট মুছে ফেলতে পারবেন।</p>
+        </section>
+        <div id="not-logged-in">
+            <h2>আপনি লগইন করা নেই</h2>
+            <p>ডিলিট করতে হলে আগে লগইন করুন।</p>
+            <a href="login.html" style="color:#3b82f6; font-weight:bold;">লগইন পেজে যান</a>
+        </div>
+        <div id="logged-in-content" style="display:none;">
+            <p style="text-align:center; font-weight:bold; margin-bottom:20px;">লগইন করা আছেন: <span id="user-email">...</span></p>
+            
+            <div class="section-card">
+                <h2 class="section-title">শুধু ডাটা ডিলিট করুন</h2>
+                <p>অ্যাকাউন্ট থাকবে, কিন্তু অর্ডার, পেমেন্ট ইত্যাদি সকল ডাটা মুছে যাবে।</p>
+                <div class="warning-box">সতর্কতা! এটি পুনরুদ্ধার করা যাবে না।</div>
+                <button onclick="deleteUserData()" class="delete-btn">ডাটা ডিলিট করুন</button>
+            </div>
+
+            <div class="section-card">
+                <h2 class="section-title">সম্পূর্ণ অ্যাকাউন্ট ডিলিট করুন</h2>
+                <p>অ্যাকাউন্ট + সকল ডাটা চিরতরে মুছে যাবে।</p>
+                <div class="warning-box">সতর্কতা! এটি অপরিবর্তনীয়।</div>
+                <p class="recaptcha-note">আপনি রোবট নন তা নিশ্চিত করতে হবে (reCAPTCHA স্বয়ংক্রিয়ভাবে চেক করবে)।</p>
+                <button onclick="deleteAccount()" class="delete-btn">অ্যাকাউন্ট ডিলিট করুন</button>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
