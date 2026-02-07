@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>অ্যাকাউন্ট এবং ডাটা ডিলিট</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Noto Sans Bengali', 'SolaimanLipi', sans-serif;
+        }
+        
+        body {
+            background: #f8fafc;
+            color: #333;
+            line-height: 1.7;
+            min-height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            padding: 18px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            width: 100%;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            font-size: 1.8rem;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.15);
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .logo-text span {
+            color: #fbbf24;
+        }
+        
+        .back-btn {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Main Container */
+        .main-container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border-radius: 20px;
+            padding: 60px 40px;
+            color: white;
+            text-align: center;
+            margin-bottom: 50px;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 25px;
+            color: #fbbf24;
+        }
+        
+        .hero-title {
+            font-size: 3.2rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        /* Content Sections */
+        .content-wrapper {
+            display: grid;
+            gap: 40px;
+            width: 100%;
+        }
+        
+        .section-card {
+            background: white;
+            border-radius: 18px;
+            padding: 45px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+        }
+        
+        .section-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .section-icon {
+            background: #3b82f6;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+        
+        .section-title {
+            font-size: 2rem;
+            color: #1e3a8a;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        
+        .section-content {
+            color: #4b5563;
+            font-size: 1.15rem;
+            line-height: 1.8;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-radius: 15px;
+            padding: 35px;
+            margin: 25px 0;
+            border-left: 6px solid #dc2626;
+            text-align: center;
+        }
+        
+        .delete-form {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .delete-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .delete-btn:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+        }
+        
+        /* Footer */
+        .footer {
+            background: #000000;
+            color: white;
+            padding: 50px 40px 40px;
+            margin-top: 80px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .copyright {
+            padding-top: 15px;
+            color: #cbd5e1;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        /* Responsive for Large Desktop */
+        @media (min-width: 1400px) {
+            .main-container {
+                max-width: 95%;
+                padding: 0 60px;
+            }
+            
+            .hero-section {
+                padding: 70px 50px;
+            }
+            
+            .hero-title {
+                font-size: 3.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.4rem;
+                max-width: 1000px;
+            }
+            
+            .content-wrapper {
+                gap: 50px;
+            }
+            
+            .section-card {
+                padding: 50px;
+            }
+            
+            .section-title {
+                font-size: 2.2rem;
+            }
+            
+            .section-content {
+                font-size: 1.2rem;
+            }
+        }
+        
+        /* Tablet */
+        @media (max-width: 1024px) {
+            .main-container {
+                max-width: 95%;
+                padding: 0 30px;
+            }
+            
+            .hero-title {
+                font-size: 2.8rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .section-card {
+                padding: 35px;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+        }
+        
+        /* Mobile */
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 15px;
+            }
+            
+            .logo-container {
+                gap: 8px;
+            }
+            
+            .logo-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 1.2rem;
+                border-radius: 8px;
+            }
+            
+            .logo-text {
+                font-size: 1.1rem;
+            }
+            
+            .back-btn {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+                gap: 6px;
+                border-radius: 6px;
+            }
+            
+            .back-btn i {
+                font-size: 0.9rem;
+            }
+            
+            .main-container {
+                margin: 15px auto;
+                padding: 0 15px;
+                max-width: 100%;
+            }
+            
+            .hero-section {
+                padding: 30px 20px;
+                margin: 15px 0 30px 0;
+                border-radius: 15px;
+            }
+            
+            .hero-icon {
+                font-size: 3rem;
+                margin-bottom: 15px;
+            }
+            
+            .hero-title {
+                font-size: 1.8rem;
+                line-height: 1.3;
+                margin-bottom: 12px;
+            }
+            
+            .hero-subtitle {
+                font-size: 1rem;
+                line-height: 1.5;
+            }
+            
+            .content-wrapper {
+                gap: 20px;
+            }
+            
+            .section-card {
+                padding: 20px;
+                border-radius: 12px;
+                margin: 0;
+            }
+            
+            .section-header {
+                flex-direction: row;
+                align-items: flex-start;
+                gap: 12px;
+                margin-bottom: 18px;
+                padding-bottom: 12px;
+            }
+            
+            .section-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1.2rem;
+                border-radius: 10px;
+                flex-shrink: 0;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+                line-height: 1.3;
+            }
+            
+            .section-content {
+                font-size: 0.95rem;
+                line-height: 1.6;
+            }
+            
+            .warning-box {
+                padding: 18px;
+                margin: 15px 0;
+                border-radius: 10px;
+            }
+            
+            .delete-btn {
+                padding: 12px 30px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
+            <div class="logo-text">Easy<span>Premium</span></div>
+        </div>
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i> ফিরে যান
+        </a>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <i class="fas fa-user-shield hero-icon"></i>
+            <h1 class="hero-title">আপনার ডাটা এবং অ্যাকাউন্ট ডিলিট করুন</h1>
+            <p class="hero-subtitle">আমরা আপনার প্রাইভেসিকে সম্মান করি। এখানে আপনি নিজের ডাটা বা সম্পূর্ণ অ্যাকাউন্ট মুছে ফেলতে পারেন। এটি স্থায়ী এবং পুনরুদ্ধারযোগ্য নয়।</p>
+        </section>
+
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            <!-- Data Delete Section -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon"><i class="fas fa-database"></i></div>
+                    <h2 class="section-title">আপনার ডাটা ডিলিট করুন</h2>
+                </div>
+                <div class="section-content">
+                    <p>এখানে আপনি আপনার সকল ব্যক্তিগত ডাটা (যেমন: অর্ডার হিস্ট্রি, পেমেন্ট ডিটেইলস) মুছে ফেলতে পারেন। অ্যাকাউন্ট থাকবে, কিন্তু ডাটা চিরতরে মুছে যাবে।</p>
+                    <div class="warning-box">
+                        <h3>সতর্কতা!</h3>
+                        <p>এই অ্যাকশনটি পুনরুদ্ধার করা যাবে না। নিশ্চিত হোন যে আপনি এটি করতে চান।</p>
+                    </div>
+                    <form class="delete-form" action="/delete-data" method="POST">
+                        <input type="checkbox" id="confirm-data" required>
+                        <label for="confirm-data">আমি নিশ্চিত যে আমার ডাটা ডিলিট করতে চাই।</label><br><br>
+                        <button type="submit" class="delete-btn">ডাটা ডিলিট করুন</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Account Delete Section -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon"><i class="fas fa-user-times"></i></div>
+                    <h2 class="section-title">আপনার অ্যাকাউন্ট ডিলিট করুন</h2>
+                </div>
+                <div class="section-content">
+                    <p>এখানে আপনি আপনার সম্পূর্ণ অ্যাকাউন্ট মুছে ফেলতে পারেন। সকল ডাটা, অর্ডার এবং অ্যাক্সেস চিরতরে হারিয়ে যাবে।</p>
+                    <div class="warning-box">
+                        <h3>সতর্কতা!</h3>
+                        <p>এই অ্যাকশনটি পুনরুদ্ধার করা যাবে না। নিশ্চিত হোন যে আপনি এটি করতে চান।</p>
+                    </div>
+                    <form class="delete-form" action="/delete-account" method="POST">
+                        <input type="checkbox" id="confirm-account" required>
+                        <label for="confirm-account">আমি নিশ্চিত যে আমার অ্যাকাউন্ট ডিলিট করতে চাই।</label><br><br>
+                        <button type="submit" class="delete-btn">অ্যাকাউন্ট ডিলিট করুন</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="copyright">&copy; 2026 EasyPremium. সকল অধিকার সংরক্ষিত। গোপনীয়তা নীতি | পরিষেবার শর্তাবলী</p>
+    </footer>
+</body>
+</html>
