@@ -6,15 +6,12 @@
     <title>অ্যাকাউন্ট এবং ডাটা ডিলিট - EasyPremium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- reCAPTCHA Enterprise (আপনার নতুন সাইট কী) -->
-    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LcvR2MsAAAAAJO3aDu6YdjuTALAOpCNfRTqY8RJ"></script>
-
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { 
             getAuth, 
-            onAuthStateChanged, 
+            onAuthStateChanged,
             deleteUser,
             reauthenticateWithCredential,
             EmailAuthProvider,
@@ -23,9 +20,7 @@
         import { 
             getDatabase, 
             ref, 
-            remove,
-            get,
-            update
+            remove
         } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
         // Firebase Configuration
@@ -41,341 +36,211 @@
         };
 
         // Initialize Firebase
+        console.log("Initializing Firebase...");
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
 
         let currentUser = null;
-        let recaptchaInitialized = false;
 
-        // Check user authentication
+        // Check authentication state
         onAuthStateChanged(auth, (user) => {
-            currentUser = user;
+            console.log("Auth state changed:", user ? "User logged in" : "No user");
+            
             if (user) {
+                console.log("User details:", {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName
+                });
+                
+                currentUser = user;
                 document.getElementById('user-email').textContent = user.email;
+                document.getElementById('user-uid').textContent = user.uid;
                 document.getElementById('not-logged-in').style.display = 'none';
                 document.getElementById('logged-in-content').style.display = 'block';
-                document.getElementById('user-email-display').textContent = user.email;
                 
-                // Initialize reCAPTCHA when user is logged in
-                if (!recaptchaInitialized) {
-                    initializeRecaptcha();
-                    recaptchaInitialized = true;
+                // Check session storage
+                if (localStorage.getItem('easyPremiumUser')) {
+                    console.log("User found in localStorage");
                 }
             } else {
-                document.getElementById('not-logged-in').style.display = 'block';
+                console.log("No user found, checking localStorage...");
+                
+                // Check if user session exists in localStorage
+                const storedUser = localStorage.getItem('easyPremiumUser');
+                if (storedUser) {
+                    try {
+                        const userData = JSON.parse(storedUser);
+                        console.log("Found user in localStorage:", userData);
+                        
+                        // Show message to refresh or login
+                        document.getElementById('not-logged-in').innerHTML = `
+                            <div style="text-align: center; padding: 40px;">
+                                <h2 style="color: #f59e0b;"><i class="fas fa-exclamation-triangle"></i> সেশন মেয়াদ শেষ</h2>
+                                <p>আপনার সেশন মেয়াদ শেষ হয়ে গেছে। পৃষ্ঠাটি রিফ্রেশ করুন বা আবার লগইন করুন।</p>
+                                <div style="margin-top: 20px;">
+                                    <button onclick="window.location.reload()" style="
+                                        background: #3b82f6;
+                                        color: white;
+                                        border: none;
+                                        padding: 10px 20px;
+                                        border-radius: 5px;
+                                        margin-right: 10px;
+                                        cursor: pointer;
+                                    ">
+                                        <i class="fas fa-redo"></i> রিফ্রেশ করুন
+                                    </button>
+                                    <a href="login.html" style="
+                                        background: #10b981;
+                                        color: white;
+                                        padding: 10px 20px;
+                                        border-radius: 5px;
+                                        text-decoration: none;
+                                        display: inline-block;
+                                    ">
+                                        <i class="fas fa-sign-in-alt"></i> লগইন করুন
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    } catch (e) {
+                        console.error("Error parsing stored user:", e);
+                        showLoginMessage();
+                    }
+                } else {
+                    showLoginMessage();
+                }
+                
                 document.getElementById('logged-in-content').style.display = 'none';
+                document.getElementById('not-logged-in').style.display = 'block';
             }
         });
 
-        // Initialize reCAPTCHA
-        function initializeRecaptcha() {
-            grecaptcha.enterprise.ready(function() {
-                console.log('reCAPTCHA Enterprise ready');
-            });
+        function showLoginMessage() {
+            document.getElementById('not-logged-in').innerHTML = `
+                <h2><i class="fas fa-user-lock"></i> লগইন প্রয়োজন</h2>
+                <p>আপনার অ্যাকাউন্ট বা ডেটা ডিলিট করতে লগইন করুন।</p>
+                <a href="login.html" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> লগইন পেজে যান
+                </a>
+            `;
         }
 
-        // 1. শুধু ডাটা ডিলিট (reCAPTCHA ছাড়া)
+        // শুধু ডাটা ডিলিট ফাংশন
         async function deleteUserData() {
             if (!currentUser) {
-                showAlert("লগইন করা নেই", "আপনি লগইন করা নেই।", "error");
+                alert("আপনি লগইন করা নেই। দয়া করে পৃষ্ঠাটি রিফ্রেশ করুন।");
                 return;
             }
             
-            const confirmed = await showConfirm(
-                "ডাটা ডিলিট",
-                "আপনার সকল ডাটা (অর্ডার, পেমেন্ট ইত্যাদি) মুছে ফেলতে চান?<br><br><strong>⚠️ সতর্কতা:</strong> এটি পুনরুদ্ধার করা যাবে না!",
-                "warning"
-            );
-            
+            const confirmed = confirm("আপনার সকল ডাটা মুছে ফেলতে চান?\n\n⚠️ সতর্কতা: এটি পুনরুদ্ধার করা যাবে না!");
             if (!confirmed) return;
 
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ডাটা মুছে ফেলা হচ্ছে...';
-            btn.disabled = true;
-
             try {
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ডাটা মুছে ফেলা হচ্ছে...';
+                btn.disabled = true;
+
                 const userId = currentUser.uid;
                 
-                // Delete user data
+                // ডাটা মুছুন
                 await remove(ref(db, 'users/' + userId));
-                console.log('Users data deleted');
-                
-                // Delete user orders
                 await remove(ref(db, 'userOrders/' + userId));
-                console.log('User orders deleted');
                 
-                // Delete transactions if any
-                try {
-                    const transactionsRef = ref(db, 'transactions');
-                    const snapshot = await get(transactionsRef);
-                    if (snapshot.exists()) {
-                        const updates = {};
-                        snapshot.forEach((child) => {
-                            const transaction = child.val();
-                            if (transaction.userId === userId || transaction.userEmail === currentUser.email) {
-                                updates[`transactions/${child.key}`] = null;
-                            }
-                        });
-                        if (Object.keys(updates).length > 0) {
-                            await update(ref(db), updates);
-                            console.log('Transactions deleted');
-                        }
-                    }
-                } catch (transError) {
-                    console.log('No transactions found');
-                }
-
-                showAlert("সফল", "✅ আপনার ডাটা সফলভাবে মুছে ফেলা হয়েছে!", "success");
+                alert("✅ আপনার ডাটা সফলভাবে মুছে ফেলা হয়েছে!");
                 
-            } catch (error) {
-                console.error("Data deletion error:", error);
-                showAlert("ত্রুটি", "ডাটা ডিলিট করতে সমস্যা: " + getErrorMessage(error), "error");
-            } finally {
                 btn.innerHTML = originalText;
+                btn.disabled = false;
+
+            } catch (error) {
+                console.error("Error:", error);
+                alert("ত্রুটি: " + error.message);
+                
+                const btn = event.target;
+                btn.innerHTML = "ডাটা ডিলিট করুন";
                 btn.disabled = false;
             }
         }
 
-        // 2. সম্পূর্ণ অ্যাকাউন্ট ডিলিট (reCAPTCHA Enterprise সহ)
+        // সম্পূর্ণ অ্যাকাউন্ট ডিলিট ফাংশন
         async function deleteAccount() {
             if (!currentUser) {
-                showAlert("লগইন করা নেই", "আপনি লগইন করা নেই।", "error");
+                alert("আপনি লগইন করা নেই। দয়া করে পৃষ্ঠাটি রিফ্রেশ করুন।");
                 return;
             }
 
-            const confirmed = await showConfirm(
-                "অ্যাকাউন্ট ডিলিট",
-                "আপনি কি নিশ্চিত?<br><br><strong>⚠️ চূড়ান্ত সতর্কতা:</strong><br>• সম্পূর্ণ অ্যাকাউন্ট মুছে যাবে<br>• সকল ডাটা চিরতরে মুছে যাবে<br>• আপনি আর লগইন করতে পারবেন না<br><br><strong>❌ এটি অপরিবর্তনীয়!</strong>",
-                "danger"
-            );
-            
+            const confirmed = confirm("সম্পূর্ণ অ্যাকাউন্ট মুছে ফেলতে চান?\n\n⚠️ এটি চিরতরে মুছে যাবে!");
             if (!confirmed) return;
 
-            // Step 1: Get password for re-authentication
-            const password = await showPasswordPrompt("পাসওয়ার্ড প্রয়োজন", "নিরাপত্তার জন্য আপনার পাসওয়ার্ড দিন:");
+            const password = prompt("নিরাপত্তার জন্য আপনার পাসওয়ার্ড দিন:");
             if (!password) {
-                showAlert("বাতিল", "পাসওয়ার্ড প্রয়োজন। ডিলিট বাতিল করা হয়েছে।", "info");
+                alert("পাসওয়ার্ড প্রয়োজন।");
                 return;
             }
 
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> নিরাপত্তা যাচাই...';
-            btn.disabled = true;
-
             try {
-                // Step 2: reCAPTCHA Enterprise verification
-                const recaptchaToken = await getRecaptchaToken('delete_account');
-                if (!recaptchaToken) {
-                    throw new Error("reCAPTCHA ভেরিফিকেশন ব্যর্থ");
-                }
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> অ্যাকাউন্ট মুছে ফেলা হচ্ছে...';
+                btn.disabled = true;
 
-                // Step 3: Re-authenticate with password
+                // পাসওয়ার্ড যাচাই
                 const credential = EmailAuthProvider.credential(currentUser.email, password);
                 await reauthenticateWithCredential(currentUser, credential);
-                console.log('User re-authenticated');
 
-                // Step 4: Delete database data
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ডাটা মুছে ফেলা হচ্ছে...';
-                
                 const userId = currentUser.uid;
+                
+                // ডাটা মুছুন
                 await remove(ref(db, 'users/' + userId));
                 await remove(ref(db, 'userOrders/' + userId));
-                console.log('Database data deleted');
-
-                // Step 5: Delete Firebase Authentication account
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> অ্যাকাউন্ট মুছে ফেলা হচ্ছে...';
+                
+                // অ্যাকাউন্ট মুছুন
                 await deleteUser(currentUser);
-                console.log('Auth account deleted');
-
-                // Step 6: Sign out
+                
+                // লগআউট
                 await signOut(auth);
-
-                // Success
-                showAlert("সফল", "✅ আপনার অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে!", "success", () => {
-                    window.location.href = "index.html";
-                });
+                
+                // localStorage থেকে মুছুন
+                localStorage.removeItem('easyPremiumUser');
+                
+                alert("✅ আপনার অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে!");
+                window.location.href = "index.html";
 
             } catch (error) {
-                console.error("Account deletion error:", error);
+                console.error("Error:", error);
                 
-                let title = "ত্রুটি";
-                let message = getErrorMessage(error);
-                let type = "error";
-                
-                if (error.message.includes('reCAPTCHA')) {
-                    title = "নিরাপত্তা যাচাই ব্যর্থ";
-                    message = "reCAPTCHA ভেরিফিকেশন ব্যর্থ। দয়া করে পৃষ্ঠাটি রিফ্রেশ করুন এবং আবার চেষ্টা করুন।";
-                } else if (error.message.includes('wrong-password')) {
-                    title = "ভুল পাসওয়ার্ড";
-                    message = "আপনার দেওয়া পাসওয়ার্ডটি ভুল। আবার চেষ্টা করুন।";
-                    type = "warning";
-                } else if (error.message.includes('requires-recent-login')) {
-                    title = "আবার লগইন করুন";
-                    message = "নিরাপত্তার জন্য আপনাকে আবার লগইন করতে হবে। লগআউট করুন, আবার লগইন করুন, তারপর আবার চেষ্টা করুন।";
-                    type = "info";
+                let errorMsg = "ত্রুটি: ";
+                if (error.code === 'auth/wrong-password') {
+                    errorMsg = "❌ ভুল পাসওয়ার্ড";
+                } else if (error.code === 'auth/requires-recent-login') {
+                    errorMsg = "⚠️ সাম্প্রতিক লগইন প্রয়োজন। লগআউট করুন এবং আবার লগইন করুন।";
+                } else {
+                    errorMsg += error.message;
                 }
                 
-                showAlert(title, message, type);
+                alert(errorMsg);
                 
-            } finally {
-                btn.innerHTML = originalText;
+                const btn = event.target;
+                btn.innerHTML = "অ্যাকাউন্ট ডিলিট করুন";
                 btn.disabled = false;
             }
         }
 
-        // Get reCAPTCHA Enterprise token
-        async function getRecaptchaToken(action) {
-            return new Promise((resolve) => {
-                grecaptcha.enterprise.ready(async () => {
-                    try {
-                        const token = await grecaptcha.enterprise.execute(
-                            '6LcvR2MsAAAAAJO3aDu6YdjuTALAOpCNfRTqY8RJ', 
-                            { action: action }
-                        );
-                        console.log('reCAPTCHA token received:', token ? 'Yes' : 'No');
-                        resolve(token);
-                    } catch (error) {
-                        console.error('reCAPTCHA error:', error);
-                        resolve(null);
-                    }
-                });
-            });
-        }
-
-        // Helper functions
-        function getErrorMessage(error) {
-            if (error.code) {
-                switch (error.code) {
-                    case 'auth/wrong-password':
-                        return "ভুল পাসওয়ার্ড";
-                    case 'auth/requires-recent-login':
-                        return "সাম্প্রতিক লগইন প্রয়োজন। লগআউট করে আবার লগইন করুন।";
-                    case 'auth/network-request-failed':
-                        return "নেটওয়ার্ক সমস্যা। ইন্টারনেট সংযোগ চেক করুন।";
-                    case 'auth/too-many-requests':
-                        return "অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।";
-                    case 'PERMISSION_DENIED':
-                        return "অনুমতি নেই। Firebase রুলস চেক করুন।";
-                    default:
-                        return error.message;
-                }
-            }
-            return error.message;
-        }
-
-        // Custom alert/confirm/prompt functions
-        function showAlert(title, message, type = "info", callback = null) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `custom-alert alert-${type}`;
-            alertDiv.innerHTML = `
-                <div class="alert-content">
-                    <div class="alert-icon">
-                        ${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}
-                    </div>
-                    <div class="alert-text">
-                        <h3>${title}</h3>
-                        <p>${message}</p>
-                    </div>
-                    <button class="alert-close" onclick="this.parentElement.parentElement.remove()${callback ? ';' + callback.toString().replace('function', '') : ''}">
-                        OK
-                    </button>
-                </div>
-            `;
-            
-            document.body.appendChild(alertDiv);
-            
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.remove();
-                    if (callback) callback();
-                }
-            }, 5000);
-        }
-
-        function showConfirm(title, message, type = "warning") {
-            return new Promise((resolve) => {
-                const confirmDiv = document.createElement('div');
-                confirmDiv.className = `custom-confirm confirm-${type}`;
-                confirmDiv.innerHTML = `
-                    <div class="confirm-content">
-                        <div class="confirm-icon">
-                            ${type === 'danger' ? '🔥' : type === 'warning' ? '⚠️' : '❓'}
-                        </div>
-                        <div class="confirm-text">
-                            <h3>${title}</h3>
-                            <p>${message}</p>
-                        </div>
-                        <div class="confirm-buttons">
-                            <button class="confirm-btn confirm-no" onclick="this.parentElement.parentElement.parentElement.remove(); resolve(false)">
-                                না, বাতিল
-                            </button>
-                            <button class="confirm-btn confirm-yes" onclick="this.parentElement.parentElement.parentElement.remove(); resolve(true)">
-                                হ্যাঁ, ডিলিট
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-                document.body.appendChild(confirmDiv);
-            });
-        }
-
-        function showPasswordPrompt(title, message) {
-            return new Promise((resolve) => {
-                const promptDiv = document.createElement('div');
-                promptDiv.className = 'custom-prompt';
-                promptDiv.innerHTML = `
-                    <div class="prompt-content">
-                        <div class="prompt-icon">🔐</div>
-                        <div class="prompt-text">
-                            <h3>${title}</h3>
-                            <p>${message}</p>
-                        </div>
-                        <input type="password" class="prompt-input" id="password-input" placeholder="আপনার পাসওয়ার্ড" autocomplete="current-password">
-                        <div class="prompt-buttons">
-                            <button class="prompt-btn prompt-cancel" onclick="this.parentElement.parentElement.parentElement.remove(); resolve(null)">
-                                বাতিল
-                            </button>
-                            <button class="prompt-btn prompt-submit" onclick="
-                                const input = document.getElementById('password-input');
-                                if (input.value) {
-                                    this.parentElement.parentElement.parentElement.remove();
-                                    resolve(input.value);
-                                } else {
-                                    alert('পাসওয়ার্ড দিন');
-                                }
-                            ">
-                                জমা দিন
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-                document.body.appendChild(promptDiv);
-                
-                // Focus on input
-                setTimeout(() => {
-                    const input = document.getElementById('password-input');
-                    if (input) input.focus();
-                }, 100);
-                
-                // Enter key support
-                const input = document.getElementById('password-input');
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        document.querySelector('.prompt-submit').click();
-                    }
-                });
-            });
-        }
-
-        // Make functions available globally
+        // ফাংশনগুলো গ্লোবাল করুন
         window.deleteUserData = deleteUserData;
         window.deleteAccount = deleteAccount;
+
+        // ডিবাগিং জন্য: লগইন স্ট্যাটাস চেক করুন
+        function checkLoginStatus() {
+            console.log("Checking login status...");
+            console.log("Current user:", currentUser);
+            console.log("Auth object:", auth);
+            console.log("LocalStorage user:", localStorage.getItem('easyPremiumUser'));
+        }
+
+        window.checkLoginStatus = checkLoginStatus;
 
     </script>
 
@@ -384,179 +249,164 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'Kalpurush', 'Arial', sans-serif;
+            font-family: 'Segoe UI', 'Kalpurush', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: #f8fafc;
             color: #1e293b;
             min-height: 100vh;
-            position: relative;
         }
 
         .header {
             background: linear-gradient(135deg, #1e3a8a, #2563eb);
-            padding: 18px 25px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             color: white;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
         }
 
         .logo {
-            font-size: 1.8rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
+            font-size: 1.5rem;
+            font-weight: bold;
         }
 
         .logo span {
             color: #fbbf24;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .back-btn {
             color: white;
             text-decoration: none;
-            padding: 10px 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            padding: 8px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 6px;
         }
 
         .back-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: white;
-            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .main-container {
-            max-width: 900px;
-            margin: 30px auto;
-            padding: 0 20px;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
         }
 
-        .hero-section {
+        .hero {
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
-            padding: 40px 30px;
+            padding: 25px;
+            border-radius: 10px;
             text-align: center;
-            border-radius: 16px;
-            margin-bottom: 35px;
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
-        }
-
-        .hero-section h1 {
-            font-size: 2.4rem;
-            margin-bottom: 15px;
-            font-weight: 800;
-        }
-
-        .hero-section p {
-            font-size: 1.15rem;
-            opacity: 0.95;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .section-card {
-            background: white;
-            padding: 35px;
-            border-radius: 16px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-            margin-bottom: 30px;
-            border: 1px solid #e2e8f0;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .section-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-        }
-
-        .section-title {
-            font-size: 1.6rem;
-            color: #1e40af;
             margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #e2e8f0;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
 
-        .section-title i {
-            color: #3b82f6;
-            font-size: 1.4rem;
-        }
-
-        .section-content {
-            color: #4b5563;
-            margin-bottom: 20px;
-            font-size: 1.05rem;
-            line-height: 1.7;
-        }
-
-        .warning-box {
-            background: linear-gradient(135deg, #fee2e2, #fecaca);
-            padding: 22px;
-            border-radius: 12px;
-            margin: 20px 0;
-            border-left: 6px solid #dc2626;
-            border-right: 6px solid #dc2626;
-        }
-
-        .warning-box h3 {
-            color: #991b1b;
+        .hero h1 {
+            font-size: 1.5rem;
             margin-bottom: 10px;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
-        .warning-box p {
-            color: #7f1d1d;
-            margin: 0;
-            font-size: 1rem;
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #dc2626;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
         }
 
         .btn {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            background: #dc2626;
             color: white;
             border: none;
-            padding: 15px 35px;
-            font-size: 1.1rem;
-            border-radius: 10px;
+            padding: 12px 25px;
+            border-radius: 6px;
             cursor: pointer;
-            font-weight: 600;
             width: 100%;
-            margin-top: 15px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
+            margin-top: 10px;
+            font-weight: 600;
         }
 
         .btn:hover {
-            background: linear-gradient(135deg, #b91c1c, #991b1b);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 18px rgba(220, 38, 38, 0.3);
+            background: #b91c1c;
         }
 
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        #not-logged-in {
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #not-logged-in h2 {
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+
+        .login-btn {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-top: 15px;
+        }
+
+        .login-btn:hover {
+            background: #2563eb;
+        }
+
+        .user-info {
+            text-align: center;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .debug-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 1000;
+        }
+
+        .debug-info {
+            position: fixed;
+            bottom: 60px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            max-width: 300px;
+            font-size: 12px;
         }
 
         .fa-spinner {
@@ -567,231 +417,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        .user-info-box {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            border: 2px solid #3b82f6;
-        }
-
-        .user-info-box strong {
-            color: #1e40af;
-            font-size: 1.2rem;
-        }
-
-        .user-info-box span {
-            color: #3b82f6;
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        /* Custom Alert/Confirm/Prompt Styles */
-        .custom-alert, .custom-confirm, .custom-prompt {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .alert-content, .confirm-content, .prompt-content {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            animation: slideUp 0.3s;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .alert-success { border-top: 5px solid #10b981; }
-        .alert-error { border-top: 5px solid #dc2626; }
-        .alert-warning { border-top: 5px solid #f59e0b; }
-        .alert-info { border-top: 5px solid #3b82f6; }
-
-        .alert-icon, .confirm-icon, .prompt-icon {
-            font-size: 3rem;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .alert-text h3, .confirm-text h3, .prompt-text h3 {
-            color: #1e3a8a;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        .alert-text p, .confirm-text p, .prompt-text p {
-            color: #4b5563;
-            text-align: center;
-            line-height: 1.6;
-        }
-
-        .alert-close {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            width: 100%;
-            margin-top: 20px;
-            transition: 0.3s;
-        }
-
-        .alert-close:hover {
-            background: #2563eb;
-        }
-
-        .confirm-buttons, .prompt-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .confirm-btn, .prompt-btn {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: 0.3s;
-        }
-
-        .confirm-no, .prompt-cancel {
-            background: #e5e7eb;
-            color: #4b5563;
-        }
-
-        .confirm-no:hover, .prompt-cancel:hover {
-            background: #d1d5db;
-        }
-
-        .confirm-yes, .prompt-submit {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            color: white;
-        }
-
-        .confirm-yes:hover, .prompt-submit:hover {
-            background: linear-gradient(135deg, #b91c1c, #991b1b);
-        }
-
-        .prompt-input {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 1rem;
-            margin-top: 15px;
-            transition: 0.3s;
-        }
-
-        .prompt-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        #not-logged-in {
-            text-align: center;
-            padding: 50px 30px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        #not-logged-in h2 {
-            color: #1e40af;
-            margin-bottom: 15px;
-            font-size: 1.8rem;
-        }
-
-        #not-logged-in p {
-            color: #6b7280;
-            margin-bottom: 25px;
-            font-size: 1.1rem;
-        }
-
-        #not-logged-in a {
-            background: #3b82f6;
-            color: white;
-            text-decoration: none;
-            padding: 14px 30px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: 0.3s;
-        }
-
-        #not-logged-in a:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                padding: 15px;
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .hero-section {
-                padding: 30px 20px;
-            }
-            
-            .hero-section h1 {
-                font-size: 1.8rem;
-            }
-            
-            .section-card {
-                padding: 25px;
-            }
-            
-            .confirm-buttons, .prompt-buttons {
-                flex-direction: column;
-            }
-        }
-
-        footer {
-            text-align: center;
-            padding: 25px;
-            color: #64748b;
-            margin-top: 50px;
-            border-top: 1px solid #e2e8f0;
-            font-size: 0.9rem;
-        }
     </style>
 </head>
 <body>
@@ -799,142 +424,105 @@
     <header class="header">
         <div class="logo">Easy<span>Premium</span></div>
         <a href="index.html" class="back-btn">
-            <i class="fas fa-arrow-left"></i> হোম পেজে ফিরে যান
+            <i class="fas fa-arrow-left"></i> ফিরে যান
         </a>
     </header>
 
     <main class="main-container">
-        <section class="hero-section">
+        <section class="hero">
             <h1>ডাটা এবং অ্যাকাউন্ট ডিলিট</h1>
             <p>আপনার ডেটা গোপনীয়তা আমাদের অগ্রাধিকার। GDPR অনুযায়ী, আপনি এখানে আপনার ডেটা বা সম্পূর্ণ অ্যাকাউন্ট মুছে ফেলতে পারেন।</p>
         </section>
 
         <div id="not-logged-in">
-            <h2><i class="fas fa-user-lock"></i> লগইন প্রয়োজন</h2>
-            <p>আপনার অ্যাকাউন্ট বা ডেটা ডিলিট করতে লগইন করুন।</p>
-            <a href="login.html">
-                <i class="fas fa-sign-in-alt"></i> লগইন পেজে যান
-            </a>
+            <!-- লোড হচ্ছে... -->
         </div>
 
         <div id="logged-in-content" style="display:none;">
-            <div class="user-info-box">
-                <p><i class="fas fa-user-check"></i> <strong>লগইন করা আছে:</strong> <br><span id="user-email-display">...</span></p>
-            </div>
-
-            <!-- ডাটা ডিলিট কার্ড -->
-            <div class="section-card">
-                <h2 class="section-title">
-                    <i class="fas fa-database"></i> শুধু ডাটা ডিলিট করুন
-                </h2>
-                <div class="section-content">
-                    <p>এই অপশন শুধুমাত্র আপনার ডেটা মুছে দেবে কিন্তু অ্যাকাউন্ট থাকবে। আপনি পরবর্তীতে আবার লগইন করতে পারবেন।</p>
-                    <p><strong>যা মুছে যাবে:</strong> সকল অর্ডার ইতিহাস, পেমেন্ট রেকর্ড, ব্যবহারের ডেটা</p>
-                </div>
-                <div class="warning-box">
-                    <h3><i class="fas fa-exclamation-triangle"></i> গুরুত্বপূর্ণ সতর্কতা</h3>
-                    <p>ডাটা মুছে ফেলার পর পুনরুদ্ধার করা যাবে না। সকল তথ্য চিরতরে মুছে যাবে।</p>
-                </div>
-                <button onclick="deleteUserData()" class="btn">
-                    <i class="fas fa-trash-alt"></i> ডাটা ডিলিট করুন
-                </button>
-            </div>
-
-            <!-- সম্পূর্ণ অ্যাকাউন্ট ডিলিট কার্ড -->
-            <div class="section-card">
-                <h2 class="section-title">
-                    <i class="fas fa-user-times"></i> সম্পূর্ণ অ্যাকাউন্ট ডিলিট করুন
-                </h2>
-                <div class="section-content">
-                    <p>এই অপশন আপনার সম্পূর্ণ অ্যাকাউন্ট এবং সকল ডেটা চিরতরে মুছে দেবে।</p>
-                    <p><strong>ধাপসমূহ:</strong></p>
-                    <ol style="margin-left: 20px; color: #4b5563; line-height: 1.8;">
-                        <li>reCAPTCHA নিরাপত্তা যাচাই</li>
-                        <li>পাসওয়ার্ড নিশ্চিতকরণ</li>
-                        <li>ডেটাবেস থেকে সকল তথ্য মুছে ফেলা</li>
-                        <li>Firebase Authentication থেকে অ্যাকাউন্ট মুছে ফেলা</li>
-                    </ol>
-                </div>
-                <div class="warning-box">
-                    <h3><i class="fas fa-radiation-alt"></i> চূড়ান্ত সতর্কতা</h3>
-                    <p>এই কাজটি সম্পূর্ণ অপরিবর্তনীয়। অ্যাকাউন্ট ডিলিটের পর আপনি আর এই অ্যাকাউন্টে লগইন করতে পারবেন না।</p>
-                </div>
-                <button onclick="deleteAccount()" class="btn">
-                    <i class="fas fa-user-slash"></i> সম্পূর্ণ অ্যাকাউন্ট ডিলিট করুন
-                </button>
-                <p style="text-align: center; margin-top: 15px; color: #6b7280; font-size: 0.9rem;">
-                    <i class="fas fa-shield-alt"></i> reCAPTCHA Enterprise দ্বারা সুরক্ষিত
+            <div class="user-info">
+                <p><i class="fas fa-user"></i> লগইন করা: <strong id="user-email">...</strong></p>
+                <p style="font-size: 12px; color: #6b7280; margin-top: 5px;">
+                    User ID: <span id="user-uid">...</span>
                 </p>
             </div>
 
-            <!-- সাহায্য সেকশন -->
-            <div class="section-card" style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe);">
-                <h2 class="section-title" style="color: #0369a1;">
-                    <i class="fas fa-hands-helping"></i> সাহায্য প্রয়োজন?
-                </h2>
-                <div class="section-content">
-                    <p>যদি ডিলিট করতে সমস্যা হয় বা আপনার কোন প্রশ্ন থাকে:</p>
+            <!-- ডাটা ডিলিট -->
+            <div class="card">
+                <h2><i class="fas fa-database"></i> শুধু ডাটা ডিলিট</h2>
+                <p>অ্যাকাউন্ট থাকবে, কিন্তু সকল অর্ডার এবং ডাটা মুছে যাবে</p>
+                <div class="warning">
+                    <strong><i class="fas fa-exclamation-triangle"></i> সতর্কতা:</strong> এটি পুনরুদ্ধার করা যাবে না
                 </div>
-                <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
-                    <a href="contact.html" style="
-                        flex: 1;
-                        min-width: 150px;
-                        background: white;
-                        padding: 15px;
-                        border-radius: 10px;
-                        text-decoration: none;
-                        color: #1e40af;
-                        font-weight: 600;
-                        border: 2px solid #3b82f6;
-                        text-align: center;
-                        transition: 0.3s;
-                    ">
-                        <i class="fas fa-envelope"></i><br>
-                        কন্টাক্ট
-                    </a>
-                    <a href="faq.html" style="
-                        flex: 1;
-                        min-width: 150px;
-                        background: white;
-                        padding: 15px;
-                        border-radius: 10px;
-                        text-decoration: none;
-                        color: #1e40af;
-                        font-weight: 600;
-                        border: 2px solid #3b82f6;
-                        text-align: center;
-                        transition: 0.3s;
-                    ">
-                        <i class="fas fa-question-circle"></i><br>
-                        FAQ
-                    </a>
-                    <a href="privacy.html" style="
-                        flex: 1;
-                        min-width: 150px;
-                        background: white;
-                        padding: 15px;
-                        border-radius: 10px;
-                        text-decoration: none;
-                        color: #1e40af;
-                        font-weight: 600;
-                        border: 2px solid #3b82f6;
-                        text-align: center;
-                        transition: 0.3s;
-                    ">
-                        <i class="fas fa-file-contract"></i><br>
-                        প্রাইভেসি
-                    </a>
+                <button onclick="deleteUserData()" class="btn">
+                    ডাটা ডিলিট করুন
+                </button>
+            </div>
+
+            <!-- অ্যাকাউন্ট ডিলিট -->
+            <div class="card">
+                <h2><i class="fas fa-user-times"></i> সম্পূর্ণ অ্যাকাউন্ট ডিলিট</h2>
+                <p>অ্যাকাউন্ট এবং সকল ডাটা চিরতরে মুছে যাবে</p>
+                <div class="warning">
+                    <strong><i class="fas fa-radiation-alt"></i> সতর্কতা:</strong> এটি অপরিবর্তনীয়
                 </div>
+                <button onclick="deleteAccount()" class="btn">
+                    অ্যাকাউন্ট ডিলিট করুন
+                </button>
+                <p style="text-align: center; color: #6b7280; font-size: 12px; margin-top: 10px;">
+                    নিরাপত্তার জন্য পাসওয়ার্ড প্রয়োজন হবে
+                </p>
             </div>
         </div>
     </main>
 
-    <footer>
+    <!-- ডিবাগ বাটন -->
+    <button class="debug-btn" onclick="document.getElementById('debug-info').style.display = 
+        document.getElementById('debug-info').style.display === 'block' ? 'none' : 'block';
+        checkLoginStatus();">
+        <i class="fas fa-bug"></i> ডিবাগ
+    </button>
+
+    <div class="debug-info" id="debug-info">
+        <h4>ডিবাগ তথ্য:</h4>
+        <p><strong>ইউজার:</strong> <span id="debug-email">চেকিং...</span></p>
+        <p><strong>UID:</strong> <span id="debug-uid">চেকিং...</span></p>
+        <p><strong>লগইন স্ট্যাটাস:</strong> <span id="debug-status">চেকিং...</span></p>
+        <button onclick="window.location.reload()" style="
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin-top: 5px;
+        ">
+            রিফ্রেশ
+        </button>
+    </div>
+
+    <footer style="text-align: center; padding: 20px; color: #6b7280; font-size: 14px;">
         <p>© 2024 EasyPremium. সর্বস্বত্ব সংরক্ষিত।</p>
-        <p style="margin-top: 8px; font-size: 0.85rem;">
+        <p style="margin-top: 5px; font-size: 12px;">
             <i class="fas fa-lock"></i> আপনার ডেটা নিরাপদে আছে
         </p>
     </footer>
+
+    <script>
+        // ডিবাগ তথ্য আপডেট
+        function updateDebugInfo() {
+            const user = JSON.parse(localStorage.getItem('easyPremiumUser') || '{}');
+            document.getElementById('debug-email').textContent = user.email || 'কোন ইউজার নেই';
+            document.getElementById('debug-uid').textContent = user.uid || 'N/A';
+            document.getElementById('debug-status').textContent = user.email ? 'লগইন আছে' : 'লগইন নেই';
+        }
+
+        // প্রতি ২ সেকেন্ডে আপডেট
+        setInterval(updateDebugInfo, 2000);
+        updateDebugInfo();
+
+        // ফায়ারবেজ ইন্সট্যান্স চেক
+        console.log("Firebase app initialized:", window.firebaseApp);
+    </script>
 
 </body>
 </html>
