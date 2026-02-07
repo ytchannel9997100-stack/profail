@@ -93,101 +93,6 @@
                 showLoading(false);
             }
         }
-        // 2. সম্পূর্ণ অ্যাকাউন্ট ডিলিট (সরাসরি ও সহজ পদ্ধতি)
-        async function deleteAccount() {
-            if (!currentUser) {
-                showAlert("লগইন করা নেই", "আপনি লগইন করা নেই।", "error");
-                return;
-            }
-            // ২ স্তরের কনফার্মেশন
-            const step1 = await showConfirm(
-                "অ্যাকাউন্ট ডিলিট",
-                `আপনার সম্পূর্ণ অ্যাকাউন্ট মুছে ফেলতে চান?\n\nইমেইল: ${currentUser.email}`,
-                "warning"
-            );
-            if (!step1) return;
-           
-            const step2 = await showConfirm(
-                "চূড়ান্ত সতর্কতা",
-                "🔥 আপনি কি নিশ্চিত?\n\n✅ হ্যাঁ - মুছে ফেলুন\n❌ না - বাতিল করুন",
-                "danger"
-            );
-            if (!step2) return;
-            try {
-                showLoading(true, "অ্যাকাউন্ট মুছে ফেলা হচ্ছে...");
-               
-                const userId = currentUser.uid;
-                const userEmail = currentUser.email;
-               
-                // ধাপ ১: Realtime Database থেকে সকল ডাটা মুছুন
-                // শুধু permission দেওয়া পাথগুলো মুছুন
-                await database.ref('users/' + userId).remove();
-                await database.ref('userOrders/' + userId).remove();
-               
-                // ধাপ ২: লগ রাখুন (যদি permission থাকে)
-                try {
-                    await database.ref('accountDeletions/' + userId).set({
-                        email: userEmail,
-                        deletedAt: new Date().toISOString(),
-                        uid: userId
-                    });
-                } catch (logError) {
-                    console.log("Log not saved, continuing...");
-                }
-               
-                // ধাপ ৩: Firebase Authentication থেকে ইউজার ডিলিট করার চেষ্টা করুন
-                try {
-                    await currentUser.delete();
-                    console.log("Auth account deleted successfully");
-                } catch (authError) {
-                    console.log("Auth deletion error:", authError.message);
-                    // যদি recent login এরর আসে, তবুও লগআউট করান
-                }
-               
-                // ধাপ ৪: ইউজারকে লগআউট করুন
-                await auth.signOut();
-               
-                // ধাপ ৫: সফল মেসেজ
-                showAlert("✅ সফল!",
-                    "আপনার অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে!\n\n" +
-                    "✅ Realtime Database: সকল ডাটা মুছে ফেলা হয়েছে\n" +
-                    "✅ Firebase Authentication: মুছে ফেলা হয়েছে\n" +
-                    "✅ লগআউট: সম্পন্ন হয়েছে\n\n" +
-                    "আপনি এখন হোমপেজে রিডাইরেক্ট হচ্ছেন...",
-                    "success",
-                    function() {
-                        window.location.href = "index.html";
-                    }
-                );
-            } catch (error) {
-                console.error("Error:", error);
-               
-                let errorMsg = "ত্রুটি হয়েছে!";
-                if (error.message.includes('PERMISSION_DENIED')) {
-                    errorMsg = "❌ Firebase Rules অনুমতি সমস্যা!\n\nআপনার ডাটা মুছতে অনুমতি নেই।\n\nসমাধান:\n1. Firebase Console-এ Rules আপডেট করুন\n2. অথবা Admin কে জানান";
-                } else if (error.message.includes('recent')) {
-                    errorMsg = "⚠️ সাম্প্রতিক লগইন সমস্যা।\n\nআপনাকে লগআউট করা হচ্ছে...";
-                    // তবুও লগআউট করান
-                    setTimeout(() => {
-                        auth.signOut();
-                        window.location.href = "index.html";
-                    }, 2000);
-                } else {
-                    errorMsg = "❌ ত্রুটি: " + error.message;
-                }
-               
-                showAlert("ত্রুটি!", errorMsg, "error");
-               
-                // তবুও লগআউট করান
-                setTimeout(() => {
-                    auth.signOut();
-                    window.location.href = "index.html";
-                }, 3000);
-               
-            } finally {
-                showLoading(false);
-            }
-        }
         // 3. সর্বোচ্চ সহজ পদ্ধতি (সবচেয়ে কার্যকরী)
         async function ultimateDelete() {
             if (!currentUser) {
@@ -260,27 +165,6 @@
                 document.body.style.cursor = 'default';
             }
         }
-        // 4. শুধু ডাটাবেস ডাটা মুছুন (সরাসরি)
-        async function deleteDatabaseDataOnly() {
-            if (!currentUser) return;
-           
-            if (!confirm("আপনার ডাটাবেস ডাটা মুছে ফেলতে চান?\n\n(অ্যাকাউন্ট থাকবে)")) {
-                return;
-            }
-            try {
-                const userId = currentUser.uid;
-               
-                // শুধু users এবং userOrders মুছুন
-                await database.ref('users/' + userId).remove();
-                await database.ref('userOrders/' + userId).remove();
-               
-                alert("✅ আপনার ডাটাবেস ডাটা মুছে ফেলা হয়েছে!");
-                window.location.reload();
-               
-            } catch (error) {
-                alert("ত্রুটি: " + error.message);
-            }
-        }
         // UI Helper Functions
         function showAlert(title, message, type, callback = null) {
             const alertDiv = document.createElement('div');
@@ -336,7 +220,6 @@
         // ফাংশনগুলো গ্লোবাল করুন
         window.deleteUserData = deleteUserData;
         window.deleteAccount = ultimateDelete; // সরাসরি ultimateDelete ব্যবহার করুন
-        window.deleteDatabaseDataOnly = deleteDatabaseDataOnly;
     </script>
     <style>
         * {
@@ -607,35 +490,6 @@
             background: #f44336;
             color: white;
         }
-        .option-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
-        .option-btn {
-            flex: 1;
-            padding: 14px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.95rem;
-            touch-action: manipulation;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            min-height: 50px;
-        }
-        .option-data {
-            background: #ff9800;
-            color: white;
-        }
-        .option-account {
-            background: #f44336;
-            color: white;
-        }
         footer {
             text-align: center;
             padding: 20px 15px;
@@ -689,17 +543,6 @@
             
             .action-desc, .warning-box p {
                 font-size: 0.92rem;
-            }
-            
-            .option-buttons {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .option-btn {
-                width: 100%;
-                min-height: 48px;
-                font-size: 0.9rem;
             }
             
             .confirm-content, .alert-content {
@@ -792,7 +635,7 @@
                 font-size: 1.15rem;
             }
             
-            .btn, .option-btn {
+            .btn {
                 font-size: 0.85rem;
             }
             
@@ -803,7 +646,7 @@
         
         /* ট্যাপ টার্গেট সাইজ বড় */
         @media (max-width: 768px) {
-            button, .btn, .login-btn, .option-btn, .confirm-no, .confirm-yes, .alert-content button {
+            button, .btn, .login-btn, .confirm-no, .confirm-yes, .alert-content button {
                 min-height: 48px;
                 min-width: 48px;
             }
@@ -891,14 +734,9 @@
                     <p>এটি সম্পূর্ণ অপরিবর্তনীয়।</p>
                 </div>
                
-                <div class="option-buttons">
-                    <button onclick="ultimateDelete()" class="option-btn option-account">
-                        <i class="fas fa-fire"></i> অ্যাকাউন্ট ডিলিট
-                    </button>
-                    <button onclick="deleteDatabaseDataOnly()" class="option-btn option-data">
-                        <i class="fas fa-database"></i> শুধু ডাটাবেস
-                    </button>
-                </div>
+                <button onclick="ultimateDelete()" class="btn">
+                    <i class="fas fa-fire"></i> অ্যাকাউন্ট ডিলিট করুন
+                </button>
                
                 <p style="text-align: center; color: #666; margin-top: 15px; font-size: 0.9rem;">
                     <i class="fas fa-info-circle"></i> সরাসরি ক্লিক করেই ডিলিট করা যাবে
@@ -951,7 +789,7 @@
         </div>
     </main>
     <footer>
-        <p>© 2026 EasyPremium</p>
+        <p>© 2024 EasyPremium</p>
         <p style="margin-top: 5px; font-size: 0.9rem;">
             <i class="fas fa-lock"></i> সুরক্ষিত
         </p>
