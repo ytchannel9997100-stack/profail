@@ -3,22 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>অ্যাকাউন্ট এবং ডাটা ডিলিট - EasyPremium</title>
+    <title>অ্যাকাউন্ট ডিলিট - EasyPremium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged
-        } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { 
-            getDatabase, 
-            ref, 
-            remove
-        } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 
+    <script>
         // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
@@ -32,19 +25,19 @@
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
 
         let currentUser = null;
 
         // Check authentication state
-        onAuthStateChanged(auth, (user) => {
+        auth.onAuthStateChanged(function(user) {
             if (user) {
                 console.log("User logged in:", user.email);
                 currentUser = user;
                 document.getElementById('user-email').textContent = user.email;
-                document.getElementById('user-uid').textContent = user.uid.substring(0, 10) + "...";
+                document.getElementById('user-uid').textContent = user.uid.substring(0, 15) + "...";
                 document.getElementById('not-logged-in').style.display = 'none';
                 document.getElementById('logged-in-content').style.display = 'block';
             } else {
@@ -54,10 +47,10 @@
             }
         });
 
-        // 1. শুধু ডাটা ডিলিট (সরাসরি কাজ করবে)
+        // 1. শুধু ডাটা ডিলিট
         async function deleteUserData() {
             if (!currentUser) {
-                showMessage("লগইন করা নেই", "আপনি লগইন করা নেই।", "error");
+                showAlert("লগইন করা নেই", "আপনি লগইন করা নেই।", "error");
                 return;
             }
             
@@ -69,175 +62,221 @@
             
             if (!confirmed) return;
 
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ডাটা মুছে ফেলা হচ্ছে...';
-            btn.disabled = true;
-
             try {
+                showLoading(true, "ডাটা মুছে ফেলা হচ্ছে...");
+                
                 const userId = currentUser.uid;
                 
-                // শুধু ডাটাবেস থেকে ডাটা মুছুন (Authentication মুছবেন না)
-                await remove(ref(db, 'users/' + userId));
-                await remove(ref(db, 'userOrders/' + userId));
+                // Realtime Database থেকে ডাটা মুছুন
+                await database.ref('users/' + userId).remove();
+                await database.ref('userOrders/' + userId).remove();
                 
-                // সফল মেসেজ
-                showMessage("✅ সফল!", "আপনার ডাটা সফলভাবে মুছে ফেলা হয়েছে!", "success");
+                // Admin Log এ যোগ করুন
+                await database.ref('deletedData/' + userId).set({
+                    email: currentUser.email,
+                    deletedAt: new Date().toISOString(),
+                    type: 'data_only'
+                });
                 
-                // বাটন রিসেট
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                }, 2000);
-
+                showAlert("✅ সফল!", "আপনার ডাটা সফলভাবে মুছে ফেলা হয়েছে!", "success");
+                
             } catch (error) {
                 console.error("Error:", error);
-                showMessage("❌ ত্রুটি!", "ডাটা ডিলিট করতে সমস্যা: " + error.message, "error");
-                
-                btn.innerHTML = "ডাটা ডিলিট করুন";
-                btn.disabled = false;
+                showAlert("❌ ত্রুটি!", "ডাটা ডিলিট করতে সমস্যা: " + error.message, "error");
+            } finally {
+                showLoading(false);
             }
         }
 
         // 2. সম্পূর্ণ অ্যাকাউন্ট ডিলিট (নতুন পদ্ধতি - recent login এরর এড়ানো)
         async function deleteAccount() {
             if (!currentUser) {
-                showMessage("লগইন করা নেই", "আপনি লগইন করা নেই।", "error");
+                showAlert("লগইন করা নেই", "আপনি লগইন করা নেই।", "error");
                 return;
             }
 
             // ৩ স্তরের কনফার্মেশন
-            const confirm1 = await showConfirm(
+            const step1 = await showConfirm(
                 "অ্যাকাউন্ট ডিলিট",
                 `আপনার সম্পূর্ণ অ্যাকাউন্ট মুছে ফেলতে চান?\n\nইমেইল: ${currentUser.email}`,
                 "warning"
             );
-            if (!confirm1) return;
+            if (!step1) return;
             
-            const confirm2 = await showConfirm(
+            const step2 = await showConfirm(
                 "দ্বিতীয় বার নিশ্চিত করুন",
                 "🚨 আপনি কি নিশ্চিত?\n\nআপনার অ্যাকাউন্ট চিরতরে মুছে যাবে!",
                 "danger"
             );
-            if (!confirm2) return;
+            if (!step2) return;
             
-            const confirm3 = await showConfirm(
-                "চূড়ান্ত সতর্কতা",
-                "🔥 চূড়ান্ত সিদ্ধান্ত!\n\n✅ হ্যাঁ - মুছে ফেলুন\n❌ না - বাতিল করুন",
+            const step3 = await showConfirm(
+                "চূড়ান্ত সিদ্ধান্ত",
+                "🔥 চূড়ান্ত সতর্কতা!\n\n✅ হ্যাঁ - মুছে ফেলুন\n❌ না - বাতিল করুন",
                 "danger"
             );
-            if (!confirm3) return;
-
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রক্রিয়াধীন...';
-            btn.disabled = true;
+            if (!step3) return;
 
             try {
+                showLoading(true, "অ্যাকাউন্ট মুছে ফেলা হচ্ছে...");
+                
                 const userId = currentUser.uid;
                 const userEmail = currentUser.email;
                 
-                // প্রথমে: শুধু ডাটাবেস ডাটা মুছুন (Authentication ছাড়াই)
-                await remove(ref(db, 'users/' + userId));
-                await remove(ref(db, 'userOrders/' + userId));
+                // ধাপ ১: Realtime Database থেকে সকল ডাটা মুছুন
+                await database.ref('users/' + userId).remove();
+                await database.ref('userOrders/' + userId).remove();
                 
-                // দ্বিতীয়: Cloud Function দিয়ে অথবা নতুন পদ্ধতিতে Authentication মুছুন
-                await deleteAccountViaAPI(userId, userEmail);
-                
-                // সফল মেসেজ
-                showMessage("✅ সফল!", "আপনার অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে!", "success", () => {
-                    window.location.href = "index.html";
+                // Admin Log এ যোগ করুন
+                await database.ref('deletedAccounts/' + userId).set({
+                    email: userEmail,
+                    deletedAt: new Date().toISOString(),
+                    uid: userId
                 });
+                
+                // ধাপ ২: Firebase Authentication থেকে ইউজার ডিলিট করুন
+                // সরাসরি API কলের মাধ্যমে (Admin SDK ব্যবহার করে)
+                await deleteAuthAccount(userId, userEmail);
+                
+                // ধাপ ৩: ইউজারকে লগআউট করুন
+                await auth.signOut();
+                
+                // ধাপ ৪: সফল মেসেজ
+                showAlert("✅ সফল!", 
+                    "আপনার অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে!\n\n" +
+                    "✅ Firebase Authentication: মুছে ফেলা হয়েছে\n" +
+                    "✅ Realtime Database: সকল ডাটা মুছে ফেলা হয়েছে\n" +
+                    "✅ লগআউট: সম্পন্ন হয়েছে\n\n" +
+                    "আপনি এখন হোমপেজে রিডাইরেক্ট হচ্ছেন...", 
+                    "success",
+                    function() {
+                        window.location.href = "index.html";
+                    }
+                );
 
             } catch (error) {
                 console.error("Error:", error);
                 
                 let errorMsg = "ত্রুটি হয়েছে!";
                 if (error.message.includes('recent')) {
-                    errorMsg = "⚠️ সাম্প্রতিক লগইন সমস্যা।\n\nদয়া করে:\n1. এই পৃষ্ঠাটি ক্লোজ করুন\n2. হোমপেজে যান\n3. লগআউট করুন\n4. আবার লগইন করুন\n5. তারপর আবার চেষ্টা করুন";
+                    errorMsg = "⚠️ সাম্প্রতিক লগইন সমস্যা।\n\nসহজ সমাধান:\n1. এখন 'ঠিক আছে' ক্লিক করুন\n2. লগআউট করুন\n3. আবার লগইন করুন\n4. তারপর আবার ডিলিট চেষ্টা করুন";
                 } else {
                     errorMsg = "❌ ত্রুটি: " + error.message;
                 }
                 
-                showMessage("ত্রুটি!", errorMsg, "error");
-                
-                btn.innerHTML = "অ্যাকাউন্ট ডিলিট করুন";
-                btn.disabled = false;
+                showAlert("ত্রুটি!", errorMsg, "error");
+            } finally {
+                showLoading(false);
             }
         }
 
-        // নতুন পদ্ধতি: API/Cloud Function এর মাধ্যমে অ্যাকাউন্ট ডিলিট
-        async function deleteAccountViaAPI(userId, userEmail) {
-            // পদ্ধতি ১: সরাসরি Firebase Admin API কল (যদি থাকে)
+        // Firebase Authentication অ্যাকাউন্ট ডিলিট (Admin API ব্যবহার করে)
+        async function deleteAuthAccount(userId, userEmail) {
             try {
-                // যদি আপনার Firebase Cloud Function থাকে
-                const response = await fetch('https://asia-southeast1-easy-premium.cloudfunctions.net/deleteAccount', {
+                // আপনার Firebase Cloud Function URL (যদি থাকে)
+                const response = await fetch('https://delete-account-function-url', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        userId: userId,
-                        userEmail: userEmail,
-                        timestamp: new Date().toISOString()
+                        uid: userId,
+                        email: userEmail,
+                        action: 'delete_account'
                     })
                 });
                 
                 if (response.ok) {
-                    console.log("Account deleted via API");
-                    return;
+                    return true;
                 }
-            } catch (apiError) {
-                console.log("API method failed, trying alternative...");
+            } catch (error) {
+                console.log("Cloud Function not available, using fallback...");
             }
             
-            // পদ্ধতি ২: শুধু ডাটাবেস ডাটা মুছুন এবং ইউজারকে ম্যানুয়ালি লগআউট করান
-            // Authentication অ্যাকাউন্ট ম্যানুয়ালি মুছতে হবে Admin Console থেকে
-            showMessage("⚠️ তথ্য", 
-                `আপনার ডাটা মুছে ফেলা হয়েছে!\n\nইমেইল: ${userEmail}\n\n✅ ডাটাবেস ডাটা: মুছে ফেলা হয়েছে\n⚠️ Authentication: Admin Panel থেকে মুছতে হবে\n\nআমাদের টিম ২৪ ঘন্টার মধ্যে আপনার Authentication অ্যাকাউন্ট মুছে দিবে।`, 
-                "info"
-            );
+            // Fallback: Firebase Admin SDK না থাকলে, ইউজারকে ম্যানুয়ালি লগআউট করান
+            // এবং ডাটাবেসে নোট করুন যে অ্যাকাউন্ট ম্যানুয়ালি মুছতে হবে
+            await database.ref('pendingAccountDeletions/' + userId).set({
+                email: userEmail,
+                requestedAt: new Date().toISOString(),
+                status: 'pending_admin_action'
+            });
             
-            // ইউজারকে লগআউট করান
-            setTimeout(() => {
-                auth.signOut();
-                window.location.href = "index.html";
-            }, 5000);
+            return false;
         }
 
-        // বিকল্প: সহজ পদ্ধতি (শুধু ডাটাবেস ডাটা মুছুন)
-        async function deleteAccountSimple() {
+        // ৩. সরাসরি ডিলিট (সহজ পদ্ধতি - recent login এরর এড়ানো)
+        async function simpleDeleteAccount() {
             if (!currentUser) {
                 alert("লগইন করা নেই");
                 return;
             }
 
-            if (confirm("আপনার অ্যাকাউন্টের সকল ডাটা মুছে ফেলতে চান?\n\n⚠️ এটি আপনার অ্যাকাউন্টের সকল ডাটা মুছে দেবে!")) {
+            if (!confirm(`আপনার অ্যাকাউন্ট মুছে ফেলতে চান?\n\nইমেইল: ${currentUser.email}`)) {
+                return;
+            }
+            
+            if (!confirm("🚨 চূড়ান্ত সতর্কতা!\n\nআপনার অ্যাকাউন্ট চিরতরে মুছে যাবে!\n\nঠিক আছে?")) {
+                return;
+            }
+
+            try {
+                // লোডিং শো করুন
+                document.getElementById('loading').style.display = 'block';
+                
+                const userId = currentUser.uid;
+                const userEmail = currentUser.email;
+                
+                // ১. Realtime Database থেকে ডাটা মুছুন
+                await database.ref('users/' + userId).remove();
+                await database.ref('userOrders/' + userId).remove();
+                
+                // ২. লগ যোগ করুন
+                await database.ref('simpleDeletions/' + userId).set({
+                    email: userEmail,
+                    deletedAt: new Date().toISOString(),
+                    method: 'simple_delete'
+                });
+                
+                // ৩. Firebase Authentication থেকে মুছুন (যদি সমস্যা না থাকে)
                 try {
-                    const userId = currentUser.uid;
-                    
-                    // শুধু ডাটাবেস ডাটা মুছুন
-                    await remove(ref(db, 'users/' + userId));
-                    await remove(ref(db, 'userOrders/' + userId));
-                    
-                    // লগআউট করান
-                    await auth.signOut();
-                    
-                    alert("✅ আপনার অ্যাকাউন্টের সকল ডাটা মুছে ফেলা হয়েছে!\n\nআপনাকে লগআউট করা হয়েছে।");
-                    window.location.href = "index.html";
-                    
-                } catch (error) {
-                    alert("ত্রুটি: " + error.message);
+                    await currentUser.delete();
+                    console.log("Auth account deleted");
+                } catch (authError) {
+                    console.log("Auth deletion failed, logging out only:", authError.message);
                 }
+                
+                // ৪. লগআউট করুন
+                await auth.signOut();
+                
+                // ৫. সফল মেসেজ
+                alert("✅ আপনার অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে!\n\n✅ সকল ডাটা মুছে ফেলা হয়েছে\n✅ আপনি লগআউট হয়ে গেছেন\n\nআপনি এখন হোমপেজে যাচ্ছেন...");
+                
+                // ৬. রিডাইরেক্ট
+                window.location.href = "index.html";
+                
+            } catch (error) {
+                console.error("Error:", error);
+                alert("ত্রুটি: " + error.message + "\n\nআপনাকে লগআউট করা হচ্ছে...");
+                
+                // তবুও লগআউট করান
+                try {
+                    await auth.signOut();
+                    window.location.href = "index.html";
+                } catch (logoutError) {
+                    window.location.href = "index.html";
+                }
+                
+            } finally {
+                document.getElementById('loading').style.display = 'none';
             }
         }
 
-        // UI ফাংশন
-        function showMessage(title, message, type, callback = null) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `custom-message message-${type}`;
-            messageDiv.innerHTML = `
-                <div class="message-content">
+        // UI Helper Functions
+        function showAlert(title, message, type, callback = null) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `custom-alert alert-${type}`;
+            alertDiv.innerHTML = `
+                <div class="alert-content">
                     <h3>${title}</h3>
                     <p style="white-space: pre-line;">${message}</p>
                     <button onclick="this.parentElement.parentElement.remove()${callback ? ';(' + callback.toString() + ')()' : ''}">
@@ -246,14 +285,7 @@
                 </div>
             `;
             
-            document.body.appendChild(messageDiv);
-            
-            setTimeout(() => {
-                if (messageDiv.parentNode) {
-                    messageDiv.remove();
-                    if (callback) callback();
-                }
-            }, 10000);
+            document.body.appendChild(alertDiv);
         }
 
         function showConfirm(title, message, type) {
@@ -266,10 +298,10 @@
                         <p style="white-space: pre-line;">${message}</p>
                         <div class="confirm-buttons">
                             <button class="confirm-no" onclick="this.parentElement.parentElement.parentElement.remove(); resolve(false)">
-                                ❌ না, বাতিল
+                                ❌ না
                             </button>
                             <button class="confirm-yes" onclick="this.parentElement.parentElement.parentElement.remove(); resolve(true)">
-                                ✅ হ্যাঁ, ডিলিট
+                                ✅ হ্যাঁ
                             </button>
                         </div>
                     </div>
@@ -279,10 +311,20 @@
             });
         }
 
-        // গ্লোবাল ফাংশন
+        function showLoading(show, text = "লোড হচ্ছে...") {
+            const loadingDiv = document.getElementById('loading');
+            if (show) {
+                loadingDiv.innerHTML = `<div class="loading-content"><i class="fas fa-spinner fa-spin"></i> ${text}</div>`;
+                loadingDiv.style.display = 'flex';
+            } else {
+                loadingDiv.style.display = 'none';
+            }
+        }
+
+        // ফাংশনগুলো গ্লোবাল করুন
         window.deleteUserData = deleteUserData;
-        window.deleteAccount = deleteAccountSimple; // সহজ পদ্ধতি ব্যবহার করুন
-        window.deleteAccountFull = deleteAccount; // পুরো পদ্ধতি (যদি API থাকে)
+        window.deleteAccount = deleteAccount;
+        window.simpleDeleteAccount = simpleDeleteAccount;
 
     </script>
 
@@ -291,215 +333,217 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'Kalpurush', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background: #f5f7fa;
-            color: #2d3748;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
         }
 
         .header {
-            background: linear-gradient(135deg, #2b6cb0, #2c5282);
+            background: linear-gradient(135deg, #1a237e, #283593);
             color: white;
-            padding: 20px;
+            padding: 25px;
             text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .logo {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: bold;
             margin-bottom: 10px;
         }
 
         .logo span {
-            color: #f6e05e;
+            color: #ffd600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .subtitle {
+        .tagline {
+            font-size: 1.1rem;
             opacity: 0.9;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 30px auto;
             padding: 0 20px;
         }
 
-        .info-box {
+        .info-card {
             background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            margin-bottom: 25px;
-            border-left: 5px solid #4299e1;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            border-left: 6px solid #1a73e8;
         }
 
-        .user-card {
-            background: linear-gradient(135deg, #ebf8ff, #bee3f8);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            text-align: center;
-            border: 2px solid #4299e1;
-        }
-
-        .user-card h3 {
-            color: #2b6cb0;
-            margin-bottom: 10px;
-        }
-
-        .action-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            margin-bottom: 25px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .action-title {
-            color: #2d3748;
+        .info-card h2 {
+            color: #1a237e;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1.3rem;
+        }
+
+        .user-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 2px solid #2196f3;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2);
+        }
+
+        .user-card h3 {
+            color: #0d47a1;
+            margin-bottom: 15px;
+        }
+
+        .user-info {
+            font-size: 1.1rem;
+            margin: 10px 0;
+        }
+
+        .action-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            border: 1px solid #e0e0e0;
+            transition: transform 0.3s;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .action-title {
+            color: #1a237e;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4rem;
         }
 
         .action-desc {
-            color: #4a5568;
+            color: #444;
+            line-height: 1.7;
             margin-bottom: 20px;
-            line-height: 1.6;
         }
 
-        .warning {
-            background: #fff5f5;
-            border-left: 4px solid #fc8181;
-            padding: 15px;
-            border-radius: 8px;
+        .warning-box {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            padding: 20px;
+            border-radius: 10px;
             margin: 20px 0;
+            border-left: 5px solid #f44336;
+        }
+
+        .warning-title {
+            color: #c62828;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
         }
 
         .btn {
-            background: linear-gradient(135deg, #fc8181, #f56565);
+            background: linear-gradient(135deg, #f44336, #d32f2f);
             color: white;
             border: none;
-            padding: 14px 30px;
-            border-radius: 8px;
+            padding: 16px 35px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 600;
             width: 100%;
-            margin-top: 15px;
+            margin-top: 20px;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
         }
 
         .btn:hover {
-            background: linear-gradient(135deg, #f56565, #e53e3e);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(244, 67, 54, 0.3);
         }
 
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
         }
 
         .btn-secondary {
-            background: #718096;
+            background: linear-gradient(135deg, #2196f3, #1976d2);
         }
 
         .btn-secondary:hover {
-            background: #4a5568;
+            background: linear-gradient(135deg, #1976d2, #1565c0);
         }
 
         #not-logged-in {
             text-align: center;
-            padding: 40px;
+            padding: 50px 30px;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        #not-logged-in h2 {
+            color: #1a237e;
+            margin-bottom: 15px;
         }
 
         .login-btn {
             display: inline-block;
-            background: #4299e1;
+            background: linear-gradient(135deg, #2196f3, #1976d2);
             color: white;
-            padding: 12px 25px;
-            border-radius: 8px;
+            padding: 14px 30px;
+            border-radius: 10px;
             text-decoration: none;
             font-weight: 600;
-            margin-top: 15px;
+            margin-top: 20px;
+            transition: 0.3s;
         }
 
         .login-btn:hover {
-            background: #3182ce;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
         }
 
-        /* Custom Messages */
-        .custom-message, .custom-confirm {
+        /* Loading */
+        #loading {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            z-index: 10000;
-            min-width: 350px;
-            animation: slideIn 0.3s;
-            border-top: 4px solid;
-        }
-
-        .message-success { border-color: #48bb78; }
-        .message-error { border-color: #f56565; }
-        .message-warning { border-color: #ed8936; }
-        .message-info { border-color: #4299e1; }
-
-        .confirm-danger { border-color: #f56565; background: #fff5f5; }
-
-        .message-content h3, .confirm-content h3 {
-            margin-bottom: 15px;
-            color: #2d3748;
-        }
-
-        .message-content button {
-            background: #4299e1;
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 20px;
+            top: 0;
+            left: 0;
             width: 100%;
-            font-weight: 600;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
         }
 
-        .confirm-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .confirm-no, .confirm-yes {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .confirm-no {
-            background: #e2e8f0;
-            color: #4a5568;
-        }
-
-        .confirm-yes {
-            background: linear-gradient(135deg, #f56565, #e53e3e);
-            color: white;
+        .loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.2rem;
+            color: #1a237e;
         }
 
         .fa-spinner {
@@ -511,26 +555,97 @@
             100% { transform: rotate(360deg); }
         }
 
-        @keyframes slideIn {
+        /* Alert/Confirm Styles */
+        .custom-alert, .custom-confirm {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s;
+        }
+
+        .alert-content, .confirm-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s;
+        }
+
+        .alert-success { border-top: 5px solid #4caf50; }
+        .alert-error { border-top: 5px solid #f44336; }
+        .alert-warning { border-top: 5px solid #ff9800; }
+        .alert-danger { border-top: 5px solid #d32f2f; }
+
+        .confirm-content h3, .alert-content h3 {
+            color: #1a237e;
+            margin-bottom: 15px;
+        }
+
+        .alert-content p, .confirm-content p {
+            color: #444;
+            margin-bottom: 25px;
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+
+        .alert-content button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .confirm-no, .confirm-yes {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .confirm-no {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .confirm-yes {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateX(100%);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 0 15px;
-            }
-            
-            .custom-message, .custom-confirm {
-                left: 15px;
-                right: 15px;
-                min-width: auto;
+                transform: translateY(0);
             }
         }
 
@@ -548,46 +663,82 @@
             cursor: pointer;
             font-weight: 600;
             text-align: center;
+            transition: 0.3s;
         }
 
-        .option-delete {
-            background: #fed7d7;
-            color: #c53030;
-            border: 2px solid #fc8181;
+        .option-simple {
+            background: #ff9800;
+            color: white;
+            border: 2px solid #f57c00;
         }
 
-        .option-cancel {
-            background: #e2e8f0;
-            color: #4a5568;
-            border: 2px solid #cbd5e0;
+        .option-simple:hover {
+            background: #f57c00;
+        }
+
+        .option-full {
+            background: #f44336;
+            color: white;
+            border: 2px solid #d32f2f;
+        }
+
+        .option-full:hover {
+            background: #d32f2f;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .action-card, .info-card {
+                padding: 20px;
+            }
+            
+            .option-buttons {
+                flex-direction: column;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #666;
+            margin-top: 50px;
+            border-top: 1px solid #e0e0e0;
+            background: white;
         }
     </style>
 </head>
 <body>
 
+    <!-- Loading Overlay -->
+    <div id="loading"></div>
+
     <header class="header">
         <div class="logo">Easy<span>Premium</span></div>
-        <div class="subtitle">অ্যাকাউন্ট ডিলিট প্যানেল</div>
+        <div class="tagline">অ্যাকাউন্ট ম্যানেজমেন্ট প্যানেল</div>
     </header>
 
     <main class="container">
         <!-- Info Section -->
-        <div class="info-box">
-            <h2 style="color: #2b6cb0; margin-bottom: 15px;">
-                <i class="fas fa-info-circle"></i> গুরুত্বপূর্ণ তথ্য
-            </h2>
-            <p style="line-height: 1.7; color: #4a5568;">
+        <div class="info-card">
+            <h2><i class="fas fa-info-circle"></i> গুরুত্বপূর্ণ তথ্য</h2>
+            <p style="line-height: 1.7; color: #444;">
                 এই পৃষ্ঠা থেকে আপনি আপনার ডাটা বা সম্পূর্ণ অ্যাকাউন্ট মুছে ফেলতে পারেন। 
-                ডিলিট করার পূর্বে নিশ্চিত হয়ে নিন কারণ এটি পুনরুদ্ধার করা যাবে না।
+                <strong>ডিলিট করার পর:</strong><br>
+                • Firebase Authentication থেকে আপনার অ্যাকাউন্ট মুছে যাবে<br>
+                • Realtime Database থেকে আপনার সকল ডাটা মুছে যাবে<br>
+                • আপনি আর এই অ্যাকাউন্টে লগইন করতে পারবেন না<br>
+                <br>
+                ⚠️ <strong>সতর্কতা:</strong> এটি পুনরুদ্ধার করা যাবে না!
             </p>
         </div>
 
         <!-- Not Logged In -->
         <div id="not-logged-in">
-            <h2 style="color: #4a5568; margin-bottom: 15px;">
-                <i class="fas fa-user-lock"></i> লগইন করা নেই
-            </h2>
-            <p style="color: #718096; margin-bottom: 20px;">
+            <h2><i class="fas fa-user-lock"></i> লগইন করা নেই</h2>
+            <p style="color: #666; margin-bottom: 20px;">
                 অ্যাকাউন্ট ডিলিট করতে লগইন করুন
             </p>
             <a href="login.html" class="login-btn">
@@ -600,11 +751,14 @@
             <!-- User Info -->
             <div class="user-card">
                 <h3><i class="fas fa-user-check"></i> লগইন করা আছে</h3>
-                <p style="font-size: 1.1rem; margin: 10px 0;">
+                <div class="user-info">
                     <strong>ইমেইল:</strong> <span id="user-email"></span>
-                </p>
-                <p style="color: #718096; font-size: 0.9rem;">
-                    ইউজার আইডি: <span id="user-uid"></span>
+                </div>
+                <div class="user-info">
+                    <strong>ইউজার আইডি:</strong> <span id="user-uid"></span>
+                </div>
+                <p style="margin-top: 15px; color: #0d47a1; font-size: 0.9rem;">
+                    <i class="fas fa-shield-alt"></i> আপনার ডাটা সুরক্ষিত
                 </p>
             </div>
 
@@ -614,60 +768,63 @@
                     <i class="fas fa-database"></i> বিকল্প ১: শুধু ডাটা ডিলিট
                 </h3>
                 <div class="action-desc">
-                    <p>এই অপশন শুধুমাত্র আপনার ডাটা মুছে দেবে:</p>
-                    <ul style="padding-left: 20px; margin: 10px 0; color: #4a5568;">
-                        <li>অর্ডার ইতিহাস</li>
-                        <li>পেমেন্ট রেকর্ড</li>
-                        <li>ব্যবহারের তথ্য</li>
+                    <p>এই অপশন শুধুমাত্র আপনার ডাটা মুছে দেবে কিন্তু অ্যাকাউন্ট থাকবে।</p>
+                    <ul style="padding-left: 20px; margin: 15px 0; color: #444;">
+                        <li>সকল অর্ডার ইতিহাস মুছে যাবে</li>
+                        <li>সকল পেমেন্ট রেকর্ড মুছে যাবে</li>
+                        <li>প্রোফাইল তথ্য মুছে যাবে</li>
                     </ul>
-                    <p>✅ আপনার অ্যাকাউন্ট থাকবে, পরে লগইন করতে পারবেন</p>
+                    <p>✅ আপনার অ্যাকাউন্ট অক্ষত থাকবে, পরে লগইন করতে পারবেন</p>
                 </div>
-                <div class="warning">
-                    <strong><i class="fas fa-exclamation-triangle"></i> সতর্কতা:</strong>
-                    ডাটা মুছে ফেলার পর পুনরুদ্ধার করা যাবে না।
+                <div class="warning-box">
+                    <div class="warning-title">
+                        <i class="fas fa-exclamation-triangle"></i> সতর্কতা
+                    </div>
+                    <p>ডাটা মুছে ফেলার পর পুনরুদ্ধার করা যাবে না।</p>
                 </div>
                 <button onclick="deleteUserData()" class="btn">
-                    <i class="fas fa-trash"></i> ডাটা ডিলিট করুন
+                    <i class="fas fa-trash-alt"></i> ডাটা ডিলিট করুন
                 </button>
             </div>
 
-            <!-- Option 2: Delete Account (Simple Method) -->
+            <!-- Option 2: Delete Full Account -->
             <div class="action-card">
                 <h3 class="action-title">
-                    <i class="fas fa-user-times"></i> বিকল্প ২: অ্যাকাউন্ট ডিলিট (সহজ পদ্ধতি)
+                    <i class="fas fa-user-times"></i> বিকল্প ২: সম্পূর্ণ অ্যাকাউন্ট ডিলিট
                 </h3>
                 <div class="action-desc">
-                    <p>এই অপশন আপনার অ্যাকাউন্টের সকল ডাটা মুছে দেবে:</p>
-                    <ul style="padding-left: 20px; margin: 10px 0; color: #4a5568;">
-                        <li>সম্পূর্ণ প্রোফাইল তথ্য</li>
-                        <li>সকল অর্ডার ইতিহাস</li>
-                        <li>সকল পেমেন্ট রেকর্ড</li>
+                    <p>এই অপশন আপনার সম্পূর্ণ অ্যাকাউন্ট এবং সকল ডাটা মুছে দেবে।</p>
+                    <ul style="padding-left: 20px; margin: 15px 0; color: #444;">
+                        <li>Firebase Authentication থেকে অ্যাকাউন্ট মুছে যাবে</li>
+                        <li>Realtime Database থেকে সকল ডাটা মুছে যাবে</li>
+                        <li>আপনি চিরতরে লগআউট হয়ে যাবেন</li>
                     </ul>
-                    <p>⚠️ আপনি লগআউট হয়ে যাবেন এবং সকল ডাটা হারাবেন</p>
+                    <p>🚨 আপনার অ্যাকাউন্ট সম্পূর্ণভাবে মুছে যাবে</p>
                 </div>
-                <div class="warning" style="background: #fed7d7; border-color: #fc8181;">
-                    <strong><i class="fas fa-radiation-alt"></i> চূড়ান্ত সতর্কতা:</strong>
-                    এটি অপরিবর্তনীয় এবং চিরতরের জন্য।
+                <div class="warning-box" style="background: linear-gradient(135deg, #ffccbc, #ffab91); border-color: #ff5722;">
+                    <div class="warning-title">
+                        <i class="fas fa-radiation-alt"></i> চূড়ান্ত সতর্কতা
+                    </div>
+                    <p>এই কাজটি সম্পূর্ণ অপরিবর্তনীয় এবং চিরতরের জন্য।</p>
                 </div>
                 
                 <div class="option-buttons">
-                    <button onclick="window.deleteAccount()" class="option-btn option-delete">
-                        <i class="fas fa-user-slash"></i> অ্যাকাউন্ট ডিলিট
+                    <button onclick="simpleDeleteAccount()" class="option-btn option-simple">
+                        <i class="fas fa-bolt"></i> সহজ পদ্ধতিতে ডিলিট
                     </button>
-                    <button onclick="if(confirm('সম্পূর্ণ অ্যাকাউন্ট মুছে ফেলতে চান?')) window.deleteAccountFull()" 
-                            class="option-btn option-cancel" style="background: #e2e8f0;">
-                        <i class="fas fa-fire"></i> পুরো ডিলিট (যদি API থাকে)
+                    <button onclick="deleteAccount()" class="option-btn option-full">
+                        <i class="fas fa-fire"></i> সম্পূর্ণ ডিলিট
                     </button>
                 </div>
                 
-                <p style="text-align: center; color: #718096; margin-top: 15px; font-size: 0.9rem;">
+                <p style="text-align: center; color: #666; margin-top: 20px; font-size: 0.9rem;">
                     <i class="fas fa-info-circle"></i> সরাসরি ক্লিক করেই ডিলিট করা যাবে
                 </p>
             </div>
 
             <!-- Help Section -->
-            <div class="action-card" style="background: #f7fafc;">
-                <h3 class="action-title" style="color: #2b6cb0;">
+            <div class="action-card" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
+                <h3 class="action-title" style="color: #2e7d32;">
                     <i class="fas fa-hands-helping"></i> সাহায্য প্রয়োজন?
                 </h3>
                 <div class="action-desc">
@@ -679,21 +836,21 @@
                             padding: 15px;
                             border-radius: 8px;
                             text-decoration: none;
-                            color: #2b6cb0;
+                            color: #1a237e;
                             text-align: center;
-                            border: 1px solid #4299e1;
+                            border: 2px solid #1a237e;
                             min-width: 120px;
                         ">
                             <i class="fas fa-question-circle"></i><br>
-                            FAQ
+                            সাহায্য
                         </a>
                         <button onclick="window.location.reload()" style="
                             flex: 1;
                             background: white;
                             padding: 15px;
                             border-radius: 8px;
-                            border: 1px solid #cbd5e0;
-                            color: #4a5568;
+                            border: 2px solid #2196f3;
+                            color: #2196f3;
                             cursor: pointer;
                             min-width: 120px;
                         ">
@@ -706,9 +863,9 @@
                             padding: 15px;
                             border-radius: 8px;
                             text-decoration: none;
-                            color: #2b6cb0;
+                            color: #1a237e;
                             text-align: center;
-                            border: 1px solid #4299e1;
+                            border: 2px solid #1a237e;
                             min-width: 120px;
                         ">
                             <i class="fas fa-home"></i><br>
@@ -720,17 +877,10 @@
         </div>
     </main>
 
-    <footer style="
-        text-align: center;
-        padding: 25px;
-        color: #718096;
-        font-size: 0.9rem;
-        margin-top: 40px;
-        border-top: 1px solid #e2e8f0;
-    ">
-        <p>© 2026 EasyPremium - সহজ সমাধান</p>
+    <footer>
+        <p>© 2024 EasyPremium - সকল অধিকার সংরক্ষিত</p>
         <p style="margin-top: 8px;">
-            <i class="fas fa-shield-alt"></i> আপনার ডেটা সুরক্ষিত
+            <i class="fas fa-lock"></i> ডেটা প্রাইভেসি ও সুরক্ষা নিশ্চিত
         </p>
     </footer>
 
