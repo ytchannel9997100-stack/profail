@@ -2372,11 +2372,9 @@
             });
         }
 
-        // Delete Account Button
+        // Delete Account Button - সরাসরি কাজ করবে (কোন ওয়ার্নিং নেই)
         deleteAccountBtn.addEventListener('click', function() {
-            if (confirm("আপনি কি নিশ্চিত যে আপনি আপনার অ্যাকাউন্ট ডিলিট করতে চান? এই একশনটি irreversible হবে।")) {
-                window.open('AccountDelete.html', '_blank');
-            }
+            window.open('AccountDelete.html', '_blank');
         });
 
         // Close Profile Modal when clicking outside
@@ -2724,11 +2722,6 @@
                         pendingPurchase = null;
                     }
                     
-                    // Show success message
-                    setTimeout(() => {
-                        alert("লগইন সফল হয়েছে! স্বাগতম " + (result.user.displayName || result.user.email));
-                    }, 500);
-                    
                 } else {
                     alert("লগইন ব্যর্থ: " + result.error);
                 }
@@ -2743,17 +2736,13 @@
             }
         });
 
-        // Logout function
+        // Logout function - সরাসরি কাজ করবে (কোন ওয়ার্নিং নেই)
         logoutBtnProfile.addEventListener('click', async function() {
-            try {
-                await authSystem.signOut();
-                profileModal.style.display = 'none';
-                userOrders = [];
-                cartBadge.style.display = 'none';
-                console.log("User logged out successfully");
-            } catch (error) {
-                console.error("Logout error:", error);
-            }
+            await authSystem.signOut();
+            profileModal.style.display = 'none';
+            userOrders = [];
+            cartBadge.style.display = 'none';
+            console.log("User logged out successfully");
         });
 
         // Purchase Form Submission
@@ -2804,8 +2793,9 @@
                     // Reset form
                     purchaseForm.reset();
                     
-                    // Show success message
-                    alert(`অর্ডার সফলভাবে তৈরি হয়েছে! অর্ডার আইডি: ${result.orderId}`);
+                    // নতুন লজিক: অর্ডার সফল হলে Pay.html এ রিডাইরেক্ট
+                    const payUrl = `https://easy-premium.com/Pay.html?orderId=${result.orderId}`;
+                    console.log("Redirecting to:", payUrl);
                     
                     purchaseModal.style.display = 'none';
                     currentPurchaseInfo = null;
@@ -2815,6 +2805,9 @@
                     
                     purchaseSubmitBtn.disabled = false;
                     purchaseSubmitBtn.textContent = 'অর্ডার কনফার্ম করুন';
+                    
+                    // নতুন উইন্ডোতে Pay.html ওপেন করুন
+                    window.open(payUrl, '_blank');
                     
                 } else {
                     throw new Error("Order creation failed");
