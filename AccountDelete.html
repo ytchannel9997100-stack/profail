@@ -897,40 +897,8 @@
                     </button>
                 </div>
 
-                <!-- Help Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">
-                            <i class="fas fa-question-circle"></i>
-                        </div>
-                        <h2 class="card-title">সাহায্য প্রয়োজন?</h2>
-                    </div>
-                    
-                    <div class="card-content">
-                        <p>যদি আপনি অ্যাকাউন্ট ডিলিট করতে সমস্যায় পড়েন:</p>
-                        <ul style="padding-left: 20px; margin: 15px 0; color: var(--text-secondary);">
-                            <li style="margin-bottom: 8px;">• পেজটি রিফ্রেশ করে আবার চেষ্টা করুন</li>
-                            <li style="margin-bottom: 8px;">• লগআউট করে পুনরায় লগইন করুন</li>
-                            <li style="margin-bottom: 8px;">• ব্রাউজার ক্যাশে ক্লিয়ার করুন</li>
-                            <li style="margin-bottom: 8px;">• সহায়তার জন্য আমাদের সাথে যোগাযোগ করুন</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="btn-group">
-                        <button onclick="window.location.reload()" class="btn btn-secondary">
-                            <i class="fas fa-redo"></i> রিফ্রেশ
-                        </button>
-                        <a href="index.html" class="btn btn-secondary">
-                            <i class="fas fa-home"></i> হোমপেজ
-                        </a>
-                    </div>
-                    
-                    <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
-                        <p style="color: var(--text-secondary); font-size: 14px;">
-                            <i class="fas fa-shield-alt"></i> আপনার তথ্য সুরক্ষিতভাবে মুছে ফেলা হবে
-                        </p>
-                    </div>
-                </div>
+                <!-- Help Card রিমুভ করা হয়েছে -->
+                
             </div>
         </div>
     </main>
@@ -1218,7 +1186,7 @@
                                     errorMsg = "অ্যাকাউন্ট ডিলিট করতে সমস্যা হয়েছে: " + error.message;
                                 }
                                 
-                                createModal('error', "ত্রুটি!", errorMsg, "ঠিক আছে ", null);
+                                createModal('error', "ত্রুটি!", errorMsg, "ঠিক আছে", null);
                                 
                                 // Try to sign out anyway
                                 try {
