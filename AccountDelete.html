@@ -796,43 +796,8 @@
         <!-- Logged In Content -->
         <div id="loggedInContent" style="display: none;">
             <div class="cards-grid">
-                <!-- User Info Card -->
-                <div class="card card-success">
-                    <div class="card-header">
-                        <div class="card-icon">
-                            <i class="fas fa-user-check"></i>
-                        </div>
-                        <h2 class="card-title">আপনার অ্যাকাউন্ট তথ্য</h2>
-                    </div>
-                    
-                    <div class="user-info-grid">
-                        <div class="info-item">
-                            <span class="info-label">ইমেইল:</span>
-                            <span class="info-value" id="userEmail"></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">ইউজার আইডি:</span>
-                            <span class="info-value" id="userId"></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">স্ট্যাটাস:</span>
-                            <span class="info-value">
-                                <span class="status-badge">
-                                    <i class="fas fa-check-circle"></i> লগইন করা আছে
-                                </span>
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="alert-box warning">
-                        <div class="alert-title warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span>সতর্কতা</span>
-                        </div>
-                        <p class="alert-content">অ্যাকাউন্ট ডিলিট করলে আপনার সকল তথ্য স্থায়ীভাবে মুছে যাবে।</p>
-                    </div>
-                </div>
-
+                <!-- User Info Card রিমুভ করা হয়েছে -->
+                
                 <!-- Delete Data Card -->
                 <div class="card card-warning">
                     <div class="card-header">
@@ -896,8 +861,6 @@
                         <i class="fas fa-fire"></i> সম্পূর্ণ অ্যাকাউন্ট ডিলিট করুন
                     </button>
                 </div>
-
-                <!-- Help Card রিমুভ করা হয়েছে -->
                 
             </div>
         </div>
@@ -962,8 +925,8 @@
                 // Update UI
                 notLoggedIn.style.display = 'none';
                 loggedInContent.style.display = 'block';
-                userEmail.textContent = user.email;
-                userId.textContent = user.uid.substring(0, 8) + '...' + user.uid.substring(user.uid.length - 8);
+                
+                // User info elements removed, so no need to update them
                 
             } else {
                 console.log("No user logged in");
