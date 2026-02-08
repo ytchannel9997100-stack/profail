@@ -1845,7 +1845,7 @@
     </style>
 </head>
 <body>
-    <!-- Website Overlay (when cookies not accepted) -->
+   
     <div id="websiteOverlay" class="website-overlay">
         <div class="overlay-content">
             <div class="overlay-icon">
@@ -1860,7 +1860,7 @@
         </div>
     </div>
 
-    <!-- Login Modal -->
+  
     <div id="loginModal" class="login-modal">
         <div class="login-content">
             <div class="login-logo">
@@ -1883,13 +1883,13 @@
         </div>
     </div>
 
-    <!-- Profile Modal -->
+    
     <div id="profileModal" class="profile-modal">
         <div class="profile-content">
             <div class="profile-header">
                 <div class="user-info-container">
                     <div class="profile-avatar" id="profileAvatar">
-                        <!-- Profile picture or initial will be added here -->
+                      
                     </div>
                     <div class="user-details">
                         <div class="profile-name" id="profileName">Loading...</div>
@@ -1914,7 +1914,7 @@
         </div>
     </div>
 
-    <!-- Purchase Form Modal -->
+   
     <div id="purchaseModal" class="purchase-modal">
         <div class="purchase-content">
             <div class="purchase-header">
@@ -1948,10 +1948,9 @@
         </div>
     </div>
 
-    <!-- Header -->
     <header class="header">
         <div class="header-left">
-            <!-- লোগো -->
+            
             <a href="#" class="logo">
                 <div class="logo-image-container">
                     <img src="https://cdn-icons-png.flaticon.com/512/8701/8701941.png" alt="Easy Premium Logo" class="logo-image">
@@ -1962,7 +1961,7 @@
                 </div>
             </a>
             
-            <!-- Search Bar for Desktop and Tablet -->
+          
             <div class="search-container">
                 <div class="search-wrapper">
                     <input type="text" id="searchInput" class="search-input" placeholder="প্ল্যাটফর্ম বা প্যাকেজ সার্চ করুন...">
@@ -1970,13 +1969,13 @@
                         <i class="fas fa-search"></i>
                     </button>
                     <div id="searchResults" class="search-results">
-                        <!-- Search results will be populated here -->
+                       
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- MODERN CART ICON -->
+        
         <div class="cart-icon-container" id="cartIcon">
             <div class="cart-modern-icon">
                 <i class="fas fa-shopping-cart"></i>
@@ -1985,20 +1984,20 @@
         </div>
         
         <nav class="nav-links">
-            <!-- Navigation links have been removed as requested -->
+
         </nav>
     </header>
 
-    <!-- Hero Section -->
+    
     <section class="hero">
         <h1>সবচেয়ে সস্তায় প্রিমিয়াম কিনুন</h1>
         <p>আমরা দিচ্ছি ইউটিউব, ফেসবুক এবং সকল জনপ্রিয় প্ল্যাটফর্মের প্রিমিয়াম সাবস্ক্রিপশন। 🔹 ১০০% সিকিউরড (আপনার তথ্য আমাদের কাছে নিরাপদ) 🔹 ফুল মেয়াদী ওয়ারেন্টি 🔹 ২৪/৭ কাস্টমার সাপোর্ট</p>
     </section>
 
-    <!-- Platforms Section -->
+   
     <section id="platforms" class="platforms-section">
         <div id="platforms-grid" class="platforms-grid">
-            <!-- Platforms will be loaded from Firebase here -->
+          
             <div class="loading-spinner">
                 <div class="spinner"></div>
                 <p>প্ল্যাটফর্ম লোড হচ্ছে...</p>
@@ -2006,7 +2005,7 @@
         </div>
     </section>
 
-    <!-- Footer -->
+   
     <footer class="footer">
         <div class="social-links">
             <a href="https://m.me/906635592542978" class="social-link"><i class="fab fa-facebook"></i></a>
@@ -2024,7 +2023,7 @@
     </footer>
 
     <script>
-        // Firebase Configuration
+       
         const firebaseConfig = {
             apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
             authDomain: "easy-premium.firebaseapp.com",
@@ -2036,7 +2035,7 @@
             measurementId: "G-CHL8K8HRPX"
         };
 
-        // Initialize Firebase
+
         try {
             firebase.initializeApp(firebaseConfig);
             console.log("Firebase initialized successfully");
@@ -2047,7 +2046,7 @@
         const database = firebase.database();
         const auth = firebase.auth();
 
-        // DOM Elements
+
         const loginModal = document.getElementById('loginModal');
         const googleLoginBtn = document.getElementById('googleLoginBtn');
         const closeLoginBtn = document.getElementById('closeLoginBtn');
@@ -2071,22 +2070,22 @@
         const purchaseSubmitBtn = document.getElementById('purchaseSubmitBtn');
         const purchaseCancelBtn = document.getElementById('purchaseCancelBtn');
         
-        // Search elements
+       
         const searchInput = document.getElementById('searchInput');
         const searchBtn = document.getElementById('searchBtn');
         const searchResults = document.getElementById('searchResults');
         
-        // MODERN Cart icon element
+       
         const cartIcon = document.getElementById('cartIcon');
         const cartBadge = document.getElementById('cartBadge');
 
-        // Variables
+       
         let pendingPurchase = null;
         let currentPurchaseInfo = null;
         let userOrders = [];
         let allPlatforms = [];
 
-        // Function to generate color based on name
+        
         function getColorFromName(name) {
             const colors = [
                 '#FF6B6B', '#4ECDC4', '#FFD166', '#06D6A0', '#118AB2',
@@ -2101,7 +2100,7 @@
             return colors[colorIndex];
         }
 
-        // Cookie Consent Logic
+       
         const websiteOverlay = document.getElementById('websiteOverlay');
         const overlayAcceptBtn = document.getElementById('overlayAcceptBtn');
         
@@ -2125,7 +2124,7 @@
         
         overlayAcceptBtn.addEventListener('click', acceptAllCookies);
         
-        // Initialize page
+       
         document.addEventListener('DOMContentLoaded', function() {
             const hasAccepted = checkCookieConsent();
             
@@ -2141,7 +2140,7 @@
                     </div>
                 `;
                 
-                // Disable all elements except cookie buttons
+                
                 document.querySelectorAll('button, input, a').forEach(element => {
                     if (element.id !== 'overlayAcceptBtn' && !element.classList.contains('cookie-link')) {
                         element.style.pointerEvents = 'none';
@@ -2150,10 +2149,10 @@
                 });
             }
             
-            // Fix for mobile scrolling
+           
             fixMobileScrolling();
             
-            // Add viewport meta tag for better mobile experience
+            
             const viewportMeta = document.querySelector('meta[name="viewport"]');
             if (!viewportMeta) {
                 const meta = document.createElement('meta');
@@ -2163,16 +2162,16 @@
             }
         });
 
-        // Fix mobile scrolling issue
+       
         function fixMobileScrolling() {
-            // Remove any fixed height/overflow issues on mobile
+           
             if (window.innerWidth <= 768) {
                 document.documentElement.style.overflowY = 'auto';
                 document.body.style.overflowY = 'auto';
                 document.documentElement.style.height = 'auto';
                 document.body.style.height = 'auto';
                 
-                // Fix for modals
+                
                 const modals = [websiteOverlay, loginModal, profileModal, purchaseModal];
                 modals.forEach(modal => {
                     if (modal) {
@@ -2184,7 +2183,7 @@
             }
         }
 
-        // MODERN Cart icon click handler
+       
         cartIcon.addEventListener('click', function() {
             if (!checkCookieConsent()) {
                 websiteOverlay.style.display = 'flex';
@@ -2199,7 +2198,7 @@
             }
         });
 
-        // Search functionality
+      
         function initializeSearch() {
             if (!searchInput) return;
             
@@ -2267,7 +2266,7 @@
             }
         }
         
-        // Display search results
+       
         function displaySearchResults(platforms) {
             if (!searchResults) return;
             
@@ -2279,7 +2278,7 @@
                 return;
             }
             
-            // আইকন ম্যাপিং ফাংশন - Netflix এবং Adobe এর জন্য ফিক্সড
+          
             function getIconClass(iconName) {
                 const iconMap = {
                     'youtube': 'fab fa-youtube youtube',
@@ -2330,7 +2329,7 @@
             searchResults.style.display = 'block';
         }
         
-        // Scroll to platform card in the grid
+        
         function scrollToPlatformCard(platformName) {
             const platformCards = document.querySelectorAll('.platform-card');
             
@@ -2353,27 +2352,27 @@
             });
         }
 
-        // Delete Account Button
+     
         deleteAccountBtn.addEventListener('click', function() {
-            if (confirm("আপনি কি নিশ্চিত যে আপনি আপনার অ্যাকাউন্ট ডিলিট করতে চান? এই একশনটি irreversible হবে।")) {
+            if (confirm("আপনি কি নিশ্চিত যে আপনি আপনার অ্যাকাউন্ট ডিলিট করতে চান?")) {
                 window.open('AccountDelete.html', '_blank');
             }
         });
 
-        // Close Profile Modal when clicking outside
+       
         profileModal.addEventListener('click', function(e) {
             if (e.target === profileModal) {
                 profileModal.style.display = 'none';
             }
         });
 
-        // Close Login Modal
+        
         closeLoginBtn.addEventListener('click', function() {
             loginModal.style.display = 'none';
             pendingPurchase = null;
         });
 
-        // Close modals when clicking outside
+      
         loginModal.addEventListener('click', function(e) {
             if (e.target === loginModal) {
                 loginModal.style.display = 'none';
@@ -2387,23 +2386,21 @@
             }
         });
 
-        // ===================== FIXED LOGIN SYSTEM =====================
         
-        // User Registration & Login System
         class EasyPremiumAuthSystem {
             constructor() {
                 this.currentUserUID = null;
                 this.currentUserData = null;
             }
             
-            // Google Sign In - FIXED VERSION
+           
             async signInWithGoogle() {
                 try {
                     const provider = new firebase.auth.GoogleAuthProvider();
                     provider.addScope('profile');
                     provider.addScope('email');
                     
-                    // Set custom parameters for better UX
+                    
                     provider.setCustomParameters({
                         prompt: 'select_account'
                     });
@@ -2414,7 +2411,7 @@
                     console.log("Google sign in successful:", result.user);
                     this.currentUserUID = result.user.uid;
                     
-                    // Create or update user in database with UID
+                    
                     await this.createOrUpdateUserInDatabase(result.user);
                     
                     console.log("User logged in with UID:", this.currentUserUID);
@@ -2427,7 +2424,7 @@
                     console.error("Error email:", error.email);
                     console.error("Error credential:", error.credential);
                     
-                    // Check for specific errors
+                   
                     if (error.code === 'auth/popup-blocked') {
                         return { success: false, error: 'পপআপ ব্লক করা হয়েছে। দয়া করে ব্রাউজার সেটিংস চেক করুন।' };
                     } else if (error.code === 'auth/popup-closed-by-user') {
@@ -2442,17 +2439,17 @@
                 }
             }
             
-            // Create or update user in database with UID
+           
             async createOrUpdateUserInDatabase(firebaseUser) {
                 const userUID = firebaseUser.uid;
                 
                 try {
-                    // Check if user exists in database
+                    
                     const userRef = database.ref(`users/${userUID}`);
                     const snapshot = await userRef.once('value');
                     
                     if (!snapshot.exists()) {
-                        // Create new user with UID
+                        
                         const userData = {
                             uid: userUID,
                             email: firebaseUser.email || '',
@@ -2467,11 +2464,11 @@
                         await userRef.set(userData);
                         console.log("New user created with UID:", userUID);
                     } else {
-                        // Update last login
+                       
                         await userRef.child('lastLogin').set(firebase.database.ServerValue.TIMESTAMP);
                     }
                     
-                    // Store user data locally
+                    
                     const userSnap = await userRef.once('value');
                     this.currentUserData = userSnap.val() || {
                         uid: userUID,
@@ -2481,7 +2478,7 @@
                     
                 } catch (error) {
                     console.error("Error in createOrUpdateUserInDatabase:", error);
-                    // Still store basic user data locally even if DB fails
+                   
                     this.currentUserData = {
                         uid: userUID,
                         email: firebaseUser.email,
@@ -2490,17 +2487,17 @@
                 }
             }
             
-            // Get current user UID
+           
             getCurrentUID() {
                 return this.currentUserUID || (auth.currentUser ? auth.currentUser.uid : null);
             }
             
-            // Check if user is authenticated
+           
             isAuthenticated() {
                 return !!this.getCurrentUID();
             }
             
-            // Sign out
+           
             async signOut() {
                 try {
                     await auth.signOut();
@@ -2516,7 +2513,7 @@
                 }
             }
             
-            // Get user data
+            
             async getUserData() {
                 const uid = this.getCurrentUID();
                 if (!uid) return null;
@@ -2539,13 +2536,13 @@
             }
         }
         
-        // UID-based Data Access System
+      
         class UIDDataProtectionSystem {
             constructor() {
                 this.authSystem = new EasyPremiumAuthSystem();
             }
             
-            // Create order with UID protection
+           
             async createOrder(orderData) {
                 const userUID = this.authSystem.getCurrentUID();
                 
@@ -2553,7 +2550,7 @@
                     throw new Error("User must be logged in to create order");
                 }
                 
-                // Get user data
+                
                 const userData = await this.authSystem.getUserData();
                 
                 const orderWithUID = {
@@ -2568,11 +2565,11 @@
                 };
                 
                 try {
-                    // Store in transactions
+                    
                     const transactionRef = database.ref('transactions').push();
                     await transactionRef.set(orderWithUID);
                     
-                    // Also store in user's personal orders collection
+                    
                     const userOrderRef = database.ref(`userOrders/${userUID}/${transactionRef.key}`);
                     await userOrderRef.set({
                         orderId: transactionRef.key,
@@ -2595,7 +2592,7 @@
                 }
             }
             
-            // Get user's orders
+           
             async getUserOrders() {
                 const userUID = this.authSystem.getCurrentUID();
                 
@@ -2615,7 +2612,7 @@
                         });
                     });
                     
-                    // Sort by date (newest first)
+                    
                     orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
                     
                     return orders;
@@ -2626,7 +2623,7 @@
                 }
             }
             
-            // Update order status
+           
             async updateOrderStatus(orderId, newStatus) {
                 const userUID = this.authSystem.getCurrentUID();
                 
@@ -2635,7 +2632,7 @@
                 }
                 
                 try {
-                    // First check if this order belongs to the user
+                    
                     const orderRef = database.ref(`userOrders/${userUID}/${orderId}`);
                     const snapshot = await orderRef.once('value');
                     
@@ -2643,7 +2640,7 @@
                         throw new Error("Order not found or you don't have permission");
                     }
                     
-                    // Update status in user's orders
+                    
                     await orderRef.update({
                         status: newStatus,
                         updatedAt: firebase.database.ServerValue.TIMESTAMP
@@ -2657,12 +2654,12 @@
                 }
             }
             
-            // Get user's profile
+          
             async getUserProfile() {
                 return await this.authSystem.getUserData();
             }
             
-            // Helper function to generate order ID
+           
             generateOrderId() {
                 const timestamp = Date.now();
                 const random = Math.random().toString(36).substr(2, 9).toUpperCase();
@@ -2670,20 +2667,18 @@
             }
         }
         
-        // Initialize auth and data protection systems
+        
         const authSystem = new EasyPremiumAuthSystem();
         const dataProtectionSystem = new UIDDataProtectionSystem();
         
-        // ===================== FIXED LOGIN EVENT LISTENER =====================
-        
-        // Google Login - FIXED VERSION
+       
         googleLoginBtn.addEventListener('click', async function() {
             if (!checkCookieConsent()) {
                 websiteOverlay.style.display = 'flex';
                 return;
             }
             
-            // Show loading state
+           
             const originalText = googleLoginBtn.innerHTML;
             googleLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> লগইন হচ্ছে...';
             googleLoginBtn.disabled = true;
@@ -2696,16 +2691,16 @@
                     console.log("Login successful, closing modal");
                     loginModal.style.display = 'none';
                     
-                    // Update cart badge with user's UID
+                    
                     updateCartBadge(authSystem.getCurrentUID());
                     
-                    // If there was a pending purchase, show purchase form
+                  
                     if (pendingPurchase) {
                         showPurchaseForm(pendingPurchase);
                         pendingPurchase = null;
                     }
                     
-                    // Show success message
+                   
                     setTimeout(() => {
                         alert("লগইন সফল হয়েছে! স্বাগতম " + (result.user.displayName || result.user.email));
                     }, 500);
@@ -2718,13 +2713,13 @@
                 console.error("Login error:", error);
                 alert("লগইন ব্যর্থ: " + error.message);
             } finally {
-                // Reset button state
+              
                 googleLoginBtn.innerHTML = originalText;
                 googleLoginBtn.disabled = false;
             }
         });
 
-        // Logout function
+       
         logoutBtnProfile.addEventListener('click', async function() {
             try {
                 await authSystem.signOut();
@@ -2737,7 +2732,7 @@
             }
         });
 
-        // Purchase Form Submission
+        
         purchaseForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -2767,7 +2762,7 @@
             purchaseSubmitBtn.textContent = 'প্রসেসিং...';
             
             try {
-                // Create order with UID protection
+               
                 const orderData = {
                     userName: purchaseUserName.value.trim(),
                     phoneNumber: purchasePhoneNumber.value.trim(),
@@ -2782,16 +2777,16 @@
                 if (result.success) {
                     console.log("Order created successfully with ID:", result.orderId);
                     
-                    // Reset form
+                    
                     purchaseForm.reset();
                     
-                    // Show success message
+                  
                     alert(`অর্ডার সফলভাবে তৈরি হয়েছে! অর্ডার আইডি: ${result.orderId}`);
                     
                     purchaseModal.style.display = 'none';
                     currentPurchaseInfo = null;
                     
-                    // Update cart badge
+                    
                     updateCartBadge(result.userId);
                     
                     purchaseSubmitBtn.disabled = false;
@@ -2810,7 +2805,7 @@
             }
         });
 
-        // Function to handle purchase
+        
         function handlePurchase(platformCard) {
             if (!checkCookieConsent()) {
                 websiteOverlay.style.display = 'flex';
@@ -2842,7 +2837,7 @@
             }
         }
 
-        // Load user profile data
+        
         async function loadUserProfile() {
             const userUID = authSystem.getCurrentUID();
             
@@ -2852,17 +2847,17 @@
             }
             
             try {
-                // Get user data with UID
+              
                 const userData = await dataProtectionSystem.getUserProfile();
                 
                 if (userData) {
                     profileName.textContent = userData.displayName || userData.email || "User";
                     profileEmail.textContent = userData.email || "No email";
                     
-                    // Set profile avatar
+                  
                     setProfileAvatar(userData);
                     
-                    // Load user's orders
+                  
                     await loadUserOrders(userUID);
                 } else {
                     profileName.textContent = "User";
@@ -2877,7 +2872,7 @@
             }
         }
 
-        // Load user orders
+        
         async function loadUserOrders(userUID) {
             ordersList.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>অর্ডার লোড হচ্ছে...</p></div>';
             
@@ -2901,7 +2896,7 @@
                 
                 displayOrders(orders);
                 
-                // Update cart badge
+                
                 cartBadge.textContent = orders.length;
                 cartBadge.style.display = 'flex';
                 
@@ -2911,14 +2906,14 @@
             }
         }
 
-        // Display orders
+     
         function displayOrders(orders) {
             if (orders.length === 0) {
                 ordersList.innerHTML = '<div class="no-orders">আপনার কোন অর্ডার নেই</div>';
                 return;
             }
             
-            // Check screen width to decide which view to show
+            
             const isDesktop = window.innerWidth >= 1025;
             
             if (isDesktop) {
@@ -3045,7 +3040,7 @@
             }
         }
 
-        // Set profile avatar
+       
         function setProfileAvatar(userData) {
             profileAvatar.innerHTML = '';
             
@@ -3064,7 +3059,7 @@
             }
         }
 
-        // Show initial avatar
+       
         function showInitialAvatar(userName) {
             const firstName = userName ? userName.charAt(0).toUpperCase() : "U";
             const color = getColorFromName(userName);
@@ -3073,7 +3068,7 @@
             profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: bold;">${firstName}</span>`;
         }
 
-        // Update cart badge
+        
         async function updateCartBadge(userId) {
             if (!userId) return;
             
@@ -3094,7 +3089,7 @@
             }
         }
 
-        // Show purchase form
+       
         function showPurchaseForm(purchaseData) {
             currentPurchaseInfo = purchaseData;
             
@@ -3103,7 +3098,7 @@
             
             const userUID = authSystem.getCurrentUID();
             if (userUID) {
-                // Try to get user name from stored data
+               
                 if (authSystem.currentUserData && authSystem.currentUserData.displayName) {
                     purchaseUserName.value = authSystem.currentUserData.displayName;
                 } else {
@@ -3119,7 +3114,7 @@
             purchaseModal.style.display = 'flex';
         }
 
-        // Function to load platforms from Firebase
+        
         function loadPlatformsFromFirebase() {
             const platformsGrid = document.getElementById('platforms-grid');
             if (!platformsGrid) return;
@@ -3139,7 +3134,7 @@
 
                 allPlatforms = [];
                 
-                // Convert object to array
+              
                 Object.entries(platformsData).forEach(([id, platform]) => {
                     allPlatforms.push({
                         id: id,
@@ -3155,10 +3150,10 @@
                     });
                 });
                 
-                // Sort by order
+               
                 allPlatforms.sort((a, b) => (a.order || 0) - (b.order || 0));
                 
-                // Filter active platforms only
+                
                 const activePlatforms = allPlatforms.filter(platform => platform.status === 'active');
 
                 activePlatforms.forEach(platform => {
@@ -3195,7 +3190,7 @@
             `;
         }
 
-        // Create a platform card
+       
         function createPlatformCard(platform) {
             const platformsGrid = document.getElementById('platforms-grid');
             const platformCard = document.createElement('div');
@@ -3203,7 +3198,7 @@
             platformCard.setAttribute('data-platform-name', platform.name);
             platformCard.setAttribute('data-platform-id', platform.id);
             
-            // আইকন ম্যাপিং ফাংশন - Netflix এবং Adobe এর জন্য ফিক্সড
+          
             function getIconClass(iconName) {
                 const iconMap = {
                     'youtube': 'fab fa-youtube youtube',
@@ -3227,7 +3222,7 @@
                 return iconMap[lowerIconName] || 'fas fa-cube';
             }
 
-            // platform.icon বা platform.name থেকে আইকন সিলেক্ট করুন
+           
             const iconSource = platform.icon || platform.name || '';
             const iconClass = getIconClass(iconSource);
 
@@ -3285,16 +3280,16 @@
         }
         
         function initializeAuth() {
-            // Listen for auth state changes
+           
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     console.log("User is signed in with UID:", user.uid);
                     
-                    // Initialize auth system with current user
+                   
                     authSystem.currentUserUID = user.uid;
                     await authSystem.createOrUpdateUserInDatabase(user);
                     
-                    // Update cart badge
+                   
                     updateCartBadge(user.uid);
                 } else {
                     console.log("No user signed in");
@@ -3304,38 +3299,38 @@
             });
         }
         
-        // Cancel purchase button
+        
         purchaseCancelBtn.addEventListener('click', function() {
             purchaseModal.style.display = 'none';
             currentPurchaseInfo = null;
         });
         
-        // Initialize everything
+       
         initializeAuth();
         
-        // Handle window resize for responsive design
+        
         let resizeTimer;
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(function() {
-                // Re-render orders on resize to switch between table/card view
+               
                 if (userOrders.length > 0) {
                     displayOrders(userOrders);
                 }
-                // Fix scrolling on resize
+                
                 fixMobileScrolling();
             }, 250);
         });
         
-        // Prevent zoom on mobile devices
+      
         document.addEventListener('touchmove', function(e) {
             if (e.scale !== 1) { e.preventDefault(); }
         }, { passive: false });
         
-        // Fix for iOS Safari scrolling
+     
         document.addEventListener('touchstart', function() {}, {passive: true});
         
-        // Additional fix for mobile scrolling
+       
         window.addEventListener('load', function() {
             setTimeout(fixMobileScrolling, 100);
         });
