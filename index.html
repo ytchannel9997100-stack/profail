@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
     <title>Easy Premium - Premium Services for Digital Platforms</title>
     <meta name="description" content="আমরা দিচ্ছি ইউটিউব, ফেসবুক এবং সকল জনপ্রিয় প্ল্যাটফর্মের প্রিমিয়াম সাবস্ক্রিপশন। 🔹 ১০০% সিকিউরড (আপনার তথ্য আমাদের কাছে নিরাপদ) 🔹 ফুল মেয়াদী ওয়ারেন্টি 🔹 ২৪/৭ কাস্টমার সাপোর্ট">
@@ -85,6 +85,8 @@
     <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkVhc3kgUHJlbWl1bSIsCiAgInNob3J0X25hbWUiOiAiRWFzeSBQcmVtaXVtIiwKICAiZGVzY3JpcHRpb24iOiAiUHJlbWl1bSBTZXJ2aWNlcyBmb3IgRGlnaXRhbCBQbGF0Zm9ybXMiLAogICJzdGFydF91cmwiOiAiLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgInRoZW1lX2NvbG9yIjogIiNGNTlGMDAiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMxQTFBMkUiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi1pY29ucy1wbmcuZmxhdGljb24uY29tLzUxMi84NzAxLzg3MDE5NDEucG5nIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLAogICAgICAicHVycG9zZSI6ICJhbnkgbWFzayYWYmxlIgogICAgfQogIF0KfQo=">
     
     <meta name="theme-color" content="#0a0a1a">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     
     <!-- EXTERNAL CSS & JS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -125,6 +127,7 @@
             overflow-x: hidden;
             width: 100%;
             height: 100%;
+            background-color: var(--primary-bg) !important;
         }
         
         /* ================== FIXED BODY BACKGROUND ================== */
@@ -137,6 +140,9 @@
             overflow-x: hidden;
             width: 100%;
             position: relative;
+            height: 100%;
+            /* Mobile browser UI area color */
+            -webkit-tap-highlight-color: transparent;
         }
         
         /* Body Overlay for Premium Effect */
@@ -153,6 +159,19 @@
                 radial-gradient(circle at 40% 80%, rgba(255, 152, 0, 0.03) 0%, transparent 50%);
             z-index: -1;
             pointer-events: none;
+        }
+        
+        /* FIX FOR MOBILE WHITE BOTTOM AREA */
+        /* This will extend the background color to the very bottom */
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -100px;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: var(--primary-bg);
+            z-index: -2;
         }
         
         /* ================== WEBSITE OVERLAY ================== */
@@ -1118,6 +1137,8 @@
             max-width: 1200px;
             margin: 0 auto;
             width: 100%;
+            position: relative;
+            z-index: 1;
         }
         
         .platforms-grid {
@@ -1267,6 +1288,14 @@
             text-align: center;
             width: 100%;
             margin-top: 40px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* EXTRA FOOTER PADDING FOR MOBILE SAFE AREA */
+        .footer::before {
+            content: '';
+            display: none;
         }
         
         .social-links {
@@ -1493,6 +1522,8 @@
             /* Footer responsive */
             .footer {
                 padding: 30px 15px 25px;
+                /* Add extra padding for mobile safe area */
+                padding-bottom: calc(25px + env(safe-area-inset-bottom, 0px));
             }
             
             .social-links {
@@ -1533,6 +1564,8 @@
             /* Footer responsive */
             .footer {
                 padding: 35px 18px 28px;
+                /* Add extra padding for mobile safe area */
+                padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
             }
             
             .social-links {
@@ -1777,6 +1810,32 @@
         /* Smooth scrolling for iOS */
         * {
             -webkit-overflow-scrolling: touch;
+        }
+        
+        /* ================== SAFE AREA FOR MOBILE ================== */
+        /* Fix for mobile bottom area (iPhone X and newer) */
+        @supports (padding: max(0px)) {
+            .footer {
+                padding-bottom: max(30px, env(safe-area-inset-bottom));
+            }
+            
+            body {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+        
+        /* Hide address bar on mobile */
+        @media (max-width: 768px) {
+            html, body {
+                height: -webkit-fill-available;
+                min-height: -webkit-fill-available;
+            }
+            
+            body {
+                overflow-x: hidden;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
         }
     </style>
 </head>
@@ -2029,6 +2088,41 @@
         // Apply fixes periodically to ensure consistency
         setInterval(applyColorFixes, 1000);
         
+        // ================== MOBILE BOTTOM AREA FIX ==================
+        function fixMobileBottomArea() {
+            // Add extra padding to footer for mobile safe area
+            const footer = document.querySelector('.footer');
+            if (footer && 'CSS' in window && 'supports' in window.CSS) {
+                if (window.CSS.supports('padding-bottom: env(safe-area-inset-bottom)')) {
+                    // Add safe area padding
+                    const currentPadding = parseInt(window.getComputedStyle(footer).paddingBottom);
+                    const safeAreaBottom = 'env(safe-area-inset-bottom)';
+                    footer.style.paddingBottom = `calc(${currentPadding}px + ${safeAreaBottom})`;
+                }
+            }
+            
+            // Set body background to cover entire screen
+            document.body.style.minHeight = '100vh';
+            document.body.style.minHeight = '-webkit-fill-available';
+            document.documentElement.style.height = '100%';
+            document.body.style.height = '100%';
+            
+            // Force repaint
+            document.body.style.display = 'none';
+            document.body.offsetHeight; // Trigger reflow
+            document.body.style.display = 'block';
+        }
+        
+        // Call the fix function
+        document.addEventListener('DOMContentLoaded', fixMobileBottomArea);
+        window.addEventListener('resize', fixMobileBottomArea);
+        window.addEventListener('load', fixMobileBottomArea);
+        
+        // Fix for iOS Safari
+        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+            document.addEventListener('touchstart', function() {}, {passive: true});
+        }
+        
         // ================== ORIGINAL SCRIPT ==================
         // Firebase Configuration
         const firebaseConfig = {
@@ -2159,8 +2253,11 @@
             // Fix for viewport meta tag
             const viewportMeta = document.querySelector('meta[name="viewport"]');
             if (viewportMeta) {
-                viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0';
+                viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=no, viewport-fit=cover';
             }
+            
+            // Apply mobile fixes
+            fixMobileBottomArea();
         });
 
         // MODERN Cart icon click handler
@@ -3296,6 +3393,8 @@
                 }
                 // Apply color fixes
                 applyColorFixes();
+                // Apply mobile bottom area fix
+                fixMobileBottomArea();
             }, 250);
         });
         
