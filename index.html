@@ -99,6 +99,29 @@
     <!-- ================== FIXED CSS STYLES ================== -->
     <style>
         /* ================== GLOBAL COLOR FIX ================== */
+        :root {
+            --primary-bg: #0a0a1a;
+            --secondary-bg: #121230;
+            --accent-color: #ff9800;
+            --accent-secondary: #00bcd4;
+            --text-color: #ffffff;
+            --text-secondary: #b0bec5;
+            --card-bg: rgba(20, 20, 40, 0.9);
+            --header-bg: rgba(10, 10, 26, 0.95);
+            --footer-bg: rgba(10, 10, 26, 0.95);
+            --border-color: rgba(255, 152, 0, 0.3);
+            --hover-bg: rgba(255, 152, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Noto Sans Bengali', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            color: var(--text-color);
+        }
+        
         html {
             scroll-behavior: smooth;
             overflow-x: hidden;
@@ -216,15 +239,15 @@
         }
         
         .accept-btn {
-            background: background: linear-gradient(45deg, #fb00ff, #ff2222);
-            color: #f8f8f8;
+            background: linear-gradient(45deg, #ff5722, var(--accent-color)) !important;
+            color: white !important;
             border: none;
         }
         
         .accept-btn:hover {
-            background: background: linear-gradient(45deg, #2700ff, #ff2222);
+            background: linear-gradient(45deg, var(--accent-color), #764ba2) !important;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
         }
         
         /* ================== HEADER ================== */
