@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
-        /* আপনার আগের CSS একই রাখুন - কোনো পরিবর্তন নেই */
+        /* আপনার আগের CSS একই রাখুন - নতুন শুধু কিছু CSS যোগ করা হয়েছে */
         * {
             margin: 0;
             padding: 0;
@@ -328,6 +328,35 @@
             margin-bottom: 10px;
         }
         
+        /* D Field Preview */
+        .d-field-preview {
+            background: rgba(0, 188, 212, 0.1);
+            border-left: 3px solid #00bcd4;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            max-height: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        
+        .d-field-preview p {
+            margin: 0;
+            color: #b0bec5;
+        }
+        
+        .d-field-label {
+            color: #00bcd4;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: block;
+        }
+        
         .platform-actions {
             display: flex;
             gap: 10px;
@@ -362,6 +391,16 @@
         
         .btn-delete:hover {
             background: rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-d-field {
+            background: rgba(255, 152, 0, 0.2);
+            color: #ff9800;
+            border: 1px solid #ff9800;
+        }
+        
+        .btn-d-field:hover {
+            background: rgba(255, 152, 0, 0.3);
         }
         
         /* Add Platform Form */
@@ -399,6 +438,14 @@
         .form-textarea {
             min-height: 100px;
             resize: vertical;
+        }
+        
+        /* D Field Textarea */
+        .d-field-textarea {
+            min-height: 150px;
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 188, 212, 0.1) !important;
+            border-color: #00bcd4 !important;
         }
         
         .form-input:focus, .form-textarea:focus, .form-select:focus {
@@ -574,6 +621,59 @@
             to { transform: translateX(0); opacity: 1; }
         }
         
+        /* Modal Styles for D Field Editing */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: rgba(30, 30, 46, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 3px solid #ff9800;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 152, 0, 0.3);
+        }
+        
+        .modal-title {
+            color: #ff9800;
+            font-size: 1.5rem;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .close-modal:hover {
+            color: #ff9800;
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .admin-header {
@@ -600,6 +700,19 @@
             
             .admin-nav {
                 justify-content: center;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+            
+            .platform-actions {
+                flex-wrap: wrap;
+            }
+            
+            .btn-sm {
+                flex: 1;
+                min-width: 100px;
             }
         }
         
@@ -782,6 +895,14 @@
                         </div>
                         
                         <div class="form-group">
+                            <label class="form-label">ডিটেইলস (D ফিল্ড) *</label>
+                            <p style="color: #b0bec5; font-size: 0.85rem; margin-top: -5px; margin-bottom: 10px;">
+                                বিস্তারিত বর্ণনা - এই তথ্য ইউজারকে দেখানো হবে
+                            </p>
+                            <textarea id="platformDField" class="form-textarea d-field-textarea" placeholder="প্ল্যাটফর্মের সম্পূর্ণ বিস্তারিত বর্ণনা লিখুন... (হিন্দি বা বাংলায়)" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
                             <label class="form-label">ফিচারসমূহ (প্রতি লাইনে একটি করে লিখুন)</label>
                             <textarea id="platformFeatures" class="form-textarea" placeholder="ফিচার 1\nফিচার 2\nফিচার 3" rows="5"></textarea>
                         </div>
@@ -943,6 +1064,40 @@
         </div>
     </div>
 
+    <!-- Modal for D Field Full View/Edit -->
+    <div id="dFieldModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="dFieldModalTitle">D ফিল্ড এডিট করুন</h2>
+                <button class="close-modal" onclick="closeDFieldModal()">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">প্ল্যাটফর্ম: <span id="modalPlatformName" style="color: #ff9800;"></span></label>
+                <textarea id="dFieldEditTextarea" class="form-textarea d-field-textarea" rows="15" placeholder="ডিটেইলস লিখুন..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <button class="nav-btn" onclick="saveDField()" style="background: #ff9800;">
+                    <i class="fas fa-save"></i> সেভ করুন
+                </button>
+                <button class="nav-btn" onclick="closeDFieldModal()" style="background: #6c757d;">
+                    <i class="fas fa-times"></i> বাতিল
+                </button>
+                <button class="nav-btn" onclick="copyDField()" style="background: #00bcd4;">
+                    <i class="fas fa-copy"></i> কপি করুন
+                </button>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <h4 style="color: #00bcd4; margin-bottom: 10px;">ডি ফিল্ড স্ট্যাটাস:</h4>
+                <div id="dFieldStats" style="color: #b0bec5; font-size: 0.9rem;">
+                    <p>লোড হচ্ছে...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Firebase Configuration
         const firebaseConfig = {
@@ -987,6 +1142,7 @@
         const platformId = document.getElementById('platformId');
         const platformName = document.getElementById('platformName');
         const platformPrice = document.getElementById('platformPrice');
+        const platformDField = document.getElementById('platformDField');
         const iconGrid = document.getElementById('iconGrid');
         const platformDescription = document.getElementById('platformDescription');
         const platformFeatures = document.getElementById('platformFeatures');
@@ -1017,6 +1173,13 @@
         const pendingOrders = document.getElementById('pendingOrders');
         const adminCount = document.getElementById('adminCount');
         const systemInfo = document.getElementById('systemInfo');
+        
+        // Modal Elements
+        const dFieldModal = document.getElementById('dFieldModal');
+        const dFieldModalTitle = document.getElementById('dFieldModalTitle');
+        const modalPlatformName = document.getElementById('modalPlatformName');
+        const dFieldEditTextarea = document.getElementById('dFieldEditTextarea');
+        const dFieldStats = document.getElementById('dFieldStats');
 
         // Variables
         let platforms = [];
@@ -1025,6 +1188,8 @@
         let selectedIcon = 'youtube';
         let currentAdminEmail = null;
         let isSuperAdmin = false;
+        let currentEditingPlatformId = null;
+        let currentEditingPlatformName = '';
         
         // Allowed Admin Emails
         const ALLOWED_ADMIN_EMAILS = [
@@ -1308,6 +1473,12 @@
                 const iconInfo = platformIcons.find(icon => icon.id === platform.icon) || platformIcons[0];
                 const featuresList = platform.features ? platform.features.join(', ') : 'কোন ফিচার নেই';
                 
+                // Get D field content with preview
+                const dFieldContent = platform.D || platform.d || platform.details || platform.description || 'ডিটেইলস নেই';
+                const dFieldPreview = dFieldContent.length > 150 
+                    ? dFieldContent.substring(0, 150) + '...' 
+                    : dFieldContent;
+                
                 const platformCard = document.createElement('div');
                 platformCard.className = 'platform-card';
                 platformCard.innerHTML = `
@@ -1322,12 +1493,22 @@
                     </div>
                     <div class="platform-body">
                         <p style="color: #b0bec5; font-size: 0.9rem; margin-bottom: 10px;">${platform.description || 'কোন বর্ণনা নেই'}</p>
+                        
+                        <span class="d-field-label">ডিটেইলস (D ফিল্ড):</span>
+                        <div class="d-field-preview">
+                            <p>${dFieldPreview}</p>
+                        </div>
+                        
                         <p style="color: #6c757d; font-size: 0.8rem; margin-bottom: 10px;"><strong>ফিচার:</strong> ${featuresList}</p>
                         <p style="color: #6c757d; font-size: 0.8rem; margin-bottom: 10px;"><strong>ক্যাটাগরি:</strong> ${platform.category || 'N/A'}</p>
                         <p style="color: #6c757d; font-size: 0.8rem; margin-bottom: 10px;"><strong>স্ট্যাটাস:</strong> ${platform.status === 'active' ? '✅ একটিভ' : '❌ ইনএকটিভ'}</p>
+                        <p style="color: #6c757d; font-size: 0.8rem; margin-bottom: 10px;"><strong>D ফিল্ড:</strong> ${dFieldContent.length} characters</p>
                         <div class="platform-actions">
                             <button class="btn-sm btn-edit" data-id="${platform.id}">
                                 <i class="fas fa-edit"></i> এডিট
+                            </button>
+                            <button class="btn-sm btn-d-field" onclick="editDField('${platform.id}', '${platform.name.replace(/'/g, "\\'")}')">
+                                <i class="fas fa-align-left"></i> D ফিল্ড
                             </button>
                             <button class="btn-sm btn-delete" data-id="${platform.id}">
                                 <i class="fas fa-trash"></i> ডিলিট
@@ -1367,6 +1548,7 @@
             platformName.value = platform.name || '';
             platformPrice.value = platform.price || '';
             platformDescription.value = platform.description || '';
+            platformDField.value = platform.D || platform.d || platform.details || '';
             platformFeatures.value = platform.features ? platform.features.join('\n') : '';
             platformCategory.value = platform.category || 'streaming';
             platformOrder.value = platform.order || 1;
@@ -1404,7 +1586,7 @@
         async function handlePlatformFormSubmit(e) {
             e.preventDefault();
             
-            if (!platformName.value.trim() || !platformPrice.value.trim() || !platformDescription.value.trim()) {
+            if (!platformName.value.trim() || !platformPrice.value.trim() || !platformDescription.value.trim() || !platformDField.value.trim()) {
                 showToast('সব প্রয়োজনীয় তথ্য পূরণ করুন', 'error');
                 return;
             }
@@ -1418,6 +1600,7 @@
                 price: platformPrice.value.trim(),
                 icon: selectedIcon,
                 description: platformDescription.value.trim(),
+                D: platformDField.value.trim(), // D field added here
                 features: featuresArray,
                 category: platformCategory.value,
                 order: parseInt(platformOrder.value) || 1,
@@ -1453,6 +1636,7 @@
             platformOrder.value = 1;
             platformStatus.value = 'active';
             platformCategory.value = 'streaming';
+            platformDField.value = '';
             
             document.querySelectorAll('.icon-option').forEach(opt => {
                 opt.classList.remove('selected');
@@ -1462,6 +1646,105 @@
             }
             
             document.getElementById('formTitle').textContent = 'নতুন প্ল্যাটফর্ম যোগ করুন';
+        }
+        
+        // Edit D Field
+        function editDField(platformId, platformName) {
+            const platform = platforms.find(p => p.id === platformId);
+            
+            if (!platform) {
+                showToast('প্ল্যাটফর্ম পাওয়া যায়নি', 'error');
+                return;
+            }
+            
+            currentEditingPlatformId = platformId;
+            currentEditingPlatformName = platformName;
+            
+            // Get D field content
+            const dFieldContent = platform.D || platform.d || platform.details || '';
+            
+            dFieldModalTitle.textContent = 'D ফিল্ড এডিট করুন';
+            modalPlatformName.textContent = platformName;
+            dFieldEditTextarea.value = dFieldContent;
+            
+            // Update stats
+            updateDFieldStats(dFieldContent);
+            
+            dFieldModal.style.display = 'flex';
+        }
+        
+        // Save D Field
+        function saveDField() {
+            if (!currentEditingPlatformId) return;
+            
+            const dFieldValue = dFieldEditTextarea.value.trim();
+            
+            if (!dFieldValue) {
+                showToast('D ফিল্ড খালি রাখা যাবে না', 'error');
+                return;
+            }
+            
+            const updates = {
+                D: dFieldValue,
+                updatedAt: firebase.database.ServerValue.TIMESTAMP,
+                updatedBy: currentAdminEmail
+            };
+            
+            database.ref(`publicData/pricingPlans/${currentEditingPlatformId}`).update(updates)
+                .then(() => {
+                    showToast('D ফিল্ড সফলভাবে আপডেট হয়েছে', 'success');
+                    
+                    // Update local data
+                    const platformIndex = platforms.findIndex(p => p.id === currentEditingPlatformId);
+                    if (platformIndex !== -1) {
+                        platforms[platformIndex].D = dFieldValue;
+                    }
+                    
+                    closeDFieldModal();
+                })
+                .catch(error => {
+                    console.error("Save D field error:", error);
+                    showToast('D ফিল্ড সেভ করতে সমস্যা হয়েছে', 'error');
+                });
+        }
+        
+        // Copy D Field
+        function copyDField() {
+            dFieldEditTextarea.select();
+            document.execCommand('copy');
+            
+            // Show feedback
+            const originalText = dFieldStats.innerHTML;
+            dFieldStats.innerHTML = '<p style="color: #4caf50;">✅ D ফিল্ড ক্লিপবোর্ডে কপি করা হয়েছে!</p>';
+            
+            setTimeout(() => {
+                updateDFieldStats(dFieldEditTextarea.value);
+            }, 2000);
+        }
+        
+        // Update D Field stats
+        function updateDFieldStats(dFieldContent) {
+            const charCount = dFieldContent.length;
+            const wordCount = dFieldContent.trim() ? dFieldContent.trim().split(/\s+/).length : 0;
+            const lineCount = dFieldContent.split('\n').length;
+            
+            let statsHTML = `
+                <p><strong>Character Count:</strong> ${charCount}</p>
+                <p><strong>Word Count:</strong> ${wordCount}</p>
+                <p><strong>Line Count:</strong> ${lineCount}</p>
+                <p><strong>Platform ID:</strong> ${currentEditingPlatformId}</p>
+                <p><strong>Last Updated:</strong> ${new Date().toLocaleString('bn-BD')}</p>
+            `;
+            
+            dFieldStats.innerHTML = statsHTML;
+        }
+        
+        // Close D Field modal
+        function closeDFieldModal() {
+            dFieldModal.style.display = 'none';
+            currentEditingPlatformId = null;
+            currentEditingPlatformName = '';
+            dFieldEditTextarea.value = '';
         }
         
         // Load orders
