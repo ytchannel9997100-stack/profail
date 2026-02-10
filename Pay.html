@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Easy Premium - Pay Now</title>
-    <meta name="description" content="আপনার প্রিমিয়াম সার্ভিসের পেমেন্ট করুন - ১০০% সিকিউর">
+    <meta name="description" content="প্রিমিয়াম সার্ভিস পেমেন্ট - ১০০% সিকিউর">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
-    <!-- Firebase SDK (compat version - সহজে কাজ করে) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
@@ -16,68 +15,52 @@
         :root {
             --primary: #0a0a1a;
             --accent: #ff9800;
-            --card: rgba(20, 20, 40, 0.9);
-            --border: rgba(255, 152, 0, 0.3);
+            --card: rgba(20,20,40,0.9);
+            --border: rgba(255,152,0,0.3);
             --text: #ffffff;
-            --text-sec: #b0bec5;
             --success: #4caf50;
+            --error: #ff5252;
+            --info: #ffd54f;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             background: linear-gradient(135deg, #0a0a1a, #121230, #1a1a3a);
             color: var(--text);
-            font-family: 'Segoe UI', 'Tahoma', sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             min-height: 100vh;
-            padding-top: 70px;
-            line-height: 1.6;
+            padding-top: 80px;
         }
-        .header {
+        header {
             position: fixed;
             top: 0; left: 0; right: 0;
             background: rgba(10,10,26,0.95);
             backdrop-filter: blur(10px);
-            padding: 15px 20px;
+            padding: 15px;
+            text-align: center;
             z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
-        .logo { font-size: 1.6rem; font-weight: bold; color: var(--accent); }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .product-box {
+        .logo { font-size: 2.2rem; font-weight: bold; color: var(--accent); }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .box {
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 30px;
-            margin-bottom: 30px;
         }
-        .product-box h1 {
-            color: var(--accent);
-            margin-bottom: 20px;
-            font-size: 2.2rem;
-        }
-        .description {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            white-space: pre-wrap;
-            word-break: break-word;
-            margin-bottom: 25px;
-        }
-        .price-tag {
-            font-size: 2.5rem;
-            color: var(--success);
-            margin: 25px 0;
-            font-weight: bold;
+        h1 { color: var(--accent); font-size: 2.2rem; margin-bottom: 20px; }
+        .desc { font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap; word-break: break-word; margin-bottom: 25px; }
+        .price { font-size: 2.8rem; color: var(--success); text-align: center; font-weight: bold; margin: 25px 0; }
+        .order-info {
+            background: rgba(255,215,0,0.15);
+            border: 1px solid #ffd54f;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 20px 0;
             text-align: center;
+            font-size: 1.15rem;
         }
         .btn-pay {
             display: block;
-            width: 100%;
             max-width: 400px;
             margin: 30px auto;
             padding: 18px;
@@ -90,125 +73,113 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        .btn-pay:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(255,152,0,0.4);
-        }
-        .loading {
+        .btn-pay:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,152,0,0.4); }
+        .msg {
             text-align: center;
             font-size: 1.2rem;
-            margin: 50px 0;
+            margin: 60px 0;
+            padding: 20px;
+            border-radius: 12px;
         }
-        .error {
-            color: #ff5252;
-            text-align: center;
-            margin: 30px 0;
-        }
-        footer {
-            text-align: center;
-            padding: 30px 20px;
-            color: var(--text-sec);
-            font-size: 0.95rem;
-        }
+        .error { background: rgba(255,82,82,0.15); color: #ff5252; }
+        .info { background: rgba(255,215,0,0.15); color: #ffd54f; }
+        footer { text-align: center; padding: 40px 20px; color: #b0bec5; font-size: 0.95rem; }
     </style>
 </head>
 <body>
 
-    <header class="header">
-        <div class="logo">Easy Premium</div>
-    </header>
+    <header><div class="logo">Easy Premium</div></header>
 
     <div class="container">
-        <div class="product-box" id="productBox">
-            <div class="loading" id="loading">প্ল্যানের তথ্য লোড হচ্ছে...</div>
-            <div class="error" id="error" style="display:none;"></div>
-            
-            <h1 id="productName" style="display:none;"></h1>
-            
-            <div class="description" id="productDesc" style="display:none;"></div>
-            
-            <div class="price-tag" id="productPrice" style="display:none;"></div>
-            
-            <button class="btn-pay" id="payButton" style="display:none;" onclick="handlePay()">
+        <div class="box">
+            <div id="loading" class="msg info">অর্ডার তথ্য লোড হচ্ছে...</div>
+            <div id="errorMsg" class="msg error" style="display:none;"></div>
+
+            <div id="orderSection" class="order-info" style="display:none;">
+                অর্ডার আইডি: <strong id="orderIdShow"></strong>
+            </div>
+
+            <h1 id="planName" style="display:none;"></h1>
+            <div id="planDesc" class="desc" style="display:none;"></div>
+            <div id="planPrice" class="price" style="display:none;"></div>
+
+            <button id="payBtn" class="btn-pay" style="display:none;" onclick="handlePay()">
                 Pay Now - Bkash / Nagad / Rocket
             </button>
         </div>
     </div>
 
-    <footer>
-        © ২০২৬ Easy Premium | সকল অধিকার সংরক্ষিত | সাপোর্ট: +8801770584994
-    </footer>
+    <footer>© ২০২৬ Easy Premium | সকল অধিকার সংরক্ষিত | সাপোর্ট: +8801770584994</footer>
 
     <script>
-        // Firebase Config (আপনার প্রজেক্টেরটা দিন - public হিসেবে ঠিক আছে)
-        const firebaseConfig = {
-            apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // যদি থাকে, না থাকলে খালি রাখুন (Realtime DB-এর জন্য databaseURL যথেষ্ট)
-            authDomain: "easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app",
-            databaseURL: "https://easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "easy-premium",
-            storageBucket: "easy-premium.appspot.com",
-            messagingSenderId: "XXXXXXXXXXXX",
-            appId: "1:XXXXXXXXXXXX:web:XXXXXXXXXXXXXXXX"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp({
+            databaseURL: "https://easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app"
+        });
         const db = firebase.database();
 
-        // URL থেকে plan ID নেয়া
-        const urlParams = new URLSearchParams(window.location.search);
-        const planId = urlParams.get('plan');
+        const params = new URLSearchParams(window.location.search);
+        const orderId = params.get('orderId');
 
-        if (!planId) {
+        if (!orderId) {
             document.getElementById('loading').style.display = 'none';
-            document.getElementById('error').style.display = 'block';
-            document.getElementById('error').textContent = 'কোন প্ল্যান সিলেক্ট করা হয়নি। URL-এ ?plan=ID দিন।';
+            document.getElementById('errorMsg').style.display = 'block';
+            document.getElementById('errorMsg').textContent = 'অর্ডার আইডি দরকার। URL-এ ?orderId=... দিন।';
         } else {
-            // Firebase থেকে ডেটা লোড
-            const planRef = db.ref(`publicData/pricingPlans/${planId}`);
-            
-            planRef.once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        
-                        document.getElementById('loading').style.display = 'none';
-                        
-                        // নাম
-                        document.getElementById('productName').textContent = data.name || 'প্রিমিয়াম প্ল্যান';
-                        document.getElementById('productName').style.display = 'block';
-                        
-                        // ডেসক্রিপশন: D প্রায়োরিটি
-                        const desc = data.D || data.description || 'বিস্তারিত তথ্য পাওয়া যায়নি।';
-                        document.getElementById('productDesc').textContent = desc;
-                        document.getElementById('productDesc').style.display = 'block';
-                        
-                        // দাম
-                        const priceText = `৳${data.price || '---'}`;
-                        document.getElementById('productPrice').textContent = priceText;
-                        document.getElementById('productPrice').style.display = 'block';
-                        
-                        // বাটন দেখানো
-                        document.getElementById('payButton').style.display = 'block';
-                    } else {
-                        showError('এই প্ল্যান ID টি পাওয়া যায়নি।');
+            document.getElementById('orderIdShow').textContent = orderId;
+            document.getElementById('orderSection').style.display = 'block';
+
+            // Step 1: orders থেকে planId নেয়া
+            db.ref(`orders/${orderId}`).once('value')
+                .then(snapshot => {
+                    if (!snapshot.exists()) {
+                        showError('এই অর্ডার ID পাওয়া যায়নি।');
+                        return;
                     }
+                    const orderData = snapshot.val();
+                    const planId = orderData.planId || orderData.plan || orderData.pricingPlan;
+
+                    if (!planId) {
+                        showError('অর্ডারে প্ল্যান ID সংরক্ষিত নেই।');
+                        return;
+                    }
+
+                    // Step 2: pricingPlans থেকে ডেটা লোড
+                    db.ref(`publicData/pricingPlans/${planId}`).once('value')
+                        .then(planSnapshot => {
+                            document.getElementById('loading').style.display = 'none';
+                            if (planSnapshot.exists()) {
+                                const data = planSnapshot.val();
+
+                                document.getElementById('planName').textContent = data.name || 'প্রিমিয়াম প্ল্যান';
+                                document.getElementById('planName').style.display = 'block';
+
+                                const fullDesc = data.D || data.description || 'বিস্তারিত ডেসক্রিপশন পাওয়া যায়নি।';
+                                document.getElementById('planDesc').textContent = fullDesc;
+                                document.getElementById('planDesc').style.display = 'block';
+
+                                document.getElementById('planPrice').textContent = `৳${data.price || '---'}`;
+                                document.getElementById('planPrice').style.display = 'block';
+
+                                document.getElementById('payBtn').style.display = 'block';
+                            } else {
+                                showError(`প্ল্যান "${planId}" পাওয়া যায়নি।`);
+                            }
+                        });
                 })
-                .catch((error) => {
-                    console.error(error);
-                    showError('ডেটা লোড করতে সমস্যা: ' + error.message);
+                .catch(err => {
+                    showError('ডেটা লোডে সমস্যা: ' + err.message);
                 });
         }
 
-        function showError(msg) {
+        function showError(message) {
             document.getElementById('loading').style.display = 'none';
-            document.getElementById('error').style.display = 'block';
-            document.getElementById('error').textContent = msg;
+            document.getElementById('errorMsg').style.display = 'block';
+            document.getElementById('errorMsg').textContent = message;
         }
 
         function handlePay() {
-            alert('পেমেন্ট প্রসেস শুরু হচ্ছে...\n(এখনো পেমেন্ট গেটওয়ে যুক্ত করা হয়নি। আপনি চাইলে Bkash/Nagad নম্বর যোগ করতে পারেন।)');
-            // পরে এখানে আসল পেমেন্ট লজিক যোগ করবেন
+            alert(`পেমেন্ট শুরু হচ্ছে (অর্ডার: ${orderId || 'N/A'})...\nযোগাযোগ: 01770584994`);
+            // এখানে আসল পেমেন্ট লজিক যোগ করুন (লিঙ্ক/ফর্ম)
         }
     </script>
 
