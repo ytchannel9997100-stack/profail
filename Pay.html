@@ -5,114 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>বিস্তারিত বিবরণ</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             background: #000;
             color: #fff;
             font-family: 'Courier New', monospace;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding-bottom: 100px; /* বাটনের জন্য স্পেস */
         }
         
         .d-container {
-            max-width: 800px;
             width: 100%;
-            padding: 20px;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .d-value {
             color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            line-height: 1.6;
-            font-size: 18px;
-            min-height: 200px;
-            display: flex;
-            justify-content: center;
+            padding: 40px;
+            line-height: 1.8;
+            font-size: 24px;
+            text-align: center;
             word-break: break-word;
             overflow-wrap: break-word;
-            margin-bottom: 20px;
-        }
-        
-        /* Pay Now বাটনের স্টাইল */
-        .pay-now-btn {
-            position: fixed;
-            bottom: 0;
-            left: 0;
+            max-width: 100%;
             width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 20px;
-            font-size: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            font-family: 'Courier New', monospace;
-            border-radius: 0;
         }
         
-        .pay-now-btn:hover {
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-            box-shadow: 0 -4px 25px rgba(102, 126, 234, 0.4);
+        /* ডেস্কটপের জন্য */
+        @media (min-width: 1024px) {
+            .d-value {
+                font-size: 28px;
+                padding: 50px;
+                line-height: 2.0;
+                max-width: 1200px;
+            }
         }
         
-        .pay-now-btn:active {
-            transform: translateY(-2px);
-        }
-        
-        /* বাটন লুকানো ক্লাস */
-        .pay-now-btn.hidden {
-            display: none;
+        /* ট্যাবলেট ডিভাইসের জন্য */
+        @media (max-width: 1023px) and (min-width: 769px) {
+            .d-value {
+                font-size: 22px;
+                padding: 30px;
+                line-height: 1.9;
+            }
         }
         
         /* মোবাইল ডিভাইসের জন্য */
         @media (max-width: 768px) {
             .d-value {
-                font-size: 16px;
-                padding: 15px;
-                line-height: 1.8;
-                min-height: auto;
-            }
-            
-            .d-container {
-                padding: 10px;
-            }
-            
-            body {
-                padding: 10px;
-                padding-bottom: 80px; /* মোবাইলের জন্য কম স্পেস */
-            }
-            
-            .pay-now-btn {
-                padding: 18px;
                 font-size: 18px;
+                padding: 20px;
+                line-height: 1.8;
             }
         }
         
         /* খুব ছোট মোবাইলের জন্য */
         @media (max-width: 480px) {
             .d-value {
-                font-size: 15px;
-                padding: 12px;
-                line-height: 1.8;
-            }
-            
-            .pay-now-btn {
-                padding: 16px;
                 font-size: 16px;
-            }
-            
-            body {
-                padding-bottom: 70px;
+                padding: 15px;
+                line-height: 1.7;
             }
         }
         
@@ -121,27 +83,26 @@
             font-style: italic;
             text-align: center;
             padding: 40px;
-            font-size: 18px;
+            font-size: 24px;
         }
         
         @media (max-width: 768px) {
             .loading {
-                font-size: 16px;
+                font-size: 20px;
                 padding: 30px 15px;
             }
         }
         
         .error {
             color: #fff;
-            padding: 20px;
-            border-radius: 5px;
+            padding: 30px;
             text-align: center;
-            font-size: 18px;
+            font-size: 24px;
         }
         
         @media (max-width: 768px) {
             .error {
-                font-size: 16px;
+                font-size: 20px;
                 padding: 20px 15px;
             }
         }
@@ -214,9 +175,6 @@
         <div id="hiddenData" class="hidden-data"></div>
     </div>
 
-    <!-- Pay Now বাটন (প্রথমে লুকানো) -->
-    <button id="payNowBtn" class="pay-now-btn hidden">Pay Now</button>
-
     <script>
         // ডিকোড করার ফাংশন
         function decryptData(encryptedData) {
@@ -270,19 +228,7 @@
             hiddenDiv.innerHTML = hiddenHtml;
         }
         
-        // Pay Now বাটন শো করার ফাংশন
-        function showPayNowButton() {
-            const payNowBtn = document.getElementById('payNowBtn');
-            if (payNowBtn) {
-                // 1 সেকেন্ড পর বাটনটি শো হবে
-                setTimeout(() => {
-                    payNowBtn.classList.remove('hidden');
-                    console.log("Pay Now বাটন শো করা হয়েছে");
-                }, 1000);
-            }
-        }
-        
-        // শুধু D ফিল্ড দেখানো এবং বাটন শো করা
+        // শুধু D ফিল্ড দেখানো
         function displayOnlyD(data) {
             const outputDiv = document.getElementById('output');
             
@@ -294,36 +240,12 @@
                         <div class="d-value">${data}</div>
                     </div>
                 `;
-                
-                // ডাটা শো হওয়ার পর বাটন শো করুন
-                showPayNowButton();
             } else {
                 outputDiv.innerHTML = `
                     <div class="error">
                         D ফিল্ডের ডাটা পাওয়া যায়নি
                     </div>
                 `;
-            }
-        }
-        
-        // Pay Now বাটনে ক্লিক হ্যান্ডলার
-        function setupPayNowButton() {
-            const payNowBtn = document.getElementById('payNowBtn');
-            
-            if (payNowBtn) {
-                payNowBtn.addEventListener('click', function() {
-                    // এখানে আপনার পেমেন্ট লজিক যোগ করুন
-                    alert("পেমেন্ট প্রক্রিয়া শুরু হচ্ছে...");
-                    
-                    // উদাহরণ: ব্যবহারকারীকে অন্য পেজে নিয়ে যাওয়া
-                    // window.location.href = "payment-page.html";
-                    
-                    // অথবা পেমেন্ট গেটওয়ে ওপেন করা
-                    // window.open("https://payment-gateway.com", "_blank");
-                    
-                    // এখন শুধু একটি মেসেজ শো করছি
-                    console.log("Pay Now বাটনে ক্লিক করা হয়েছে");
-                });
             }
         }
         
@@ -376,9 +298,6 @@
             
             // শুধু D ফিল্ড দেখান
             displayOnlyD(dFieldData);
-            
-            // Pay Now বাটন সেটআপ করুন
-            setupPayNowButton();
         }
         
         // পেজ লোড হলে ডাটা প্রক্রিয়া শুরু করুন
@@ -388,9 +307,6 @@
         
         // URL প্যারামিটার পরিবর্তন হলে আবার লোড করার জন্য
         window.addEventListener('popstate', processData);
-        
-        // স্ক্রল করলেও বাটন দেখা যাবে - এটি fixed পজিশনে থাকবে
-        // তাই আলাদা করে কোনো হ্যান্ডলার লাগবে না
     </script>
 </body>
 </html>
