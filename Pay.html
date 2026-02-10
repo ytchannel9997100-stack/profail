@@ -23,31 +23,47 @@
             color: #ff9800;
             font-size: 28px;
             font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        .logo:hover {
+            transform: scale(1.05);
+            text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
         }
         .container {
             max-width: 900px;
             margin: 30px auto;
             padding: 20px;
         }
+        /* লগিন সেকশন - স্টাইল আপডেট */
         .login-box {
             background: rgba(20,20,40,0.9);
             padding: 30px;
-            border-radius: 10px;
+            border-radius: 15px;
             text-align: center;
-            border: 1px solid rgba(255,152,0,0.3);
+            border: 2px solid rgba(255,152,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none; /* শুরুতে লুকানো */
         }
         .login-input {
             width: 100%;
             padding: 15px;
             margin: 10px 0;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid #ff9800;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid #ff9800;
             border-radius: 8px;
             color: white;
             font-size: 16px;
+            transition: all 0.3s;
+        }
+        .login-input:focus {
+            outline: none;
+            border-color: #ff5722;
+            box-shadow: 0 0 15px rgba(255, 152, 0, 0.3);
         }
         .login-btn {
-            background: #ff9800;
+            background: linear-gradient(45deg, #ff9800, #ff5722);
             color: white;
             border: none;
             padding: 15px 30px;
@@ -56,19 +72,27 @@
             cursor: pointer;
             margin-top: 20px;
             width: 100%;
+            transition: all 0.3s;
+        }
+        .login-btn:hover {
+            background: linear-gradient(45deg, #ff5722, #ff9800);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
         }
         .order-box {
             background: rgba(20,20,40,0.95);
             border-radius: 15px;
             padding: 30px;
             border: 2px solid rgba(255,152,0,0.4);
-            display: none;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
         .order-id {
             color: #ff9800;
             font-size: 24px;
             text-align: center;
             margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,152,0,0.3);
         }
         .platform-name {
             color: #4caf50;
@@ -84,19 +108,26 @@
         }
         .detail-item {
             background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        .detail-item:hover {
+            background: rgba(0,0,0,0.4);
+            border-color: rgba(255,152,0,0.3);
+            transform: translateY(-3px);
         }
         .detail-label {
             color: #b0bec5;
             font-size: 14px;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
         .detail-value {
             color: white;
             font-size: 18px;
             font-weight: bold;
+            word-break: break-all;
         }
         .description-box {
             background: rgba(0,0,0,0.3);
@@ -106,6 +137,7 @@
             border-left: 4px solid #ff9800;
             max-height: 400px;
             overflow-y: auto;
+            line-height: 1.6;
         }
         .action-buttons {
             display: flex;
@@ -120,23 +152,47 @@
             font-size: 16px;
             cursor: pointer;
             text-align: center;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
         }
         .btn-confirm {
-            background: #4caf50;
+            background: linear-gradient(45deg, #4caf50, #2e7d32);
             color: white;
+        }
+        .btn-confirm:hover {
+            background: linear-gradient(45deg, #2e7d32, #4caf50);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
         }
         .btn-cancel {
-            background: #ff5252;
+            background: linear-gradient(45deg, #ff5252, #d32f2f);
             color: white;
         }
+        .btn-cancel:hover {
+            background: linear-gradient(45deg, #d32f2f, #ff5252);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 82, 82, 0.3);
+        }
         .btn-download {
-            background: #2196f3;
+            background: linear-gradient(45deg, #2196f3, #1976d2);
             color: white;
+        }
+        .btn-download:hover {
+            background: linear-gradient(45deg, #1976d2, #2196f3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
         }
         .loading {
             text-align: center;
-            padding: 40px;
+            padding: 60px 20px;
             color: #ff9800;
+            background: rgba(20,20,40,0.9);
+            border-radius: 15px;
+            border: 2px solid rgba(255,152,0,0.3);
         }
         .error {
             background: rgba(255,82,82,0.15);
@@ -154,36 +210,59 @@
             margin-top: 40px;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
+        .secure-badge {
+            background: linear-gradient(45deg, #4caf50, #2e7d32);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        .info-box {
+            background: rgba(0,188,212,0.15);
+            border-left: 4px solid #00bcd4;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: #b0bec5;
+            font-size: 14px;
+        }
         @media (max-width: 768px) {
             .details-grid { grid-template-columns: 1fr; }
             .action-buttons { flex-direction: column; }
+            .container { padding: 15px; }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
     <div class="header">
-        <div class="logo">
+        <a href="https://easy-premium.com" class="logo">
             <i class="fas fa-crown"></i> Easy Premium
-        </div>
+        </a>
+        <span class="secure-badge">
+            <i class="fas fa-lock"></i> সিকিউর অর্ডার ভিউ
+        </span>
     </div>
 
     <div class="container">
         <!-- লগিন সিস্টেম -->
         <div class="login-box" id="loginSection">
             <h2 style="color: #ff9800; margin-bottom: 30px;">অর্ডার ডিটেইলস এক্সেস</h2>
-            <input type="text" id="userId" class="login-input" placeholder="আপনার ইউজার আইডি (যেমন: FhHXrKhfDAWzwbM7N8NaduCmChn2)">
-            <input type="text" id="orderId" class="login-input" placeholder="আপনার অর্ডার আইডি (যেমন: -01b3H8aB_NDCcMLyux)">
-            <button class="login-btn" onclick="loginToOrder()">
+            <input type="text" id="userId" class="login-input" placeholder="আপনার ইউজার আইডি">
+            <input type="text" id="orderId" class="login-input" placeholder="আপনার অর্ডার আইডি">
+            <button class="login-btn" onclick="manualLogin()">
                 <i class="fas fa-lock"></i> অর্ডার এক্সেস করুন
             </button>
-            <p style="margin-top: 20px; color: #b0bec5; font-size: 14px;">
-                <i class="fas fa-info-circle"></i> শুধুমাত্র অর্ডার করার ইউজারই অর্ডারটি দেখতে পারবেন
-            </p>
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> এই পেজে লিংকের মাধ্যমে আসলে ডাটা অটোমেটিক লোড হবে। ম্যানুয়ালি ইউজার/অর্ডার আইডি দিয়ে এক্সেস করতে চাইলে উপরের ফর্ম ব্যবহার করুন।
+            </div>
         </div>
 
         <!-- লোডিং -->
-        <div class="loading" id="loadingSection" style="display:none;">
+        <div class="loading" id="loadingSection">
             <i class="fas fa-spinner fa-spin fa-3x"></i>
             <p style="margin-top: 20px;">অর্ডার লোড হচ্ছে...</p>
         </div>
@@ -192,7 +271,7 @@
         <div class="error" id="errorSection" style="display:none;"></div>
 
         <!-- অর্ডার ডিটেইলস -->
-        <div class="order-box" id="orderSection">
+        <div class="order-box" id="orderSection" style="display:none;">
             <div class="order-id" id="orderIdDisplay"></div>
             <div class="platform-name" id="platformNameDisplay"></div>
             
@@ -229,6 +308,14 @@
             </h3>
             <div class="description-box" id="platformDescription"></div>
 
+            <!-- ইউজার ডাটা -->
+            <h3 style="color: #ff9800; margin-top: 30px; margin-bottom: 15px;">
+                <i class="fas fa-user-circle"></i> ইউজার তথ্য
+            </h3>
+            <div class="description-box" id="userInfo">
+                লোড হচ্ছে...
+            </div>
+
             <!-- ক্রেডেনশিয়ালস (যদি থাকে) -->
             <div id="credentialsSection" style="display:none; margin-top: 25px;">
                 <h3 style="color: #4caf50; margin-bottom: 15px;">
@@ -243,13 +330,13 @@
             </h3>
             <div class="action-buttons">
                 <button class="btn btn-confirm" onclick="confirmOrder()">
-                    <i class="fas fa-check-circle"></i> কনফার্ম করুন
+                    <i class="fas fa-check-circle"></i> অর্ডার কনফার্ম
                 </button>
                 <button class="btn btn-download" onclick="downloadDetails()">
-                    <i class="fas fa-download"></i> ডাউনলোড
+                    <i class="fas fa-download"></i> ডিটেইলস ডাউনলোড
                 </button>
                 <button class="btn btn-cancel" onclick="cancelOrder()">
-                    <i class="fas fa-times-circle"></i> ক্যান্সেল
+                    <i class="fas fa-times-circle"></i> অর্ডার ক্যান্সেল
                 </button>
             </div>
         </div>
@@ -262,9 +349,59 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
     <script>
+        // ==================== SAME SECURE LINK GENERATOR ====================
+        class SecureLinkGenerator {
+            constructor() {
+                this.encryptionKey = 'EP_SECURE_2025_KEY_!@#';
+            }
+            
+            encryptData(data) {
+                try {
+                    const dataStr = JSON.stringify(data);
+                    let encrypted = '';
+                    for (let i = 0; i < dataStr.length; i++) {
+                        const keyChar = this.encryptionKey.charCodeAt(i % this.encryptionKey.length);
+                        const dataChar = dataStr.charCodeAt(i);
+                        encrypted += String.fromCharCode(dataChar ^ keyChar);
+                    }
+                    return btoa(encrypted);
+                } catch (error) {
+                    console.error("Encryption error:", error);
+                    return null;
+                }
+            }
+            
+            decryptData(encryptedData) {
+                try {
+                    const decoded = atob(encryptedData);
+                    let decrypted = '';
+                    for (let i = 0; i < decoded.length; i++) {
+                        const keyChar = this.encryptionKey.charCodeAt(i % this.encryptionKey.length);
+                        const dataChar = decoded.charCodeAt(i);
+                        decrypted += String.fromCharCode(dataChar ^ keyChar);
+                    }
+                    return JSON.parse(decrypted);
+                } catch (error) {
+                    console.error("Decryption error:", error);
+                    return null;
+                }
+            }
+            
+            parsePaymentLink(url) {
+                try {
+                    const urlObj = new URL(url);
+                    const encryptedData = urlObj.searchParams.get('data');
+                    if (!encryptedData) return null;
+                    return this.decryptData(encryptedData);
+                } catch (error) {
+                    console.error("Error parsing payment link:", error);
+                    return null;
+                }
+            }
+        }
+
         // Firebase Configuration
         const firebaseConfig = {
             databaseURL: "https://easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app"
@@ -273,39 +410,83 @@
         // Firebase Initialize
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const auth = firebase.auth();
+        const secureLinkGenerator = new SecureLinkGenerator();
 
         let currentUserId = '';
         let currentOrderId = '';
 
-        async function loginToOrder() {
-            const userId = document.getElementById('userId').value.trim();
-            const orderId = document.getElementById('orderId').value.trim();
+        // DOM লোড হওয়ার পরই চেক করবে
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("📌 অর্ডার প্যানেল লোড হয়েছে...");
+            checkURLForData();
+        });
 
-            if (!userId || !orderId) {
-                showError('ইউজার আইডি এবং অর্ডার আইডি দিতে হবে');
-                return;
+        // URL থেকে ডাটা চেক করুন
+        function checkURLForData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encryptedData = urlParams.get('data');
+            
+            if (encryptedData) {
+                console.log("🔐 এনক্রিপ্টেড ডাটা পাওয়া গেছে:", encryptedData.substring(0, 30) + "...");
+                processEncryptedData(encryptedData);
+            } else {
+                // URL-এ সরাসরি আইডি থাকলে
+                const orderId = urlParams.get('orderId');
+                const userId = urlParams.get('userId');
+                const platformId = urlParams.get('platformId');
+                
+                if (orderId && userId) {
+                    console.log("📊 সরাসরি আইডি পাওয়া গেছে");
+                    loadOrderData(userId, orderId);
+                } else {
+                    // কোন ডাটা না পাওয়া গেলে লগিন ফর্ম শো করুন
+                    console.log("⚠️ কোন এনক্রিপ্টেড ডাটা নেই, লগিন ফর্ম দেখানো হচ্ছে");
+                    showLoginForm();
+                }
             }
+        }
 
+        // এনক্রিপ্টেড ডাটা প্রসেস করুন
+        function processEncryptedData(encryptedData) {
+            document.getElementById('loadingSection').style.display = 'block';
+            document.getElementById('loginSection').style.display = 'none';
+            
+            try {
+                const decryptedData = secureLinkGenerator.decryptData(encryptedData);
+                console.log("✅ ডিকোডেড ডাটা:", decryptedData);
+                
+                if (decryptedData && decryptedData.u && decryptedData.o) {
+                    const { u: userId, o: orderId, p: platformId } = decryptedData;
+                    console.log(`📋 আইডি পাওয়া গেছে - ইউজার: ${userId}, অর্ডার: ${orderId}`);
+                    loadOrderData(userId, orderId);
+                } else {
+                    throw new Error("ডিকোডেড ডাটাতে যথেষ্ট তথ্য নেই");
+                }
+            } catch (error) {
+                console.error("❌ ডিকোডিং এরর:", error);
+                showError("ডাটা প্রসেস করতে সমস্যা হয়েছে। ম্যানুয়ালি লগইন করুন।");
+                showLoginForm();
+            }
+        }
+
+        // Firebase থেকে অর্ডার ডাটা লোড করুন
+        async function loadOrderData(userId, orderId) {
             currentUserId = userId;
             currentOrderId = orderId;
-
-            // UI আপডেট
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('loadingSection').style.display = 'block';
-            document.getElementById('errorSection').style.display = 'none';
-
+            
+            console.log(`🔍 লোড হচ্ছে: ইউজার=${userId}, অর্ডার=${orderId}`);
+            
             try {
-                // Firebase থেকে ইউজারের অর্ডার চেক করুন
+                // ইউজারের অর্ডার চেক করুন
                 const userOrdersRef = db.ref(`userOrders/${userId}/${orderId}`);
                 const snapshot = await userOrdersRef.once('value');
 
                 if (!snapshot.exists()) {
-                    throw new Error('এই ইউজারের জন্য অর্ডার পাওয়া যায়নি');
+                    throw new Error('এই ইউজারের জন্য অর্ডার পাওয়া যায়নি');
                 }
 
                 const orderData = snapshot.val();
-                console.log('✅ অর্ডার ডেটা:', orderData);
+                console.log('✅ অর্ডার ডাটা:', orderData);
 
                 // প্ল্যাটফর্ম আইডি পেতে
                 const platformId = orderData.platformId || orderData.platform;
@@ -313,31 +494,43 @@
                     throw new Error('অর্ডারে প্ল্যাটফর্ম আইডি নেই');
                 }
 
-                // প্ল্যাটফর্ম ডেটা লোড করুন
+                // প্ল্যাটফর্ম ডাটা লোড করুন
                 const platformRef = db.ref(`publicData/pricingPlans/${platformId}`);
                 const platformSnap = await platformRef.once('value');
 
                 if (!platformSnap.exists()) {
-                    throw new Error('প্ল্যাটফর্ম ডেটা পাওয়া যায়নি');
+                    throw new Error('প্ল্যাটফর্ম ডেটা পাওয়া যায়নি');
                 }
 
                 const platformData = platformSnap.val();
 
-                // সব ডেটা শো করুন
-                displayOrderData(userId, orderId, orderData, platformData);
+                // ইউজার ডাটা লোড করুন
+                let userData = null;
+                try {
+                    const userRef = db.ref(`users/${userId}`);
+                    const userSnap = await userRef.once('value');
+                    if (userSnap.exists()) {
+                        userData = userSnap.val();
+                    }
+                } catch (userError) {
+                    console.log("⚠️ ইউজার ডাটা লোড করতে পারেনি:", userError);
+                }
+
+                // সব ডাটা শো করুন
+                displayOrderData(userId, orderId, orderData, platformData, userData);
 
             } catch (error) {
                 console.error('❌ Error:', error);
                 showError(error.message);
-                document.getElementById('loadingSection').style.display = 'none';
-                document.getElementById('loginSection').style.display = 'block';
+                showLoginForm();
             }
         }
 
-        function displayOrderData(userId, orderId, orderData, platformData) {
-            // UI শো করুন
+        function displayOrderData(userId, orderId, orderData, platformData, userData) {
+            // UI আপডেট
             document.getElementById('loadingSection').style.display = 'none';
             document.getElementById('orderSection').style.display = 'block';
+            document.getElementById('loginSection').style.display = 'none';
 
             // 1. অর্ডার আইডি
             document.getElementById('orderIdDisplay').textContent = `অর্ডার #${orderId}`;
@@ -350,11 +543,21 @@
 
             // 3. স্ট্যাটাস
             const status = orderData.status || 'pending';
-            document.getElementById('detailStatus').textContent = status;
+            const statusElement = document.getElementById('detailStatus');
+            statusElement.textContent = status;
+            
+            // স্ট্যাটাস অনুযায়ী কালার
+            if (status === 'success' || status === 'completed' || status === 'confirmed') {
+                statusElement.style.color = '#4caf50';
+            } else if (status === 'pending' || status === 'processing') {
+                statusElement.style.color = '#ff9800';
+            } else if (status === 'cancelled' || status === 'failed') {
+                statusElement.style.color = '#ff5252';
+            }
 
             // 4. মূল্য
             const price = orderData.price || platformData.price || 'N/A';
-            document.getElementById('detailPrice').textContent = `৳${price}`;
+            document.getElementById('detailPrice').textContent = `৳ ${price}`;
 
             // 5. তারিখ
             const orderDate = orderData.orderDate || orderData.date || new Date().toISOString();
@@ -363,7 +566,7 @@
             // 6. ইউজার আইডি
             document.getElementById('detailUserId').textContent = userId;
 
-            // 7. D ফিল্ড ডেসক্রিপশন
+            // 7. প্ল্যাটফর্ম ডেসক্রিপশন
             let description = '';
             if (platformData.D) {
                 description = platformData.D;
@@ -376,26 +579,70 @@
             }
             document.getElementById('platformDescription').textContent = description;
 
-            // 8. ক্রেডেনশিয়ালস (যদি থাকে)
+            // 8. ইউজার ইনফো
+            let userInfoHtml = '';
+            if (userData) {
+                userInfoHtml += `👤 নাম: ${userData.displayName || 'নেই'}<br>`;
+                userInfoHtml += `📧 ইমেইল: ${userData.email || 'নেই'}<br>`;
+                userInfoHtml += `📅 অ্যাকাউন্ট তৈরি: ${formatDate(userData.createdAt || '')}<br>`;
+                userInfoHtml += `🔐 অ্যাকাউন্ট টাইপ: ${userData.accountType || 'customer'}`;
+            } else {
+                userInfoHtml = 'ইউজার ডাটা পাওয়া যায়নি';
+            }
+            document.getElementById('userInfo').innerHTML = userInfoHtml;
+
+            // 9. ক্রেডেনশিয়ালস (যদি থাকে)
             if (orderData.credentials || orderData.username || orderData.password) {
                 let credentials = '';
                 if (orderData.credentials) {
                     credentials = orderData.credentials;
                 } else {
-                    credentials = `Username: ${orderData.username || 'N/A'}\n`;
-                    credentials += `Password: ${orderData.password || 'N/A'}`;
+                    credentials = `👤 Username: ${orderData.username || 'N/A'}\n`;
+                    credentials += `🔒 Password: ${orderData.password || 'N/A'}`;
                 }
                 document.getElementById('credentialsContent').textContent = credentials;
                 document.getElementById('credentialsSection').style.display = 'block';
             }
 
-            // 9. পেজ টাইটেল
-            document.title = `${platformName} - অর্ডার #${orderId}`;
+            // 10. পেজ টাইটেল
+            document.title = `${platformName} - অর্ডার #${orderId} - Easy Premium`;
+            
+            console.log("✅ অর্ডার ডাটা সফলভাবে দেখানো হয়েছে");
+        }
+
+        // ম্যানুয়াল লগিন ফাংশন
+        function manualLogin() {
+            const userId = document.getElementById('userId').value.trim();
+            const orderId = document.getElementById('orderId').value.trim();
+
+            if (!userId || !orderId) {
+                showError('ইউজার আইডি এবং অর্ডার আইডি দিতে হবে');
+                return;
+            }
+
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('loadingSection').style.display = 'block';
+            
+            loadOrderData(userId, orderId);
+        }
+
+        // লগিন ফর্ম শো
+        function showLoginForm() {
+            document.getElementById('loadingSection').style.display = 'none';
+            document.getElementById('errorSection').style.display = 'none';
+            document.getElementById('orderSection').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+            
+            // URL-এ যদি অর্ডার আইডি থাকে, অটোফিল করুন
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderIdFromUrl = urlParams.get('orderId');
+            if (orderIdFromUrl) {
+                document.getElementById('orderId').value = orderIdFromUrl;
+            }
         }
 
         function confirmOrder() {
             if (confirm('আপনি কি এই অর্ডারটি কনফার্ম করতে চান?')) {
-                // Firebase-এ স্ট্যাটাস আপডেট করুন
                 const updateRef = db.ref(`userOrders/${currentUserId}/${currentOrderId}/status`);
                 updateRef.set('confirmed')
                     .then(() => {
@@ -425,42 +672,61 @@
         }
 
         function downloadDetails() {
-            const orderContent = `
-অর্ডার ডিটেইলস - Easy Premium
-=============================
-অর্ডার আইডি: ${currentOrderId}
-ইউজার আইডি: ${currentUserId}
-প্ল্যাটফর্ম: ${document.getElementById('detailPlatform').textContent}
-স্ট্যাটাস: ${document.getElementById('detailStatus').textContent}
-মূল্য: ${document.getElementById('detailPrice').textContent}
-তারিখ: ${document.getElementById('detailDate').textContent}
+            const platformName = document.getElementById('detailPlatform').textContent;
+            const status = document.getElementById('detailStatus').textContent;
+            const price = document.getElementById('detailPrice').textContent;
+            const date = document.getElementById('detailDate').textContent;
+            const description = document.getElementById('platformDescription').textContent;
 
-ডেসক্রিপশন:
-${document.getElementById('platformDescription').textContent}
+            const orderContent = `
+=====================================
+      EASY PREMIUM - ORDER DETAILS
+=====================================
+
+📦 অর্ডার আইডি: ${currentOrderId}
+👤 ইউজার আইডি: ${currentUserId}
+🛒 প্ল্যাটফর্ম: ${platformName}
+📊 স্ট্যাটাস: ${status}
+💰 মূল্য: ${price}
+📅 তারিখ: ${date}
+
+📋 প্ল্যাটফর্ম ডেসক্রিপশন:
+${description}
+
+ℹ️ এই ফাইলটি শুধুমাত্র অর্ডারকারীর জন্য।
+🔐 কেউ শেয়ার করবেন না।
 
 © ২০২৬ Easy Premium
+📞 সাপোর্ট: +8801770584994
+🌐 ওয়েবসাইট: https://easy-premium.com
+=====================================
             `;
 
             const blob = new Blob([orderContent], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `order-${currentOrderId}.txt`;
+            a.download = `easy-premium-order-${currentOrderId}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            
+            alert('📥 অর্ডার ডিটেইলস ডাউনলোড শুরু হয়েছে!');
         }
 
         function formatDate(dateString) {
             try {
                 const date = new Date(dateString);
+                if (isNaN(date.getTime())) return dateString;
+                
                 return date.toLocaleDateString('bn-BD', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
                     hour: '2-digit',
-                    minute: '2-digit'
+                    minute: '2-digit',
+                    hour12: true
                 });
             } catch (e) {
                 return dateString;
@@ -472,7 +738,7 @@ ${document.getElementById('platformDescription').textContent}
             errorDiv.innerHTML = `
                 <h3><i class="fas fa-exclamation-triangle"></i> সমস্যা হয়েছে</h3>
                 <p>${message}</p>
-                <button onclick="location.reload()" style="
+                <button onclick="showLoginForm()" style="
                     background: #ff9800;
                     color: white;
                     border: none;
@@ -481,17 +747,11 @@ ${document.getElementById('platformDescription').textContent}
                     margin-top: 15px;
                     cursor: pointer;
                 ">
-                    <i class="fas fa-redo"></i> আবার চেষ্টা করুন
+                    <i class="fas fa-sign-in-alt"></i> ম্যানুয়াল লগইন
                 </button>
             `;
             errorDiv.style.display = 'block';
-        }
-
-        // URL-এ যদি অর্ডার আইডি থাকে, অটোফিল করুন
-        const urlParams = new URLSearchParams(window.location.search);
-        const orderIdFromUrl = urlParams.get('orderId');
-        if (orderIdFromUrl) {
-            document.getElementById('orderId').value = orderIdFromUrl;
+            document.getElementById('loadingSection').style.display = 'none';
         }
     </script>
 </body>
