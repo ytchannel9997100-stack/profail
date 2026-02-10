@@ -36,19 +36,93 @@
             border: 1px solid #ff0;
             margin-top: 5px;
             border-radius: 5px;
+            line-height: 1.5;
+        }
+        .loading {
+            color: #ff9900;
+            font-style: italic;
+        }
+        .error {
+            color: #ff0000;
+            background: rgba(255, 0, 0, 0.1);
+            padding: 10px;
+            border: 1px solid #ff0000;
+            border-radius: 5px;
         }
     </style>
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
+            authDomain: "easy-premium.firebaseapp.com",
+            databaseURL: "https://easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "easy-premium",
+            storageBucket: "easy-premium.firebasestorage.app",
+            messagingSenderId: "155891252265",
+            appId: "1:155891252265:web:77ab41de24231e8e5ef038",
+            measurementId: "G-CHL8K8HRPX"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Firebase থেকে D ফিল্ডের ডাটা পড়ার ফাংশন
+        window.fetchDFromFirebase = async function(platformId) {
+            try {
+                console.log("Firebase থেকে ডাটা লোড হচ্ছে... Platform ID:", platformId);
+                
+                // আপনার স্ক্রিনশট অনুযায়ী ডাটাবেস পাথ
+                const dRef = ref(database, `publicData/pricingPlans/${platformId}`);
+                const snapshot = await get(dRef);
+                
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    console.log("Firebase থেকে ডাটা:", data);
+                    
+                    // D ফিল্ড রিটার্ন করুন
+                    if (data.D) {
+                        return {
+                            D: data.D,
+                            category: data.category || 'N/A',
+                            description: data.description || 'N/A',
+                            status: data.status || 'N/A',
+                            price: data.price || 'N/A'
+                        };
+                    } else if (data.description) {
+                        return {
+                            D: data.description,
+                            category: data.category || 'N/A',
+                            description: data.description,
+                            status: data.status || 'N/A',
+                            price: data.price || 'N/A'
+                        };
+                    }
+                } else {
+                    console.log("কোন ডাটা পাওয়া যায়নি");
+                    return null;
+                }
+            } catch (error) {
+                console.error("Firebase থেকে ডাটা লোড করতে সমস্যা:", error);
+                return null;
+            }
+        };
+    </script>
 </head>
 <body>
     <div id="output">
-        <!-- তথ্য এখানে দেখাবে -->
+        <div class="info-line">
+            <span class="label">স্ট্যাটাস:</span>
+            <span class="value loading">ডাটা লোড হচ্ছে...</span>
+        </div>
     </div>
 
     <script>
-        // URL থেকে এনক্রিপ্টেড ডাটা নেওয়া
-        const urlParams = new URLSearchParams(window.location.search);
-        const encodedData = urlParams.get('data');
-        
         // ডিকোড করার ফাংশন
         function decryptData(encryptedData) {
             try {
@@ -75,131 +149,202 @@
             }
         }
         
-        // তথ্য প্রসেসিং
-        if (encodedData) {
+        // UI-তে ডাটা প্রদর্শন করার ফাংশন
+        function displayData(data, firebaseData = null) {
+            const outputDiv = document.getElementById('output');
+            
+            if (!outputDiv) return;
+            
+            let html = '';
+            
+            // ১. ইউজার আইডি
+            if (data.u || data.userId) {
+                const userId = data.u || data.userId;
+                html += `
+                    <div class="info-line">
+                        <span class="label">ইউজার আইডি:</span>
+                        <span class="value">${userId}</span>
+                    </div>
+                `;
+            }
+            
+            // ২. অর্ডার আইডি
+            if (data.o || data.orderId) {
+                const orderId = data.o || data.orderId;
+                html += `
+                    <div class="info-line">
+                        <span class="label">অর্ডার আইডি:</span>
+                        <span class="value">${orderId}</span>
+                    </div>
+                `;
+            }
+            
+            // ৩. প্ল্যাটফর্ম আইডি
+            if (data.p || data.platformId) {
+                const platformId = data.p || data.platformId;
+                html += `
+                    <div class="info-line">
+                        <span class="label">প্ল্যাটফর্ম আইডি:</span>
+                        <span class="value">${platformId}</span>
+                    </div>
+                `;
+            }
+            
+            // ৪. Firebase থেকে পাওয়া D ডাটা (গুজরাটি/হিন্দি টেক্সট)
+            if (firebaseData && firebaseData.D) {
+                html += `
+                    <div class="info-line">
+                        <span class="label">বিস্তারিত বিবরণ (D):</span>
+                        <div class="d-value">${firebaseData.D}</div>
+                    </div>
+                `;
+            }
+            
+            // ৫. Firebase থেকে পাওয়া অন্যান্য ডাটা
+            if (firebaseData) {
+                if (firebaseData.category) {
+                    html += `
+                        <div class="info-line">
+                            <span class="label">ক্যাটাগরি:</span>
+                            <span class="value">${firebaseData.category}</span>
+                        </div>
+                    `;
+                }
+                
+                if (firebaseData.description && !firebaseData.D) {
+                    html += `
+                        <div class="info-line">
+                            <span class="label">বিবরণ:</span>
+                            <span class="value">${firebaseData.description}</span>
+                        </div>
+                    `;
+                }
+                
+                if (firebaseData.status) {
+                    html += `
+                        <div class="info-line">
+                            <span class="label">স্ট্যাটাস:</span>
+                            <span class="value">${firebaseData.status}</span>
+                        </div>
+                    `;
+                }
+                
+                if (firebaseData.price) {
+                    html += `
+                        <div class="info-line">
+                            <span class="label">দাম:</span>
+                            <span class="value">${firebaseData.price}</span>
+                        </div>
+                    `;
+                }
+            }
+            
+            // ৬. ডিক্রিপ্টেড ডাটা থেকে অন্যান্য তথ্য
+            if (data.n || data.platformName) {
+                const platformName = data.n || data.platformName;
+                html += `
+                    <div class="info-line">
+                        <span class="label">প্ল্যাটফর্ম নাম:</span>
+                        <span class="value">${platformName}</span>
+                    </div>
+                `;
+            }
+            
+            if (data.a || data.price) {
+                const price = data.a || data.price;
+                html += `
+                    <div class="info-line">
+                        <span class="label">দাম:</span>
+                        <span class="value">${price} টাকা</span>
+                    </div>
+                `;
+            }
+            
+            // ৭. তারিখ
+            if (data.t || data.createdAt) {
+                const timestamp = parseInt(data.t || data.createdAt);
+                if (!isNaN(timestamp)) {
+                    const date = new Date(timestamp);
+                    html += `
+                        <div class="info-line">
+                            <span class="label">তারিখ:</span>
+                            <span class="value">${date.toLocaleString('bn-BD')}</span>
+                        </div>
+                    `;
+                }
+            }
+            
+            // ৮. সরাসরি D ডাটা (যদি ডিক্রিপ্টেড ডাটায় থাকে)
+            if (data.d || data.D || data.description) {
+                const dData = data.d || data.D || data.description;
+                if (!firebaseData || !firebaseData.D) {
+                    html += `
+                        <div class="info-line">
+                            <span class="label">বিবরণ:</span>
+                            <div class="d-value">${dData}</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            outputDiv.innerHTML = html;
+        }
+        
+        // মূল প্রক্রিয়া ফাংশন
+        async function processData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedData = urlParams.get('data');
+            
+            if (!encodedData) {
+                document.getElementById('output').innerHTML = `
+                    <div class="info-line error">
+                        <span class="label">এরর:</span>
+                        <span class="value">URL-এ কোন ডাটা নেই</span>
+                    </div>
+                `;
+                return;
+            }
+            
             console.log("এনক্রিপ্টেড ডাটা:", encodedData);
             
             const decryptedData = decryptData(encodedData);
             console.log("ডিক্রিপ্টেড ডাটা:", decryptedData);
             
-            const outputDiv = document.getElementById('output');
-            
-            if (decryptedData) {
-                // ১. ইউজার আইডি
-                if (decryptedData.u || decryptedData.userId) {
-                    const userId = decryptedData.u || decryptedData.userId;
-                    outputDiv.innerHTML += `
-                        <div class="info-line">
-                            <span class="label">ইউজার আইডি:</span>
-                            <span class="value">${userId}</span>
-                        </div>
-                    `;
-                }
-                
-                // ২. অর্ডার আইডি
-                if (decryptedData.o || decryptedData.orderId) {
-                    const orderId = decryptedData.o || decryptedData.orderId;
-                    outputDiv.innerHTML += `
-                        <div class="info-line">
-                            <span class="label">অর্ডার আইডি:</span>
-                            <span class="value">${orderId}</span>
-                        </div>
-                    `;
-                }
-                
-                // ৩. প্ল্যাটফর্ম আইডি
-                if (decryptedData.p || decryptedData.platformId) {
-                    const platformId = decryptedData.p || decryptedData.platformId;
-                    outputDiv.innerHTML += `
-                        <div class="info-line">
-                            <span class="label">প্ল্যাটফর্ম আইডি:</span>
-                            <span class="value">${platformId}</span>
-                        </div>
-                    `;
-                }
-                
-                // ৪. D ফিল্ডের ডাটা (গুজরাটি/হিন্দি টেক্সট)
-                if (decryptedData.d || decryptedData.D || decryptedData.description) {
-                    const dData = decryptedData.d || decryptedData.D || decryptedData.description;
-                    outputDiv.innerHTML += `
-                        <div class="info-line">
-                            <span class="label">বিস্তারিত বিবরণ (D):</span>
-                            <div class="d-value">${dData}</div>
-                        </div>
-                    `;
-                }
-                
-                // ৫. অন্যান্য তথ্য (যদি থাকে)
-                if (decryptedData.n || decryptedData.platformName) {
-                    const platformName = decryptedData.n || decryptedData.platformName;
-                    outputDiv.innerHTML += `
-                        <div class="info-line">
-                            <span class="label">প্ল্যাটফর্ম নাম:</span>
-                            <span class="value">${platformName}</span>
-                        </div>
-                    `;
-                }
-                
-                if (decryptedData.a || decryptedData.price) {
-                    const price = decryptedData.a || decryptedData.price;
-                    outputDiv.innerHTML += `
-                        <div class="info-line">
-                            <span class="label">দাম:</span>
-                            <span class="value">${price}</span>
-                        </div>
-                    `;
-                }
-                
-                // ৬. ক্যাটাগরি (যদি থাকে)
-                if (decryptedData.c || decryptedData.category) {
-                    const category = decryptedData.c || decryptedData.category;
-                    outputDiv.innerHTML += `
-                        <div class="info-line">
-                            <span class="label">ক্যাটাগরি:</span>
-                            <span class="value">${category}</span>
-                        </div>
-                    `;
-                }
-                
-                // ৭. স্ট্যাটাস (যদি থাকে)
-                if (decryptedData.s || decryptedData.status) {
-                    const status = decryptedData.s || decryptedData.status;
-                    outputDiv.innerHTML += `
-                        <div class="info-line">
-                            <span class="label">স্ট্যাটাস:</span>
-                            <span class="value">${status}</span>
-                        </div>
-                    `;
-                }
-                
-                // ৮. তারিখ
-                if (decryptedData.t || decryptedData.createdAt) {
-                    const timestamp = parseInt(decryptedData.t || decryptedData.createdAt);
-                    const date = new Date(timestamp);
-                    outputDiv.innerHTML += `
-                        <div class="info-line">
-                            <span class="label">তারিখ:</span>
-                            <span class="value">${date.toLocaleString()}</span>
-                        </div>
-                    `;
-                }
-                
-            } else {
-                outputDiv.innerHTML = `
-                    <div class="info-line">
+            if (!decryptedData) {
+                document.getElementById('output').innerHTML = `
+                    <div class="info-line error">
                         <span class="label">এরর:</span>
                         <span class="value">ডাটা ডিক্রিপ্ট করা যায়নি</span>
                     </div>
                 `;
+                return;
             }
-        } else {
-            document.getElementById('output').innerHTML = `
-                <div class="info-line">
-                    <span class="label">এরর:</span>
-                    <span class="value">URL-এ কোন ডাটা নেই</span>
-                </div>
-            `;
+            
+            // platformId আছে কিনা চেক করুন
+            const platformId = decryptedData.p || decryptedData.platformId;
+            let firebaseData = null;
+            
+            if (platformId && window.fetchDFromFirebase) {
+                try {
+                    // Firebase থেকে D ফিল্ডের ডাটা আনুন
+                    firebaseData = await window.fetchDFromFirebase(platformId);
+                    console.log("Firebase থেকে প্রাপ্ত ডাটা:", firebaseData);
+                } catch (error) {
+                    console.error("Firebase ডাটা লোড করতে সমস্যা:", error);
+                }
+            }
+            
+            // UI-তে তথ্য প্রদর্শন করুন
+            displayData(decryptedData, firebaseData);
         }
+        
+        // পেজ লোড হলে ডাটা প্রক্রিয়া শুরু করুন
+        document.addEventListener('DOMContentLoaded', function() {
+            processData();
+        });
+        
+        // URL প্যারামিটার পরিবর্তন হলে আবার লোড করার জন্য
+        window.addEventListener('popstate', processData);
     </script>
 </body>
 </html>
