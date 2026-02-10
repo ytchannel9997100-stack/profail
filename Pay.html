@@ -7,7 +7,7 @@
     <style>
         body {
             background: #000;
-            color: #0f0;
+            color: #fff;
             font-family: 'Courier New', monospace;
             margin: 0;
             padding: 20px;
@@ -22,13 +22,11 @@
             padding: 20px;
         }
         .d-value {
-            color: #f6f6f6;
-            background: rgba(255, 255, 0, 0.05);
+            color: #fff;
             padding: 20px;
-            border: 2px solid #ff0;
             border-radius: 10px;
             line-height: 1.6;
-            font-size: 18px; /* ডেস্কটপের জন্য */
+            font-size: 18px;
             min-height: 200px;
             display: flex;
             justify-content: center;
@@ -41,10 +39,9 @@
         /* মোবাইল ডিভাইসের জন্য */
         @media (max-width: 768px) {
             .d-value {
-                font-size: 16px; /* মোবাইলের জন্য */
+                font-size: 16px;
                 padding: 15px;
                 line-height: 1.8;
-                border-width: 2px;
                 min-height: auto;
             }
             .d-container {
@@ -58,15 +55,14 @@
         /* খুব ছোট মোবাইলের জন্য */
         @media (max-width: 480px) {
             .d-value {
-                font-size: 15px; /* আরো একটু ছোট */
+                font-size: 15px;
                 padding: 12px;
                 line-height: 1.8;
-                border-width: 2px;
             }
         }
         
         .loading {
-            color: #ff9900;
+            color: #fff;
             font-style: italic;
             text-align: center;
             padding: 40px;
@@ -81,10 +77,8 @@
         }
         
         .error {
-            color: #ff0000;
-            background: rgba(255, 0, 0, 0.1);
+            color: #fff;
             padding: 20px;
-            border: 1px solid #ff0000;
             border-radius: 5px;
             text-align: center;
             font-size: 18px;
