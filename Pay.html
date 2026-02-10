@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Easy Premium - Pay Now</title>
     <meta name="description" content="প্রিমিয়াম সার্ভিস পেমেন্ট - ১০০% সিকিউর">
-    
+   
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
+   
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    
+   
     <style>
         :root {
             --primary: #0a0a1a;
@@ -87,36 +87,33 @@
     </style>
 </head>
 <body>
-
     <header><div class="logo">Easy Premium</div></header>
-
     <div class="container">
         <div class="box">
             <div id="loading" class="msg info">অর্ডার তথ্য লোড হচ্ছে...</div>
             <div id="errorMsg" class="msg error" style="display:none;"></div>
-
             <div id="orderSection" class="order-info" style="display:none;">
                 অর্ডার আইডি: <strong id="orderIdShow"></strong>
             </div>
-
             <h1 id="planName" style="display:none;"></h1>
             <div id="planDesc" class="desc" style="display:none;"></div>
             <div id="planPrice" class="price" style="display:none;"></div>
-
             <button id="payBtn" class="btn-pay" style="display:none;" onclick="handlePay()">
                 Pay Now - Bkash / Nagad / Rocket
             </button>
         </div>
     </div>
-
     <footer>© ২০২৬ Easy Premium | সকল অধিকার সংরক্ষিত | সাপোর্ট: +8801770584994</footer>
 
     <script>
+        // Firebase Initialization
         firebase.initializeApp({
             databaseURL: "https://easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app"
         });
+
         const db = firebase.database();
 
+        // Get orderId from URL
         const params = new URLSearchParams(window.location.search);
         const orderId = params.get('orderId');
 
@@ -128,13 +125,14 @@
             document.getElementById('orderIdShow').textContent = orderId;
             document.getElementById('orderSection').style.display = 'block';
 
-            // Step 1: orders থেকে planId নেয়া
+            // Step 1: Fetch order data
             db.ref(`orders/${orderId}`).once('value')
                 .then(snapshot => {
                     if (!snapshot.exists()) {
                         showError('এই অর্ডার ID পাওয়া যায়নি।');
                         return;
                     }
+
                     const orderData = snapshot.val();
                     const planId = orderData.planId || orderData.plan || orderData.pricingPlan;
 
@@ -143,10 +141,11 @@
                         return;
                     }
 
-                    // Step 2: pricingPlans থেকে ডেটা লোড
+                    // Step 2: Fetch pricing plan data
                     db.ref(`publicData/pricingPlans/${planId}`).once('value')
                         .then(planSnapshot => {
                             document.getElementById('loading').style.display = 'none';
+
                             if (planSnapshot.exists()) {
                                 const data = planSnapshot.val();
 
@@ -179,9 +178,8 @@
 
         function handlePay() {
             alert(`পেমেন্ট শুরু হচ্ছে (অর্ডার: ${orderId || 'N/A'})...\nযোগাযোগ: 01770584994`);
-            // এখানে আসল পেমেন্ট লজিক যোগ করুন (লিঙ্ক/ফর্ম)
+            // এখানে আসল পেমেন্ট গেটওয়ে লজিক যোগ করতে পারো (SSLCommerz, বিকাশ API ইত্যাদি)
         }
     </script>
-
 </body>
 </html>
