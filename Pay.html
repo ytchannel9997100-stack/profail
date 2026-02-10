@@ -2,67 +2,159 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Order Info</title>
+    <title>Order Information</title>
     <style>
-        body { background: #000; color: #fff; font-family: monospace; margin: 20px; }
-        .info { margin: 10px 0; padding: 5px; }
-        .label { color: #0f0; }
-        .value { color: #fff; word-break: break-all; }
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        .info-line {
+            margin: 15px 0;
+            padding: 10px;
+            border-left: 3px solid #0f0;
+            background: rgba(0, 255, 0, 0.05);
+        }
+        .label {
+            color: #0ff;
+            font-weight: bold;
+        }
+        .value {
+            color: #0f0;
+            word-break: break-all;
+            display: block;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
-    <div id="data">
+    <div id="output">
         <!-- তথ্য এখানে দেখাবে -->
     </div>
 
     <script>
-        // URL থেকে ডাটা নেওয়া
+        // URL থেকে এনক্রিপ্টেড ডাটা নেওয়া
         const urlParams = new URLSearchParams(window.location.search);
+        const encodedData = urlParams.get('data');
         
-        // তিনটি তথ্য
-        const userId = urlParams.get('u') || urlParams.get('uid') || urlParams.get('userId');
-        const orderId = urlParams.get('o') || urlParams.get('orderId') || urlParams.get('oid');
-        const platformId = urlParams.get('p') || urlParams.get('platformId') || urlParams.get('pid');
-        
-        // যদি এনক্রিপ্টেড ডাটা থাকে
-        const encryptedData = urlParams.get('data');
-        let decryptedData = null;
-        
-        if (encryptedData) {
+        // ডিকোড করার ফাংশন
+        function decryptData(encryptedData) {
             try {
-                // সিম্পল বেস৬৪ ডিকোড
-                const decoded = atob(encryptedData);
-                decryptedData = JSON.parse(decoded);
-            } catch(e) {
-                console.log("ডিকোড করা যায়নি");
+                // URL decode প্রথমে
+                const urlDecoded = decodeURIComponent(encryptedData);
+                
+                // Base64 decode
+                const base64Decoded = atob(urlDecoded);
+                
+                // XOR ডিক্রিপশন
+                const key = 'EP_SECURE_2025_KEY_!@#';
+                let decrypted = '';
+                
+                for (let i = 0; i < base64Decoded.length; i++) {
+                    const keyChar = key.charCodeAt(i % key.length);
+                    const dataChar = base64Decoded.charCodeAt(i);
+                    decrypted += String.fromCharCode(dataChar ^ keyChar);
+                }
+                
+                return JSON.parse(decrypted);
+            } catch (error) {
+                console.error("ডিক্রিপ্ট এরর:", error);
+                return null;
             }
         }
         
-        // তথ্য সংগ্রহ
-        const finalData = {
-            userId: decryptedData?.u || decryptedData?.userId || userId,
-            orderId: decryptedData?.o || decryptedData?.orderId || orderId,
-            platformId: decryptedData?.p || decryptedData?.platformId || platformId
-        };
-        
-        // তথ্য দেখানো
-        const container = document.getElementById('data');
-        
-        if (finalData.userId) {
-            container.innerHTML += `<div class="info"><span class="label">User ID: </span><span class="value">${finalData.userId}</span></div>`;
-        }
-        
-        if (finalData.orderId) {
-            container.innerHTML += `<div class="info"><span class="label">Order ID: </span><span class="value">${finalData.orderId}</span></div>`;
-        }
-        
-        if (finalData.platformId) {
-            container.innerHTML += `<div class="info"><span class="label">Platform ID: </span><span class="value">${finalData.platformId}</span></div>`;
-        }
-        
-        // কোন তথ্য না থাকলে
-        if (!finalData.userId && !finalData.orderId && !finalData.platformId) {
-            container.innerHTML = `<div class="info"><span class="label">No data found in URL</span></div>`;
+        // তথ্য প্রসেসিং
+        if (encodedData) {
+            console.log("এনক্রিপ্টেড ডাটা:", encodedData);
+            
+            const decryptedData = decryptData(encodedData);
+            console.log("ডিক্রিপ্টেড ডাটা:", decryptedData);
+            
+            const outputDiv = document.getElementById('output');
+            
+            if (decryptedData) {
+                // ১. ইউজার আইডি
+                if (decryptedData.u || decryptedData.userId) {
+                    const userId = decryptedData.u || decryptedData.userId;
+                    outputDiv.innerHTML += `
+                        <div class="info-line">
+                            <span class="label">ইউজার আইডি:</span>
+                            <span class="value">${userId}</span>
+                        </div>
+                    `;
+                }
+                
+                // ২. অর্ডার আইডি
+                if (decryptedData.o || decryptedData.orderId) {
+                    const orderId = decryptedData.o || decryptedData.orderId;
+                    outputDiv.innerHTML += `
+                        <div class="info-line">
+                            <span class="label">অর্ডার আইডি:</span>
+                            <span class="value">${orderId}</span>
+                        </div>
+                    `;
+                }
+                
+                // ৩. প্ল্যাটফর্ম আইডি
+                if (decryptedData.p || decryptedData.platformId) {
+                    const platformId = decryptedData.p || decryptedData.platformId;
+                    outputDiv.innerHTML += `
+                        <div class="info-line">
+                            <span class="label">প্ল্যাটফর্ম আইডি:</span>
+                            <span class="value">${platformId}</span>
+                        </div>
+                    `;
+                }
+                
+                // ৪. অন্যান্য তথ্য (যদি থাকে)
+                if (decryptedData.n || decryptedData.platformName) {
+                    const platformName = decryptedData.n || decryptedData.platformName;
+                    outputDiv.innerHTML += `
+                        <div class="info-line">
+                            <span class="label">প্ল্যাটফর্ম নাম:</span>
+                            <span class="value">${platformName}</span>
+                        </div>
+                    `;
+                }
+                
+                if (decryptedData.a || decryptedData.price) {
+                    const price = decryptedData.a || decryptedData.price;
+                    outputDiv.innerHTML += `
+                        <div class="info-line">
+                            <span class="label">দাম:</span>
+                            <span class="value">${price}</span>
+                        </div>
+                    `;
+                }
+                
+                // তারিখ
+                if (decryptedData.t) {
+                    const date = new Date(parseInt(decryptedData.t));
+                    outputDiv.innerHTML += `
+                        <div class="info-line">
+                            <span class="label">তারিখ:</span>
+                            <span class="value">${date.toLocaleString()}</span>
+                        </div>
+                    `;
+                }
+                
+            } else {
+                outputDiv.innerHTML = `
+                    <div class="info-line">
+                        <span class="label">এরর:</span>
+                        <span class="value">ডাটা ডিক্রিপ্ট করা যায়নি</span>
+                    </div>
+                `;
+            }
+        } else {
+            document.getElementById('output').innerHTML = `
+                <div class="info-line">
+                    <span class="label">এরর:</span>
+                    <span class="value">URL-এ কোন ডাটা নেই</span>
+                </div>
+            `;
         }
     </script>
 </body>
