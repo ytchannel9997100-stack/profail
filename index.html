@@ -2019,6 +2019,112 @@
     </footer>
 
     <script>
+        // ================== SECURE LINK GENERATION SYSTEM ==================
+
+        class SecureLinkGenerator {
+            constructor() {
+                // এনক্রিপশন কী (আপনি এটি পরিবর্তন করতে পারেন)
+                this.encryptionKey = 'EP_SECURE_2025_KEY_!@#';
+            }
+            
+            // Simple XOR encryption for data
+            encryptData(data) {
+                try {
+                    // Convert data to string
+                    const dataStr = JSON.stringify(data);
+                    let encrypted = '';
+                    
+                    // Simple XOR encryption
+                    for (let i = 0; i < dataStr.length; i++) {
+                        const keyChar = this.encryptionKey.charCodeAt(i % this.encryptionKey.length);
+                        const dataChar = dataStr.charCodeAt(i);
+                        encrypted += String.fromCharCode(dataChar ^ keyChar);
+                    }
+                    
+                    // Convert to Base64 for URL safety
+                    return btoa(encrypted);
+                } catch (error) {
+                    console.error("Encryption error:", error);
+                    return null;
+                }
+            }
+            
+            // Decrypt data
+            decryptData(encryptedData) {
+                try {
+                    // Decode from Base64
+                    const decoded = atob(encryptedData);
+                    let decrypted = '';
+                    
+                    // XOR decryption
+                    for (let i = 0; i < decoded.length; i++) {
+                        const keyChar = this.encryptionKey.charCodeAt(i % this.encryptionKey.length);
+                        const dataChar = decoded.charCodeAt(i);
+                        decrypted += String.fromCharCode(dataChar ^ keyChar);
+                    }
+                    
+                    return JSON.parse(decrypted);
+                } catch (error) {
+                    console.error("Decryption error:", error);
+                    return null;
+                }
+            }
+            
+            // Generate secure payment link
+            generatePaymentLink(orderData) {
+                const {
+                    orderId,
+                    userId,
+                    platformId,
+                    platformName,
+                    price,
+                    timestamp
+                } = orderData;
+                
+                // Create data object
+                const dataToEncrypt = {
+                    o: orderId,          // orderId
+                    u: userId,           // userId
+                    p: platformId,       // platformId
+                    n: platformName,     // platformName
+                    a: price,            // amount/price
+                    t: timestamp || Date.now(), // timestamp
+                    r: Math.random().toString(36).substr(2, 9) // random salt
+                };
+                
+                // Encrypt the data
+                const encryptedData = this.encryptData(dataToEncrypt);
+                
+                if (!encryptedData) {
+                    console.error("Failed to encrypt data");
+                    return null;
+                }
+                
+                // Generate secure URL
+                const baseUrl = "https://easy-premium.com/Pay.html";
+                const secureUrl = `${baseUrl}?data=${encodeURIComponent(encryptedData)}&v=2`;
+                
+                return secureUrl;
+            }
+            
+            // Parse payment link
+            parsePaymentLink(url) {
+                try {
+                    const urlObj = new URL(url);
+                    const encryptedData = urlObj.searchParams.get('data');
+                    
+                    if (!encryptedData) {
+                        return null;
+                    }
+                    
+                    return this.decryptData(encryptedData);
+                } catch (error) {
+                    console.error("Error parsing payment link:", error);
+                    return null;
+                }
+            }
+        }
+
         // ================== COLOR FIX SCRIPT ==================
         function applyColorFixes() {
             // Fix body background
@@ -2747,6 +2853,7 @@
         // Initialize auth and data protection systems
         const authSystem = new EasyPremiumAuthSystem();
         const dataProtectionSystem = new UIDDataProtectionSystem();
+        const secureLinkGenerator = new SecureLinkGenerator();
         
         // ===================== FIXED LOGIN EVENT LISTENER =====================
         
@@ -2850,21 +2957,35 @@
                     // Reset form
                     purchaseForm.reset();
                     
-                    // নতুন লজিক: অর্ডার সফল হলে Pay.html এ রিডাইরেক্ট
-                    const payUrl = `https://easy-premium.com/Pay.html?orderId=${result.orderId}`;
-                    console.log("Redirecting to:", payUrl);
+                    // Generate secure payment link
+                    const orderFullData = {
+                        orderId: result.orderId,
+                        userId: result.userId,
+                        platformId: currentPurchaseInfo.platformId,
+                        platformName: currentPurchaseInfo.platformName,
+                        price: currentPurchaseInfo.price,
+                        timestamp: Date.now()
+                    };
                     
-                    purchaseModal.style.display = 'none';
-                    currentPurchaseInfo = null;
+                    const paymentLink = secureLinkGenerator.generatePaymentLink(orderFullData);
                     
-                    // Update cart badge
-                    updateCartBadge(result.userId);
-                    
-                    purchaseSubmitBtn.disabled = false;
-                    purchaseSubmitBtn.textContent = 'অর্ডার কনফার্ম করুন';
-                    
-                    // নতুন উইন্ডোতে Pay.html ওপেন করুন
-                    window.open(payUrl, '_blank');
+                    if (paymentLink) {
+                        console.log("Generated secure payment link:", paymentLink);
+                        
+                        purchaseModal.style.display = 'none';
+                        currentPurchaseInfo = null;
+                        
+                        // Update cart badge
+                        updateCartBadge(result.userId);
+                        
+                        purchaseSubmitBtn.disabled = false;
+                        purchaseSubmitBtn.textContent = 'অর্ডার কনফার্ম করুন';
+                        
+                        // নতুন উইন্ডোতে পেমেন্ট লিঙ্ক ওপেন করুন
+                        window.open(paymentLink, '_blank');
+                    } else {
+                        throw new Error("Failed to generate payment link");
+                    }
                     
                 } else {
                     throw new Error("Order creation failed");
