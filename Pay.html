@@ -3,208 +3,315 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Easy Premium - Pay Now</title>
-    <meta name="description" content="প্রিমিয়াম সার্ভিস পেমেন্ট - ১০০% সিকিউর">
-   
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-   
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-   
+    <title>Easy Premium - Order Details</title>
+    
     <style>
-        :root {
-            --primary: #0a0a1a;
-            --accent: #ff9800;
-            --card: rgba(20,20,40,0.9);
-            --border: rgba(255,152,0,0.3);
-            --text: #ffffff;
-            --success: #4caf50;
-            --error: #ff5252;
-            --info: #ffd54f;
-        }
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             background: linear-gradient(135deg, #0a0a1a, #121230, #1a1a3a);
-            color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
-            min-height: 100vh;
-            padding-top: 80px;
-        }
-        header {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            background: rgba(10,10,26,0.95);
-            backdrop-filter: blur(10px);
-            padding: 15px;
-            text-align: center;
-            z-index: 1000;
-        }
-        .logo { font-size: 2.2rem; font-weight: bold; color: var(--accent); }
-        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
-        .box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 30px;
-        }
-        h1 { color: var(--accent); font-size: 2.2rem; margin-bottom: 20px; }
-        .desc { font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap; word-break: break-word; margin-bottom: 25px; }
-        .price { font-size: 2.8rem; color: var(--success); text-align: center; font-weight: bold; margin: 25px 0; }
-        .order-info {
-            background: rgba(255,215,0,0.15);
-            border: 1px solid #ffd54f;
-            border-radius: 12px;
-            padding: 15px;
-            margin: 20px 0;
-            text-align: center;
-            font-size: 1.15rem;
-        }
-        .btn-pay {
-            display: block;
-            max-width: 400px;
-            margin: 30px auto;
-            padding: 18px;
-            background: linear-gradient(45deg, var(--accent), #f57c00);
-            border: none;
-            border-radius: 12px;
             color: white;
-            font-size: 1.3rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .btn-pay:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,152,0,0.4); }
-        .msg {
-            text-align: center;
-            font-size: 1.2rem;
-            margin: 60px 0;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
             padding: 20px;
-            border-radius: 12px;
         }
-        .error { background: rgba(255,82,82,0.15); color: #ff5252; }
-        .info { background: rgba(255,215,0,0.15); color: #ffd54f; }
-        footer { text-align: center; padding: 40px 20px; color: #b0bec5; font-size: 0.95rem; }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(20,20,40,0.9);
+            border-radius: 10px;
+            padding: 30px;
+            border: 1px solid rgba(255,152,0,0.3);
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+        }
+        .error {
+            color: #ff5252;
+            text-align: center;
+            padding: 30px;
+            border: 1px solid #ff5252;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .order-details {
+            display: none;
+        }
+        .description-box {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .description-box::-webkit-scrollbar {
+            width: 8px;
+        }
+        .description-box::-webkit-scrollbar-thumb {
+            background: #ff9800;
+            border-radius: 4px;
+        }
+        .order-id {
+            color: #ff9800;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .debug-info {
+            background: rgba(255,152,0,0.1);
+            border: 1px solid rgba(255,152,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+            font-family: monospace;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #b0bec5;
+            font-size: 14px;
+        }
+        button {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #f57c00;
+        }
     </style>
 </head>
 <body>
-    <header><div class="logo">Easy Premium</div></header>
     <div class="container">
-        <div class="box">
-            <div id="loading" class="msg info">অর্ডার তথ্য লোড হচ্ছে...</div>
-            <div id="errorMsg" class="msg error" style="display:none;"></div>
-            <div id="orderSection" class="order-info" style="display:none;">
-                অর্ডার আইডি: <strong id="orderIdShow"></strong>
-            </div>
-            <h1 id="planName" style="display:none;"></h1>
-            <div id="planDesc" class="desc" style="display:none;"></div>
-            <div id="planPrice" class="price" style="display:none;"></div>
-            <button id="payBtn" class="btn-pay" style="display:none;" onclick="handlePay()">
-                Pay Now - Bkash / Nagad / Rocket
-            </button>
+        <div class="loading" id="loading">অর্ডার লোড হচ্ছে...</div>
+        <div class="error" id="error" style="display:none;"></div>
+        
+        <div class="order-details" id="orderDetails">
+            <div class="order-id" id="orderIdDisplay"></div>
+            <div class="description-box" id="orderDescription"></div>
+            <div class="debug-info" id="debugInfo" style="display:none;"></div>
         </div>
     </div>
-    <footer>© ২০২৬ Easy Premium | সকল অধিকার সংরক্ষিত | সাপোর্ট: +8801770584994</footer>
+
+    <footer>
+        © ২০২৬ Easy Premium | সাপোর্ট: +8801770584994
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
     <script>
-        // Firebase config (তোমার exact URL)
-        firebase.initializeApp({
+        // Firebase Configuration
+        const firebaseConfig = {
             databaseURL: "https://easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app"
-        });
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        
-        // URL params (শুধু ?orderId= handle করবে)
-        const params = new URLSearchParams(window.location.search);
-        const orderId = params.get('orderId');
-        
-        console.log('🔍 Order ID from URL:', orderId); // Debug: F12 Console চেক করো
-        
+
+        // Get orderId from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId');
+
         if (!orderId) {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('errorMsg').style.display = 'block';
-            document.getElementById('errorMsg').textContent = 'অর্ডার আইডি দরকার। URL-এ ?orderId=-Ol4b3H8aB_NDCcMLyux দিন।';
-            console.error('❌ No orderId in URL');
+            showError('অর্ডার আইডি পাওয়া যায়নি। URL-এ ?orderId=YOUR_ID যোগ করুন।');
         } else {
-            // Order ID show করো
-            document.getElementById('orderIdShow').textContent = orderId;
-            document.getElementById('orderSection').style.display = 'block';
-            
-            console.log('📦 Fetching order:', `userOrders/.../${orderId}`);
-            
-            // Step 1: Order data লোড (তোমার structure: userOrders/uid/orderId)
-            // তোমার স্ক্রিনশটে userOrders > uid > orderId path, তাই multiple path try করছি
-            Promise.any([
-                db.ref(`userOrders/${orderId}`).once('value'),  // direct userOrders/orderId
-                db.ref(`orders/${orderId}`).once('value'),      // orders/orderId  
-                db.ref(`userOrders/কোনোUID/${orderId}`).once('value') // fallback
-            ])
-            .then(async (snapshot) => {
-                const orderData = snapshot.val();
-                console.log('✅ Order data:', orderData);
-                
-                if (!orderData) {
-                    showError('এই অর্ডার ID পাওয়া যায়নি। Firebase Rules চেক করো।');
-                    return;
-                }
-                
-                // Plan ID extract (multiple possible fields)
-                const planId = orderData.planId || orderData.plan || orderData.pricingPlan || orderData.plan;
-                console.log('🎯 Plan ID:', planId);
-                
-                if (!planId) {
-                    showError('অর্ডারে planId নেই। Order data চেক করো।');
-                    return;
-                }
-                
-                // Step 2: Pricing plan + D description লোড
-                console.log('📋 Fetching pricingPlans:', `pricingPlans/${planId}`);
-                const planSnapshot = await db.ref(`pricingPlans/${planId}`).once('value');
-                const planData = planSnapshot.val();
-                
-                console.log('🎉 FULL PLAN DATA (D আছে কি না চেক করো):', planData);
-                
-                document.getElementById('loading').style.display = 'none';
-                
-                if (planData) {
-                    // Plan name
-                    document.getElementById('planName').textContent = planData.name || 'প্রিমিয়াম প্ল্যান';
-                    document.getElementById('planName').style.display = 'block';
-                    
-                    // D description (তোমার main issue) - multiple fallback
-                    const fullDesc = planData.D ||           // ← তোমার Firebase-এ D আছে
-                                   planData.description || 
-                                   planData.desc || 
-                                   planData.Details || 
-                                   'বিস্তারিত ডেসক্রিপশন পাওয়া যায়নি। Rules Publish করো।';
-                    console.log('📄 D/Description:', fullDesc.substring(0, 100) + '...');
-                    
-                    document.getElementById('planDesc').textContent = fullDesc;
-                    document.getElementById('planDesc').style.display = 'block';
-                    
-                    // Price (তোমার order থেকে ৳1900)
-                    const price = planData.price || orderData.price || '---';
-                    document.getElementById('planPrice').textContent = `৳${price}`;
-                    document.getElementById('planPrice').style.display = 'block';
-                    
-                    document.getElementById('payBtn').style.display = 'block';
-                    console.log('✅ সব লোড হয়েছে! D দেখা উচিত।');
-                } else {
-                    showError(`প্ল্যান "${planId}" পাওয়া যায়নি। Console চেক করো।`);
-                }
-            })
-            .catch(err => {
-                console.error('❌ Firebase Error:', err);
-                showError(`লোডে সমস্যা: ${err.message || 'Permission Denied (Rules .read: true করো)'}`);
-            });
+            loadAllData(orderId);
         }
-        
+
+        function loadAllData(orderId) {
+            console.log("🔍 Order ID:", orderId);
+            
+            // Firebase-এর সব নোড সার্চ করবে
+            searchInAllNodes(orderId);
+        }
+
+        function searchInAllNodes(orderId) {
+            const allRef = db.ref('/');
+            
+            allRef.once('value')
+                .then((snapshot) => {
+                    const allData = snapshot.val();
+                    console.log("📦 All Firebase data:", allData);
+                    
+                    // সব নোডে সার্চ করো
+                    let foundData = null;
+                    let foundPath = "";
+                    
+                    function searchRecursive(data, path = "") {
+                        for (const key in data) {
+                            const currentPath = path ? `${path}/${key}` : key;
+                            const value = data[key];
+                            
+                            // যদি সরাসরি orderId match করে
+                            if (key === orderId) {
+                                foundData = value;
+                                foundPath = currentPath;
+                                console.log("✅ Found at path:", currentPath, value);
+                                return true;
+                            }
+                            
+                            // যদি D ফিল্ড থাকে
+                            if (value && typeof value === 'object' && value.D) {
+                                console.log("📄 Found D field at:", currentPath, value.D.substring(0, 50) + "...");
+                            }
+                            
+                            // Recursive search
+                            if (value && typeof value === 'object') {
+                                if (searchRecursive(value, currentPath)) {
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    }
+                    
+                    if (allData && searchRecursive(allData)) {
+                        showOrderDetails(foundData, orderId, foundPath);
+                    } else {
+                        // যদি না পায়, তাহলে শুধু orderId নোডে চেষ্টা করো
+                        db.ref(orderId).once('value')
+                            .then((snap) => {
+                                if (snap.exists()) {
+                                    showOrderDetails(snap.val(), orderId, orderId);
+                                } else {
+                                    showError('এই অর্ডার আইডি Firebase-এ খুঁজে পাওয়া যায়নি।');
+                                    showDebugInfo(allData);
+                                }
+                            })
+                            .catch(err => {
+                                console.error("Error:", err);
+                                showError('Firebase থেকে ডেটা লোড করতে সমস্যা: ' + err.message);
+                            });
+                    }
+                })
+                .catch((error) => {
+                    console.error("Firebase error:", error);
+                    showError('Firebase সংযোগে সমস্যা। ইন্টারনেট চেক করুন।');
+                });
+        }
+
+        function showOrderDetails(data, orderId, path) {
+            console.log("🎯 Order Data found:", data);
+            
+            document.getElementById('loading').style.display = 'none';
+            
+            // Order ID show
+            document.getElementById('orderIdDisplay').textContent = `অর্ডার ID: ${orderId} (পাথ: ${path})`;
+            
+            // D ফিল্ড খোঁজা
+            let description = "";
+            
+            if (data.D) {
+                description = data.D;
+                console.log("✅ D field found:", description.substring(0, 100) + "...");
+            } else {
+                // D না পেলে অন্যান্য ফিল্ড চেক করো
+                const possibleFields = ['description', 'desc', 'details', 'Details', 'info', 'text', 'content'];
+                for (const field of possibleFields) {
+                    if (data[field]) {
+                        description = data[field];
+                        console.log(`📝 Using ${field} field:`, description.substring(0, 100) + "...");
+                        break;
+                    }
+                }
+                
+                if (!description) {
+                    description = "❌ D ফিল্ড পাওয়া যায়নি। নিচের ডিবাগ তথ্য চেক করুন:\n\n" + 
+                                 JSON.stringify(data, null, 2);
+                }
+            }
+            
+            document.getElementById('orderDescription').textContent = description;
+            
+            // ডিবাগ তথ্য
+            let debugText = `📊 Firebase পাথ: ${path}\n`;
+            debugText += `🔑 পাওয়া ফিল্ডসমূহ: ${Object.keys(data).join(', ')}\n`;
+            debugText += `📦 D ফিল্ড আছে: ${data.D ? 'হ্যাঁ' : 'না'}\n`;
+            debugText += `🎯 পুরো ডেটা:\n${JSON.stringify(data, null, 2)}`;
+            
+            document.getElementById('debugInfo').textContent = debugText;
+            document.getElementById('debugInfo').style.display = 'block';
+            
+            // Show the details
+            document.getElementById('orderDetails').style.display = 'block';
+            
+            // Update page title
+            document.title = `Order ${orderId} - Easy Premium`;
+        }
+
+        function showDebugInfo(allData) {
+            let debugText = "🔥 Firebase-এ পাওয়া সকল মূল নোড:\n\n";
+            
+            if (allData) {
+                const rootKeys = Object.keys(allData);
+                debugText += `📁 রুট নোড (${rootKeys.length}টি): ${rootKeys.join(', ')}\n\n`;
+                
+                // প্রতিটি মূল নোডের keys দেখাও
+                for (const key of rootKeys) {
+                    if (allData[key] && typeof allData[key] === 'object') {
+                        const subKeys = Object.keys(allData[key]);
+                        debugText += `📂 ${key}: ${subKeys.length > 10 ? subKeys.slice(0, 10).join(', ') + '...' : subKeys.join(', ')}\n`;
+                    }
+                }
+                
+                // D ফিল্ড আছে এমন আইটেম খোঁজো
+                debugText += "\n🔍 D ফিল্ড আছে এমন আইটেম:\n";
+                let dCount = 0;
+                
+                function findDFields(obj, path = "", depth = 0) {
+                    if (depth > 3) return; // Limit depth
+                    
+                    for (const key in obj) {
+                        const value = obj[key];
+                        const currentPath = path ? `${path}/${key}` : key;
+                        
+                        if (value && typeof value === 'object') {
+                            if (value.D) {
+                                debugText += `📍 ${currentPath}: ${value.D.substring(0, 50)}...\n`;
+                                dCount++;
+                            }
+                            findDFields(value, currentPath, depth + 1);
+                        }
+                    }
+                }
+                
+                findDFields(allData);
+                
+                if (dCount === 0) {
+                    debugText += "❌ কোনো D ফিল্ড পাওয়া যায়নি!\n";
+                }
+            }
+            
+            document.getElementById('debugInfo').textContent = debugText;
+            document.getElementById('debugInfo').style.display = 'block';
+        }
+
         function showError(message) {
             document.getElementById('loading').style.display = 'none';
-            document.getElementById('errorMsg').style.display = 'block';
-            document.getElementById('errorMsg').textContent = message;
-        }
-        
-        function handlePay() {
-            alert(`পেমেন্ট শুরু হচ্ছে (অর্ডার: ${orderId})\nযোগাযোগ: 01770584994\nBkash/Nagad/Rocket`);
+            const errorDiv = document.getElementById('error');
+            errorDiv.style.display = 'block';
+            errorDiv.textContent = message;
+            
+            // রিট্রাই বাটন যোগ করো
+            const retryBtn = document.createElement('button');
+            retryBtn.textContent = 'আবার চেষ্টা করুন';
+            retryBtn.onclick = function() {
+                location.reload();
+            };
+            errorDiv.appendChild(document.createElement('br'));
+            errorDiv.appendChild(retryBtn);
         }
     </script>
 </body>
