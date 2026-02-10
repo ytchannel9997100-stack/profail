@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy Premium - Pay Now</title>
+    <meta name="description" content="আপনার প্রিমিয়াম সার্ভিসের পেমেন্ট করুন - ১০০% সিকিউর">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #0a0a1a;
+            --accent: #ff9800;
+            --card: rgba(20, 20, 40, 0.9);
+            --border: rgba(255, 152, 0, 0.3);
+            --text: #ffffff;
+            --text-sec: #b0bec5;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: linear-gradient(135deg, #0a0a1a, #121230, #1a1a3a);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            padding-top: 70px;
+        }
+        .header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(10,10,26,0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { font-size: 1.6rem; font-weight: bold; color: var(--accent); }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .product-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .product-box h1 {
+            color: var(--accent);
+            margin-bottom: 20px;
+            font-size: 2.2rem;
+        }
+        .description {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            white-space: pre-wrap; /* লম্বা টেক্সট ভালো দেখাবে */
+            word-break: break-word;
+        }
+        .price-tag {
+            font-size: 2rem;
+            color: #4caf50;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .btn-pay {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            margin: 30px auto;
+            padding: 18px;
+            background: linear-gradient(45deg, var(--accent), #f57c00);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-pay:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255,152,0,0.4);
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-sec);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">Easy Premium</div>
+    </header>
+
+    <div class="container">
+        <div class="product-box">
+            <h1 id="productName">YouTube Premium পরিবার প্যাক</h1>
+            
+            <div class="description" id="productDesc">
+                <!-- এখানে Firebase থেকে আসা লম্বা "D" বা description দেখানো হবে -->
+                লোড হচ্ছে... (যদি Firebase কানেক্ট করা থাকে তাহলে এখানে বিশাল লম্বা কীওয়ার্ড ডেসক্রিপশন দেখা যাবে, যেমন: জন ব্যবহারকারী, বিজ্ঞাপন মুক্ত ভিডিও, ব্যাকগ্রাউন্ড প্লে, অফলাইন ডাউনলোড জন ব্যবহারকারী... ইত্যাদি রিপিট করে)
+            </div>
+            
+            <div class="price-tag">৳৫৫০</div>
+            
+            <button class="btn-pay" onclick="alert('পেমেন্ট প্রসেস শুরু হচ্ছে... (এখনো লিঙ্ক যোগ করা হয়নি)')">
+                Pay Now - Bkash / Nagad
+            </button>
+        </div>
+    </div>
+
+    <footer>
+        © ২০২৬ Easy Premium | সকল অধিকার সংরক্ষিত
+    </footer>
+
+    <!-- ভবিষ্যতে Firebase SDK যোগ করে ডায়নামিক করার উদাহরণ (অপশনাল) -->
+    <!-- 
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+            databaseURL: "https://easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app",
+            // ... other config if needed
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // উদাহরণ: একটা নির্দিষ্ট প্ল্যান লোড করা (URL থেকে planId নেয়া যায়)
+        const planId = "-OkgI2qnNdnQy6v9R777"; // অথবা location.search থেকে নিন
+
+        get(ref(db, `publicData/pricingPlans/${planId}`))
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    document.getElementById("productName").textContent = data.name || "প্রোডাক্ট";
+                    
+                    // প্রায়োরিটি: "D" থাকলে সেটা, না হলে description
+                    const longDesc = data.D || data.description || "ডেসক্রিপশন পাওয়া যায়নি";
+                    document.getElementById("productDesc").textContent = longDesc;
+                    
+                    // price update etc.
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                document.getElementById("productDesc").textContent = "ডেটা লোড করতে সমস্যা হয়েছে।";
+            });
+    </script>
+    -->
+
+</body>
+</html>
