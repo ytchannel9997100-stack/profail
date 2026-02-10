@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Easy Premium - Pay Now</title>
     <meta name="description" content="প্রিমিয়াম সার্ভিস পেমেন্ট - ১০০% সিকিউর">
-   
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-   
+    
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-   
+    
     <style>
         :root {
             --primary: #0a0a1a;
@@ -113,7 +113,7 @@
 
         const db = firebase.database();
 
-        // Get orderId from URL
+        // Get orderId from URL query parameter
         const params = new URLSearchParams(window.location.search);
         const orderId = params.get('orderId');
 
@@ -121,54 +121,60 @@
             document.getElementById('loading').style.display = 'none';
             document.getElementById('errorMsg').style.display = 'block';
             document.getElementById('errorMsg').textContent = 'অর্ডার আইডি দরকার। URL-এ ?orderId=... দিন।';
-        } else {
-            document.getElementById('orderIdShow').textContent = orderId;
-            document.getElementById('orderSection').style.display = 'block';
-
-            // Step 1: Fetch order data
-            db.ref(`orders/${orderId}`).once('value')
-                .then(snapshot => {
-                    if (!snapshot.exists()) {
-                        showError('এই অর্ডার ID পাওয়া যায়নি।');
-                        return;
-                    }
-
-                    const orderData = snapshot.val();
-                    const planId = orderData.planId || orderData.plan || orderData.pricingPlan;
-
-                    if (!planId) {
-                        showError('অর্ডারে প্ল্যান ID সংরক্ষিত নেই।');
-                        return;
-                    }
-
-                    // Step 2: Fetch pricing plan data
-                    db.ref(`publicData/pricingPlans/${planId}`).once('value')
-                        .then(planSnapshot => {
-                            document.getElementById('loading').style.display = 'none';
-
-                            if (planSnapshot.exists()) {
-                                const data = planSnapshot.val();
-
-                                document.getElementById('planName').textContent = data.name || 'প্রিমিয়াম প্ল্যান';
-                                document.getElementById('planName').style.display = 'block';
-
-                                const fullDesc = data.D || data.description || 'বিস্তারিত ডেসক্রিপশন পাওয়া যায়নি।';
-                                document.getElementById('planDesc').textContent = fullDesc;
-                                document.getElementById('planDesc').style.display = 'block';
-
-                                document.getElementById('planPrice').textContent = `৳${data.price || '---'}`;
-                                document.getElementById('planPrice').style.display = 'block';
-
-                                document.getElementById('payBtn').style.display = 'block';
-                            } else {
-                                showError(`প্ল্যান "${planId}" পাওয়া যায়নি।`);
-                            }
-                        });
-                })
-                .catch(err => {
-                    showError('ডেটা লোডে সমস্যা: ' + err.message);
-                });
+            return;
         }
+
+        document.getElementById('orderIdShow').textContent = orderId;
+        document.getElementById('orderSection').style.display = 'block';
+
+        // Fetch order data
+        db.ref(`orders/${orderId}`).once('value')
+            .then(snapshot => {
+                if (!snapshot.exists()) {
+                    showError('এই অর্ডার ID পাওয়া যায়নি।');
+                    return;
+                }
+
+                const orderData = snapshot.val();
+                const planId = orderData.planId || orderData.plan || orderData.pricingPlan;
+
+                if (!planId) {
+                    showError('অর্ডারে প্ল্যান ID সংরক্ষিত নেই।');
+                    return;
+                }
+
+                // Fetch pricing plan data (যদি publicData না থাকে তাহলে শুধু pricingPlans/${planId} ব্যবহার করো)
+                db.ref(`pricingPlans/${planId}`).once('value')   // ← এখানে publicData/ চেক করো, দরকার হলে লাগাও
+                    .then(planSnapshot => {
+                        document.getElementById('loading').style.display = 'none';
+
+                        if (planSnapshot.exists()) {
+                            const data = planSnapshot.val();
+                            console.log('প্ল্যান ডেটা:', data);  // ← ব্রাউজার কনসোলে দেখো কী আসছে
+
+                            document.getElementById('planName').textContent = data.name || 'প্রিমিয়াম প্ল্যান';
+                            document.getElementById('planName').style.display = 'block';
+
+                            // ডেসক্রিপশন প্রায়োরিটি: description > D > fallback
+                            const fullDesc = data.description || data.D || data.desc || 'বিস্তারিত ডেসক্রিপশন পাওয়া যায়নি।';
+                            document.getElementById('planDesc').textContent = fullDesc;
+                            document.getElementById('planDesc').style.display = 'block';
+
+                            document.getElementById('planPrice').textContent = `৳${data.price || '---'}`;
+                            document.getElementById('planPrice').style.display = 'block';
+
+                            document.getElementById('payBtn').style.display = 'block';
+                        } else {
+                            showError(`প্ল্যান "${planId}" পাওয়া যায়নি।`);
+                        }
+                    })
+                    .catch(err => {
+                        showError('প্ল্যান লোডে সমস্যা: ' + err.message);
+                    });
+            })
+            .catch(err => {
+                showError('অর্ডার লোডে সমস্যা: ' + err.message);
+            });
 
         function showError(message) {
             document.getElementById('loading').style.display = 'none';
@@ -178,7 +184,7 @@
 
         function handlePay() {
             alert(`পেমেন্ট শুরু হচ্ছে (অর্ডার: ${orderId || 'N/A'})...\nযোগাযোগ: 01770584994`);
-            // এখানে আসল পেমেন্ট গেটওয়ে লজিক যোগ করতে পারো (SSLCommerz, বিকাশ API ইত্যাদি)
+            // এখানে বাস্তব পেমেন্ট গেটওয়ে যোগ করো (SSLCommerz, bKash API ইত্যাদি)
         }
     </script>
 </body>
