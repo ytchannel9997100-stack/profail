@@ -27,6 +27,16 @@
             display: block;
             margin-top: 5px;
         }
+        .d-value {
+            color: #ff0;
+            font-style: italic;
+            white-space: pre-wrap;
+            background: rgba(255, 255, 0, 0.1);
+            padding: 10px;
+            border: 1px solid #ff0;
+            margin-top: 5px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -108,7 +118,18 @@
                     `;
                 }
                 
-                // ৪. অন্যান্য তথ্য (যদি থাকে)
+                // ৪. D ফিল্ডের ডাটা (গুজরাটি/হিন্দি টেক্সট)
+                if (decryptedData.d || decryptedData.D || decryptedData.description) {
+                    const dData = decryptedData.d || decryptedData.D || decryptedData.description;
+                    outputDiv.innerHTML += `
+                        <div class="info-line">
+                            <span class="label">বিস্তারিত বিবরণ (D):</span>
+                            <div class="d-value">${dData}</div>
+                        </div>
+                    `;
+                }
+                
+                // ৫. অন্যান্য তথ্য (যদি থাকে)
                 if (decryptedData.n || decryptedData.platformName) {
                     const platformName = decryptedData.n || decryptedData.platformName;
                     outputDiv.innerHTML += `
@@ -129,9 +150,32 @@
                     `;
                 }
                 
-                // তারিখ
-                if (decryptedData.t) {
-                    const date = new Date(parseInt(decryptedData.t));
+                // ৬. ক্যাটাগরি (যদি থাকে)
+                if (decryptedData.c || decryptedData.category) {
+                    const category = decryptedData.c || decryptedData.category;
+                    outputDiv.innerHTML += `
+                        <div class="info-line">
+                            <span class="label">ক্যাটাগরি:</span>
+                            <span class="value">${category}</span>
+                        </div>
+                    `;
+                }
+                
+                // ৭. স্ট্যাটাস (যদি থাকে)
+                if (decryptedData.s || decryptedData.status) {
+                    const status = decryptedData.s || decryptedData.status;
+                    outputDiv.innerHTML += `
+                        <div class="info-line">
+                            <span class="label">স্ট্যাটাস:</span>
+                            <span class="value">${status}</span>
+                        </div>
+                    `;
+                }
+                
+                // ৮. তারিখ
+                if (decryptedData.t || decryptedData.createdAt) {
+                    const timestamp = parseInt(decryptedData.t || decryptedData.createdAt);
+                    const date = new Date(timestamp);
                     outputDiv.innerHTML += `
                         <div class="info-line">
                             <span class="label">তারিখ:</span>
