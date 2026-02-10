@@ -2,6 +2,7 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>বিস্তারিত বিবরণ</title>
     <style>
         body {
@@ -27,11 +28,44 @@
             border: 2px solid #ff0;
             border-radius: 10px;
             line-height: 1.8;
-            font-size: 18px;
+            font-size: 22px; /* ডেস্কটপের জন্য বড় ফন্ট */
             min-height: 200px;
             display: flex;
             justify-content: center;
+            align-items: center;
+            text-align: center;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
+        
+        /* মোবাইল ডিভাইসের জন্য */
+        @media (max-width: 768px) {
+            .d-value {
+                font-size: 26px; /* মোবাইলের জন্য আরো বড় ফন্ট */
+                padding: 25px;
+                line-height: 2.0;
+                border-width: 3px;
+                min-height: 250px;
+            }
+            .d-container {
+                padding: 15px;
+            }
+            body {
+                padding: 15px;
+            }
+        }
+        
+        /* খুব ছোট মোবাইলের জন্য */
+        @media (max-width: 480px) {
+            .d-value {
+                font-size: 28px; /* আরো বড় ফন্ট */
+                padding: 30px 20px;
+                line-height: 2.2;
+                border-width: 4px;
+                min-height: 300px;
+            }
+        }
+        
         .loading {
             color: #ff9900;
             font-style: italic;
@@ -39,6 +73,14 @@
             padding: 40px;
             font-size: 20px;
         }
+        
+        @media (max-width: 768px) {
+            .loading {
+                font-size: 24px;
+                padding: 60px 20px;
+            }
+        }
+        
         .error {
             color: #ff0000;
             background: rgba(255, 0, 0, 0.1);
@@ -46,7 +88,16 @@
             border: 1px solid #ff0000;
             border-radius: 5px;
             text-align: center;
+            font-size: 20px;
         }
+        
+        @media (max-width: 768px) {
+            .error {
+                font-size: 22px;
+                padding: 30px 20px;
+            }
+        }
+        
         .hidden-data {
             display: none !important;
         }
