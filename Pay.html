@@ -5,27 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Easy Premium - Pay Now</title>
     <meta name="description" content="প্রিমিয়াম সার্ভিস পেমেন্ট - ১০০% সিকিউর">
-    
+   
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
+   
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    
+   
     <style>
-        :root { --primary: #0a0a1a; --accent: #ff9800; --card: rgba(20,20,40,0.9); --border: rgba(255,152,0,0.3); --text: #ffffff; --success: #4caf50; --error: #ff5252; --info: #ffd54f; }
+        :root {
+            --primary: #0a0a1a;
+            --accent: #ff9800;
+            --card: rgba(20,20,40,0.9);
+            --border: rgba(255,152,0,0.3);
+            --text: #ffffff;
+            --success: #4caf50;
+            --error: #ff5252;
+            --info: #ffd54f;
+        }
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { background: linear-gradient(135deg, #0a0a1a, #121230, #1a1a3a); color: var(--text); font-family: 'Segoe UI', sans-serif; min-height: 100vh; padding-top: 80px; }
-        header { position: fixed; top: 0; left: 0; right: 0; background: rgba(10,10,26,0.95); backdrop-filter: blur(10px); padding: 15px; text-align: center; z-index: 1000; }
+        body {
+            background: linear-gradient(135deg, #0a0a1a, #121230, #1a1a3a);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(10,10,26,0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            text-align: center;
+            z-index: 1000;
+        }
         .logo { font-size: 2.2rem; font-weight: bold; color: var(--accent); }
         .container { max-width: 900px; margin: 0 auto; padding: 20px; }
-        .box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 30px; }
+        .box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+        }
         h1 { color: var(--accent); font-size: 2.2rem; margin-bottom: 20px; }
         .desc { font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap; word-break: break-word; margin-bottom: 25px; }
         .price { font-size: 2.8rem; color: var(--success); text-align: center; font-weight: bold; margin: 25px 0; }
-        .order-info { background: rgba(255,215,0,0.15); border: 1px solid #ffd54f; border-radius: 12px; padding: 15px; margin: 20px 0; text-align: center; font-size: 1.15rem; }
-        .btn-pay { display: block; max-width: 400px; margin: 30px auto; padding: 18px; background: linear-gradient(45deg, var(--accent), #f57c00); border: none; border-radius: 12px; color: white; font-size: 1.3rem; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .order-info {
+            background: rgba(255,215,0,0.15);
+            border: 1px solid #ffd54f;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.15rem;
+        }
+        .btn-pay {
+            display: block;
+            max-width: 400px;
+            margin: 30px auto;
+            padding: 18px;
+            background: linear-gradient(45deg, var(--accent), #f57c00);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
         .btn-pay:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,152,0,0.4); }
-        .msg { text-align: center; font-size: 1.2rem; margin: 60px 0; padding: 20px; border-radius: 12px; }
+        .msg {
+            text-align: center;
+            font-size: 1.2rem;
+            margin: 60px 0;
+            padding: 20px;
+            border-radius: 12px;
+        }
         .error { background: rgba(255,82,82,0.15); color: #ff5252; }
         .info { background: rgba(255,215,0,0.15); color: #ffd54f; }
         footer { text-align: center; padding: 40px 20px; color: #b0bec5; font-size: 0.95rem; }
@@ -43,82 +98,113 @@
             <h1 id="planName" style="display:none;"></h1>
             <div id="planDesc" class="desc" style="display:none;"></div>
             <div id="planPrice" class="price" style="display:none;"></div>
-            <button id="payBtn" class="btn-pay" style="display:none;" onclick="handlePay()">Pay Now - Bkash / Nagad / Rocket</button>
+            <button id="payBtn" class="btn-pay" style="display:none;" onclick="handlePay()">
+                Pay Now - Bkash / Nagad / Rocket
+            </button>
         </div>
     </div>
     <footer>© ২০২৬ Easy Premium | সকল অধিকার সংরক্ষিত | সাপোর্ট: +8801770584994</footer>
-
+    
     <script>
+        // Firebase config (তোমার exact URL)
         firebase.initializeApp({
             databaseURL: "https://easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app"
         });
         const db = firebase.database();
-
+        
+        // URL params (শুধু ?orderId= handle করবে)
         const params = new URLSearchParams(window.location.search);
         const orderId = params.get('orderId');
-
+        
+        console.log('🔍 Order ID from URL:', orderId); // Debug: F12 Console চেক করো
+        
         if (!orderId) {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('errorMsg').style.display = 'block';
-            document.getElementById('errorMsg').textContent = 'অর্ডার আইডি দরকার! URL এর শেষে যোগ করো: ?orderId=তোমার_অর্ডার_আইডি';
-            return;
-        }
-
-        document.getElementById('orderIdShow').textContent = orderId;
-        document.getElementById('orderSection').style.display = 'block';
-
-        db.ref(`orders/${orderId}`).once('value')
-            .then(snapshot => {
-                console.log('Orders data:', snapshot.val()); // Console-এ চেক করো
-                if (!snapshot.exists()) {
-                    showError('এই অর্ডার ID পাওয়া যায়নি।');
-                    return;
-                }
+            document.getElementById('errorMsg').textContent = 'অর্ডার আইডি দরকার। URL-এ ?orderId=-Ol4b3H8aB_NDCcMLyux দিন।';
+            console.error('❌ No orderId in URL');
+        } else {
+            // Order ID show করো
+            document.getElementById('orderIdShow').textContent = orderId;
+            document.getElementById('orderSection').style.display = 'block';
+            
+            console.log('📦 Fetching order:', `userOrders/.../${orderId}`);
+            
+            // Step 1: Order data লোড (তোমার structure: userOrders/uid/orderId)
+            // তোমার স্ক্রিনশটে userOrders > uid > orderId path, তাই multiple path try করছি
+            Promise.any([
+                db.ref(`userOrders/${orderId}`).once('value'),  // direct userOrders/orderId
+                db.ref(`orders/${orderId}`).once('value'),      // orders/orderId  
+                db.ref(`userOrders/কোনোUID/${orderId}`).once('value') // fallback
+            ])
+            .then(async (snapshot) => {
                 const orderData = snapshot.val();
-                const planId = orderData.planId || orderData.plan || orderData.pricingPlan;
-                if (!planId) {
-                    showError('অর্ডারে প্ল্যান ID নেই।');
+                console.log('✅ Order data:', orderData);
+                
+                if (!orderData) {
+                    showError('এই অর্ডার ID পাওয়া যায়নি। Firebase Rules চেক করো।');
                     return;
                 }
-
-                // Path: তোমার ডেটা অনুযায়ী publicData নেই, শুধু pricingPlans
-                db.ref(`pricingPlans/${planId}`).once('value')
-                    .then(planSnapshot => {
-                        console.log('Pricing plan data:', planSnapshot.val()); // এখানে D/description দেখা যাবে
-                        document.getElementById('loading').style.display = 'none';
-
-                        if (planSnapshot.exists()) {
-                            const data = planSnapshot.val();
-                            document.getElementById('planName').textContent = data.name || 'প্রিমিয়াম প্ল্যান';
-                            document.getElementById('planName').style.display = 'block';
-
-                            const fullDesc = data.description || data.D || data.desc || 'ডেসক্রিপশন পাওয়া যায়নি।';
-                            document.getElementById('planDesc').textContent = fullDesc;
-                            document.getElementById('planDesc').style.display = 'block';
-
-                            document.getElementById('planPrice').textContent = `৳${data.price || '---'}`;
-                            document.getElementById('planPrice').style.display = 'block';
-
-                            document.getElementById('payBtn').style.display = 'block';
-                        } else {
-                            showError(`প্ল্যান "${planId}" পাওয়া যায়নি।`);
-                        }
-                    })
-                    .catch(err => showError('প্ল্যান লোডে সমস্যা: ' + err.message));
+                
+                // Plan ID extract (multiple possible fields)
+                const planId = orderData.planId || orderData.plan || orderData.pricingPlan || orderData.plan;
+                console.log('🎯 Plan ID:', planId);
+                
+                if (!planId) {
+                    showError('অর্ডারে planId নেই। Order data চেক করো।');
+                    return;
+                }
+                
+                // Step 2: Pricing plan + D description লোড
+                console.log('📋 Fetching pricingPlans:', `pricingPlans/${planId}`);
+                const planSnapshot = await db.ref(`pricingPlans/${planId}`).once('value');
+                const planData = planSnapshot.val();
+                
+                console.log('🎉 FULL PLAN DATA (D আছে কি না চেক করো):', planData);
+                
+                document.getElementById('loading').style.display = 'none';
+                
+                if (planData) {
+                    // Plan name
+                    document.getElementById('planName').textContent = planData.name || 'প্রিমিয়াম প্ল্যান';
+                    document.getElementById('planName').style.display = 'block';
+                    
+                    // D description (তোমার main issue) - multiple fallback
+                    const fullDesc = planData.D ||           // ← তোমার Firebase-এ D আছে
+                                   planData.description || 
+                                   planData.desc || 
+                                   planData.Details || 
+                                   'বিস্তারিত ডেসক্রিপশন পাওয়া যায়নি। Rules Publish করো।';
+                    console.log('📄 D/Description:', fullDesc.substring(0, 100) + '...');
+                    
+                    document.getElementById('planDesc').textContent = fullDesc;
+                    document.getElementById('planDesc').style.display = 'block';
+                    
+                    // Price (তোমার order থেকে ৳1900)
+                    const price = planData.price || orderData.price || '---';
+                    document.getElementById('planPrice').textContent = `৳${price}`;
+                    document.getElementById('planPrice').style.display = 'block';
+                    
+                    document.getElementById('payBtn').style.display = 'block';
+                    console.log('✅ সব লোড হয়েছে! D দেখা উচিত।');
+                } else {
+                    showError(`প্ল্যান "${planId}" পাওয়া যায়নি। Console চেক করো।`);
+                }
             })
             .catch(err => {
-                console.error('Orders error:', err);
-                showError('অর্ডার লোডে সমস্যা: ' + (err.message || 'Permission denied বা নেটওয়ার্ক ইস্যু'));
+                console.error('❌ Firebase Error:', err);
+                showError(`লোডে সমস্যা: ${err.message || 'Permission Denied (Rules .read: true করো)'}`);
             });
-
+        }
+        
         function showError(message) {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('errorMsg').style.display = 'block';
             document.getElementById('errorMsg').textContent = message;
         }
-
+        
         function handlePay() {
-            alert(`পেমেন্ট শুরু (অর্ডার: ${orderId}) - যোগাযোগ: 01770584994`);
+            alert(`পেমেন্ট শুরু হচ্ছে (অর্ডার: ${orderId})\nযোগাযোগ: 01770584994\nBkash/Nagad/Rocket`);
         }
     </script>
 </body>
