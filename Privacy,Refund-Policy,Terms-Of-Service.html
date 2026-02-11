@@ -492,6 +492,66 @@
             transform: translateY(-5px) scale(1.1);
             box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
         }
+        .hero-section2 {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(rgba(10, 10, 26, 0.9), rgba(10, 10, 26, 0.9)), url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 40px;
+            flex-shrink: 0;
+            width: 100%;
+        }
+        
+        .hero-section2::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255, 152, 0, 0.1), rgba(0, 188, 212, 0.1));
+            z-index: 0;
+        }
+        
+        .hero-content2 {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .hero-icon2 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: var(--accent-color) !important;
+            display: inline-block;
+            background: rgba(255, 152, 0, 0.1);
+            width: 100px;
+            height: 100px;
+            line-height: 100px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 152, 0, 0.3);
+        }
+        
+        .hero-title2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--accent-color) !important;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .hero-subtitle2 {
+            font-size: 1.2rem;
+            color: var(--text-secondary) !important;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
         
         /* Social Media Icon Colors */
         .social-link:nth-child(1) i { color: #1877F2 !important; }
@@ -923,6 +983,18 @@
                     </div>
                 </div>
             </section>
+                <div class="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section2">
+            <div class="hero-content2">
+                <div class="hero-icon">
+                    <i class="fas fa-user-shield2"></i>
+                </div>
+                <h1 class="hero-title2">গোপনীয়তা নীতি</h1>
+                <p class="hero-subtitle2">আপনার ডেটা নিরাপত্তা আমাদের অগ্রাধিকার। এখানে আমরা ব্যাখ্যা করেছি কিভাবে আমরা আপনার তথ্য সংগ্রহ, ব্যবহার এবং সুরক্ষিত করি। Easy Premium বাংলাদেশের আইন অনুযায়ী নিবন্ধিত এবং বাংলাদেশ ডিজিটাল কমার্সের নির্দেশিকা অনুসরণ করে।</p>
+            </div>
+        </section>
+
         </div>
 
         <!-- Footer -->
