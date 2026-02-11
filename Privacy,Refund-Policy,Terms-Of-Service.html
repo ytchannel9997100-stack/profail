@@ -552,6 +552,25 @@
             margin: 0 auto;
             line-height: 1.6;
         }
+        .list-container2 {
+            margin: 20px 0;
+        }
+        
+        .list-item2 {
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+            color: var(--text-secondary) !important;
+        }
+        
+        .list-item2::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color) !important;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
         
         /* Social Media Icon Colors */
         .social-link:nth-child(1) i { color: #1877F2 !important; }
