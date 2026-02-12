@@ -71,7 +71,7 @@
             background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 50%, #1a1a3a 100%) !important;
             background-attachment: fixed !important;
             min-height: 100vh;
-            min-height: -webkit-fill-available; /* For mobile browsers */
+            min-height: -webkit-fill-available;
             color: var(--text-color) !important;
             overflow-x: hidden;
             position: relative;
@@ -80,7 +80,6 @@
             flex-direction: column;
         }
         
-        /* Fix for mobile address bar */
         @supports (-webkit-touch-callout: none) {
             body {
                 min-height: -webkit-fill-available;
@@ -88,7 +87,6 @@
             }
         }
         
-        /* Body Overlay for Premium Effect */
         body::before {
             content: '';
             position: fixed;
@@ -104,7 +102,6 @@
             pointer-events: none;
         }
         
-        /* Main Content Wrapper */
         .main-content {
             flex: 1;
             display: flex;
@@ -112,158 +109,7 @@
             width: 100%;
         }
         
-        /* ================== HEADER ================== */
-        .header {
-            background: var(--header-bg) !important;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            width: 100%;
-            flex-shrink: 0;
-        }
-        
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex: 1;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            transition: transform 0.3s;
-            min-width: 0;
-        }
-        
-        .logo:hover {
-            transform: scale(1.02);
-        }
-        
-        .logo-image-container {
-            width: 45px;
-            height: 45px;
-            min-width: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
-            transition: all 0.3s;
-            border-radius: 8px;
-            background: white;
-            padding: 5px;
-        }
-        
-        .logo-image-container:hover {
-            box-shadow: 0 8px 25px rgba(255, 152, 0, 0.5);
-            transform: rotate(5deg);
-        }
-        
-        .logo-image {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        
-        .logo-image-container::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent,
-                rgba(255, 255, 255, 0.1),
-                transparent
-            );
-            transform: rotate(45deg);
-            animation: shine 3s infinite linear;
-        }
-        
-        @keyframes shine {
-            0% {
-                transform: translateX(-100%) translateY(-100%) rotate(45deg);
-            }
-            100% {
-                transform: translateX(100%) translateY(100%) rotate(45deg);
-            }
-        }
-        
-        .logo-text {
-            display: flex;
-            flex-direction: column;
-            line-height: 1;
-            min-width: 0;
-            overflow: hidden;
-        }
-        
-        .logo-main {
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: var(--accent-color) !important;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            transition: all 0.3s;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .logo-sub {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--accent-secondary) !important;
-            letter-spacing: 0.3px;
-            margin-top: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .logo:hover .logo-main {
-            color: #ff5722 !important;
-            text-shadow: 0 0 10px rgba(255, 87, 34, 0.5);
-        }
-        
-        .logo:hover .logo-sub {
-            color: var(--accent-color) !important;
-        }
-        
-        /* ================== BACK TO HOME BUTTON ================== */
-        .back-home-btn {
-            background: linear-gradient(45deg, var(--accent-color), #ff5722) !important;
-            color: white !important;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-            margin-left: auto;
-            text-decoration: none;
-        }
-        
-        .back-home-btn:hover {
-            background: linear-gradient(45deg, #ff5722, var(--accent-color)) !important;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 87, 34, 0.3);
-        }
+        /* ================== HEADER - REMOVED COMPLETELY ================== */
         
         /* ================== HERO SECTION ================== */
         .hero-section {
@@ -391,7 +237,6 @@
             margin-bottom: 15px;
         }
         
-        /* ================== STYLED BOXES ================== */
         .highlight-box {
             background: rgba(255, 152, 0, 0.1) !important;
             border-radius: 10px;
@@ -432,7 +277,6 @@
         .warning-box h3 i { color: #dc3545 !important; }
         .info-box h3 i { color: var(--accent-secondary) !important; }
         
-        /* ================== LISTS ================== */
         .list-container {
             margin: 20px 0;
         }
@@ -493,87 +337,6 @@
             box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
         }
         
-        .hero-section2 {
-            text-align: center;
-            padding: 60px 20px;
-            background: linear-gradient(rgba(10, 10, 26, 0.9), rgba(10, 10, 26, 0.9)), url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 40px;
-            flex-shrink: 0;
-            width: 100%;
-        }
-        
-        .hero-section2::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, rgba(255, 152, 0, 0.1), rgba(0, 188, 212, 0.1));
-            z-index: 0;
-        }
-        
-        .hero-content2 {
-            position: relative;
-            z-index: 1;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        
-        .hero-icon2 {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: var(--accent-color) !important;
-            display: inline-block;
-            background: rgba(255, 152, 0, 0.1);
-            width: 100px;
-            height: 100px;
-            line-height: 100px;
-            border-radius: 50%;
-            border: 3px solid rgba(255, 152, 0, 0.3);
-        }
-        
-        .hero-title2 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: var(--accent-color) !important;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .hero-subtitle2 {
-            font-size: 1.2rem;
-            color: var(--text-secondary) !important;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        .list-container2 {
-            margin: 20px 0;
-        }
-        
-        .list-item2 {
-            margin-bottom: 12px;
-            padding-left: 25px;
-            position: relative;
-            color: var(--text-secondary) !important;
-        }
-        
-        .list-item2::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            color: var(--accent-color) !important;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-        
-        /* Social Media Icon Colors */
         .social-link:nth-child(1) i { color: #1877F2 !important; }
         .social-link:nth-child(2) i { color: #E4405F !important; }
         .social-link:nth-child(3) i { color: #FF0000 !important; }
@@ -623,29 +386,11 @@
         .section-card:nth-child(4) { animation-delay: 0.4s; }
         .section-card:nth-child(5) { animation-delay: 0.5s; }
         .section-card:nth-child(6) { animation-delay: 0.6s; }
+        .section-card:nth-child(7) { animation-delay: 0.7s; }
+        .section-card:nth-child(8) { animation-delay: 0.8s; }
         
         /* ================== RESPONSIVE DESIGN ================== */
-        
-        /* Mobile Devices */
         @media (max-width: 768px) {
-            .logo-image-container {
-                width: 40px;
-                height: 40px;
-            }
-            
-            .logo-main {
-                font-size: 1.1rem;
-            }
-            
-            .logo-sub {
-                font-size: 0.7rem;
-            }
-            
-            .back-home-btn {
-                padding: 8px 15px;
-                font-size: 0.8rem;
-            }
-            
             .hero-section {
                 padding: 40px 15px;
             }
@@ -724,7 +469,6 @@
             }
         }
         
-        /* Small Mobile */
         @media (max-width: 480px) {
             .hero-section {
                 padding: 30px 12px;
@@ -766,14 +510,8 @@
             .section-title {
                 font-size: 1.2rem;
             }
-            
-            .back-home-btn {
-                padding: 8px 12px;
-                font-size: 0.75rem;
-            }
         }
         
-        /* Tablet */
         @media (min-width: 769px) and (max-width: 1024px) {
             .hero-section {
                 padding: 50px 30px;
@@ -792,7 +530,6 @@
             }
         }
         
-        /* Desktop */
         @media (min-width: 1025px) {
             .hero-section {
                 padding: 70px 40px;
@@ -811,7 +548,6 @@
             }
         }
         
-        /* ================== SCROLLBAR STYLING ================== */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -829,13 +565,10 @@
             background: rgba(255, 152, 0, 0.7);
         }
         
-        /* ================== MOBILE BOTTOM BAR FIX ================== */
-        /* This ensures the content reaches the very bottom */
         body {
             position: relative;
         }
         
-        /* Add extra padding at bottom for mobile browsers */
         @media (max-width: 768px) {
             .content-wrapper {
                 padding-bottom: max(40px, env(safe-area-inset-bottom));
@@ -846,7 +579,6 @@
             }
         }
         
-        /* iOS Safari specific fixes */
         @supports (-webkit-touch-callout: none) {
             .content-wrapper {
                 padding-bottom: calc(40px + env(safe-area-inset-bottom));
@@ -859,27 +591,6 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-left">
-            <a href="https://easy-premium.com" class="logo">
-                <div class="logo-image-container">
-                    <img src="https://cdn-icons-png.flaticon.com/512/8701/8701941.png" alt="Easy Premium Logo" class="logo-image">
-                </div>
-                <div class="logo-text">
-                    <div class="logo-main">EASY PREMIUM</div>
-                    <div class="logo-sub">Privacy Policy</div>
-                </div>
-            </a>
-        </div>
-        
-        <a href="https://easy-premium.com" class="back-home-btn">
-            <i class="fas fa-home"></i>
-            হোমে ফিরে যান
-        </a>
-    </header>
-
-    <!-- Main Content Container -->
     <div class="main-content">
         <!-- Hero Section -->
         <section class="hero-section">
@@ -1024,7 +735,7 @@
                 </div>
             </section>
             
-            <!-- Section 7 - Refund Policy (Fixed) -->
+            <!-- Section 7 - Refund Policy - WITH ALL ORIGINAL CONTENT RESTORED -->
             <section class="section-card">
                 <div class="section-header">
                     <div class="section-icon">
@@ -1055,9 +766,48 @@
                         <div class="list-item">পেমেন্টের ট্রানজ্যাকশন স্ক্রিনশট সংরক্ষণ করুন</div>
                         <div class="list-item">যেকোন প্রোডাক্ট ডেলিভারির পর রিফান্ড প্রযোজ্য নয়, আবার বলছি – অর্ডার কনফার্ম কিংবা ডেলিভারি কনফার্ম হওয়ার পর কোন প্রকার রিফান্ড প্রযোজ্য নয়। কেবলমাত্র ডেলিভারি দিতে ব্যর্থ হলেই রিফান্ড প্রযোয্য হবে। পারচেজ করার পর ভবিষ্যতে যদি কোন প্রোডাক্টে সমস্যা হয়, তাহলে আমরা আপনাকে ফুল ওয়ারেন্টি করবো ইনশাআল্লাহ, এক্ষেত্রে কিছু প্রোডাক্ট ওয়ারেন্টি করার জন্য নির্দিষ্ট সময়সীমা আছে সেই সময় সীমা পার হলে আমরা ওয়ারেন্টি করতে পারবো না, অথবা সময়সীমার মধ্যে থেকেও যদি আমাদের ডেলিভারির সাথে দেয়া কোন রুলস ভঙ্গ করা হয় যেমনঃ- পলিসি ভায়োলেশন এই টাইপ সেক্ষেত্রেও আমরা ওয়ারেন্টি করতে ব্যর্থ হবো</div>
                         <div class="list-item">কার্ড ডেলিভারি ইমেইলে দেওয়া হবে, কোনো ফিজিক্যাল কার্ড নয় একবার কার্ড ইস্যু হলে রিফান্ড করা যাবে না এই কার্ড দিয়ে পেমেন্ট করা ছাড়া অন্য কোনো অ্যাক্সেস পাওয়া যায় না</div>
-                        <div class="list-item">সমস্ত অর্ডার গ্রহণযোগ্যতা এবং প্রাপ্যতার উপর নির্ভরশীল। পেমেন্ট সুরক্ষিত বিকাশ নগদ পেমেন্ট গেটওয়ের মাধ্যমে প্রক্রিয়াকরণ করা হয়। আমরা আপনার পেমেন্ট তথ্য সংরক্ষণ করি না। পেমেন্ট ব্যর্থ হলে, আপনার অর্ডার প্রক্রিয়াকরণ করা হবে না। </div>
+                        <div class="list-item">সমস্ত অর্ডার গ্রহণযোগ্যতা এবং প্রাপ্যতার উপর নির্ভরশীল। পেমেন্ট সুরক্ষিত বিকাশ নগদ পেমেন্ট গেটওয়ের মাধ্যমে প্রক্রিয়াকরণ করা হয়। আমরা আপনার পেমেন্ট তথ্য সংরক্ষণ করি না। পেমেন্ট ব্যর্থ হলে, আপনার অর্ডার প্রক্রিয়াকরণ করা হবে না।</div>
                         <div class="list-item">ডিজিটাল প্রোডাক্ট অর্ডার করতে অবশ্যই আপনাকে প্রথমে পে করতে হবে। যদি বিশ্বাস নিয়ে কোনো সমস্যা থাকে তাহলে আমাদের সকল সোসাল মিডিয়াগুলো ঘুরে আসতে পারেন। অধিকাংশ প্রোডাক্ট অর্ডার কমপ্লিট করার সাথে সাথে আপনার মেইলে চলে যাব , তবে কিছু কিছু প্রোডাক্টের ক্ষেত্রে মিনিমাম ১ ঘন্টা থেকে ম্যাক্সিমাম ২৪ ঘন্টা সময় দিতে হবে।</div>
                     </div>
+                </div>
+            </section>
+
+            <!-- Section 8 - পরিষেবার শর্তাবলী (Terms of Service) -->
+            <section class="section-card">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <h2 class="section-title">পরিষেবার শর্তাবলী</h2>
+                </div>
+                <div class="section-content">
+                    <p>Easy Premium এর ওয়েবসাইট ও সেবা ব্যবহারের জন্য নিম্নলিখিত শর্তাবলী প্রযোজ্য। আমাদের যেকোনো সেবা ব্যবহার করার অর্থ আপনি এই শর্তাবলী মেনে চলতে বাধ্য থাকবেন।</p>
+                    
+                    <div class="info-box">
+                        <h3><i class="fas fa-info-circle"></i> সেবা গ্রহণের যোগ্যতা</h3>
+                        <p>আমাদের সেবা গ্রহণের জন্য আপনার বয়স কমপক্ষে ১৮ বছর হতে হবে। নাবালক কোনো ব্যক্তি অভিভাবকের অনুমতি ছাড়া আমাদের সেবা ব্যবহার করতে পারবেন না।</p>
+                    </div>
+                    
+                    <div class="list-container">
+                        <div class="list-item">আমরা শুধুমাত্র বাংলাদেশের ভোক্তাদের জন্য সেবা প্রদান করে থাকি।</div>
+                        <div class="list-item">অর্ডার নিশ্চিত করার পর সেবা বা পণ্যের মূল্য পরিবর্তন করা যাবে না।</div>
+                        <div class="list-item">সঠিক তথ্য প্রদান করা ক্রেতার দায়িত্ব। ভুল তথ্যের কারণে কোনো ক্ষতি হলে Easy Premium দায়ী থাকবে না।</div>
+                        <div class="list-item">কোনো সেবা বা পণ্য ক্রয়ের পূর্বে তার শর্তাবলী ও মেয়াদ সম্পর্কে নিশ্চিত হয়ে নিন।</div>
+                        <div class="list-item">আমরা ডিজিটাল পণ্য ও সেবা প্রদান করি; ফিজিক্যাল পণ্য প্রদান করা হয় না (ভার্চুয়াল কার্ড ছাড়া)।</div>
+                        <div class="list-item">প্রদত্ত সেবা গ্রহণের পর তা ফেরতযোগ্য নয়, শুধুমাত্র ডেলিভারি ব্যর্থ হলে রিফান্ড পলিসি প্রযোজ্য হবে।</div>
+                    </div>
+                    
+                    <div class="warning-box">
+                        <h3><i class="fas fa-gavel"></i> নিষিদ্ধ কার্যক্রম</h3>
+                        <p>আমাদের সেবা ব্যবহার করে কোনো বেআইনি কাজ, প্রতারণা, বা বাংলাদেশের প্রচলিত আইনবিরুদ্ধ কার্যক্রম পরিচালনা করা যাবে না। এই ধরনের কর্মকাণ্ডের জন্য সংশ্লিষ্ট ব্যক্তি সম্পূর্ণরূপে দায়ী থাকবেন।</p>
+                    </div>
+                    
+                    <div class="highlight-box">
+                        <h3><i class="fas fa-check-circle"></i> দায় সীমিকা</h3>
+                        <p>Easy Premium কোনো তৃতীয় পক্ষের সেবা বা পণ্যের কারণে সৃষ্ট ক্ষতির জন্য সরাসরি দায়ী নয়। তবে আমরা গ্রাহকের সাপোর্ট ও সমস্যা সমাধানে সর্বোচ্চ সহায়তা প্রদান করি। বাংলাদেশের ভোক্তা অধিকার সংরক্ষণ আইন, ২০০৯ অনুযায়ী আপনার অধিকার সংরক্ষিত।</p>
+                    </div>
+                    
+                    <p style="margin-top: 20px;"><strong>শেষ সংশোধন:</strong> জানুয়ারী ২০২৬</p>
                 </div>
             </section>
         </div>
@@ -1081,7 +831,6 @@
     </div>
 
     <script>
-        // Animate sections on scroll
         document.addEventListener('DOMContentLoaded', function() {
             const observerOptions = {
                 threshold: 0.1,
@@ -1097,12 +846,10 @@
                 });
             }, observerOptions);
             
-            // Observe all section cards
             document.querySelectorAll('.section-card').forEach(card => {
                 observer.observe(card);
             });
             
-            // Add hover effect to social links
             const socialLinks = document.querySelectorAll('.social-link');
             socialLinks.forEach(link => {
                 link.addEventListener('mouseenter', function() {
@@ -1114,19 +861,13 @@
                 });
             });
             
-            // Fix for mobile browsers - ensure content fills screen
             function adjustHeight() {
                 const vh = window.innerHeight * 0.01;
                 document.documentElement.style.setProperty('--vh', `${vh}px`);
-                
-                // Ensure body covers full height
                 document.body.style.minHeight = window.innerHeight + 'px';
             }
             
-            // Initial adjustment
             adjustHeight();
-            
-            // Adjust on resize and orientation change
             window.addEventListener('resize', adjustHeight);
             window.addEventListener('orientationchange', adjustHeight);
         });
