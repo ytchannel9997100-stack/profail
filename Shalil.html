@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
+        /* আপনার আগের CSS code ঠিক রাখুন */
         * {
             margin: 0;
             padding: 0;
@@ -111,7 +112,7 @@
             min-height: 20px;
         }
         
-        /* Admin Panel */
+        /* Admin Panel - Full CSS from previous response */
         .admin-panel {
             display: none;
         }
@@ -711,11 +712,13 @@
         let currentAdminEmail = null;
         let currentOrderToCancel = null;
 
-        // Allowed Admin Emails
+        // ✅ Allowed Admin Emails - নতুন Super Admin যোগ করা হয়েছে
         const ALLOWED_ADMIN_EMAILS = [
             'mdashikislam017705@gmail.com',
             'mdsojib1388888@gmail.com',
-            'admin@easy-premium.com'
+            'admin@easy-premium.com',
+            'shahsultanshakil204571@gmail.com',
+            'allwork204571@gmail.com'  // ✅ নতুন Super Admin
         ];
 
         // Initialize on page load
@@ -739,6 +742,16 @@
                         await loadAdminData(user);
                         showAdminPanel();
                         initializeOrderSystem();
+                        
+                        // Super Admin check for specific features
+                        const isSuperAdmin = [
+                            'mdsojib1388888@gmail.com',
+                            'shahsultanshakil204571@gmail.com',
+                            'allwork204571@gmail.com'
+                        ].includes(user.email);
+                        
+                        console.log("Admin Role:", isSuperAdmin ? "Super Admin" : "Admin");
+                        
                     } else {
                         console.log("Email not allowed:", user.email);
                         await auth.signOut();
@@ -816,6 +829,20 @@
             } else {
                 const initial = user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase();
                 adminAvatar.innerHTML = `<span style="font-size: 1.2rem;">${initial}</span>`;
+            }
+            
+            // Save admin info to database
+            try {
+                const adminRef = database.ref(`adminUsers/${user.uid}`);
+                await adminRef.update({
+                    email: user.email,
+                    name: user.displayName || '',
+                    photoURL: user.photoURL || '',
+                    lastLogin: firebase.database.ServerValue.TIMESTAMP,
+                    status: 'active'
+                });
+            } catch (error) {
+                console.error("Error saving admin data:", error);
             }
         }
         
