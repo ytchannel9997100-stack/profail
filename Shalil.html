@@ -274,18 +274,50 @@
             background: rgba(37, 211, 102, 0.2);
             color: #25D366;
             border: 1px solid #25D366;
-            padding: 5px 10px;
+            padding: 8px 12px;
             border-radius: 5px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             cursor: pointer;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
         }
         
         .whatsapp-btn:hover {
             background: rgba(37, 211, 102, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.2);
+        }
+        
+        .whatsapp-btn i {
+            font-size: 1.1rem;
+        }
+        
+        /* Copy Button */
+        .copy-btn {
+            background: rgba(0, 188, 212, 0.2);
+            color: #00bcd4;
+            border: 1px solid #00bcd4;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+            margin-left: 5px;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(0, 188, 212, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.2);
         }
         
         /* Cancel Button */
@@ -432,6 +464,29 @@
             color: #b0bec5;
         }
         
+        /* Button Group */
+        .btn-group {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        /* Message Preview */
+        .message-preview {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+            max-width: 400px;
+            word-break: break-all;
+        }
+        
+        .message-preview strong {
+            color: #ff9800;
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .admin-header {
@@ -460,9 +515,13 @@
                 padding: 10px;
             }
             
-            .btn-cancel, .btn-pending {
+            .btn-cancel, .btn-pending, .whatsapp-btn, .copy-btn {
                 padding: 6px 10px;
                 font-size: 0.8rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
             }
         }
         
@@ -653,6 +712,32 @@
         </div>
     </div>
 
+    <!-- Message Preview Modal -->
+    <div id="messageModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="background: rgba(30,30,46,0.95); padding: 30px; border-radius: 15px; max-width: 600px; width: 90%; border: 3px solid #25D366;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <i class="fab fa-whatsapp" style="font-size: 4rem; color: #25D366;"></i>
+                <h3 style="color: #ff9800; margin-top: 15px;">WhatsApp মেসেজ প্রিভিউ</h3>
+            </div>
+            
+            <div class="message-preview" id="messagePreview" style="margin-bottom: 20px; background: rgba(37, 211, 102, 0.1); border-color: #25D366;">
+                লোড হচ্ছে...
+            </div>
+            
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a id="sendWhatsAppLink" href="#" target="_blank" class="whatsapp-btn" style="flex: 1; padding: 12px; justify-content: center; font-size: 1rem;">
+                    <i class="fab fa-whatsapp"></i> WhatsApp ওপেন করুন
+                </a>
+                <button id="copyMessageBtn" class="copy-btn" style="flex: 1; padding: 12px; justify-content: center; font-size: 1rem;">
+                    <i class="fas fa-copy"></i> কপি করুন
+                </button>
+                <button id="closeMessageModalBtn" class="btn-pending" style="flex: 1; padding: 12px; justify-content: center; font-size: 1rem;">
+                    <i class="fas fa-times"></i> বন্ধ করুন
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Firebase Configuration
         const firebaseConfig = {
@@ -706,11 +791,22 @@
         const cancelOrderInfo = document.getElementById('cancelOrderInfo');
         const confirmCancelBtn = document.getElementById('confirmCancelBtn');
         const closeCancelModalBtn = document.getElementById('closeCancelModalBtn');
+        
+        // Message Modal Elements
+        const messageModal = document.getElementById('messageModal');
+        const messagePreview = document.getElementById('messagePreview');
+        const sendWhatsAppLink = document.getElementById('sendWhatsAppLink');
+        const copyMessageBtn = document.getElementById('copyMessageBtn');
+        const closeMessageModalBtn = document.getElementById('closeMessageModalBtn');
 
         // Variables
         let orders = [];
         let currentAdminEmail = null;
         let currentOrderToCancel = null;
+        let currentMessageData = null;
+
+        // Base URL for payment page
+        const BASE_URL = 'https://easy-premium.com/Pay.html';
 
         // ✅ Allowed Admin Emails - নতুন Super Admin যোগ করা হয়েছে
         const ALLOWED_ADMIN_EMAILS = [
@@ -781,6 +877,17 @@
             confirmCancelBtn.addEventListener('click', function() {
                 if (currentOrderToCancel) {
                     cancelOrder(currentOrderToCancel);
+                }
+            });
+            
+            closeMessageModalBtn.addEventListener('click', function() {
+                messageModal.style.display = 'none';
+                currentMessageData = null;
+            });
+            
+            copyMessageBtn.addEventListener('click', function() {
+                if (currentMessageData) {
+                    copyToClipboard(currentMessageData.fullMessage);
                 }
             });
         }
@@ -1012,22 +1119,24 @@
                 }
                 
                 const whatsappNumber = order.whatsappNumber || order.phoneNumber || 'নাম্বার নেই';
-                const cleanWhatsappNumber = whatsappNumber.replace(/\D/g, '');
-                const whatsappLink = `https://wa.me/${cleanWhatsappNumber}`;
                 
                 let actionButtons = '';
                 
                 if (order.status === 'pending') {
                     actionButtons = `
-                        <button class="btn-cancel" onclick="showCancelModal('${order.id}', '${order.userName || ''}', '${order.platform || ''}')">
-                            <i class="fas fa-times-circle"></i> ক্যানসেল
-                        </button>
+                        <div class="btn-group">
+                            <button class="btn-cancel" onclick="showCancelModal('${order.id}', '${order.userName || ''}', '${order.platform || ''}')">
+                                <i class="fas fa-times-circle"></i> ক্যানসেল
+                            </button>
+                        </div>
                     `;
                 } else if (order.status === 'cancelled') {
                     actionButtons = `
-                        <button class="btn-pending" onclick="updateOrderStatus('${order.id}', 'pending')">
-                            <i class="fas fa-undo-alt"></i> পেন্ডিং করুন
-                        </button>
+                        <div class="btn-group">
+                            <button class="btn-pending" onclick="updateOrderStatus('${order.id}', 'pending')">
+                                <i class="fas fa-undo-alt"></i> পেন্ডিং করুন
+                            </button>
+                        </div>
                     `;
                 } else {
                     actionButtons = `
@@ -1045,9 +1154,9 @@
                             <div style="font-size: 0.8rem; color: #b0bec5;">${order.phoneNumber || 'ফোন নেই'}</div>
                         </td>
                         <td>
-                            <a href="${whatsappLink}" target="_blank" class="whatsapp-btn">
-                                <i class="fab fa-whatsapp"></i> ${whatsappNumber}
-                            </a>
+                            <button class="whatsapp-btn" onclick="sendWhatsAppMessage('${order.id}', '${whatsappNumber}', '${order.userName || ''}', '${order.platform || ''}', '${order.price || ''}')">
+                                <i class="fab fa-whatsapp"></i> মেসেজ পাঠান
+                            </button>
                         </td>
                         <td>${order.platform || 'প্ল্যাটফর্ম নেই'}</td>
                         <td style="color: #00bcd4; font-weight: 600;">${order.price || '৳ -'}</td>
@@ -1059,6 +1168,85 @@
             });
             
             ordersTable.innerHTML = html;
+        }
+        
+        // Generate payment link for order
+        function generatePaymentLink(orderId, platform, price) {
+            // এখানে আপনার এনক্রিপশন লজিক বসাতে হবে
+            // বর্তমানে একটি সিম্পল এনকোডেড স্ট্রিং ব্যবহার করা হচ্ছে
+            
+            // উদাহরণস্বরূপ, অর্ডার আইডি এবং প্ল্যাটফর্ম এনকোড করে লিংক জেনারেট করা
+            const dataString = `${orderId}|${platform}|${price}|${Date.now()}`;
+            const encodedData = btoa(dataString); // Base64 এনকোডিং
+            
+            // আপনার দেওয়া লিংকের ফরম্যাট অনুযায়ী
+            return `${BASE_URL}?data=${encodedData}&v=2`;
+        }
+        
+        // Generate WhatsApp message
+        function generateWhatsAppMessage(orderId, userName, platform, price) {
+            const paymentLink = generatePaymentLink(orderId, platform, price);
+            
+            // ইউজারকে পাঠানোর জন্য মেসেজ তৈরি করুন
+            const message = `আসসালামু আলাইকুম ${userName},
+
+আপনার অর্ডারটি কনফার্ম করতে নিচের লিংকে ক্লিক করুন:
+
+অর্ডার আইডি: ${orderId}
+প্ল্যাটফর্ম: ${platform}
+মূল্য: ${price}
+
+পেমেন্ট কনফার্ম লিংক:
+${paymentLink}
+
+ধন্যবাদান্তে,
+Easy Premium Team`;
+
+            return {
+                message: message,
+                paymentLink: paymentLink,
+                encodedMessage: encodeURIComponent(message)
+            };
+        }
+        
+        // Send WhatsApp message
+        function sendWhatsAppMessage(orderId, phoneNumber, userName, platform, price) {
+            // ফোন নম্বর থেকে সব নন-ডিজিট ক্যারেক্টার রিমুভ করুন
+            const cleanNumber = phoneNumber.replace(/\D/g, '');
+            
+            if (!cleanNumber) {
+                showToast('ভ্যালিড ফোন নম্বর পাওয়া যায়নি', 'error');
+                return;
+            }
+            
+            // মেসেজ জেনারেট করুন
+            const messageData = generateWhatsAppMessage(orderId, userName, platform, price);
+            
+            // WhatsApp URL তৈরি করুন
+            const whatsappUrl = `https://wa.me/${cleanNumber}?text=${messageData.encodedMessage}`;
+            
+            // মেসেজ প্রিভিউ সেট করুন
+            currentMessageData = {
+                fullMessage: messageData.message,
+                paymentLink: messageData.paymentLink,
+                whatsappUrl: whatsappUrl
+            };
+            
+            messagePreview.innerHTML = messageData.message.replace(/\n/g, '<br>');
+            sendWhatsAppLink.href = whatsappUrl;
+            
+            // মোডাল দেখান
+            messageModal.style.display = 'flex';
+        }
+        
+        // Copy to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('মেসেজ কপি হয়েছে! এখন WhatsApp এ পেস্ট করুন', 'success');
+            }).catch(err => {
+                console.error('Copy failed:', err);
+                showToast('কপি করতে সমস্যা হয়েছে', 'error');
+            });
         }
         
         // Show cancel modal
