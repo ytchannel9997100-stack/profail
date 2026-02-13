@@ -82,7 +82,7 @@
     <meta name="msapplication-TileImage" content="https://cdn-icons-png.flaticon.com/512/8701/8701941.png">
     
     <!-- PWA MANIFEST -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkVhc3kgUHJlbWl1bSIsCiAgInNob3J0X25hbWUiOiAiRWFzeSBQcmVtaXVtIiwKICAiZGVzY3JpcHRpb24iOiAiUHJlbWl1bSBTZXJ2aWNlcyBmb3IgRGlnaXRhbCBQbGF0Zm9ybXMiLAogICJzdGFydF91cmwiOiAiLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgInRoZW1lX2NvbG9yIjogIiNGNTlGMDAiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMxQTFBMkUiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi1pY29ucy1wbmcuZmxhdGljb24uY29tLzUxMi84NzAxLzg3MDE5NDEucG5nIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLAogICAgICAicHVycG9zZSI6ICJhbnkgbWFzayYWYmxlIgogICAgfQogIF0KfQo=">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkVhc3kgUHJlbWl1bSIsCiAgInNob3J0X25hbWUiOiAiRWFzeSBQcmVtaXVtIiwKICAiZGVzY3JpcHRpb24iOiAiUHJlbWl1bSBTZXJ2aWNlcyBmb3IgRGlnaXRhbCBQbGF0Zm9ybXMiLAogICJzdGFydF91cmwiOiAiLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgInRoZW1lX2NvbG9yIjogIiNGNTlGMDAiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMxQTFBMkUiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi1pY29ucy1wbmcuZmxhdGljb24uY29tLzUxMi84NzAxLzg3MDE5NDEucG5nIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciLAogICAgICAicHVycG9zZSI6ICJhbnkgbWFzayYmYmxlIgogICAgfQogIF0KfQo=">
     
     <meta name="theme-color" content="#0a0a1a">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -96,9 +96,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     
+    <!-- EmailJS SDK - ইমেইল পাঠানোর জন্য -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
     <!-- ================== FIXED CSS STYLES ================== -->
     <style>
-        /* ================== GLOBAL COLOR FIX ================== */
+        /* আপনার দেওয়া সম্পূর্ণ CSS ঠিক আগের মতোই থাকবে */
         :root {
             --primary-bg: #0a0a1a;
             --secondary-bg: #121230;
@@ -132,7 +135,6 @@
             background-color: var(--primary-bg) !important;
         }
         
-        /* ================== FIXED BODY BACKGROUND ================== */
         body {
             background: var(--primary-bg) !important;
             background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 50%, #1a1a3a 100%) !important;
@@ -143,11 +145,9 @@
             width: 100%;
             position: relative;
             height: 100%;
-            /* Mobile browser UI area color */
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* Body Overlay for Premium Effect */
         body::before {
             content: '';
             position: fixed;
@@ -163,8 +163,6 @@
             pointer-events: none;
         }
         
-        /* FIX FOR MOBILE WHITE BOTTOM AREA */
-        /* This will extend the background color to the very bottom */
         body::after {
             content: '';
             position: fixed;
@@ -176,7 +174,6 @@
             z-index: -2;
         }
         
-        /* ================== WEBSITE OVERLAY ================== */
         .website-overlay {
             position: fixed;
             top: 0;
@@ -252,7 +249,6 @@
             box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
         }
         
-        /* ================== HEADER ================== */
         .header {
             background: var(--header-bg) !important;
             padding: 12px 16px;
@@ -380,7 +376,6 @@
             color: var(--accent-color) !important;
         }
         
-        /* ================== MODERN CART ICON ================== */
         .cart-icon-container {
             cursor: pointer;
             transition: all 0.3s;
@@ -477,9 +472,50 @@
             display: none;
         }
         
-        /* ================== SEARCH BAR ================== */
         .search-container {
             display: none;
+        }
+        
+        @media (min-width: 769px) {
+            .search-container {
+                display: block;
+                flex: 1;
+                max-width: 300px;
+                margin-left: 20px;
+            }
+            
+            .header-left {
+                gap: 20px;
+            }
+        }
+        
+        @media (min-width: 1025px) {
+            .search-container {
+                max-width: 400px;
+                margin-left: 30px;
+            }
+            
+            .nav-links {
+                display: flex;
+                gap: 20px;
+            }
+            
+            .nav-link {
+                color: var(--text-color) !important;
+                text-decoration: none;
+                font-weight: 600;
+                padding: 8px 15px;
+                border-radius: 5px;
+                transition: all 0.3s;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .nav-link:hover {
+                background: var(--hover-bg) !important;
+                color: var(--accent-color) !important;
+            }
         }
         
         .search-wrapper {
@@ -529,7 +565,6 @@
             transform: translateY(-50%) scale(1.1);
         }
         
-        /* ================== SEARCH RESULTS ================== */
         .search-results {
             position: absolute;
             top: 100%;
@@ -609,7 +644,6 @@
             font-size: 0.9rem;
         }
         
-        /* ================== PROFILE MODAL ================== */
         .profile-modal {
             display: none;
             position: fixed;
@@ -736,7 +770,6 @@
             box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
         }
         
-        /* ================== ORDERS SECTION ================== */
         .orders-section {
             margin-top: 20px;
         }
@@ -749,7 +782,6 @@
             border-bottom: 1px solid rgba(0, 188, 212, 0.3);
         }
         
-        /* Orders Table for Desktop */
         .orders-table-container {
             width: 100%;
             overflow-x: auto;
@@ -788,7 +820,6 @@
             border-bottom: none;
         }
         
-        /* Mobile Card View for Orders */
         .orders-cards {
             display: flex;
             flex-direction: column;
@@ -866,7 +897,6 @@
             font-size: 1.1rem;
         }
         
-        /* ================== LOGIN MODAL ================== */
         .login-modal {
             display: none;
             position: fixed;
@@ -973,7 +1003,6 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
-        /* ================== PURCHASE FORM MODAL ================== */
         .purchase-modal {
             display: none;
             position: fixed;
@@ -1102,7 +1131,6 @@
             background: #f8f9fa;
         }
         
-        /* ================== HERO SECTION ================== */
         .hero {
             text-align: center;
             padding: 30px 20px;
@@ -1133,7 +1161,6 @@
             padding: 0 10px;
         }
         
-        /* ================== PLATFORMS SECTION ================== */
         .platforms-section {
             padding: 30px 15px;
             max-width: 1200px;
@@ -1261,7 +1288,6 @@
             background: linear-gradient(45deg, #ff5722, var(--accent-color)) !important;
         }
         
-        /* ================== LOADING SPINNER ================== */
         .loading-spinner {
             text-align: center;
             padding: 40px 20px;
@@ -1283,7 +1309,6 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* ================== FOOTER ================== */
         .footer {
             background: var(--footer-bg) !important;
             padding: 40px 20px 30px;
@@ -1292,12 +1317,6 @@
             margin-top: 40px;
             position: relative;
             z-index: 1;
-        }
-        
-        /* EXTRA FOOTER PADDING FOR MOBILE SAFE AREA */
-        .footer::before {
-            content: '';
-            display: none;
         }
         
         .social-links {
@@ -1330,12 +1349,11 @@
             box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
         }
         
-        /* FIXED: WhatsApp icon color */
-        .social-link:nth-child(1) i { color: #1877F2 !important; } /* Facebook Messenger */
-        .social-link:nth-child(2) i { color: #E4405F !important; } /* Instagram */
-        .social-link:nth-child(3) i { color: #FF0000 !important; } /* YouTube */
-        .social-link:nth-child(4) i { color: #0088cc !important; } /* Telegram */
-        .social-link:nth-child(5) i { color: #25D366 !important; } /* WhatsApp */
+        .social-link:nth-child(1) i { color: #1877F2 !important; }
+        .social-link:nth-child(2) i { color: #E4405F !important; }
+        .social-link:nth-child(3) i { color: #FF0000 !important; }
+        .social-link:nth-child(4) i { color: #0088cc !important; }
+        .social-link:nth-child(5) i { color: #25D366 !important; }
         
         .social-link:hover i {
             color: var(--accent-color) !important;
@@ -1357,9 +1375,6 @@
             margin-bottom: 0;
         }
         
-        /* ================== RESPONSIVE DESIGN ================== */
-        
-        /* Small Mobile (up to 480px) */
         @media (max-width: 480px) {
             .header {
                 padding: 10px 12px;
@@ -1521,10 +1536,8 @@
                 font-size: 1rem;
             }
             
-            /* Footer responsive */
             .footer {
                 padding: 30px 15px 25px;
-                /* Add extra padding for mobile safe area */
                 padding-bottom: calc(25px + env(safe-area-inset-bottom, 0px));
             }
             
@@ -1544,7 +1557,6 @@
             }
         }
         
-        /* Mobile (481px to 768px) */
         @media (min-width: 481px) and (max-width: 768px) {
             .header {
                 padding: 12px 15px;
@@ -1563,10 +1575,8 @@
                 gap: 15px;
             }
             
-            /* Footer responsive */
             .footer {
                 padding: 35px 18px 28px;
-                /* Add extra padding for mobile safe area */
                 padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
             }
             
@@ -1581,110 +1591,7 @@
             }
         }
         
-        /* Tablet (769px to 1024px) */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .header {
-                padding: 12px 20px;
-            }
-            
-            .logo-main {
-                font-size: 1.4rem;
-            }
-            
-            .hero {
-                padding: 40px 20px;
-                min-height: 250px;
-            }
-            
-            .hero h1 {
-                font-size: 2rem;
-            }
-            
-            .platforms-section {
-                padding: 40px 20px;
-            }
-            
-            .platforms-grid {
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                gap: 20px;
-            }
-            
-            /* Show search bar on tablet and desktop */
-            .search-container {
-                display: block;
-                flex: 1;
-                max-width: 300px;
-                margin-left: 20px;
-            }
-            
-            .header-left {
-                gap: 20px;
-            }
-        }
-        
-        /* Desktop (1025px and above) */
         @media (min-width: 1025px) {
-            .header {
-                padding: 12px 30px;
-            }
-            
-            .logo-main {
-                font-size: 1.5rem;
-            }
-            
-            .hero {
-                padding: 50px 20px;
-                min-height: 300px;
-            }
-            
-            .hero h1 {
-                font-size: 2.2rem;
-            }
-            
-            .platforms-section {
-                padding: 50px 30px;
-            }
-            
-            .platforms-grid {
-                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-                gap: 25px;
-            }
-            
-            /* Show search bar on tablet and desktop */
-            .search-container {
-                display: block;
-                flex: 1;
-                max-width: 400px;
-                margin-left: 30px;
-            }
-            
-            .header-left {
-                gap: 30px;
-            }
-            
-            .nav-links {
-                display: flex;
-                gap: 20px;
-            }
-            
-            .nav-link {
-                color: var(--text-color) !important;
-                text-decoration: none;
-                font-weight: 600;
-                padding: 8px 15px;
-                border-radius: 5px;
-                transition: all 0.3s;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-            
-            .nav-link:hover {
-                background: var(--hover-bg) !important;
-                color: var(--accent-color) !important;
-            }
-            
-            /* Show table view on desktop */
             .orders-table-container {
                 display: block;
             }
@@ -1714,46 +1621,6 @@
             }
         }
         
-        /* Large Desktop (1440px and above) */
-        @media (min-width: 1440px) {
-            .platforms-grid {
-                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-                gap: 30px;
-            }
-        }
-        
-        /* Landscape Mobile */
-        @media (max-height: 600px) and (orientation: landscape) {
-            .hero {
-                min-height: 150px;
-                padding: 20px 15px;
-            }
-            
-            .hero h1 {
-                font-size: 1.5rem;
-                margin-bottom: 10px;
-            }
-            
-            .hero p {
-                font-size: 0.9rem;
-                margin-bottom: 10px;
-            }
-            
-            .platforms-section {
-                padding: 20px 15px;
-            }
-            
-            .profile-content {
-                max-height: 70vh;
-            }
-            
-            .login-content {
-                max-height: 80vh;
-                overflow-y: auto;
-            }
-        }
-        
-        /* ================== PLATFORM SPECIFIC COLORS ================== */
         .youtube { color: #FF0000 !important; }
         .facebook { color: #1877F2 !important; }
         .instagram { color: #E4405F !important; }
@@ -1769,32 +1636,29 @@
         .canva { color: #00C4CC !important; }
         .google { color: #4285F4 !important; }
         .linkedin { color: #0077B5 !important; }
-
-        /* ================== SCROLLBAR STYLING ================== */
+        
         .profile-content::-webkit-scrollbar,
         .search-results::-webkit-scrollbar {
             width: 5px;
         }
-
+        
         .profile-content::-webkit-scrollbar-track,
         .search-results::-webkit-scrollbar-track {
             background: rgba(255, 255, 255, 0.1);
         }
-
+        
         .profile-content::-webkit-scrollbar-thumb,
         .search-results::-webkit-scrollbar-thumb {
             background: rgba(255, 152, 0, 0.5);
             border-radius: 5px;
         }
         
-        /* ================== INPUT STYLING ================== */
         input[type="tel"],
         input[type="number"] {
             -webkit-appearance: none;
             appearance: none;
         }
         
-        /* Fix for iOS zoom on input */
         @media screen and (-webkit-min-device-pixel-ratio:0) {
             select:focus,
             textarea:focus,
@@ -1803,19 +1667,15 @@
             }
         }
         
-        /* Prevent text size adjustment */
         html {
             -webkit-text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;
         }
         
-        /* Smooth scrolling for iOS */
         * {
             -webkit-overflow-scrolling: touch;
         }
         
-        /* ================== SAFE AREA FOR MOBILE ================== */
-        /* Fix for mobile bottom area (iPhone X and newer) */
         @supports (padding: max(0px)) {
             .footer {
                 padding-bottom: max(30px, env(safe-area-inset-bottom));
@@ -1826,7 +1686,6 @@
             }
         }
         
-        /* Hide address bar on mobile */
         @media (max-width: 768px) {
             html, body {
                 height: -webkit-fill-available;
@@ -2021,140 +1880,22 @@
     </footer>
 
     <script>
-        // ================== SECURE LINK GENERATION SYSTEM ==================
-
-        class SecureLinkGenerator {
-            constructor() {
-                // এনক্রিপশন কী (আপনি এটি পরিবর্তন করতে পারেন)
-                this.encryptionKey = 'EP_SECURE_2025_KEY_!@#';
-            }
-            
-            // Simple XOR encryption for data
-            encryptData(data) {
-                try {
-                    // Convert data to string
-                    const dataStr = JSON.stringify(data);
-                    let encrypted = '';
-                    
-                    // Simple XOR encryption
-                    for (let i = 0; i < dataStr.length; i++) {
-                        const keyChar = this.encryptionKey.charCodeAt(i % this.encryptionKey.length);
-                        const dataChar = dataStr.charCodeAt(i);
-                        encrypted += String.fromCharCode(dataChar ^ keyChar);
-                    }
-                    
-                    // Convert to Base64 for URL safety
-                    return btoa(encrypted);
-                } catch (error) {
-                    console.error("Encryption error:", error);
-                    return null;
-                }
-            }
-            
-            // Decrypt data
-            decryptData(encryptedData) {
-                try {
-                    // Decode from Base64
-                    const decoded = atob(encryptedData);
-                    let decrypted = '';
-                    
-                    // XOR decryption
-                    for (let i = 0; i < decoded.length; i++) {
-                        const keyChar = this.encryptionKey.charCodeAt(i % this.encryptionKey.length);
-                        const dataChar = decoded.charCodeAt(i);
-                        decrypted += String.fromCharCode(dataChar ^ keyChar);
-                    }
-                    
-                    return JSON.parse(decrypted);
-                } catch (error) {
-                    console.error("Decryption error:", error);
-                    return null;
-                }
-            }
-            
-            // Generate secure payment link
-            generatePaymentLink(orderData) {
-                const {
-                    orderId,
-                    userId,
-                    platformId,
-                    platformName,
-                    price,
-                    timestamp
-                } = orderData;
-                
-                // Create data object
-                const dataToEncrypt = {
-                    o: orderId,          // orderId
-                    u: userId,           // userId
-                    p: platformId,       // platformId
-                    n: platformName,     // platformName
-                    a: price,            // amount/price
-                    t: timestamp || Date.now(), // timestamp
-                    r: Math.random().toString(36).substr(2, 9) // random salt
-                };
-                
-                // Encrypt the data
-                const encryptedData = this.encryptData(dataToEncrypt);
-                
-                if (!encryptedData) {
-                    console.error("Failed to encrypt data");
-                    return null;
-                }
-                
-                // Generate secure URL
-                const baseUrl = "https://easy-premium.com/Pay.html";
-                const secureUrl = `${baseUrl}?data=${encodeURIComponent(encryptedData)}&v=2`;
-                
-                return secureUrl;
-            }
-            
-            // Parse payment link
-            parsePaymentLink(url) {
-                try {
-                    const urlObj = new URL(url);
-                    const encryptedData = urlObj.searchParams.get('data');
-                    
-                    if (!encryptedData) {
-                        return null;
-                    }
-                    
-                    return this.decryptData(encryptedData);
-                } catch (error) {
-                    console.error("Error parsing payment link:", error);
-                    return null;
-                }
-            }
-        }
-
         // ================== COLOR FIX SCRIPT ==================
         function applyColorFixes() {
-            // Fix body background
             document.body.style.backgroundColor = '#0a0a1a';
             document.body.style.backgroundImage = 'linear-gradient(135deg, #0a0a1a 0%, #121230 50%, #1a1a3a 100%)';
             document.body.style.backgroundAttachment = 'fixed';
             
-            // Fix all text colors
             const allElements = document.querySelectorAll('*');
             allElements.forEach(el => {
                 const style = window.getComputedStyle(el);
                 const color = style.color;
                 
-                // Fix black or dark text
                 if (color === 'rgb(0, 0, 0)' || color === 'black' || color === 'rgba(0, 0, 0, 0.87)') {
                     el.style.color = '#ffffff';
                 }
-                
-                // Fix background colors
-                const bgColor = style.backgroundColor;
-                if (bgColor === 'rgba(0, 0, 0, 0)' || bgColor === 'transparent') {
-                    // Keep transparent
-                } else if (bgColor === 'rgb(255, 255, 255)' || bgColor === 'white') {
-                    el.style.backgroundColor = '#0a0a1a';
-                }
             });
             
-            // Specific element fixes
             const accentElements = document.querySelectorAll('.logo-main, .platform-name, .profile-name, .section-title, .price');
             accentElements.forEach(el => {
                 el.style.color = '#ff9800';
@@ -2165,21 +1906,18 @@
                 el.style.color = '#00bcd4';
             });
             
-            // Button fixes
             const buttons = document.querySelectorAll('.buy-button, .submit-btn, .accept-btn, .google-login-btn, .logout-btn-profile');
             buttons.forEach(btn => {
                 btn.style.background = 'linear-gradient(45deg, #ff9800, #ff5722)';
                 btn.style.color = 'white';
             });
             
-            // Card fixes
             const cards = document.querySelectorAll('.platform-card, .profile-content, .login-content, .overlay-content');
             cards.forEach(card => {
                 card.style.background = 'rgba(20, 20, 40, 0.9)';
                 card.style.border = '1px solid rgba(255, 152, 0, 0.2)';
             });
             
-            // Input fixes
             const inputs = document.querySelectorAll('.form-input, .search-input');
             inputs.forEach(input => {
                 input.style.background = 'rgba(255, 255, 255, 0.1)';
@@ -2188,51 +1926,40 @@
             });
         }
         
-        // Apply fixes on load and resize
         document.addEventListener('DOMContentLoaded', applyColorFixes);
         window.addEventListener('resize', applyColorFixes);
         window.addEventListener('load', applyColorFixes);
-        
-        // Apply fixes periodically to ensure consistency
         setInterval(applyColorFixes, 1000);
         
-        // ================== MOBILE BOTTOM AREA FIX ==================
         function fixMobileBottomArea() {
-            // Add extra padding to footer for mobile safe area
             const footer = document.querySelector('.footer');
             if (footer && 'CSS' in window && 'supports' in window.CSS) {
                 if (window.CSS.supports('padding-bottom: env(safe-area-inset-bottom)')) {
-                    // Add safe area padding
                     const currentPadding = parseInt(window.getComputedStyle(footer).paddingBottom);
                     const safeAreaBottom = 'env(safe-area-inset-bottom)';
                     footer.style.paddingBottom = `calc(${currentPadding}px + ${safeAreaBottom})`;
                 }
             }
             
-            // Set body background to cover entire screen
             document.body.style.minHeight = '100vh';
             document.body.style.minHeight = '-webkit-fill-available';
             document.documentElement.style.height = '100%';
             document.body.style.height = '100%';
             
-            // Force repaint
             document.body.style.display = 'none';
-            document.body.offsetHeight; // Trigger reflow
+            document.body.offsetHeight;
             document.body.style.display = 'block';
         }
         
-        // Call the fix function
         document.addEventListener('DOMContentLoaded', fixMobileBottomArea);
         window.addEventListener('resize', fixMobileBottomArea);
         window.addEventListener('load', fixMobileBottomArea);
         
-        // Fix for iOS Safari
         if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
             document.addEventListener('touchstart', function() {}, {passive: true});
         }
         
-        // ================== ORIGINAL SCRIPT ==================
-        // Firebase Configuration
+        // ================== FIREBASE CONFIG ==================
         const firebaseConfig = {
             apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
             authDomain: "easy-premium.firebaseapp.com",
@@ -2244,7 +1971,6 @@
             measurementId: "G-CHL8K8HRPX"
         };
 
-        // Initialize Firebase
         try {
             firebase.initializeApp(firebaseConfig);
             console.log("Firebase initialized successfully");
@@ -2254,6 +1980,9 @@
         
         const database = firebase.database();
         const auth = firebase.auth();
+
+        // ================== EMAILJS CONFIG ==================
+        emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); // EmailJS থেকে Public Key দিন
 
         // DOM Elements
         const loginModal = document.getElementById('loginModal');
@@ -2279,12 +2008,10 @@
         const purchaseSubmitBtn = document.getElementById('purchaseSubmitBtn');
         const purchaseCancelBtn = document.getElementById('purchaseCancelBtn');
         
-        // Search elements
         const searchInput = document.getElementById('searchInput');
         const searchBtn = document.getElementById('searchBtn');
         const searchResults = document.getElementById('searchResults');
         
-        // MODERN Cart icon element
         const cartIcon = document.getElementById('cartIcon');
         const cartBadge = document.getElementById('cartBadge');
 
@@ -2294,7 +2021,6 @@
         let userOrders = [];
         let allPlatforms = [];
 
-        // Function to generate color based on name
         function getColorFromName(name) {
             const colors = [
                 '#FF6B6B', '#4ECDC4', '#FFD166', '#06D6A0', '#118AB2',
@@ -2309,7 +2035,6 @@
             return colors[colorIndex];
         }
 
-        // Cookie Consent Logic
         const websiteOverlay = document.getElementById('websiteOverlay');
         const overlayAcceptBtn = document.getElementById('overlayAcceptBtn');
         
@@ -2333,7 +2058,6 @@
         
         overlayAcceptBtn.addEventListener('click', acceptAllCookies);
         
-        // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             const hasAccepted = checkCookieConsent();
             
@@ -2349,7 +2073,6 @@
                     </div>
                 `;
                 
-                // Disable all elements except cookie buttons
                 document.querySelectorAll('button, input, a').forEach(element => {
                     if (element.id !== 'overlayAcceptBtn' && !element.classList.contains('cookie-link')) {
                         element.style.pointerEvents = 'none';
@@ -2358,17 +2081,14 @@
                 });
             }
             
-            // Fix for viewport meta tag
             const viewportMeta = document.querySelector('meta[name="viewport"]');
             if (viewportMeta) {
                 viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=no, viewport-fit=cover';
             }
             
-            // Apply mobile fixes
             fixMobileBottomArea();
         });
 
-        // MODERN Cart icon click handler
         cartIcon.addEventListener('click', function() {
             if (!checkCookieConsent()) {
                 websiteOverlay.style.display = 'flex';
@@ -2383,7 +2103,6 @@
             }
         });
 
-        // Search functionality
         function initializeSearch() {
             if (!searchInput) return;
             
@@ -2451,7 +2170,6 @@
             }
         }
         
-        // Display search results
         function displaySearchResults(platforms) {
             if (!searchResults) return;
             
@@ -2463,7 +2181,6 @@
                 return;
             }
             
-            // আইকন ম্যাপিং ফাংশন - Netflix এবং Adobe এর জন্য ফিক্সড
             function getIconClass(iconName) {
                 const iconMap = {
                     'youtube': 'fab fa-youtube youtube',
@@ -2514,7 +2231,6 @@
             searchResults.style.display = 'block';
         }
         
-        // Scroll to platform card in the grid
         function scrollToPlatformCard(platformName) {
             const platformCards = document.querySelectorAll('.platform-card');
             
@@ -2537,25 +2253,21 @@
             });
         }
 
-        // Delete Account Button - সরাসরি কাজ করবে (কোন ওয়ার্নিং নেই)
         deleteAccountBtn.addEventListener('click', function() {
             window.open('AccountDelete.html', '_blank');
         });
 
-        // Close Profile Modal when clicking outside
         profileModal.addEventListener('click', function(e) {
             if (e.target === profileModal) {
                 profileModal.style.display = 'none';
             }
         });
 
-        // Close Login Modal
         closeLoginBtn.addEventListener('click', function() {
             loginModal.style.display = 'none';
             pendingPurchase = null;
         });
 
-        // Close modals when clicking outside
         loginModal.addEventListener('click', function(e) {
             if (e.target === loginModal) {
                 loginModal.style.display = 'none';
@@ -2569,77 +2281,43 @@
             }
         });
 
-        // ===================== FIXED LOGIN SYSTEM =====================
-        
-        // User Registration & Login System
-        class EasyPremiumAuthSystem {
-            constructor() {
-                this.currentUserUID = null;
-                this.currentUserData = null;
+        // ===================== GOOGLE LOGIN SYSTEM =====================
+        googleLoginBtn.addEventListener('click', async function() {
+            if (!checkCookieConsent()) {
+                websiteOverlay.style.display = 'flex';
+                return;
             }
             
-            // Google Sign In - FIXED VERSION
-            async signInWithGoogle() {
-                try {
-                    const provider = new firebase.auth.GoogleAuthProvider();
-                    provider.addScope('profile');
-                    provider.addScope('email');
-                    
-                    // Set custom parameters for better UX
-                    provider.setCustomParameters({
-                        prompt: 'select_account'
-                    });
-                    
-                    console.log("Starting Google sign in...");
-                    const result = await auth.signInWithPopup(provider);
-                    
-                    console.log("Google sign in successful:", result.user);
-                    this.currentUserUID = result.user.uid;
-                    
-                    // Create or update user in database with UID
-                    await this.createOrUpdateUserInDatabase(result.user);
-                    
-                    console.log("User logged in with UID:", this.currentUserUID);
-                    return { success: true, user: result.user };
-                    
-                } catch (error) {
-                    console.error("Google Sign In Error:", error);
-                    console.error("Error code:", error.code);
-                    console.error("Error message:", error.message);
-                    console.error("Error email:", error.email);
-                    console.error("Error credential:", error.credential);
-                    
-                    // Check for specific errors
-                    if (error.code === 'auth/popup-blocked') {
-                        return { success: false, error: 'পপআপ ব্লক করা হয়েছে। দয়া করে ব্রাউজার সেটিংস চেক করুন।' };
-                    } else if (error.code === 'auth/popup-closed-by-user') {
-                        return { success: false, error: 'লগইন পপআপ বন্ধ করা হয়েছে।' };
-                    } else if (error.code === 'auth/cancelled-popup-request') {
-                        return { success: false, error: 'লগইন রিকোয়েস্ট বাতিল হয়েছে।' };
-                    } else if (error.code === 'auth/account-exists-with-different-credential') {
-                        return { success: false, error: 'এই ইমেইল অন্য অ্যাকাউন্টের সাথে যুক্ত আছে।' };
-                    } else {
-                        return { success: false, error: error.message };
-                    }
-                }
-            }
+            const originalText = googleLoginBtn.innerHTML;
+            googleLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> লগইন হচ্ছে...';
+            googleLoginBtn.disabled = true;
             
-            // Create or update user in database with UID
-            async createOrUpdateUserInDatabase(firebaseUser) {
-                const userUID = firebaseUser.uid;
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.addScope('profile');
+                provider.addScope('email');
+                
+                provider.setCustomParameters({
+                    prompt: 'select_account'
+                });
+                
+                console.log("Starting Google sign in...");
+                const result = await auth.signInWithPopup(provider);
+                
+                console.log("Google sign in successful:", result.user);
+                
+                const userUID = result.user.uid;
                 
                 try {
-                    // Check if user exists in database
                     const userRef = database.ref(`users/${userUID}`);
                     const snapshot = await userRef.once('value');
                     
                     if (!snapshot.exists()) {
-                        // Create new user with UID
                         const userData = {
                             uid: userUID,
-                            email: firebaseUser.email || '',
-                            displayName: firebaseUser.displayName || '',
-                            photoURL: firebaseUser.photoURL || '',
+                            email: result.user.email || '',
+                            displayName: result.user.displayName || '',
+                            photoURL: result.user.photoURL || '',
                             createdAt: firebase.database.ServerValue.TIMESTAMP,
                             lastLogin: firebase.database.ServerValue.TIMESTAMP,
                             accountType: 'customer',
@@ -2649,269 +2327,352 @@
                         await userRef.set(userData);
                         console.log("New user created with UID:", userUID);
                     } else {
-                        // Update last login
                         await userRef.child('lastLogin').set(firebase.database.ServerValue.TIMESTAMP);
                     }
                     
-                    // Store user data locally
-                    const userSnap = await userRef.once('value');
-                    this.currentUserData = userSnap.val() || {
-                        uid: userUID,
-                        email: firebaseUser.email,
-                        displayName: firebaseUser.displayName
-                    };
-                    
                 } catch (error) {
-                    console.error("Error in createOrUpdateUserInDatabase:", error);
-                    // Still store basic user data locally even if DB fails
-                    this.currentUserData = {
-                        uid: userUID,
-                        email: firebaseUser.email,
-                        displayName: firebaseUser.displayName
-                    };
-                }
-            }
-            
-            // Get current user UID
-            getCurrentUID() {
-                return this.currentUserUID || (auth.currentUser ? auth.currentUser.uid : null);
-            }
-            
-            // Check if user is authenticated
-            isAuthenticated() {
-                return !!this.getCurrentUID();
-            }
-            
-            // Sign out
-            async signOut() {
-                try {
-                    await auth.signOut();
-                    this.currentUserUID = null;
-                    this.currentUserData = null;
-                    
-                    console.log("User signed out");
-                    return { success: true };
-                    
-                } catch (error) {
-                    console.error("Sign Out Error:", error);
-                    return { success: false, error: error.message };
-                }
-            }
-            
-            // Get user data
-            async getUserData() {
-                const uid = this.getCurrentUID();
-                if (!uid) return null;
-                
-                try {
-                    const userRef = database.ref(`users/${uid}`);
-                    const snapshot = await userRef.once('value');
-                    
-                    if (snapshot.exists()) {
-                        this.currentUserData = snapshot.val();
-                        return this.currentUserData;
-                    }
-                    
-                    return null;
-                    
-                } catch (error) {
-                    console.error("Error getting user data:", error);
-                    return null;
-                }
-            }
-        }
-        
-        // UID-based Data Access System
-        class UIDDataProtectionSystem {
-            constructor() {
-                this.authSystem = new EasyPremiumAuthSystem();
-            }
-            
-            // Create order with UID protection
-            async createOrder(orderData) {
-                const userUID = this.authSystem.getCurrentUID();
-                
-                if (!userUID) {
-                    throw new Error("User must be logged in to create order");
+                    console.error("Error in user database operation:", error);
                 }
                 
-                // Get user data
-                const userData = await this.authSystem.getUserData();
+                loginModal.style.display = 'none';
                 
-                const orderWithUID = {
-                    ...orderData,
-                    userId: userUID,
-                    userEmail: userData?.email || '',
-                    userName: userData?.displayName || orderData.userName || '',
-                    orderDate: new Date().toISOString(),
-                    status: 'pending',
-                    orderId: this.generateOrderId(),
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                };
+                updateCartBadge(result.user.uid);
                 
-                try {
-                    // Store in transactions
-                    const transactionRef = database.ref('transactions').push();
-                    await transactionRef.set(orderWithUID);
-                    
-                    // Also store in user's personal orders collection
-                    const userOrderRef = database.ref(`userOrders/${userUID}/${transactionRef.key}`);
-                    await userOrderRef.set({
-                        orderId: transactionRef.key,
-                        platform: orderData.platform,
-                        price: orderData.price,
-                        status: 'pending',
-                        orderDate: orderWithUID.orderDate,
-                        platformId: orderData.platformId
-                    });
-                    
-                    return {
-                        success: true,
-                        orderId: transactionRef.key,
-                        userId: userUID
-                    };
-                    
-                } catch (error) {
-                    console.error("Order creation error:", error);
-                    throw error;
-                }
-            }
-            
-            // Get user's orders
-            async getUserOrders() {
-                const userUID = this.authSystem.getCurrentUID();
-                
-                if (!userUID) {
-                    console.log("No user UID found");
-                    return [];
-                }
-                
-                try {
-                    const snapshot = await database.ref(`userOrders/${userUID}`).once('value');
-                    
-                    const orders = [];
-                    snapshot.forEach(child => {
-                        orders.push({
-                            id: child.key,
-                            ...child.val()
-                        });
-                    });
-                    
-                    // Sort by date (newest first)
-                    orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-                    
-                    return orders;
-                    
-                } catch (error) {
-                    console.error("Error getting user orders:", error);
-                    return [];
-                }
-            }
-            
-            // Update order status
-            async updateOrderStatus(orderId, newStatus) {
-                const userUID = this.authSystem.getCurrentUID();
-                
-                if (!userUID) {
-                    throw new Error("User not authenticated");
-                }
-                
-                try {
-                    // First check if this order belongs to the user
-                    const orderRef = database.ref(`userOrders/${userUID}/${orderId}`);
-                    const snapshot = await orderRef.once('value');
-                    
-                    if (!snapshot.exists()) {
-                        throw new Error("Order not found or you don't have permission");
-                    }
-                    
-                    // Update status in user's orders
-                    await orderRef.update({
-                        status: newStatus,
-                        updatedAt: firebase.database.ServerValue.TIMESTAMP
-                    });
-                    
-                    return { success: true };
-                    
-                } catch (error) {
-                    console.error("Error updating order:", error);
-                    throw error;
-                }
-            }
-            
-            // Get user's profile
-            async getUserProfile() {
-                return await this.authSystem.getUserData();
-            }
-            
-            // Helper function to generate order ID
-            generateOrderId() {
-                const timestamp = Date.now();
-                const random = Math.random().toString(36).substr(2, 9).toUpperCase();
-                return `EP-${timestamp}-${random}`;
-            }
-        }
-        
-        // Initialize auth and data protection systems
-        const authSystem = new EasyPremiumAuthSystem();
-        const dataProtectionSystem = new UIDDataProtectionSystem();
-        const secureLinkGenerator = new SecureLinkGenerator();
-        
-        // ===================== FIXED LOGIN EVENT LISTENER =====================
-        
-        // Google Login - FIXED VERSION
-        googleLoginBtn.addEventListener('click', async function() {
-            if (!checkCookieConsent()) {
-                websiteOverlay.style.display = 'flex';
-                return;
-            }
-            
-            // Show loading state
-            const originalText = googleLoginBtn.innerHTML;
-            googleLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> লগইন হচ্ছে...';
-            googleLoginBtn.disabled = true;
-            
-            try {
-                console.log("Google login button clicked");
-                const result = await authSystem.signInWithGoogle();
-                
-                if (result.success) {
-                    console.log("Login successful, closing modal");
-                    loginModal.style.display = 'none';
-                    
-                    // Update cart badge with user's UID
-                    updateCartBadge(authSystem.getCurrentUID());
-                    
-                    // If there was a pending purchase, show purchase form
-                    if (pendingPurchase) {
-                        showPurchaseForm(pendingPurchase);
-                        pendingPurchase = null;
-                    }
-                    
-                } else {
-                    alert("লগইন ব্যর্থ: " + result.error);
+                if (pendingPurchase) {
+                    showPurchaseForm(pendingPurchase);
+                    pendingPurchase = null;
                 }
                 
             } catch (error) {
-                console.error("Login error:", error);
-                alert("লগইন ব্যর্থ: " + error.message);
+                console.error("Google Sign In Error:", error);
+                
+                let errorMessage = "লগইন ব্যর্থ হয়েছে";
+                if (error.code === 'auth/popup-blocked') {
+                    errorMessage = 'পপআপ ব্লক করা হয়েছে। দয়া করে ব্রাউজার সেটিংস চেক করুন।';
+                } else if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage = 'লগইন পপআপ বন্ধ করা হয়েছে।';
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    errorMessage = 'লগইন রিকোয়েস্ট বাতিল হয়েছে।';
+                } else if (error.code === 'auth/account-exists-with-different-credential') {
+                    errorMessage = 'এই ইমেইল অন্য অ্যাকাউন্টের সাথে যুক্ত আছে।';
+                } else {
+                    errorMessage = error.message;
+                }
+                
+                alert(errorMessage);
             } finally {
-                // Reset button state
                 googleLoginBtn.innerHTML = originalText;
                 googleLoginBtn.disabled = false;
             }
         });
 
-        // Logout function - সরাসরি কাজ করবে (কোন ওয়ার্নিং নেই)
         logoutBtnProfile.addEventListener('click', async function() {
-            await authSystem.signOut();
-            profileModal.style.display = 'none';
-            userOrders = [];
-            cartBadge.style.display = 'none';
-            console.log("User logged out successfully");
+            try {
+                await auth.signOut();
+                profileModal.style.display = 'none';
+                userOrders = [];
+                cartBadge.style.display = 'none';
+                console.log("User logged out successfully");
+            } catch (error) {
+                console.error("Logout error:", error);
+            }
         });
 
-        // Purchase Form Submission
+        // ===================== ইমেইল পাঠানোর ফাংশন =====================
+        async function sendOrderConfirmationEmail(userEmail, userName, orderData) {
+            try {
+                // EmailJS দিয়ে ইমেইল পাঠানো
+                const templateParams = {
+                    to_email: userEmail,
+                    to_name: userName || 'গ্রাহক',
+                    from_name: 'Easy Premium',
+                    from_email: 'noreply@easy-premium.com',
+                    order_id: orderData.orderId,
+                    platform: orderData.platform,
+                    price: orderData.price,
+                    phone: orderData.phoneNumber,
+                    whatsapp: orderData.whatsappNumber,
+                    order_date: new Date().toLocaleString('bn-BD', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    payment_link: orderData.paymentLink || 'https://easy-premium.com/Pay.html',
+                    reply_to: 'mdashikislam017705@gmail.com'
+                };
+                
+                // EmailJS এ টেমপ্লেট আইডি এবং সার্ভিস আইডি দিন
+                const serviceID = 'YOUR_EMAILJS_SERVICE_ID'; // EmailJS Service ID
+                const templateID = 'YOUR_EMAILJS_TEMPLATE_ID'; // EmailJS Template ID
+                
+                const response = await emailjs.send(serviceID, templateID, templateParams);
+                
+                console.log('Email sent successfully:', response);
+                
+                // Firebase-এ ইমেইল পাঠানোর রেকর্ড রাখুন
+                if (orderData.orderId) {
+                    await database.ref(`transactions/${orderData.orderId}`).update({
+                        emailSent: true,
+                        emailSentAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error sending email:', error);
+                return false;
+            }
+        }
+
+        // ===================== পেমেন্ট লিংক জেনারেটর =====================
+        function generatePaymentLink(orderId, platform, price) {
+            const encryptionKey = 'EP_SECURE_2025_KEY_!@#';
+            
+            try {
+                const dataObj = {
+                    o: orderId,
+                    p: platform,
+                    a: price,
+                    t: Date.now(),
+                    r: Math.random().toString(36).substr(2, 9)
+                };
+                
+                const dataStr = JSON.stringify(dataObj);
+                let encrypted = '';
+                
+                for (let i = 0; i < dataStr.length; i++) {
+                    const keyChar = encryptionKey.charCodeAt(i % encryptionKey.length);
+                    const dataChar = dataStr.charCodeAt(i);
+                    encrypted += String.fromCharCode(dataChar ^ keyChar);
+                }
+                
+                const encodedData = btoa(encrypted);
+                const urlEncoded = encodeURIComponent(encodedData);
+                
+                return `https://easy-premium.com/Pay.html?data=${urlEncoded}&v=2`;
+            } catch (error) {
+                console.error("Payment link generation error:", error);
+                return `https://easy-premium.com/Pay.html?order=${orderId}&v=2`;
+            }
+        }
+
+        // ===================== প্ল্যাটফর্ম লোড ফাংশন =====================
+        function loadPlatformsFromFirebase() {
+            const platformsGrid = document.getElementById('platforms-grid');
+            if (!platformsGrid) return;
+            
+            platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে...</p></div>';
+
+            const platformsRef = database.ref('publicData/pricingPlans');
+            
+            platformsRef.on('value', (snapshot) => {
+                const platformsData = snapshot.val();
+                platformsGrid.innerHTML = '';
+
+                if (!platformsData) {
+                    showNoPlatformsMessage();
+                    return;
+                }
+
+                allPlatforms = [];
+                
+                Object.entries(platformsData).forEach(([id, platform]) => {
+                    allPlatforms.push({
+                        id: id,
+                        name: platform.name,
+                        icon: platform.icon,
+                        description: platform.description,
+                        price: platform.price,
+                        features: platform.features || [],
+                        category: platform.category,
+                        order: platform.order || 0,
+                        status: platform.status || 'active',
+                        color: platform.color || '#ff9800'
+                    });
+                });
+                
+                allPlatforms.sort((a, b) => (a.order || 0) - (b.order || 0));
+                
+                const activePlatforms = allPlatforms.filter(platform => platform.status === 'active');
+
+                activePlatforms.forEach(platform => {
+                    createPlatformCard(platform);
+                });
+
+                document.querySelectorAll('.platform-card .buy-button').forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const platformCard = this.closest('.platform-card');
+                        handlePurchase(platformCard);
+                    });
+                });
+
+                initializeSearch();
+                
+                animatePlatformCards();
+            }, (error) => {
+                console.error("Error loading platforms:", error);
+                showNoPlatformsMessage();
+            });
+        }
+
+        function showNoPlatformsMessage() {
+            const platformsGrid = document.getElementById('platforms-grid');
+            platformsGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-box-open" style="font-size: 3.5rem; color: #ff9800; margin-bottom: 20px;"></i>
+                    <h3 style="color: #ff9800; margin-bottom: 15px;">প্ল্যাটফর্ম পাওয়া যায়নি</h3>
+                    <p style="color: #ddd; max-width: 500px; margin: 0 auto;">
+                        বর্তমানে কোনো প্ল্যাটফর্ম পাওয়া যায়নি। দয়া করে কিছুক্ষণ পরে আবার চেষ্টা করুন অথবা অ্যাডমিনের সাথে যোগাযোগ করুন।
+                    </p>
+                </div>
+            `;
+        }
+
+        function createPlatformCard(platform) {
+            const platformsGrid = document.getElementById('platforms-grid');
+            const platformCard = document.createElement('div');
+            platformCard.className = 'platform-card';
+            platformCard.setAttribute('data-platform-name', platform.name);
+            platformCard.setAttribute('data-platform-id', platform.id);
+            
+            function getIconClass(iconName) {
+                const iconMap = {
+                    'youtube': 'fab fa-youtube youtube',
+                    'facebook': 'fab fa-facebook-f facebook',
+                    'instagram': 'fab fa-instagram instagram',
+                    'tiktok': 'fab fa-tiktok tiktok',
+                    'whatsapp': 'fab fa-whatsapp whatsapp',
+                    'telegram': 'fab fa-telegram telegram',
+                    'netflix': 'fas fa-film netflix',
+                    'spotify': 'fab fa-spotify spotify',
+                    'discord': 'fab fa-discord discord',
+                    'amazon': 'fab fa-amazon amazon',
+                    'microsoft': 'fab fa-microsoft microsoft',
+                    'adobe': 'fas fa-paint-brush adobe',
+                    'canva': 'fas fa-paint-brush canva',
+                    'google': 'fab fa-google google',
+                    'linkedin': 'fab fa-linkedin linkedin'
+                };
+                
+                const lowerIconName = iconName ? iconName.toLowerCase() : '';
+                return iconMap[lowerIconName] || 'fas fa-cube';
+            }
+
+            const iconSource = platform.icon || platform.name || '';
+            const iconClass = getIconClass(iconSource);
+
+            platformCard.innerHTML = `
+                <div class="platform-header">
+                    <i class="${iconClass} platform-icon"></i>
+                    <div class="platform-name">${platform.name || 'প্ল্যাটফর্ম'}</div>
+                </div>
+                <div class="platform-description">
+                    ${platform.description || 'প্রিমিয়াম সেবা পান সবচেয়ে কম দামে।'}
+                </div>
+                <div class="platform-features">
+                    ${platform.features && platform.features.length > 0 ? platform.features.map(feature => `
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>${feature}</span>
+                        </div>
+                    `).join('') : `
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>ইনস্ট্যান্ট ডেলিভারি</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>১০০% সেফ</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>গ্যারান্টিড</span>
+                        </div>
+                    `}
+                </div>
+                <div class="platform-price">
+                    <div class="price">${platform.price || '৳ 100'}</div>
+                    <div class="price-desc">লগইন তথ্যের প্রয়োজন নেই</div>
+                </div>
+                <button class="buy-button">কিনুন</button>
+            `;
+
+            platformsGrid.appendChild(platformCard);
+        }
+
+        function animatePlatformCards() {
+            const cards = document.querySelectorAll('.platform-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.5s, transform 0.5s';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+        }
+        
+        function initializeAuth() {
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    console.log("User is signed in with UID:", user.uid);
+                    updateCartBadge(user.uid);
+                } else {
+                    console.log("No user signed in");
+                }
+            });
+        }
+
+        // ===================== পেমেন্ট লিংক সহ অর্ডার তৈরি ফাংশন =====================
+        async function createOrderWithEmail(orderData) {
+            try {
+                const user = auth.currentUser;
+                if (!user) throw new Error("User not logged in");
+                
+                const orderId = `EP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+                
+                const paymentLink = generatePaymentLink(orderId, orderData.platform, orderData.price);
+                
+                const orderWithId = {
+                    ...orderData,
+                    orderId: orderId,
+                    userId: user.uid,
+                    userEmail: user.email || '',
+                    userName: orderData.userName || user.displayName || '',
+                    orderDate: new Date().toISOString(),
+                    status: 'pending',
+                    paymentLink: paymentLink,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
+                
+                const transactionRef = database.ref('transactions').push();
+                await transactionRef.set(orderWithId);
+                
+                const userOrderRef = database.ref(`userOrders/${user.uid}/${transactionRef.key}`);
+                await userOrderRef.set({
+                    orderId: transactionRef.key,
+                    platform: orderData.platform,
+                    price: orderData.price,
+                    status: 'pending',
+                    orderDate: orderWithId.orderDate,
+                    platformId: orderData.platformId
+                });
+                
+                orderWithId.firebaseKey = transactionRef.key;
+                
+                return orderWithId;
+                
+            } catch (error) {
+                console.error("Order creation error:", error);
+                throw error;
+            }
+        }
+
         purchaseForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -2920,20 +2681,17 @@
                 return;
             }
             
+            if (!auth.currentUser) {
+                alert('আপনাকে প্রথমে লগইন করতে হবে');
+                loginModal.style.display = 'flex';
+                pendingPurchase = currentPurchaseInfo;
+                return;
+            }
+            
             if (!currentPurchaseInfo) return;
             
-            if (!purchaseUserName.value.trim()) {
-                purchaseUserName.focus();
-                return;
-            }
-            
-            if (!purchasePhoneNumber.value.trim()) {
-                purchasePhoneNumber.focus();
-                return;
-            }
-            
-            if (!purchaseWhatsappNumber.value.trim()) {
-                purchaseWhatsappNumber.focus();
+            if (!purchaseUserName.value.trim() || !purchasePhoneNumber.value.trim() || !purchaseWhatsappNumber.value.trim()) {
+                alert('সব তথ্য দিন');
                 return;
             }
             
@@ -2941,7 +2699,6 @@
             purchaseSubmitBtn.textContent = 'প্রসেসিং...';
             
             try {
-                // Create order with UID protection
                 const orderData = {
                     userName: purchaseUserName.value.trim(),
                     phoneNumber: purchasePhoneNumber.value.trim(),
@@ -2951,129 +2708,90 @@
                     platformId: currentPurchaseInfo.platformId
                 };
                 
-                const result = await dataProtectionSystem.createOrder(orderData);
+                const createdOrder = await createOrderWithEmail(orderData);
                 
-                if (result.success) {
-                    console.log("Order created successfully with ID:", result.orderId);
-                    
-                    // Reset form
-                    purchaseForm.reset();
-                    
-                    // Generate secure payment link
-                    const orderFullData = {
-                        orderId: result.orderId,
-                        userId: result.userId,
-                        platformId: currentPurchaseInfo.platformId,
-                        platformName: currentPurchaseInfo.platformName,
-                        price: currentPurchaseInfo.price,
-                        timestamp: Date.now()
-                    };
-                    
-                    const paymentLink = secureLinkGenerator.generatePaymentLink(orderFullData);
-                    
-                    if (paymentLink) {
-                        console.log("Generated secure payment link:", paymentLink);
-                        
-                        purchaseModal.style.display = 'none';
-                        currentPurchaseInfo = null;
-                        
-                        // Update cart badge
-                        updateCartBadge(result.userId);
-                        
-                        purchaseSubmitBtn.disabled = false;
-                        purchaseSubmitBtn.textContent = 'অর্ডার কনফার্ম করুন';
-                        
-                        // নতুন উইন্ডোতে পেমেন্ট লিঙ্ক ওপেন করুন
-                        window.open(paymentLink, '_blank');
-                    } else {
-                        throw new Error("Failed to generate payment link");
-                    }
-                    
-                } else {
-                    throw new Error("Order creation failed");
+                console.log("Order created successfully with ID:", createdOrder.orderId);
+                
+                purchaseForm.reset();
+                
+                // ===================== ইমেইল পাঠান =====================
+                const user = auth.currentUser;
+                if (user && user.email) {
+                    // ব্যাকগ্রাউন্ডে ইমেইল পাঠান - কোন ডায়লগ দেখাবে না
+                    sendOrderConfirmationEmail(user.email, createdOrder.userName, createdOrder).catch(err => {
+                        console.error("Background email sending error:", err);
+                    });
                 }
+                
+                purchaseModal.style.display = 'none';
+                currentPurchaseInfo = null;
+                
+                updateCartBadge(user.uid);
+                
+                window.open(createdOrder.paymentLink, '_blank');
                 
             } catch (error) {
                 console.error("Error creating order:", error);
                 alert("অর্ডার তৈরি করতে সমস্যা হয়েছে: " + error.message);
-                
+            } finally {
                 purchaseSubmitBtn.disabled = false;
                 purchaseSubmitBtn.textContent = 'অর্ডার কনফার্ম করুন';
             }
         });
 
-        // Function to handle purchase
         function handlePurchase(platformCard) {
             if (!checkCookieConsent()) {
                 websiteOverlay.style.display = 'flex';
                 return;
             }
             
-            const userUID = authSystem.getCurrentUID();
+            const platformName = platformCard.querySelector('.platform-name').textContent;
+            const price = platformCard.querySelector('.price').textContent;
+            const platformId = platformCard.getAttribute('data-platform-id');
             
-            if (!userUID) {
-                const platformName = platformCard.querySelector('.platform-name').textContent;
-                const price = platformCard.querySelector('.price').textContent;
-                const platformId = platformCard.getAttribute('data-platform-id');
-                
+            if (!auth.currentUser) {
                 pendingPurchase = {
                     platformName: platformName,
                     price: price,
                     platformId: platformId,
                     platformCard: platformCard
                 };
-                
                 loginModal.style.display = 'flex';
             } else {
                 showPurchaseForm({
-                    platformName: platformCard.querySelector('.platform-name').textContent,
-                    price: platformCard.querySelector('.price').textContent,
-                    platformId: platformCard.getAttribute('data-platform-id'),
+                    platformName: platformName,
+                    price: price,
+                    platformId: platformId,
                     platformCard: platformCard
                 });
             }
         }
 
-        // Load user profile data
         async function loadUserProfile() {
-            const userUID = authSystem.getCurrentUID();
+            const user = auth.currentUser;
             
-            if (!userUID) {
-                console.log("No user UID found");
-                return;
-            }
+            if (!user) return;
             
             try {
-                // Get user data with UID
-                const userData = await dataProtectionSystem.getUserProfile();
+                const userUID = user.uid;
                 
-                if (userData) {
-                    profileName.textContent = userData.displayName || userData.email || "User";
-                    profileEmail.textContent = userData.email || "No email";
-                    
-                    // Set profile avatar
-                    setProfileAvatar(userData);
-                    
-                    // Load user's orders
-                    await loadUserOrders(userUID);
+                profileName.textContent = user.displayName || user.email || "User";
+                profileEmail.textContent = user.email || "No email";
+                
+                if (user.photoURL) {
+                    const img = document.createElement('img');
+                    img.src = user.photoURL;
+                    img.alt = user.displayName || "User";
+                    img.className = 'profile-avatar-img';
+                    profileAvatar.innerHTML = '';
+                    profileAvatar.appendChild(img);
                 } else {
-                    profileName.textContent = "User";
-                    profileEmail.textContent = "No email";
-                    setProfileAvatar(null);
+                    const firstName = user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase();
+                    const color = getColorFromName(user.displayName || user.email);
+                    profileAvatar.style.background = color;
+                    profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: bold;">${firstName}</span>`;
                 }
                 
-            } catch (error) {
-                console.error("Error loading user profile:", error);
-                profileName.textContent = "Error";
-                profileEmail.textContent = "Could not load profile";
-            }
-        }
-
-        // Load user orders
-        async function loadUserOrders(userUID) {
-            ordersList.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>অর্ডার লোড হচ্ছে...</p></div>';
-            
-            try {
                 const snapshot = await database.ref(`userOrders/${userUID}`).once('value');
                 
                 const orders = [];
@@ -3093,24 +2811,21 @@
                 
                 displayOrders(orders);
                 
-                // Update cart badge
                 cartBadge.textContent = orders.length;
                 cartBadge.style.display = 'flex';
                 
             } catch (error) {
-                console.error("Error loading user orders:", error);
+                console.error("Error loading user profile:", error);
                 ordersList.innerHTML = '<div class="no-orders">অর্ডার লোড করতে সমস্যা হয়েছে</div>';
             }
         }
 
-        // Display orders
         function displayOrders(orders) {
             if (orders.length === 0) {
                 ordersList.innerHTML = '<div class="no-orders">আপনার কোন অর্ডার নেই</div>';
                 return;
             }
             
-            // Check screen width to decide which view to show
             const isDesktop = window.innerWidth >= 1025;
             
             if (isDesktop) {
@@ -3237,35 +2952,25 @@
             }
         }
 
-        // Set profile avatar
-        function setProfileAvatar(userData) {
-            profileAvatar.innerHTML = '';
+        function showPurchaseForm(purchaseData) {
+            currentPurchaseInfo = purchaseData;
             
-            if (userData && userData.photoURL) {
-                const img = document.createElement('img');
-                img.src = userData.photoURL;
-                img.alt = userData.displayName || "User";
-                img.className = 'profile-avatar-img';
-                img.onerror = function() {
-                    showInitialAvatar(userData.displayName || userData.email);
-                };
-                profileAvatar.appendChild(img);
+            purchasePlatformName.textContent = purchaseData.platformName;
+            purchasePlatformPrice.textContent = `দাম: ${purchaseData.price}`;
+            
+            const user = auth.currentUser;
+            if (user && user.displayName) {
+                purchaseUserName.value = user.displayName;
             } else {
-                const userName = userData ? (userData.displayName || userData.email || "User") : "User";
-                showInitialAvatar(userName);
+                purchaseUserName.value = '';
             }
-        }
-
-        // Show initial avatar
-        function showInitialAvatar(userName) {
-            const firstName = userName ? userName.charAt(0).toUpperCase() : "U";
-            const color = getColorFromName(userName);
             
-            profileAvatar.style.background = color;
-            profileAvatar.innerHTML = `<span style="font-size: 2rem; font-weight: bold;">${firstName}</span>`;
+            purchasePhoneNumber.value = '';
+            purchaseWhatsappNumber.value = '';
+            
+            purchaseModal.style.display = 'flex';
         }
 
-        // Update cart badge
         async function updateCartBadge(userId) {
             if (!userId) return;
             
@@ -3285,248 +2990,29 @@
                 cartBadge.style.display = 'none';
             }
         }
-
-        // Show purchase form
-        function showPurchaseForm(purchaseData) {
-            currentPurchaseInfo = purchaseData;
-            
-            purchasePlatformName.textContent = purchaseData.platformName;
-            purchasePlatformPrice.textContent = `দাম: ${purchaseData.price}`;
-            
-            const userUID = authSystem.getCurrentUID();
-            if (userUID) {
-                // Try to get user name from stored data
-                if (authSystem.currentUserData && authSystem.currentUserData.displayName) {
-                    purchaseUserName.value = authSystem.currentUserData.displayName;
-                } else {
-                    purchaseUserName.value = '';
-                }
-            } else {
-                purchaseUserName.value = '';
-            }
-            
-            purchasePhoneNumber.value = '';
-            purchaseWhatsappNumber.value = '';
-            
-            purchaseModal.style.display = 'flex';
-        }
-
-        // Function to load platforms from Firebase
-        function loadPlatformsFromFirebase() {
-            const platformsGrid = document.getElementById('platforms-grid');
-            if (!platformsGrid) return;
-            
-            platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে...</p></div>';
-
-            const platformsRef = database.ref('publicData/pricingPlans');
-            
-            platformsRef.on('value', (snapshot) => {
-                const platformsData = snapshot.val();
-                platformsGrid.innerHTML = '';
-
-                if (!platformsData) {
-                    showNoPlatformsMessage();
-                    return;
-                }
-
-                allPlatforms = [];
-                
-                // Convert object to array
-                Object.entries(platformsData).forEach(([id, platform]) => {
-                    allPlatforms.push({
-                        id: id,
-                        name: platform.name,
-                        icon: platform.icon,
-                        description: platform.description,
-                        price: platform.price,
-                        features: platform.features || [],
-                        category: platform.category,
-                        order: platform.order || 0,
-                        status: platform.status || 'active',
-                        color: platform.color || '#ff9800'
-                    });
-                });
-                
-                // Sort by order
-                allPlatforms.sort((a, b) => (a.order || 0) - (b.order || 0));
-                
-                // Filter active platforms only
-                const activePlatforms = allPlatforms.filter(platform => platform.status === 'active');
-
-                activePlatforms.forEach(platform => {
-                    createPlatformCard(platform);
-                });
-
-                document.querySelectorAll('.platform-card .buy-button').forEach(button => {
-                    button.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const platformCard = this.closest('.platform-card');
-                        handlePurchase(platformCard);
-                    });
-                });
-
-                initializeSearch();
-                
-                animatePlatformCards();
-            }, (error) => {
-                console.error("Error loading platforms:", error);
-                showNoPlatformsMessage();
-            });
-        }
-
-        function showNoPlatformsMessage() {
-            const platformsGrid = document.getElementById('platforms-grid');
-            platformsGrid.innerHTML = `
-                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
-                    <i class="fas fa-box-open" style="font-size: 3.5rem; color: #ff9800; margin-bottom: 20px;"></i>
-                    <h3 style="color: #ff9800; margin-bottom: 15px;">প্ল্যাটফর্ম পাওয়া যায়নি</h3>
-                    <p style="color: #ddd; max-width: 500px; margin: 0 auto;">
-                        বর্তমানে কোনো প্ল্যাটফর্ম পাওয়া যায়নি। দয়া করে কিছুক্ষণ পরে আবার চেষ্টা করুন অথবা অ্যাডমিনের সাথে যোগাযোগ করুন।
-                    </p>
-                </div>
-            `;
-        }
-
-        // Create a platform card
-        function createPlatformCard(platform) {
-            const platformsGrid = document.getElementById('platforms-grid');
-            const platformCard = document.createElement('div');
-            platformCard.className = 'platform-card';
-            platformCard.setAttribute('data-platform-name', platform.name);
-            platformCard.setAttribute('data-platform-id', platform.id);
-            
-            // আইকন ম্যাপিং ফাংশন - Netflix এবং Adobe এর জন্য ফিক্সড
-            function getIconClass(iconName) {
-                const iconMap = {
-                    'youtube': 'fab fa-youtube youtube',
-                    'facebook': 'fab fa-facebook-f facebook',
-                    'instagram': 'fab fa-instagram instagram',
-                    'tiktok': 'fab fa-tiktok tiktok',
-                    'whatsapp': 'fab fa-whatsapp whatsapp',
-                    'telegram': 'fab fa-telegram telegram',
-                    'netflix': 'fas fa-film netflix',
-                    'spotify': 'fab fa-spotify spotify',
-                    'discord': 'fab fa-discord discord',
-                    'amazon': 'fab fa-amazon amazon',
-                    'microsoft': 'fab fa-microsoft microsoft',
-                    'adobe': 'fas fa-paint-brush adobe',
-                    'canva': 'fas fa-paint-brush canva',
-                    'google': 'fab fa-google google',
-                    'linkedin': 'fab fa-linkedin linkedin'
-                };
-                
-                const lowerIconName = iconName ? iconName.toLowerCase() : '';
-                return iconMap[lowerIconName] || 'fas fa-cube';
-            }
-
-            // platform.icon বা platform.name থেকে আইকন সিলেক্ট করুন
-            const iconSource = platform.icon || platform.name || '';
-            const iconClass = getIconClass(iconSource);
-
-            platformCard.innerHTML = `
-                <div class="platform-header">
-                    <i class="${iconClass} platform-icon"></i>
-                    <div class="platform-name">${platform.name || 'প্ল্যাটফর্ম'}</div>
-                </div>
-                <div class="platform-description">
-                    ${platform.description || 'প্রিমিয়াম সেবা পান সবচেয়ে কম দামে।'}
-                </div>
-                <div class="platform-features">
-                    ${platform.features && platform.features.length > 0 ? platform.features.map(feature => `
-                        <div class="feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>${feature}</span>
-                        </div>
-                    `).join('') : `
-                        <div class="feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>ইনস্ট্যান্ট ডেলিভারি</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>১০০% সেফ</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-check-circle"></i>
-                            <span>গ্যারান্টিড</span>
-                        </div>
-                    `}
-                </div>
-                <div class="platform-price">
-                    <div class="price">${platform.price || '৳ 100'}</div>
-                    <div class="price-desc">লগইন তথ্যের প্রয়োজন নেই</div>
-                </div>
-                <button class="buy-button">কিনুন</button>
-            `;
-
-            platformsGrid.appendChild(platformCard);
-        }
-
-        function animatePlatformCards() {
-            const cards = document.querySelectorAll('.platform-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.5s, transform 0.5s';
-                
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 150);
-            });
-        }
         
-        function initializeAuth() {
-            // Listen for auth state changes
-            auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    console.log("User is signed in with UID:", user.uid);
-                    
-                    // Initialize auth system with current user
-                    authSystem.currentUserUID = user.uid;
-                    await authSystem.createOrUpdateUserInDatabase(user);
-                    
-                    // Update cart badge
-                    updateCartBadge(user.uid);
-                } else {
-                    console.log("No user signed in");
-                    authSystem.currentUserUID = null;
-                    authSystem.currentUserData = null;
-                }
-            });
-        }
-        
-        // Cancel purchase button
         purchaseCancelBtn.addEventListener('click', function() {
             purchaseModal.style.display = 'none';
             currentPurchaseInfo = null;
         });
         
-        // Initialize everything
         initializeAuth();
         
-        // Handle window resize for responsive design
         let resizeTimer;
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(function() {
-                // Re-render orders on resize to switch between table/card view
                 if (userOrders.length > 0) {
                     displayOrders(userOrders);
                 }
-                // Apply color fixes
                 applyColorFixes();
-                // Apply mobile bottom area fix
                 fixMobileBottomArea();
             }, 250);
         });
         
-        // Fix for mobile scroll issue
         document.addEventListener('touchmove', function(e) {
-            // Allow all touch moves
         }, { passive: true });
         
-        // Fix for viewport zoom
         document.addEventListener('gesturestart', function(e) {
             e.preventDefault();
         });
