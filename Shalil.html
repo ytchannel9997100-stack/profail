@@ -738,6 +738,23 @@
             'allwork204571@gmail.com'
         ];
 
+        // Platform ID mapping (Pay.html যে ফরম্যাট ব্যবহার করে)
+        const PLATFORM_ID_MAP = {
+            'telegram': 'telegram',
+            'telegram premium': 'telegram',
+            'youtube': 'youtube',
+            'youtube premium': 'youtube',
+            'facebook': 'facebook',
+            'facebook premium': 'facebook',
+            'instagram': 'instagram',
+            'netflix': 'netflix',
+            'spotify': 'spotify',
+            'whatsapp': 'whatsapp',
+            'whatsapp business': 'whatsapp',
+            'tiktok': 'tiktok',
+            'tiktok coins': 'tiktok'
+        };
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             initializeApp();
@@ -1080,22 +1097,52 @@
             ordersTable.innerHTML = html;
         }
         
-        // Generate encrypted data string for payment link
-        function generateEncryptedData(orderId, platform, price) {
-            // orderId|platform|price|timestamp format
-            const dataString = `${orderId}|${platform}|${price}|${Date.now()}`;
+        // Platform Name থেকে Platform ID বের করার ফাংশন (Pay.html যেভাবে ব্যবহার করে)
+        function getPlatformId(platformName) {
+            if (!platformName) return 'unknown';
             
-            // Base64 encoding
-            const encodedData = btoa(dataString);
+            const lowerPlatform = platformName.toLowerCase().trim();
+            
+            // ডিফল্ট ম্যাপিং
+            for (const [key, value] of Object.entries(PLATFORM_ID_MAP)) {
+                if (lowerPlatform.includes(key)) {
+                    return value;
+                }
+            }
+            
+            // কোনো ম্যাপিং না পেলে স্পেস রিমুভ করে ছোট হাতের করে দিন
+            return lowerPlatform.replace(/\s+/g, '');
+        }
+        
+        // Generate encrypted data string for payment link - আপনার দেওয়া লিংকের মতো
+        function generateEncryptedData(orderId, platform, price) {
+            // Platform ID বের করুন
+            const platformId = getPlatformId(platform);
+            
+            // টাইমস্ট্যাম্প (মিলিসেকেন্ড)
+            const timestamp = Date.now();
+            
+            // আপনার দেওয়া উদাহরণের মতো ডাটা স্ট্রিং তৈরি করুন
+            // ফরম্যাট: orderId|platformId|price|timestamp
+            const dataString = `${orderId}|${platformId}|${price}|${timestamp}`;
+            
+            // প্রথম লেয়ার এনকোডিং (Base64)
+            let encodedData = btoa(dataString);
+            
+            // দ্বিতীয় লেয়ার এনকোডিং (আপনার দেওয়া লিংকে ডাবল এনকোডিং আছে বলে মনে হচ্ছে)
+            encodedData = btoa(encodedData);
+            
+            // ইউআরএল সেফ এনকোডিং (/+ কে প্রতিস্থাপন)
+            encodedData = encodedData.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
             
             return encodedData;
         }
         
-        // Generate payment link for order
+        // Generate payment link for order - আপনার দেওয়া ফরম্যাটে
         function generatePaymentLink(orderId, platform, price) {
             const encryptedData = generateEncryptedData(orderId, platform, price);
             
-            // Format: https://easy-premium.com/Pay.html?data=[encryptedData]&v=2
+            // ফরম্যাট: https://easy-premium.com/Pay.html?data=[encryptedData]&v=2
             return `${BASE_URL}?data=${encryptedData}&v=2`;
         }
         
