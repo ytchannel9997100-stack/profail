@@ -2378,20 +2378,22 @@
             }
         });
 
-        // ===================== ইমেইল পাঠানোর ফাংশন =====================
+        // ===================== ইমেইল পাঠানোর ফাংশন - সম্পূর্ণ সংশোধিত =====================
         async function sendOrderConfirmationEmail(userEmail, userName, orderData) {
             try {
-                // EmailJS দিয়ে ইমেইল পাঠানো
+                // EmailJS টেমপ্লেট প্যারামিটার - আপনার টেমপ্লেটের সাথে মিল রেখে
                 const templateParams = {
                     to_email: userEmail,
                     to_name: userName || 'গ্রাহক',
                     from_name: 'Easy Premium',
-                    from_email: 'noreply@easy-premium.com',
+                    reply_to: 'mdashikislam017705@gmail.com',
+                    
+                    // অর্ডার সংক্রান্ত তথ্য
                     order_id: orderData.orderId,
-                    platform: orderData.platform,
-                    price: orderData.price,
-                    phone: orderData.phoneNumber,
-                    whatsapp: orderData.whatsappNumber,
+                    platform_name: orderData.platform,
+                    platform_price: orderData.price,
+                    customer_phone: orderData.phoneNumber,
+                    customer_whatsapp: orderData.whatsappNumber,
                     order_date: new Date().toLocaleString('bn-BD', {
                         year: 'numeric',
                         month: 'long',
@@ -2399,21 +2401,29 @@
                         hour: '2-digit',
                         minute: '2-digit'
                     }),
-                    payment_link: orderData.paymentLink || 'https://easy-premium.com/Pay.html',
-                    reply_to: 'mdashikislam017705@gmail.com'
+                    
+                    // পেমেন্ট লিংক
+                    payment_link: orderData.paymentLink || `https://easy-premium.com/Pay.html?order=${orderData.orderId}&v=2`,
+                    
+                    // কোম্পানি তথ্য
+                    company_email: 'mdashikislam017705@gmail.com',
+                    company_phone: '+8801770584994',
+                    company_address: 'বামনডাঙ্গা, সুন্দরগঞ্জ, গাইবান্ধা, রংপুর'
                 };
                 
-               
-                const serviceID = 'service_uknj50j'; 
-                const templateID = 'template_gdvntij'; 
+                // EmailJS Service ID এবং Template ID
+                const serviceID = 'service_uknj50j'; // আপনার Service ID
+                const templateID = 'order_confirmation'; // আপনার Template ID
+                
+                console.log("Sending email with params:", templateParams);
                 
                 const response = await emailjs.send(serviceID, templateID, templateParams);
                 
                 console.log('Email sent successfully:', response);
                 
-                
-                if (orderData.orderId) {
-                    await database.ref(`transactions/${orderData.orderId}`).update({
+                // Firebase-এ রেকর্ড আপডেট
+                if (orderData.firebaseKey) {
+                    await database.ref(`transactions/${orderData.firebaseKey}`).update({
                         emailSent: true,
                         emailSentAt: firebase.database.ServerValue.TIMESTAMP
                     });
@@ -2422,34 +2432,58 @@
                 return true;
             } catch (error) {
                 console.error('Error sending email:', error);
+                console.error('Error details:', error.text || error.message);
                 return false;
             }
         }
 
-        // ===================== পেমেন্ট লিংক জেনারেটর - সঠিক ভার্সন (Pay.html এর সাথে সামঞ্জস্যপূর্ণ) =====================
-        function generatePaymentLink(orderId, platform, price) {
+        // ===================== পেমেন্ট লিংক জেনারেটর - সম্পূর্ণ সংশোধিত =====================
+        function generatePaymentLink(orderId, platform, price, platformId) {
             try {
-                // Pay.html যেভাবে ডাটা ডিকোড করে, সেভাবে এনকোড করুন
-                // platform কে platformId-তে রূপান্তর (যেমন: "Telegram Premium" -> "telegram")
-                const platformId = platform ? platform.toLowerCase().replace(/\s+/g, '') : 'unknown';
+                // Platform ID ম্যাপিং - আপনার Firebase ডাটাবেসের সাথে মিল রেখে
+                const platformIdMap = {
+                    'youtube': 'youtube_premium',
+                    'youtube premium': 'youtube_premium',
+                    'facebook': 'facebook_premium', 
+                    'facebook premium': 'facebook_premium',
+                    'instagram': 'instagram_premium',
+                    'telegram': 'telegram_premium',
+                    'telegram premium': 'telegram_premium',
+                    'netflix': 'netflix_premium',
+                    'spotify': 'spotify_premium',
+                    'whatsapp': 'whatsapp_business',
+                    'whatsapp business': 'whatsapp_business',
+                    'tiktok': 'tiktok_coins',
+                    'tiktok coins': 'tiktok_coins'
+                };
                 
-                // আপনার দেওয়া উদাহরণের মতো ডাটা স্ট্রিং তৈরি করুন
-                // ফরম্যাট: orderId|platformId|price|timestamp
+                // Platform name থেকে সঠিক ID বের করুন
+                const platformLowerCase = platform ? platform.toLowerCase() : '';
+                let finalPlatformId = platformId || 'unknown';
+                
+                // ম্যাপিং থেকে খুঁজুন
+                for (const [key, value] of Object.entries(platformIdMap)) {
+                    if (platformLowerCase.includes(key)) {
+                        finalPlatformId = value;
+                        break;
+                    }
+                }
+                
+                // ডাটা স্ট্রিং তৈরি করুন (Pay.html যেভাবে ডিকোড করে)
                 const timestamp = Date.now();
-                const dataString = `${orderId}|${platformId}|${price}|${timestamp}`;
+                const dataString = `${orderId}|${finalPlatformId}|${price}|${timestamp}`;
                 
-                // Base64 এনকোডিং (একবার)
+                // Base64 এনকোডিং
                 let encodedData = btoa(dataString);
                 
-                // URL-safe এনকোডিং
+                // URL encode
                 encodedData = encodeURIComponent(encodedData);
                 
-                // ফরম্যাট: https://easy-premium.com/Pay.html?data=[encodedData]&v=2
+                // ফাইনাল লিংক
                 return `https://easy-premium.com/Pay.html?data=${encodedData}&v=2`;
                 
             } catch (error) {
                 console.error("Payment link generation error:", error);
-                // ফ্যালব্যাক লিংক
                 return `https://easy-premium.com/Pay.html?order=${orderId}&v=2`;
             }
         }
@@ -2632,7 +2666,8 @@
                 
                 const orderId = `EP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
                 
-                const paymentLink = generatePaymentLink(orderId, orderData.platform, orderData.price);
+                // পেমেন্ট লিংক জেনারেট করুন (platformId সহ)
+                const paymentLink = generatePaymentLink(orderId, orderData.platform, orderData.price, orderData.platformId);
                 
                 const orderWithId = {
                     ...orderData,
@@ -2659,6 +2694,7 @@
                     platformId: orderData.platformId
                 });
                 
+                // firebaseKey যোগ করুন
                 orderWithId.firebaseKey = transactionRef.key;
                 
                 return orderWithId;
