@@ -1982,7 +1982,7 @@
         const auth = firebase.auth();
 
         // ================== EMAILJS CONFIG ==================
-        emailjs.init("U1I0SVkI_0R1gRFVn"); 
+        emailjs.init("U1I0SVkI_0R1gRFVn"); // আপনার দেওয়া Public Key
 
         // DOM Elements
         const loginModal = document.getElementById('loginModal');
@@ -2426,34 +2426,30 @@
             }
         }
 
-        // ===================== পেমেন্ট লিংক জেনারেটর =====================
+        // ===================== পেমেন্ট লিংক জেনারেটর - সঠিক ভার্সন (Pay.html এর সাথে সামঞ্জস্যপূর্ণ) =====================
         function generatePaymentLink(orderId, platform, price) {
-            const encryptionKey = 'EP_SECURE_2025_KEY_!@#';
-            
             try {
-                const dataObj = {
-                    o: orderId,
-                    p: platform,
-                    a: price,
-                    t: Date.now(),
-                    r: Math.random().toString(36).substr(2, 9)
-                };
+                // Pay.html যেভাবে ডাটা ডিকোড করে, সেভাবে এনকোড করুন
+                // platform কে platformId-তে রূপান্তর (যেমন: "Telegram Premium" -> "telegram")
+                const platformId = platform ? platform.toLowerCase().replace(/\s+/g, '') : 'unknown';
                 
-                const dataStr = JSON.stringify(dataObj);
-                let encrypted = '';
+                // আপনার দেওয়া উদাহরণের মতো ডাটা স্ট্রিং তৈরি করুন
+                // ফরম্যাট: orderId|platformId|price|timestamp
+                const timestamp = Date.now();
+                const dataString = `${orderId}|${platformId}|${price}|${timestamp}`;
                 
-                for (let i = 0; i < dataStr.length; i++) {
-                    const keyChar = encryptionKey.charCodeAt(i % encryptionKey.length);
-                    const dataChar = dataStr.charCodeAt(i);
-                    encrypted += String.fromCharCode(dataChar ^ keyChar);
-                }
+                // Base64 এনকোডিং (একবার)
+                let encodedData = btoa(dataString);
                 
-                const encodedData = btoa(encrypted);
-                const urlEncoded = encodeURIComponent(encodedData);
+                // URL-safe এনকোডিং
+                encodedData = encodeURIComponent(encodedData);
                 
-                return `https://easy-premium.com/Pay.html?data=${urlEncoded}&v=2`;
+                // ফরম্যাট: https://easy-premium.com/Pay.html?data=[encodedData]&v=2
+                return `https://easy-premium.com/Pay.html?data=${encodedData}&v=2`;
+                
             } catch (error) {
                 console.error("Payment link generation error:", error);
+                // ফ্যালব্যাক লিংক
                 return `https://easy-premium.com/Pay.html?order=${orderId}&v=2`;
             }
         }
