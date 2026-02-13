@@ -10,7 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
-        /* আপনার আগের CSS code ঠিক রাখুন */
         * {
             margin: 0;
             padding: 0;
@@ -112,7 +111,7 @@
             min-height: 20px;
         }
         
-        /* Admin Panel - Full CSS from previous response */
+        /* Admin Panel */
         .admin-panel {
             display: none;
         }
@@ -292,34 +291,6 @@
             box-shadow: 0 5px 15px rgba(37, 211, 102, 0.2);
         }
         
-        .whatsapp-btn i {
-            font-size: 1.1rem;
-        }
-        
-        /* Copy Button */
-        .copy-btn {
-            background: rgba(0, 188, 212, 0.2);
-            color: #00bcd4;
-            border: 1px solid #00bcd4;
-            padding: 8px 12px;
-            border-radius: 5px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-            font-weight: 500;
-            margin-left: 5px;
-        }
-        
-        .copy-btn:hover {
-            background: rgba(0, 188, 212, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.2);
-        }
-        
         /* Cancel Button */
         .btn-cancel {
             background: rgba(220, 53, 69, 0.2);
@@ -471,22 +442,6 @@
             flex-wrap: wrap;
         }
         
-        /* Message Preview */
-        .message-preview {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            border: 1px solid rgba(255, 152, 0, 0.3);
-            max-width: 400px;
-            word-break: break-all;
-        }
-        
-        .message-preview strong {
-            color: #ff9800;
-        }
-        
         /* Responsive */
         @media (max-width: 768px) {
             .admin-header {
@@ -515,7 +470,7 @@
                 padding: 10px;
             }
             
-            .btn-cancel, .btn-pending, .whatsapp-btn, .copy-btn {
+            .btn-cancel, .btn-pending, .whatsapp-btn {
                 padding: 6px 10px;
                 font-size: 0.8rem;
             }
@@ -575,7 +530,7 @@
         </div>
     </div>
     
-    <!-- Admin Panel - Only Order Management -->
+    <!-- Admin Panel -->
     <div class="admin-panel" id="adminPanel">
         <!-- Header -->
         <header class="admin-header">
@@ -594,7 +549,7 @@
             </button>
         </header>
         
-        <!-- Main Content - Only Order Management -->
+        <!-- Main Content -->
         <div class="main-content">
             <!-- Dashboard Stats Section -->
             <div class="section">
@@ -712,32 +667,6 @@
         </div>
     </div>
 
-    <!-- Message Preview Modal -->
-    <div id="messageModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center;">
-        <div style="background: rgba(30,30,46,0.95); padding: 30px; border-radius: 15px; max-width: 600px; width: 90%; border: 3px solid #25D366;">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <i class="fab fa-whatsapp" style="font-size: 4rem; color: #25D366;"></i>
-                <h3 style="color: #ff9800; margin-top: 15px;">WhatsApp মেসেজ প্রিভিউ</h3>
-            </div>
-            
-            <div class="message-preview" id="messagePreview" style="margin-bottom: 20px; background: rgba(37, 211, 102, 0.1); border-color: #25D366;">
-                লোড হচ্ছে...
-            </div>
-            
-            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                <a id="sendWhatsAppLink" href="#" target="_blank" class="whatsapp-btn" style="flex: 1; padding: 12px; justify-content: center; font-size: 1rem;">
-                    <i class="fab fa-whatsapp"></i> WhatsApp ওপেন করুন
-                </a>
-                <button id="copyMessageBtn" class="copy-btn" style="flex: 1; padding: 12px; justify-content: center; font-size: 1rem;">
-                    <i class="fas fa-copy"></i> কপি করুন
-                </button>
-                <button id="closeMessageModalBtn" class="btn-pending" style="flex: 1; padding: 12px; justify-content: center; font-size: 1rem;">
-                    <i class="fas fa-times"></i> বন্ধ করুন
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script>
         // Firebase Configuration
         const firebaseConfig = {
@@ -791,30 +720,22 @@
         const cancelOrderInfo = document.getElementById('cancelOrderInfo');
         const confirmCancelBtn = document.getElementById('confirmCancelBtn');
         const closeCancelModalBtn = document.getElementById('closeCancelModalBtn');
-        
-        // Message Modal Elements
-        const messageModal = document.getElementById('messageModal');
-        const messagePreview = document.getElementById('messagePreview');
-        const sendWhatsAppLink = document.getElementById('sendWhatsAppLink');
-        const copyMessageBtn = document.getElementById('copyMessageBtn');
-        const closeMessageModalBtn = document.getElementById('closeMessageModalBtn');
 
         // Variables
         let orders = [];
         let currentAdminEmail = null;
         let currentOrderToCancel = null;
-        let currentMessageData = null;
 
         // Base URL for payment page
         const BASE_URL = 'https://easy-premium.com/Pay.html';
 
-        // ✅ Allowed Admin Emails - নতুন Super Admin যোগ করা হয়েছে
+        // Allowed Admin Emails
         const ALLOWED_ADMIN_EMAILS = [
             'mdashikislam017705@gmail.com',
             'mdsojib1388888@gmail.com',
             'admin@easy-premium.com',
             'shahsultanshakil204571@gmail.com',
-            'allwork204571@gmail.com'  // ✅ নতুন Super Admin
+            'allwork204571@gmail.com'
         ];
 
         // Initialize on page load
@@ -839,7 +760,7 @@
                         showAdminPanel();
                         initializeOrderSystem();
                         
-                        // Super Admin check for specific features
+                        // Super Admin check
                         const isSuperAdmin = [
                             'mdsojib1388888@gmail.com',
                             'shahsultanshakil204571@gmail.com',
@@ -877,17 +798,6 @@
             confirmCancelBtn.addEventListener('click', function() {
                 if (currentOrderToCancel) {
                     cancelOrder(currentOrderToCancel);
-                }
-            });
-            
-            closeMessageModalBtn.addEventListener('click', function() {
-                messageModal.style.display = 'none';
-                currentMessageData = null;
-            });
-            
-            copyMessageBtn.addEventListener('click', function() {
-                if (currentMessageData) {
-                    copyToClipboard(currentMessageData.fullMessage);
                 }
             });
         }
@@ -1155,7 +1065,7 @@
                         </td>
                         <td>
                             <button class="whatsapp-btn" onclick="sendWhatsAppMessage('${order.id}', '${whatsappNumber}', '${order.userName || ''}', '${order.platform || ''}', '${order.price || ''}')">
-                                <i class="fab fa-whatsapp"></i> মেসেজ পাঠান
+                                <i class="fab fa-whatsapp"></i> WhatsApp
                             </button>
                         </td>
                         <td>${order.platform || 'প্ল্যাটফর্ম নেই'}</td>
@@ -1170,24 +1080,30 @@
             ordersTable.innerHTML = html;
         }
         
+        // Generate encrypted data string for payment link
+        function generateEncryptedData(orderId, platform, price) {
+            // orderId|platform|price|timestamp format
+            const dataString = `${orderId}|${platform}|${price}|${Date.now()}`;
+            
+            // Base64 encoding
+            const encodedData = btoa(dataString);
+            
+            return encodedData;
+        }
+        
         // Generate payment link for order
         function generatePaymentLink(orderId, platform, price) {
-            // এখানে আপনার এনক্রিপশন লজিক বসাতে হবে
-            // বর্তমানে একটি সিম্পল এনকোডেড স্ট্রিং ব্যবহার করা হচ্ছে
+            const encryptedData = generateEncryptedData(orderId, platform, price);
             
-            // উদাহরণস্বরূপ, অর্ডার আইডি এবং প্ল্যাটফর্ম এনকোড করে লিংক জেনারেট করা
-            const dataString = `${orderId}|${platform}|${price}|${Date.now()}`;
-            const encodedData = btoa(dataString); // Base64 এনকোডিং
-            
-            // আপনার দেওয়া লিংকের ফরম্যাট অনুযায়ী
-            return `${BASE_URL}?data=${encodedData}&v=2`;
+            // Format: https://easy-premium.com/Pay.html?data=[encryptedData]&v=2
+            return `${BASE_URL}?data=${encryptedData}&v=2`;
         }
         
         // Generate WhatsApp message
         function generateWhatsAppMessage(orderId, userName, platform, price) {
             const paymentLink = generatePaymentLink(orderId, platform, price);
             
-            // ইউজারকে পাঠানোর জন্য মেসেজ তৈরি করুন
+            // Message format as shown in your example
             const message = `আসসালামু আলাইকুম ${userName},
 
 আপনার অর্ডারটি কনফার্ম করতে নিচের লিংকে ক্লিক করুন:
@@ -1202,14 +1118,10 @@ ${paymentLink}
 ধন্যবাদান্তে,
 Easy Premium Team`;
 
-            return {
-                message: message,
-                paymentLink: paymentLink,
-                encodedMessage: encodeURIComponent(message)
-            };
+            return message;
         }
         
-        // Send WhatsApp message
+        // Send WhatsApp message - সরাসরি WhatsApp ওপেন হবে
         function sendWhatsAppMessage(orderId, phoneNumber, userName, platform, price) {
             // ফোন নম্বর থেকে সব নন-ডিজিট ক্যারেক্টার রিমুভ করুন
             const cleanNumber = phoneNumber.replace(/\D/g, '');
@@ -1220,33 +1132,26 @@ Easy Premium Team`;
             }
             
             // মেসেজ জেনারেট করুন
-            const messageData = generateWhatsAppMessage(orderId, userName, platform, price);
+            const message = generateWhatsAppMessage(orderId, userName, platform, price);
+            
+            // মেসেজ এনকোড করুন
+            const encodedMessage = encodeURIComponent(message);
             
             // WhatsApp URL তৈরি করুন
-            const whatsappUrl = `https://wa.me/${cleanNumber}?text=${messageData.encodedMessage}`;
+            const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
             
-            // মেসেজ প্রিভিউ সেট করুন
-            currentMessageData = {
-                fullMessage: messageData.message,
-                paymentLink: messageData.paymentLink,
-                whatsappUrl: whatsappUrl
-            };
+            // সরাসরি WhatsApp ওপেন করুন (নতুন ট্যাবে)
+            window.open(whatsappUrl, '_blank');
             
-            messagePreview.innerHTML = messageData.message.replace(/\n/g, '<br>');
-            sendWhatsAppLink.href = whatsappUrl;
+            // লগ সংরক্ষণ করুন
+            database.ref('whatsappLogs').push({
+                orderId: orderId,
+                phoneNumber: cleanNumber,
+                sentAt: firebase.database.ServerValue.TIMESTAMP,
+                sentBy: currentAdminEmail
+            }).catch(error => console.error("Error logging WhatsApp:", error));
             
-            // মোডাল দেখান
-            messageModal.style.display = 'flex';
-        }
-        
-        // Copy to clipboard
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('মেসেজ কপি হয়েছে! এখন WhatsApp এ পেস্ট করুন', 'success');
-            }).catch(err => {
-                console.error('Copy failed:', err);
-                showToast('কপি করতে সমস্যা হয়েছে', 'error');
-            });
+            showToast('WhatsApp মেসেজ পাঠানোর জন্য ওপেন হচ্ছে...', 'success');
         }
         
         // Show cancel modal
