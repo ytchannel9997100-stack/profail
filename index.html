@@ -1982,7 +1982,7 @@
         const auth = firebase.auth();
 
         // ================== EMAILJS CONFIG ==================
-        emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); // EmailJS থেকে Public Key দিন
+        emailjs.init("U1I0SVkI_0R1gRFVn"); 
 
         // DOM Elements
         const loginModal = document.getElementById('loginModal');
@@ -2403,15 +2403,15 @@
                     reply_to: 'mdashikislam017705@gmail.com'
                 };
                 
-                // EmailJS এ টেমপ্লেট আইডি এবং সার্ভিস আইডি দিন
-                const serviceID = 'service_uknj50j'; // EmailJS Service ID
-                const templateID = 'order_confirmation'; // EmailJS Template ID
+               
+                const serviceID = 'service_uknj50j'; 
+                const templateID = 'order_confirmation'; 
                 
                 const response = await emailjs.send(serviceID, templateID, templateParams);
                 
                 console.log('Email sent successfully:', response);
                 
-                // Firebase-এ ইমেইল পাঠানোর রেকর্ড রাখুন
+                
                 if (orderData.orderId) {
                     await database.ref(`transactions/${orderData.orderId}`).update({
                         emailSent: true,
