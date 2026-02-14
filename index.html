@@ -1706,7 +1706,7 @@
             }
         }
         
-        /* ===== সিকিউরিটি ইন্ডিকেটর (শুধু ভিজুয়াল, UI পরিবর্তন না করে) ===== */
+        /* ===== সিকিউরিটি ইন্ডিকেটর ===== */
         .security-badge-container {
             position: fixed;
             bottom: 20px;
@@ -1780,17 +1780,14 @@
             margin-right: 5px;
         }
         
-        /* রেট লিমিট ইন্ডিকেটর (অদৃশ্য) */
         .rate-limit-indicator {
             display: none;
         }
         
-        /* অ্যাক্টিভিটি মনিটর (ডিবাগের জন্য, প্রোডাকশনে দেখাবে না) */
         .activity-monitor {
             display: none;
         }
         
-        /* সেশন টাইমার (শুধু প্রয়োজন হলে) */
         .session-timer {
             position: fixed;
             top: 10px;
@@ -3627,6 +3624,99 @@
     })();
     </script>
 
+    <!-- ================== রাইট ক্লিক প্রোটেকশন ও অনলাইন কাউন্টার সরানোর স্ক্রিপ্ট ================== -->
+    <script>
+    (function() {
+        // ========== রাইট ক্লিক প্রোটেকশন ==========
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // ডান ক্লিকের বিকল্প উপায়ও বন্ধ করা
+        document.addEventListener('mousedown', function(e) {
+            if (e.button === 2) { // রাইট বাটন
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // টাচ স্ক্রিনে লং প্রেস প্রোটেকশন (মোবাইল)
+        document.addEventListener('touchstart', function(e) {
+            let touchTimer;
+            const handleTouchEnd = function() {
+                clearTimeout(touchTimer);
+                document.removeEventListener('touchend', handleTouchEnd);
+            };
+            
+            if (e.touches.length === 1) {
+                touchTimer = setTimeout(function() {
+                    // লং প্রেস হলে কনটেক্সট মেনু বন্ধ করা
+                    e.preventDefault();
+                }, 500);
+                
+                document.addEventListener('touchend', handleTouchEnd, { once: true });
+            }
+        }, { passive: false });
+        
+        console.log('✅ রাইট ক্লিক প্রোটেকশন চালু হয়েছে');
+        
+        // ========== "অনলাইন কাউন্টার" লেখা সরানো ==========
+        function removeOnlineCounter() {
+            // যেই এলিমেন্টে "অনলাইন" লেখা আছে তা খুঁজে বের করা
+            const allElements = document.querySelectorAll('*');
+            
+            allElements.forEach(el => {
+                if (el.children.length === 0 && el.textContent) { // শুধু টেক্সট নোড
+                    const text = el.textContent.trim();
+                    if (text.includes('জন অনলাইন') || text.includes('online') || /^\d+\s*জন\s*অনলাইন$/.test(text)) {
+                        el.remove();
+                    }
+                }
+            });
+            
+            // ক্লাস বা আইডি দিয়ে খোঁজা
+            const possibleSelectors = [
+                '[class*="online"]',
+                '[id*="online"]',
+                '[class*="user-count"]',
+                '[id*="user-count"]',
+                '.online-counter',
+                '#online-counter'
+            ];
+            
+            possibleSelectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => {
+                    if (el.textContent.includes('জন অনলাইন') || el.textContent.includes('online')) {
+                        el.remove();
+                    }
+                });
+            });
+            
+            // ডিভ যেটাতে সংখ্যা ও "অনলাইন" আছে
+            const divs = document.querySelectorAll('div');
+            divs.forEach(div => {
+                if (div.textContent && /\d+\s*জন\s*অনলাইন/.test(div.textContent)) {
+                    div.remove();
+                }
+            });
+        }
+        
+        // ডম লোডের পর এবং প্রতি সেকেন্ডে চেক (কারণ ডায়নামিক হতে পারে)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', removeOnlineCounter);
+        } else {
+            removeOnlineCounter();
+        }
+        
+        // প্রতি সেকেন্ডে চেক (কিছু সাইট ডায়নামিক যোগ করে)
+        setInterval(removeOnlineCounter, 1000);
+        
+        console.log('✅ অনলাইন কাউন্টার সরানো হয়েছে');
+    })();
+    </script>
+
     <!-- ================== স্মার্ট ফিচার: রিয়েল-টাইম নোটিফিকেশন ================== -->
     <script>
     (function() {
@@ -3834,33 +3924,10 @@
             };
         }
         
-        // ========== লাইভ ইউজার কাউন্ট (ডেমো) ==========
+        // ========== লাইভ ইউজার কাউন্ট (এখন আর দেখানো হবে না - সম্পূর্ণ সরানো হয়েছে) ==========
+        // শুধু খালি ফাংশন রাখলাম যাতে কোনো এরর না হয়
         function updateLiveUserCount() {
-            // র্যান্ডম ইউজার কাউন্ট দেখানো (শুধু ভিজুয়াল)
-            const userCount = Math.floor(Math.random() * 10) + 15; // 15-25 এর মধ্যে
-            
-            const countElement = document.createElement('div');
-            countElement.style.position = 'fixed';
-            countElement.style.bottom = '20px';
-            countElement.style.left = '20px';
-            countElement.style.background = 'rgba(10, 10, 26, 0.8)';
-            countElement.style.backdropFilter = 'blur(5px)';
-            countElement.style.border = '1px solid #00bcd4';
-            countElement.style.borderRadius = '20px';
-            countElement.style.padding = '5px 15px';
-            countElement.style.fontSize = '0.7rem';
-            countElement.style.color = '#00bcd4';
-            countElement.style.zIndex = '9998';
-            countElement.style.boxShadow = '0 5px 10px rgba(0,0,0,0.2)';
-            countElement.innerHTML = `<i class="fas fa-users"></i> ${userCount} জন অনলাইন`;
-            
-            document.body.appendChild(countElement);
-            
-            // প্রতি ৩০ সেকেন্ডে আপডেট
-            setInterval(() => {
-                const newCount = Math.floor(Math.random() * 10) + 15;
-                countElement.innerHTML = `<i class="fas fa-users"></i> ${newCount} জন অনলাইন`;
-            }, 30000);
+            // কিছুই করবে না - সম্পূর্ণ সরানো হয়েছে
         }
         
         // ডম রেডির পর
