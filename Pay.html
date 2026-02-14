@@ -24,11 +24,13 @@
             justify-content: center;
         }
         
+        /* ===== পরিবর্তিত অংশ: কন্টেইনার ফুল স্ক্রিন ===== */
         .container { 
             width: 100%;
-            max-width: 900px; 
+            max-width: 100%; /* আগে ছিল 900px, এখন 100% */
             margin: 0 auto; 
         }
+        /* ===== পরিবর্তিত অংশ শেষ ===== */
         
         .header { 
             text-align: center; 
@@ -51,6 +53,7 @@
             border-radius: 16px; 
             padding: 20px; 
             margin-bottom: 15px;
+            width: 100%; /* কার্ড ফুল উইথ */
         }
         
         .info-row { 
@@ -163,11 +166,15 @@
             to { transform: rotate(360deg); }
         }
         
+        /* পিসির জন্য অতিরিক্ত স্টাইল */
         @media (min-width: 1024px) {
-            .container { max-width: 1000px; }
-            .header h1 { font-size: 32px; }
+            .header h1 { font-size: 36px; } /* হেডার একটু বড় */
+            .card { padding: 30px; } /* কার্ডের প্যাডিং বাড়ালাম */
+            .info-row { font-size: 18px; } /* টেক্সট একটু বড় */
+            .price { font-size: 40px; } /* প্রাইস বড় */
         }
         
+        /* মোবাইলের জন্য আগের মতোই */
         @media (max-width: 480px) {
             body { padding: 10px; padding-bottom: 75px; }
             .header h1 { font-size: 24px; }
@@ -196,23 +203,18 @@
                 console.log("=== DECRYPTION START ===");
                 console.log("1. Encrypted data from URL:", encrypted);
                 
-                // URL ডিকোড
                 const urlDecoded = decodeURIComponent(encrypted);
                 console.log("2. After URL decode:", urlDecoded);
                 
-                // Base64 ডিকোড
                 const base64Decoded = atob(urlDecoded);
                 console.log("3. After Base64 decode:", base64Decoded);
                 
-                // পাইপ দিয়ে সেপারেট
                 const parts = base64Decoded.split('|');
                 console.log("4. Split parts:", parts);
                 
                 if (parts.length >= 4) {
-                    // Platform ID থেকে ব্যাকস্ল্যাশ এবং বিশেষ ক্যারেক্টার ক্লিন
                     let cleanPlatformId = parts[1];
                     
-                    // ব্যাকস্ল্যাশ এবং এক্সট্রা ক্যারেক্টার রিমুভ
                     cleanPlatformId = cleanPlatformId.replace(/\\/g, '');
                     cleanPlatformId = cleanPlatformId.replace(/[^a-zA-Z0-9_-]/g, '');
                     
@@ -222,7 +224,7 @@
                     return {
                         orderId: parts[0],
                         platformId: cleanPlatformId,
-                        originalPlatformId: parts[1], // ডিবাগের জন্য রাখা
+                        originalPlatformId: parts[1],
                         price: parts[2],
                         timestamp: parts[3]
                     };
@@ -238,7 +240,6 @@
             try {
                 console.log("🔍 Searching D field for:", platformId);
                 
-                // একাধিক পাথে চেক
                 const paths = [
                     `publicData/pricingPlans/${platformId}`,
                     `pricingPlans/${platformId}`,
@@ -260,7 +261,6 @@
                         if (data.d) return data.d;
                         if (data.info) return data.info;
                         
-                        // যদি কোনো স্ট্রিং পাওয়া যায়
                         for (const key in data) {
                             if (typeof data[key] === 'string' && data[key].length > 0) {
                                 return data[key];
@@ -299,7 +299,6 @@
                 return;
             }
             
-            // D ফিল্ড আনা
             const dField = await fetchDField(data.platformId);
             
             const date = new Date(parseInt(data.timestamp));
@@ -313,7 +312,6 @@
             
             const platformName = data.platformId.replace(/_/g, ' ').toUpperCase();
             
-            // ডিবাগ তথ্য
             const debugHTML = `
                 <div class="debug-info">
                     <strong>🔧 ডিবাগ তথ্য:</strong><br>
@@ -323,7 +321,6 @@
                 </div>
             `;
             
-            // D ফিল্ড HTML
             let dFieldHTML = '';
             if (dField) {
                 dFieldHTML = `
