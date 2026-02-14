@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>পেমেন্ট তথ্য - Easy Premium</title>
     <meta name="theme-color" content="#000000">
     
@@ -14,69 +14,56 @@
             width: 100%; 
             min-height: 100vh; 
             color: #fff; 
-            font-family: 'Segoe UI', 'Arial', sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
         
         body { 
-            padding: 20px; 
-            padding-bottom: 100px; 
+            padding: 15px; 
+            padding-bottom: 85px; 
             display: flex;
             justify-content: center;
         }
         
-        /* মূল কন্টেইনার - রেস্পন্সিভ সাইজ */
+        /* কন্টেইনার - মাঝারি সাইজ */
         .container { 
             width: 100%;
-            max-width: 1400px; /* পিসিতে বড় হবে */
+            max-width: 900px; /* আগে ছিল 1600px, এখন কমিয়ে 900px */
             margin: 0 auto; 
         }
         
-        /* হেডার স্টাইল */
         .header { 
             text-align: center; 
-            margin-bottom: 30px; 
+            margin-bottom: 20px; 
         }
         
         .header h1 { 
             color: #ff9800; 
-            font-size: clamp(28px, 5vw, 52px); /* রেস্পন্সিভ ফন্ট */
-            text-shadow: 0 0 10px rgba(255,152,0,0.3);
+            font-size: 28px; /* ফিক্সড সাইজ */
         }
         
         .header p { 
             color: #00bcd4; 
-            font-size: clamp(16px, 3vw, 26px);
+            font-size: 16px;
         }
         
-        /* কার্ড স্টাইল */
         .card { 
             background: #111; 
             border: 1px solid #333; 
-            border-radius: clamp(12px, 3vw, 28px); 
-            padding: clamp(20px, 4vw, 45px); 
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(255,152,0,0.1);
-            transition: transform 0.3s ease;
+            border-radius: 16px; 
+            padding: 20px; 
+            margin-bottom: 15px;
         }
         
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: #ff9800;
-        }
-        
-        /* ইনফো রো */
         .info-row { 
             display: flex; 
             justify-content: space-between; 
-            padding: clamp(12px, 2vw, 20px) 0; 
+            padding: 12px 0; 
             border-bottom: 1px solid #222; 
-            font-size: clamp(14px, 2vw, 20px);
-            flex-wrap: wrap;
-            gap: 10px;
+            font-size: 15px;
         }
         
         .label { 
-            color: #aaa; 
+            color: #888; 
             font-weight: 600; 
         }
         
@@ -84,28 +71,24 @@
             color: #ff9800; 
             font-weight: 700; 
             text-align: right;
+            max-width: 60%;
             word-break: break-word;
-            max-width: 70%;
         }
         
-        /* প্রাইস বক্স */
         .price-box { 
-            background: linear-gradient(145deg, #1a1a1a, #0a0a0a); 
-            padding: clamp(20px, 4vw, 35px); 
-            border-radius: clamp(8px, 2vw, 18px); 
+            background: #1a1a1a; 
+            padding: 18px; 
+            border-radius: 12px; 
             text-align: center; 
-            margin: 25px 0; 
-            border: 1px solid #333;
+            margin: 15px 0; 
         }
         
         .price { 
-            font-size: clamp(36px, 8vw, 64px); 
+            font-size: 32px; 
             color: #ff9800; 
             font-weight: 800; 
-            letter-spacing: 2px;
         }
         
-        /* পেমেন্ট বাটন - ফুল স্ক্রিন */
         .pay-btn { 
             position: fixed; 
             bottom: 0; 
@@ -114,54 +97,45 @@
             background: linear-gradient(135deg, #ff9800, #f44336); 
             color: white; 
             border: none; 
-            padding: clamp(16px, 3vw, 26px); 
-            font-size: clamp(18px, 4vw, 30px); 
+            padding: 16px; 
+            font-size: 18px; 
             font-weight: bold; 
             cursor: pointer;
             z-index: 1000; 
             text-transform: uppercase; 
-            letter-spacing: 3px;
-            box-shadow: 0 -5px 20px rgba(255,152,0,0.3);
+            letter-spacing: 1px;
         }
         
         .pay-btn.hidden { display: none; }
         
-        .pay-btn:hover {
-            background: linear-gradient(135deg, #ff8800, #ff3333);
-        }
-        
-        /* ডি-ফিল্ড */
         .d-field { 
-            margin-top: 25px; 
-            padding: clamp(12px, 2vw, 18px); 
+            margin-top: 15px; 
+            padding: 12px; 
             background: #0a0a0a; 
-            border-left: 5px solid #ff9800; 
-            border-radius: 6px; 
+            border-left: 4px solid #ff9800; 
+            border-radius: 4px; 
             color: #ddd; 
-            font-size: clamp(14px, 2vw, 18px);
-            line-height: 1.6;
+            font-size: 14px;
         }
         
-        /* লোডিং ও এরর */
         .error, .loading { 
             text-align: center; 
-            padding: 50px; 
+            padding: 30px; 
             background: #111;
-            border-radius: 16px;
-            font-size: clamp(16px, 3vw, 22px);
+            border-radius: 12px;
+            font-size: 16px;
         }
         
         .error { color: #ff6666; }
         .loading { color: #888; }
         
-        /* লোডিং অ্যানিমেশন */
         .loading::after {
             content: '';
             display: inline-block;
-            width: 24px;
-            height: 24px;
-            margin-left: 12px;
-            border: 3px solid #ff9800;
+            width: 16px;
+            height: 16px;
+            margin-left: 8px;
+            border: 2px solid #ff9800;
             border-top-color: transparent;
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -171,78 +145,56 @@
             to { transform: rotate(360deg); }
         }
         
-        /* পিসির জন্য অতিরিক্ত স্টাইল */
+        /* পিসির জন্য সামান্য বড় */
         @media (min-width: 1024px) {
             .container {
-                max-width: 1600px; /* পিসিতে আরও বড় */
-            }
-            
-            .card {
-                padding: 55px;
-            }
-            
-            .info-row {
-                font-size: 22px;
-                padding: 22px 0;
-            }
-            
-            .price-box {
-                padding: 45px;
-            }
-            
-            .price {
-                font-size: 72px;
+                max-width: 1000px; /* পিসিতে একটু বড় */
             }
             
             .header h1 {
-                font-size: 58px;
-            }
-        }
-        
-        /* 4K মনিটরের জন্য */
-        @media (min-width: 2000px) {
-            .container {
-                max-width: 2000px;
-            }
-            
-            body {
-                padding: 60px;
-                padding-bottom: 180px;
+                font-size: 32px;
             }
             
             .card {
-                padding: 70px;
+                padding: 25px;
             }
             
             .info-row {
-                font-size: 28px;
+                font-size: 16px;
             }
             
             .price {
-                font-size: 90px;
+                font-size: 36px;
             }
         }
         
         /* ছোট মোবাইলের জন্য */
         @media (max-width: 480px) {
             body {
-                padding: 12px;
-                padding-bottom: 85px;
+                padding: 10px;
+                padding-bottom: 75px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .card {
+                padding: 15px;
             }
             
             .info-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
+                font-size: 14px;
+                padding: 10px 0;
             }
             
-            .value {
-                max-width: 100%;
-                text-align: left;
+            .price {
+                font-size: 28px;
             }
             
-            .price-box {
-                padding: 20px;
+            .pay-btn {
+                padding: 14px;
+                font-size: 16px;
             }
         }
     </style>
@@ -251,7 +203,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     
     <script>
-        // Firebase কনফিগারেশন
         firebase.initializeApp({
             apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
             authDomain: "easy-premium.firebaseapp.com",
@@ -289,8 +240,7 @@
             try {
                 const snapshot = await database.ref(`publicData/pricingPlans/${platformId}`).once('value');
                 if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    return data.D || data.description || null;
+                    return snapshot.val().D || snapshot.val().description || null;
                 }
             } catch (e) {
                 console.error("Firebase error:", e);
@@ -327,15 +277,14 @@
                 month: 'long', 
                 day: 'numeric',
                 hour: '2-digit', 
-                minute: '2-digit',
-                hour12: true
+                minute: '2-digit'
             });
             
             const platformName = data.platformId.replace(/_/g, ' ').toUpperCase();
             
             output.innerHTML = `
                 <div class="card">
-                    <h2 style="color:#ff9800; margin-bottom:25px; text-align:center; font-size:clamp(22px,4vw,36px);">📋 অর্ডার তথ্য</h2>
+                    <h2 style="color:#ff9800; margin-bottom:15px; text-align:center; font-size:20px;">📋 অর্ডার তথ্য</h2>
                     
                     <div class="info-row">
                         <span class="label">অর্ডার আইডি:</span>
@@ -358,7 +307,7 @@
                     </div>
                     
                     <div class="price-box">
-                        <div style="color:#888; margin-bottom:12px; font-size:clamp(16px,3vw,22px);">মোট প্রদেয়</div>
+                        <div style="color:#888; margin-bottom:8px;">মোট প্রদেয়</div>
                         <div class="price">${data.price} ৳</div>
                     </div>
                     
@@ -368,10 +317,6 @@
             
             payBtn.classList.remove('hidden');
         });
-
-        function handlePayment() {
-            alert('পেমেন্ট গেটওয়ে সংযুক্ত হবে\n\nআপনাকে পেমেন্ট পেজে রিডাইরেক্ট করা হবে');
-        }
     </script>
 </head>
 <body>
@@ -384,6 +329,6 @@
         <div id="output"></div>
     </div>
     
-    <button id="payBtn" class="pay-btn hidden" onclick="handlePayment()">💳 পেমেন্ট কনফার্ম করুন</button>
+    <button id="payBtn" class="pay-btn hidden" onclick="alert('পেমেন্ট গেটওয়ে সংযুক্ত হবে')">💳 পেমেন্ট কনফার্ম করুন</button>
 </body>
 </html>
