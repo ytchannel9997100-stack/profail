@@ -2412,7 +2412,7 @@
             }
         }
 
-        // ===================== পেমেন্ট লিংক জেনারেটর - সংশোধিত =====================
+        // ===================== পেমেন্ট লিংক জেনারেটর =====================
         function generatePaymentLink(orderId, platform, price, platformId) {
             try {
                 // platformId যদি দেওয়া থাকে, সেটাই ব্যবহার করব
@@ -2642,13 +2642,14 @@
             });
         }
 
-        // ===================== পেমেন্ট লিংক সহ অর্ডার তৈরি ফাংশন =====================
+        // ===================== পেমেন্ট লিংক সহ অর্ডার তৈরি ফাংশন (পরিবর্তিত) =====================
         async function createOrderWithEmail(orderData) {
             try {
                 const user = auth.currentUser;
                 if (!user) throw new Error("User not logged in");
                 
-                const orderId = `EP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+                // .toUpperCase() সরিয়ে দেওয়া হয়েছে - অর্ডার আইডি যেভাবে আছে সেভাবে থাকবে
+                const orderId = `EP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
                 
                 const paymentLink = generatePaymentLink(orderId, orderData.platform, orderData.price, orderData.platformId);
                 
