@@ -318,12 +318,7 @@
             const platformName = data.platformId.replace(/_/g, ' ').toUpperCase();
             
             const debugHTML = `
-                <div class="debug-info">
-                    <strong>🔧 ডিবাগ তথ্য:</strong><br>
-                    Original Platform ID: ${data.originalPlatformId || 'N/A'}<br>
-                    Cleaned Platform ID: ${data.platformId}<br>
-                    Timestamp: ${data.timestamp}
-                </div>
+            
             `;
             
             let dFieldHTML = '';
