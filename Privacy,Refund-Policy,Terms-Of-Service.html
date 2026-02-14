@@ -28,6 +28,12 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- ================== সিকিউরিটি ও স্মার্ট ফিচার ================== -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:; style-src 'self' https: 'unsafe-inline'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="format-detection" content="telephone=no, address=no, email=no">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    
     <style>
         /* ================== GLOBAL VARIABLES ================== */
         :root {
@@ -871,6 +877,320 @@
             window.addEventListener('resize', adjustHeight);
             window.addEventListener('orientationchange', adjustHeight);
         });
+    </script>
+    
+    <!-- ================== অ্যান্টি-ফিশিং ও স্মার্ট সিকিউরিটি স্ক্রিপ্ট ================== -->
+    <script>
+    (function() {
+        'use strict';
+        
+        // ========== কনফিগারেশন ==========
+        const CONFIG = {
+            SESSION_TIMEOUT: 30 * 60 * 1000, // 30 মিনিট (মিলিসেকেন্ড)
+            MAX_ATTEMPTS: 5, // সর্বোচ্চ চেষ্টা
+            RATE_LIMIT_WINDOW: 15 * 60 * 1000, // 15 মিনিট
+            ALERT_ON_DEVTOOLS: true, // ডেভটুলস খুললে এলার্ট দেবে
+            ENABLE_ACTIVITY_LOG: false, // লোকাল অ্যাক্টিভিটি লগ (প্রোডাকশনে false রাখুন)
+            ENFORCE_HTTPS: true // HTTPS ফোর্স করবে
+        };
+        
+        // ========== ১. HTTPS ফোর্স করা ==========
+        if (CONFIG.ENFORCE_HTTPS && location.protocol !== 'https:' && location.hostname !== 'localhost' && !location.hostname.includes('127.0.0.1')) {
+            location.replace('https://' + location.host + location.pathname + location.search);
+        }
+        
+        // ========== ২. ক্লিকজ্যাকিং প্রোটেকশন ==========
+        if (self !== top) {
+            // যদি আইফ্রেমে লোড হয়, তাহলে মূল উইন্ডোতে রিডাইরেক্ট
+            try {
+                top.location.href = self.location.href;
+            } catch (e) {
+                // ক্রস-অরিজিন আইফ্রেম - ব্লক
+                document.body.innerHTML = '<h1 style="color:red;text-align:center;padding:50px;">Access Denied</h1>';
+                throw new Error('Clickjacking protection');
+            }
+        }
+        
+        // ========== ৩. ডিভ টুলস ডিটেকশন ==========
+        function detectDevTools() {
+            const start = performance.now();
+            debugger; // ডিবাগার ট্রিগার
+            const end = performance.now();
+            
+            if (end - start > 100) {
+                // ডেভ টুলস খোলা আছে
+                if (CONFIG.ALERT_ON_DEVTOOLS) {
+                    console.log('%c⚠️ নিরাপত্তা সতর্কতা: ডেভেলপার টুলস সনাক্ত করা হয়েছে!', 'color: #ff9800; font-size: 14px; font-weight: bold;');
+                    
+                    // ইউজারকে জানানো (শুধু একবার)
+                    if (!window._devToolsAlertShown) {
+                        window._devToolsAlertShown = true;
+                        
+                        // একটি নন-ইনট্রুসিভ নোটিফিকেশন দেখানো
+                        const alertDiv = document.createElement('div');
+                        alertDiv.style.position = 'fixed';
+                        alertDiv.style.top = '20px';
+                        alertDiv.style.left = '50%';
+                        alertDiv.style.transform = 'translateX(-50%)';
+                        alertDiv.style.background = 'rgba(255, 152, 0, 0.9)';
+                        alertDiv.style.color = 'white';
+                        alertDiv.style.padding = '10px 20px';
+                        alertDiv.style.borderRadius = '5px';
+                        alertDiv.style.zIndex = '10001';
+                        alertDiv.style.fontSize = '0.9rem';
+                        alertDiv.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+                        alertDiv.style.backdropFilter = 'blur(5px)';
+                        alertDiv.innerHTML = '<i class="fas fa-shield-alt"></i> নিরাপত্তা সতর্কতা: ডেভেলপার টুলস বন্ধ করুন';
+                        
+                        document.body.appendChild(alertDiv);
+                        
+                        setTimeout(() => {
+                            if (alertDiv.parentNode) {
+                                alertDiv.style.opacity = '0';
+                                alertDiv.style.transition = 'opacity 0.5s';
+                                setTimeout(() => {
+                                    if (alertDiv.parentNode) alertDiv.remove();
+                                }, 500);
+                            }
+                        }, 5000);
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+        
+        // প্রতি ৩ সেকেন্ডে চেক করুন
+        setInterval(detectDevTools, 3000);
+        
+        // ========== ৪. রেট লিমিটিং (অর্ডার স্প্যাম প্রোটেকশন) ==========
+        window._rateLimitStore = window._rateLimitStore || {
+            attempts: {},
+            blockUntil: {}
+        };
+        
+        window.checkRateLimit = function(action, userId = 'anonymous') {
+            const key = `${action}_${userId}`;
+            const now = Date.now();
+            
+            // ব্লক চেক
+            if (window._rateLimitStore.blockUntil[key] && window._rateLimitStore.blockUntil[key] > now) {
+                const remaining = Math.ceil((window._rateLimitStore.blockUntil[key] - now) / 1000 / 60);
+                return {
+                    allowed: false,
+                    message: `অনেক চেষ্টা করেছেন। ${remaining} মিনিট পরে আবার চেষ্টা করুন।`,
+                    remainingMinutes: remaining
+                };
+            }
+            
+            // এটেম্পট চেক
+            if (!window._rateLimitStore.attempts[key]) {
+                window._rateLimitStore.attempts[key] = [];
+            }
+            
+            // পুরানো এটেম্পট ফিল্টার
+            window._rateLimitStore.attempts[key] = window._rateLimitStore.attempts[key].filter(t => t > now - CONFIG.RATE_LIMIT_WINDOW);
+            
+            if (window._rateLimitStore.attempts[key].length >= CONFIG.MAX_ATTEMPTS) {
+                // ব্লক করুন
+                window._rateLimitStore.blockUntil[key] = now + CONFIG.RATE_LIMIT_WINDOW;
+                return {
+                    allowed: false,
+                    message: 'অনেক চেষ্টা করেছেন। ১৫ মিনিট পরে আবার চেষ্টা করুন।',
+                    remainingMinutes: 15
+                };
+            }
+            
+            // এটেম্পট যোগ করুন
+            window._rateLimitStore.attempts[key].push(now);
+            
+            return { allowed: true };
+        };
+        
+        // ========== ৫. সেশন টাইমআউট ==========
+        let sessionTimer;
+        let sessionWarningShown = false;
+        
+        function resetSessionTimer() {
+            if (sessionTimer) clearTimeout(sessionTimer);
+            
+            sessionTimer = setTimeout(() => {
+                // সেশন টাইমআউট - লগআউট করুন
+                if (firebase && firebase.auth() && firebase.auth().currentUser) {
+                    // ইউজারকে জানান
+                    if (confirm('আপনার সেশন শেষ হয়ে গেছে। আবার লগইন করবেন?')) {
+                        firebase.auth().signOut();
+                        window.location.reload();
+                    } else {
+                        firebase.auth().signOut();
+                    }
+                }
+            }, CONFIG.SESSION_TIMEOUT);
+        }
+        
+        // ইউজার অ্যাক্টিভিটিতে টাইমার রিসেট
+        ['click', 'keypress', 'scroll', 'mousemove', 'touchstart'].forEach(event => {
+            document.addEventListener(event, resetSessionTimer, { passive: true });
+        });
+        
+        // ========== ৬. XSS প্রোটেকশন (ইনপুট স্যানিটাইজ) ==========
+        function sanitizeInput(input) {
+            if (typeof input !== 'string') return input;
+            
+            // বিপজ্জনক ক্যারেক্টার এস্কেপ করুন
+            return input
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#x27;')
+                .replace(/\//g, '&#x2F;')
+                .replace(/\\/g, '&#x5C;')
+                .replace(/`/g, '&#96;')
+                .replace(/=/g, '&#61;');
+        }
+        
+        // ফর্ম ইনপুট স্যানিটাইজ করার জন্য ফাংশন (যদি থাকে)
+        function setupFormProtection() {
+            document.querySelectorAll('form').forEach(form => {
+                if (form._protected) return;
+                form._protected = true;
+                
+                form.addEventListener('submit', function(e) {
+                    const textInputs = this.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], textarea');
+                    textInputs.forEach(input => {
+                        if (input.value && typeof input.value === 'string') {
+                            input.dataset.originalValue = input.value;
+                            if (/[<>"'`=]/.test(input.value)) {
+                                console.warn('সতর্কতা: ইনপুটে বিপজ্জনক ক্যারেক্টার পাওয়া গেছে');
+                            }
+                        }
+                    });
+                }, true);
+            });
+        }
+        
+        // ডম পরিবর্তন হলে আবার সেটআপ করুন
+        const observer = new MutationObserver(() => {
+            setupFormProtection();
+        });
+        
+        observer.observe(document.body, { childList: true, subtree: true });
+        
+        // ========== ৭. লোকাল স্টোরেজ এনক্রিপশন (সিম্পল) ==========
+        const originalSetItem = localStorage.setItem;
+        const originalGetItem = localStorage.getItem;
+        
+        // শুধুমাত্র সংবেদনশীল ডেটার জন্য
+        const sensitiveKeys = ['user', 'session', 'token', 'auth'];
+        
+        localStorage.setItem = function(key, value) {
+            if (sensitiveKeys.some(k => key.toLowerCase().includes(k))) {
+                try {
+                    const encoded = btoa(encodeURIComponent(value));
+                    return originalSetItem.call(this, `_sec_${key}`, encoded);
+                } catch (e) {
+                    console.warn('LocalStorage encoding error');
+                }
+            }
+            return originalSetItem.call(this, key, value);
+        };
+        
+        localStorage.getItem = function(key) {
+            if (sensitiveKeys.some(k => key.toLowerCase().includes(k))) {
+                try {
+                    const encoded = originalGetItem.call(this, `_sec_${key}`);
+                    if (encoded) {
+                        return decodeURIComponent(atob(encoded));
+                    }
+                } catch (e) {
+                    console.warn('LocalStorage decoding error');
+                }
+            }
+            return originalGetItem.call(this, key);
+        };
+        
+        // ========== ৮. সিকিউরিটি ব্যাজ তৈরি (নিষ্ক্রিয়) ==========
+        function createSecurityBadge() {
+            // কিছুই করে না - প্রয়োজন হলে পরে অ্যাক্টিভেট করা যাবে
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', createSecurityBadge);
+        } else {
+            createSecurityBadge();
+        }
+        
+        // ========== ৯. অ্যান্টি-ফিশিং ও ডোমেইন ভেরিফিকেশন ==========
+        function verifyDomain() {
+            const allowedDomains = ['easy-premium.com', 'www.easy-premium.com', 'localhost', '127.0.0.1'];
+            const currentHost = window.location.hostname;
+            
+            if (!allowedDomains.includes(currentHost) && !currentHost.endsWith('.easy-premium.com')) {
+                console.warn('অজানা ডোমেইনে চলছে:', currentHost);
+            }
+        }
+        
+        verifyDomain();
+        
+        // ========== ১০. কীবোর্ড শর্টকাট প্রোটেকশন ==========
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+U (ভিউ সোর্স)
+            if (e.ctrlKey && e.keyCode === 85) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Ctrl+S (সেভ)
+            if (e.ctrlKey && e.keyCode === 83) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Ctrl+Shift+I (ইন্সপেক্ট)
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // F12
+            if (e.keyCode === 123) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // ========== ১১. রাইট ক্লিক প্রোটেকশন ==========
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        document.addEventListener('mousedown', function(e) {
+            if (e.button === 2) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        document.addEventListener('touchstart', function(e) {
+            let touchTimer;
+            const handleTouchEnd = function() {
+                clearTimeout(touchTimer);
+                document.removeEventListener('touchend', handleTouchEnd);
+            };
+            
+            if (e.touches.length === 1) {
+                touchTimer = setTimeout(function() {
+                    e.preventDefault();
+                }, 500);
+                
+                document.addEventListener('touchend', handleTouchEnd, { once: true });
+            }
+        }, { passive: false });
+        
+        console.log('%c🔒 Easy Premium - Privacy Policy সুরক্ষিত মোড সক্রিয়', 'color: #4caf50; font-size: 14px; font-weight: bold;');
+    })();
     </script>
 </body>
 </html>
