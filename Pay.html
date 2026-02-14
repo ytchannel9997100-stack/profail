@@ -2,96 +2,22 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">               
     <title>পেমেন্ট তথ্য</title>
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <style>
-        /* সম্পূর্ণ ব্ল্যাক ব্যাকগ্রাউন্ড */
-        html, body {
-            background: #000 !important;
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            color: #fff;
-            font-family: 'Courier New', monospace;
-        }
-        
-        body {
-            background: #000;
-            min-height: 100vh;
-        }
-        
-        /* কন্টেন্ট এরিয়া */
-        .content-wrapper {
-            width: 100%;
-            padding: 20px;
-            padding-bottom: 100px;
-            box-sizing: border-box;
-        }
-        
-        /* ডাটা ডিসপ্লে বক্স */
-        .d-value {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 20px;
-            line-height: 1.8;
-            font-size: 18px;
-            white-space: pre-line;
-            word-break: break-word;
-        }
-        
-        /* পে নাও বাটন */
-        .pay-now-btn {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(135deg, #fb00ff, #ff2222);
-            color: white;
-            border: none;
-            padding: 20px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 1000;
-            padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-        }
-        
-        .pay-now-btn.hidden {
-            display: none;
-        }
-        
-        /* এরর মেসেজ */
-        .error {
-            color: #ff6666;
-            padding: 20px;
-            text-align: center;
-            background: #111;
-            border: 1px solid #ff2222;
-            border-radius: 8px;
-        }
-        
-        /* লোডিং */
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #fff;
-        }
-        
-        /* মোবাইল রেস্পন্সিভ */
-        @media (max-width: 768px) {
-            .content-wrapper { padding: 15px; padding-bottom: 90px; }
-            .d-value { font-size: 16px; padding: 15px; }
-            .pay-now-btn { padding: 18px; font-size: 18px; }
-        }
+        html, body { background: #000 !important; margin: 0; padding: 0; width: 100%; height: 100%; color: #fff; font-family: 'Courier New', monospace; }
+        .content-wrapper { width: 100%; padding: 20px; padding-bottom: 100px; box-sizing: border-box; }
+        .d-value { background: #111; border: 1px solid #333; border-radius: 8px; padding: 20px; line-height: 1.8; font-size: 18px; white-space: pre-line; word-break: break-word; }
+        .pay-now-btn { position: fixed; bottom: 0; left: 0; width: 100%; background: linear-gradient(135deg, #fb00ff, #ff2222); color: white; border: none; padding: 20px; font-size: 20px; font-weight: bold; cursor: pointer; z-index: 1000; padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
+        .pay-now-btn.hidden { display: none; }
+        .error { color: #ff6666; padding: 20px; text-align: center; background: #111; border: 1px solid #ff2222; border-radius: 8px; }
+        .loading { text-align: center; padding: 40px; }
     </style>
     
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     
@@ -111,72 +37,69 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // ========== ডিক্রিপশন ফাংশন ==========
-        function decryptPaymentData(encryptedData) {
+        // ========== সঠিক ডিক্রিপশন ফাংশন ==========
+        function decryptData(encryptedData) {
             try {
                 console.log("ডিক্রিপ্ট করা হচ্ছে:", encryptedData);
                 
-                // 1. URL ডিকোড
+                // স্টেপ 1: URL ডিকোড (থেকে %2F ইত্যাদি)
                 const urlDecoded = decodeURIComponent(encryptedData);
                 console.log("URL ডিকোড:", urlDecoded);
                 
-                // 2. Base64 ডিকোড
+                // স্টেপ 2: Base64 ডিকোড
+                // 'RVAtMTc3...' থেকে 'EP-177...' হবে
                 const base64Decoded = atob(urlDecoded);
                 console.log("Base64 ডিকোড:", base64Decoded);
                 
-                // 3. ডিক্রিপশন কী (মেইন সাইটের সাথে মিল রেখে)
+                // স্টেপ 3: XOR ডিক্রিপশন (একই কী দিয়ে)
                 const key = 'EP_SECURE_2025_KEY_!@#';
-                
-                // 4. XOR ডিক্রিপশন
                 let decrypted = '';
+                
                 for (let i = 0; i < base64Decoded.length; i++) {
                     const keyChar = key.charCodeAt(i % key.length);
                     const dataChar = base64Decoded.charCodeAt(i);
                     decrypted += String.fromCharCode(dataChar ^ keyChar);
                 }
                 
-                console.log("ডিক্রিপ্টেড স্ট্রিং:", decrypted);
+                console.log("XOR ডিক্রিপ্টেড:", decrypted);
                 
-                // 5. পাইপ-সেপারেটেড ফরম্যাট পার্স করুন
+                // স্টেপ 4: পাইপ সেপারেটেড ফরম্যাট পার্স
                 const parts = decrypted.split('|');
                 
                 if (parts.length >= 4) {
                     return {
-                        orderId: parts[0],        // অর্ডার আইডি
-                        platformId: parts[1],      // প্ল্যাটফর্ম আইডি (যেমন: youtube_premium)
-                        price: parts[2],           // মূল্য
-                        timestamp: parts[3],       // টাইমস্ট্যাম্প
-                        platform: parts[1].replace(/_/g, ' ').toUpperCase() // প্ল্যাটফর্ম নাম ফরম্যাট করা
+                        orderId: parts[0],
+                        platformId: parts[1],
+                        price: parts[2],
+                        timestamp: parts[3]
                     };
                 } else {
-                    throw new Error("Invalid format - expected pipe-separated");
+                    console.error("পাইপ সেপারেটর পাওয়া যায়নি");
+                    return null;
                 }
-                
             } catch (error) {
                 console.error("ডিক্রিপ্ট এরর:", error);
                 return null;
             }
         }
 
+        // ========== প্ল্যাটফর্মের নাম ফরম্যাট করা ==========
+        function formatPlatformName(platformId) {
+            if (!platformId) return 'N/A';
+            return platformId.replace(/_/g, ' ').toUpperCase();
+        }
+
         // ========== ফায়ারবেস থেকে D ফিল্ড পড়া ==========
         async function fetchDFromFirebase(platformId) {
             try {
-                console.log("Firebase থেকে ডাটা আনা হচ্ছে:", platformId);
-                
                 const snapshot = await database.ref(`publicData/pricingPlans/${platformId}`).once('value');
-                
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    console.log("Firebase ডাটা:", data);
-                    
-                    // D ফিল্ড বা description খোঁজা
-                    if (data.D) return data.D;
-                    if (data.description) return data.description;
-                    return JSON.stringify(data, null, 2);
+                    return data.D || data.description || JSON.stringify(data);
                 }
                 return null;
             } catch (error) {
-                console.error("Firebase এরর:", error);
+                console.error("Firebase error:", error);
                 return null;
             }
         }
@@ -196,35 +119,32 @@
             }
             
             // ডাটা ডিক্রিপ্ট করা
-            const data = decryptPaymentData(encodedData);
+            const data = decryptData(encodedData);
             
             if (!data) {
                 outputDiv.innerHTML = `
                     <div class="error">
                         <strong>❌ ডাটা ডিক্রিপ্ট করা যায়নি</strong><br><br>
-                        <small>এনক্রিপ্টেড ডাটা: ${encodedData.substring(0, 50)}...</small>
+                        <small>এনক্রিপ্টেড ডাটা: ${encodedData.substring(0, 60)}...</small>
                     </div>
                 `;
                 return;
             }
             
-            // ফায়ারবেস থেকে D ফিল্ড আনা (যদি থাকে)
-            let dFieldContent = '';
+            // ফায়ারবেস থেকে D ফিল্ড আনা
+            let dField = '';
             if (data.platformId) {
                 const firebaseData = await fetchDFromFirebase(data.platformId);
                 if (firebaseData) {
-                    dFieldContent = `\n\n📄 **বিস্তারিত তথ্য**\n${firebaseData}`;
+                    dField = `\n\n📄 বিস্তারিত:\n${firebaseData}`;
                 }
             }
             
-            // টাইমস্ট্যাম্পকে তারিখে রূপান্তর
+            // টাইমস্ট্যাম্প ফরম্যাট করা
             const date = new Date(parseInt(data.timestamp));
             const formattedDate = date.toLocaleString('bn-BD', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
             });
             
             // ডাটা দেখানো
@@ -232,17 +152,17 @@
                 <div class="d-value">
                     <strong>📋 অর্ডার তথ্য</strong><br><br>
                     🔖 অর্ডার আইডি: ${data.orderId}<br>
-                    🎯 প্ল্যাটফর্ম: ${data.platform}<br>
+                    🎯 প্ল্যাটফর্ম: ${formatPlatformName(data.platformId)}<br>
                     💰 মূল্য: ${data.price} ৳<br>
-                    📅 তারিখ: ${formattedDate}${dFieldContent.replace(/\n/g, '<br>')}
+                    📅 তারিখ: ${formattedDate}${dField.replace(/\n/g, '<br>')}
                 </div>
             `;
             
             // পে নাও বাটন দেখানো
             payNowBtn.classList.remove('hidden');
             payNowBtn.onclick = () => {
-                alert(`✅ পেমেন্ট প্রক্রিয়া শুরু হচ্ছে...\n\nঅর্ডার: ${data.orderId}\nপ্ল্যাটফর্ম: ${data.platform}\nমূল্য: ${data.price} ৳`);
-                // এখানে আপনার পেমেন্ট গেটওয়ে URL দিন
+                alert(`✅ পেমেন্ট প্রক্রিয়া শুরু হচ্ছে...\n\nঅর্ডার: ${data.orderId}\nপ্ল্যাটফর্ম: ${formatPlatformName(data.platformId)}\nমূল্য: ${data.price} ৳`);
+                // আপনার পেমেন্ট গেটওয়ে লিঙ্ক এখানে দিন
                 // window.location.href = `https://your-payment-gateway.com?order=${data.orderId}&amount=${data.price}`;
             };
         });
