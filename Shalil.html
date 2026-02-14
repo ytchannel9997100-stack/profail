@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
+        /* পুরনো CSS ঠিক আগের মতোই থাকবে */
         * {
             margin: 0;
             padding: 0;
@@ -738,30 +739,47 @@
             'allwork204571@gmail.com'
         ];
 
-        // Platform ID mapping (Pay.html যে ফরম্যাট ব্যবহার করে)
+        // ===== পরিবর্তিত অংশ: Platform ID mapping - সঠিক Firebase IDs ব্যবহার করুন =====
         const PLATFORM_ID_MAP = {
-            'telegram': 'telegram_premium',
-            'telegram premium': 'telegram_premium',
-            'youtube': 'youtube_premium',
-            'youtube premium': 'youtube_premium',
-            'facebook': 'facebook_premium',
-            'facebook premium': 'facebook_premium',
-            'instagram': 'instagram_premium',
-            'instagram premium': 'instagram_premium',
-            'netflix': 'netflix_premium',
-            'netflix premium': 'netflix_premium',
-            'spotify': 'spotify_premium',
-            'spotify premium': 'spotify_premium',
-            'whatsapp': 'whatsapp_business',
-            'whatsapp business': 'whatsapp_business',
-            'tiktok': 'tiktok_coins',
-            'tiktok coins': 'tiktok_coins',
-            'amazon': 'amazon_prime',
-            'amazon prime': 'amazon_prime',
-            'prime': 'amazon_prime'
+            // Amazon
+            'amazon': '-PLKNNA2EEIS6X9K8Z',
+            'amazon prime': '-PLKNNA2EEIS6X9K8Z',
+            'prime': '-PLKNNA2EEIS6X9K8Z',
+            
+            // YouTube
+            'youtube': '-PLyYOUTUBE_ID', // আপনার আসল YouTube ID দিন
+            'youtube premium': '-PLyYOUTUBE_ID',
+            
+            // Netflix
+            'netflix': '-PLnNETFLIX_ID', // আপনার আসল Netflix ID দিন
+            'netflix premium': '-PLnNETFLIX_ID',
+            
+            // Facebook
+            'facebook': '-PLfFACEBOOK_ID', // আপনার আসল Facebook ID দিন
+            'facebook premium': '-PLfFACEBOOK_ID',
+            
+            // Instagram
+            'instagram': '-PLiINSTAGRAM_ID', // আপনার আসল Instagram ID দিন
+            'instagram premium': '-PLiINSTAGRAM_ID',
+            
+            // Telegram
+            'telegram': '-PLtTELEGRAM_ID', // আপনার আসল Telegram ID দিন
+            'telegram premium': '-PLtTELEGRAM_ID',
+            
+            // Spotify
+            'spotify': '-PLsSPOTIFY_ID', // আপনার আসল Spotify ID দিন
+            'spotify premium': '-PLsSPOTIFY_ID',
+            
+            // WhatsApp
+            'whatsapp': '-PLwWHATSAPP_ID', // আপনার আসল WhatsApp ID দিন
+            'whatsapp business': '-PLwWHATSAPP_ID',
+            
+            // TikTok
+            'tiktok': '-PLtTIKTOK_ID', // আপনার আসল TikTok ID দিন
+            'tiktok coins': '-PLtTIKTOK_ID'
         };
 
-        // ===== Generate encrypted data string for payment link (সঠিক, সিঙ্গেল Base64 + URL encode) =====
+        // ===== Generate encrypted data string for payment link =====
         function generateEncryptedData(orderId, platform, price) {
             try {
                 const platformId = getPlatformId(platform);
@@ -1032,7 +1050,7 @@
             return filtered;
         }
         
-        // ===== পরিবর্তিত অংশ ১: Display orders - সঠিক অর্ডার আইডি দেখানো =====
+        // Display orders
         function displayOrders(ordersList) {
             if (ordersList.length === 0) {
                 ordersTable.innerHTML = '<tr><td colspan="8" class="no-data">কোন অর্ডার পাওয়া যায়নি</td></tr>';
@@ -1042,7 +1060,6 @@
             let html = '';
             
             ordersList.forEach(order => {
-                // অর্ডার আইডি হিসেবে আগে orderId ফিল্ড দেখাব, না থাকলে Firebase key
                 const displayOrderId = order.orderId || order.id;
                 
                 const orderDate = order.orderDate ? new Date(order.orderDate).toLocaleString('bn-BD', {
@@ -1116,7 +1133,7 @@
             ordersTable.innerHTML = html;
         }
         
-        // ===== Platform Name থেকে Platform ID বের করার ফাংশন =====
+        // Platform Name থেকে Platform ID বের করার ফাংশন
         function getPlatformId(platformName) {
             if (!platformName) return 'unknown';
             
@@ -1124,20 +1141,22 @@
             
             for (const [key, value] of Object.entries(PLATFORM_ID_MAP)) {
                 if (lowerPlatform.includes(key)) {
+                    console.log(`✅ Platform mapped: ${platformName} -> ${value}`);
                     return value;
                 }
             }
             
+            console.warn(`⚠️ No mapping found for platform: ${platformName}`);
             return lowerPlatform.replace(/\s+/g, '');
         }
         
-        // ===== Generate payment link =====
+        // Generate payment link
         function generatePaymentLink(orderId, platform, price) {
             const encryptedData = generateEncryptedData(orderId, platform, price);
             return `${BASE_URL}?data=${encryptedData}&v=2`;
         }
         
-        // ===== Generate WhatsApp message (সঠিক অর্ডার আইডি ব্যবহার) =====
+        // Generate WhatsApp message
         function generateWhatsAppMessage(orderId, userName, platform, price) {
             const paymentLink = generatePaymentLink(orderId, platform, price);
             
@@ -1158,17 +1177,14 @@ Easy Premium Team`;
             return message;
         }
         
-        // ===== পরিবর্তিত অংশ ২: Send WhatsApp message - সঠিক orderId ব্যবহার =====
+        // Send WhatsApp message
         function sendWhatsAppMessage(orderId, phoneNumber, userName, platform, price) {
-            // orderId প্যারামিটার হচ্ছে Firebase key (order.id)
-            // আমাদের দরকার order.orderId, তাই পুরো অর্ডার খুঁজে বের করি
             const order = orders.find(o => o.id === orderId);
             if (!order) {
                 showToast('অর্ডার পাওয়া যায়নি', 'error');
                 return;
             }
             
-            // যে আইডি পেমেন্ট লিংকে যাবে সেটি order.orderId (EP-... ফরম্যাট)
             const displayOrderId = order.orderId || orderId;
             
             const cleanNumber = phoneNumber.replace(/\D/g, '');
@@ -1242,7 +1258,7 @@ Easy Premium Team`;
                 });
         }
         
-        // Update order status (for revert to pending)
+        // Update order status
         function updateOrderStatus(orderId, newStatus) {
             const updates = {
                 status: newStatus,
