@@ -32,17 +32,6 @@
             -webkit-overflow-scrolling: touch;
         }
         
-        /* Safe area adjustments */
-        @supports (padding-top: env(safe-area-inset-top)) {
-            body {
-                padding-top: env(safe-area-inset-top);
-                padding-bottom: env(safe-area-inset-bottom);
-                padding-left: env(safe-area-inset-left);
-                padding-right: env(safe-area-inset-right);
-                background: #000;
-            }
-        }
-        
         .content-wrapper {
             width: 100%;
             padding: 20px;
@@ -58,7 +47,7 @@
         .d-container {
             width: 100%;
             background: #000;
-            margin-top: 0;
+            margin-top: 20px;
         }
         
         .d-value {
@@ -77,7 +66,6 @@
             background: #111;
         }
         
-        /* Pay Now বাটন */
         .pay-now-btn {
             position: fixed;
             bottom: 0;
@@ -127,19 +115,6 @@
             border-radius: 8px;
         }
         
-        .debug-info {
-            background: #111;
-            padding: 15px;
-            margin: 20px 0;
-            border: 1px solid #333;
-            border-radius: 8px;
-            font-size: 12px;
-            color: #0f0;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-        
         @media (max-width: 768px) {
             .content-wrapper { padding: 15px; padding-bottom: 100px; }
             .d-value { font-size: 16px; padding: 15px; }
@@ -152,7 +127,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     
     <script>
-        // ফায়ারবেস কনফিগারেশন
+        // ফায়ারবেস কনফিগারেশন (আপনার দেওয়া কনফিগ)
         const firebaseConfig = {
             apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
             authDomain: "easy-premium.firebaseapp.com",
@@ -186,7 +161,7 @@
                 const base64Decoded = atob(urlDecoded);
                 console.log("2️⃣ Base64 decoded:", base64Decoded);
                 
-                // 3. ডিক্রিপশন কী (মেইন সাইটের generatePaymentLink-এর সাথে মিল রেখে)
+                // 3. ডিক্রিপশন কী (মেইন সাইটের generatePaymentLink-এ ব্যবহৃত কী)
                 const key = 'EP_SECURE_2025_KEY_!@#';
                 
                 // 4. XOR ডিক্রিপশন
@@ -199,29 +174,25 @@
                 
                 console.log("3️⃣ XOR decrypted:", decrypted);
                 
-                // 5. JSON পার্স
-                // ফরম্যাট: "orderId|platformId|price|timestamp" অথবা JSON
-                let parsed;
-                try {
-                    parsed = JSON.parse(decrypted);
-                    console.log("4️⃣ Parsed as JSON:", parsed);
-                } catch (e) {
-                    // পাইপ সেপারেটেড ফরম্যাট হতে পারে
-                    const parts = decrypted.split('|');
-                    if (parts.length >= 3) {
-                        parsed = {
-                            orderId: parts[0],
-                            platformId: parts[1],
-                            price: parts[2],
-                            timestamp: parts[3] || Date.now()
-                        };
-                        console.log("4️⃣ Parsed as pipe-separated:", parsed);
-                    } else {
-                        throw new Error("Invalid data format");
-                    }
+                // 5. পাইপ-সেপারেটেড ফরম্যাট পার্স করুন
+                // ফরম্যাট: orderId|platformId|price|timestamp
+                const parts = decrypted.split('|');
+                
+                if (parts.length >= 4) {
+                    const parsedData = {
+                        orderId: parts[0],
+                        platformId: parts[1],
+                        price: parts[2],
+                        timestamp: parts[3],
+                        platform: parts[1].replace('_premium', '').replace('_', ' ').toUpperCase(),
+                        amount: parts[2]
+                    };
+                    console.log("4️⃣ Parsed pipe-separated data:", parsedData);
+                    return parsedData;
+                } else {
+                    throw new Error("Invalid data format - expected pipe-separated");
                 }
                 
-                return parsed;
             } catch (error) {
                 console.error("❌ Decryption error:", error);
                 return null;
@@ -232,7 +203,8 @@
         async function fetchDFromFirebase(platformId) {
             try {
                 if (!database) {
-                    throw new Error("Firebase not initialized");
+                    console.log("⚠️ Firebase not available");
+                    return null;
                 }
                 
                 console.log("📡 Fetching D field for platform:", platformId);
@@ -244,7 +216,6 @@
                     const data = snapshot.val();
                     console.log("📦 Firebase data:", data);
                     
-                    // D ফিল্ড খোঁজা
                     if (data.D) return data.D;
                     if (data.description) return data.description;
                     return JSON.stringify(data, null, 2);
@@ -261,21 +232,15 @@
         // ========== পেজ লোড হওয়ার পর ==========
         window.addEventListener('DOMContentLoaded', async function() {
             const outputDiv = document.getElementById('output');
-            const debugDiv = document.getElementById('debugInfo');
             const payNowBtn = document.getElementById('payNowBtn');
             
             // URL থেকে data প্যারামিটার নেওয়া
             const urlParams = new URLSearchParams(window.location.search);
-            const encodedData = urlParams.get('data') || urlParams.get('v') || urlParams.get('order');
+            const encodedData = urlParams.get('data');
             
             if (!encodedData) {
                 outputDiv.innerHTML = '<div class="error">❌ URL-এ কোনো ডাটা নেই</div>';
                 return;
-            }
-            
-            // ডিবাগ তথ্য দেখানো
-            if (debugDiv) {
-                debugDiv.innerHTML = `<strong>Raw encoded data:</strong> ${encodedData}`;
             }
             
             // ডিক্রিপ্ট করার চেষ্টা
@@ -284,50 +249,44 @@
             if (!decryptedData) {
                 outputDiv.innerHTML = `
                     <div class="error">
-                        <strong>❌ ডাটা ডিক্রিপ্ট করা যায়নি</strong>
+                        <strong>❌ ডাটা ডিক্রিপ্ট করা যায়নি</strong><br><br>
+                        <small style="color:#999;">এনক্রিপ্টেড ডাটা: ${encodedData.substring(0, 50)}...</small>
                     </div>
                 `;
                 return;
             }
             
-            // ডিবাগ তথ্য আপডেট
-            if (debugDiv) {
-                debugDiv.innerHTML += `<br><br><strong>✅ Decrypted data:</strong><br>${JSON.stringify(decryptedData, null, 2)}`;
-            }
-            
             // ডিক্রিপ্টেড ডাটা থেকে platformId বের করা
-            const platformId = decryptedData.p || decryptedData.platformId || decryptedData.id || 
-                              (decryptedData.orderId ? decryptedData.orderId.split('-')[1] : null);
+            const platformId = decryptedData.platformId;
             
             // Firebase থেকে D ফিল্ড আনা
-            let dFieldContent = "📄 D ফিল্ড পাওয়া যায়নি";
+            let dFieldContent = `📋 **অর্ডার তথ্য**\n\n`;
+            dFieldContent += `অর্ডার আইডি: ${decryptedData.orderId}\n`;
+            dFieldContent += `প্ল্যাটফর্ম: ${decryptedData.platform}\n`;
+            dFieldContent += `মূল্য: ${decryptedData.price} ৳\n`;
+            dFieldContent += `টাইমস্ট্যাম্প: ${new Date(parseInt(decryptedData.timestamp)).toLocaleString('bn-BD')}\n`;
+            
             if (platformId && database) {
                 const firebaseData = await fetchDFromFirebase(platformId);
                 if (firebaseData) {
-                    dFieldContent = firebaseData;
+                    dFieldContent += `\n📄 **বিস্তারিত তথ্য**\n${firebaseData}`;
                 }
-            } else {
-                // ফ্যালব্যাক: ডিক্রিপ্টেড ডাটা থেকে
-                dFieldContent = decryptedData.d || decryptedData.D || decryptedData.description || 
-                               `Order ID: ${decryptedData.orderId || 'N/A'}\nPlatform: ${decryptedData.platformId || platformId || 'N/A'}\nPrice: ${decryptedData.price || 'N/A'}`;
             }
             
             // D ফিল্ড দেখানো
             outputDiv.innerHTML = `
                 <div class="d-container">
-                    <div class="d-value">${dFieldContent.replace(/\n/g, '<br>')}</div>
+                    <div class="d-value">${dFieldContent.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
                 </div>
             `;
             
             // Pay Now বাটন দেখানো
             if (payNowBtn) {
                 payNowBtn.classList.remove('hidden');
-                
-                // বাটনে ক্লিক করলে
-                payNowBtn.onclick = function() {
-                    const paymentUrl = decryptedData.paymentLink || 
-                                       `https://easy-premium.com/Pay.html?order=${decryptedData.orderId || ''}`;
-                    window.open(paymentUrl, '_blank');
+                payNowBtn.onclick = () => {
+                    alert(`পেমেন্ট প্রক্রিয়া শুরু হচ্ছে...\nঅর্ডার আইডি: ${decryptedData.orderId}\nমূল্য: ${decryptedData.price} ৳`);
+                    // এখানে আপনার পেমেন্ট গেটওয়ে URL দিন
+                    // window.location.href = `https://your-payment-gateway.com?order=${decryptedData.orderId}&amount=${decryptedData.price}`;
                 };
             }
         });
@@ -336,18 +295,10 @@
 <body>
     <div class="content-wrapper">
         <div id="output">
-            <div class="loading">
-                🔄 ডাটা ডিক্রিপ্ট করা হচ্ছে...
-            </div>
-        </div>
-        
-        <!-- ডিবাগ তথ্য (প্রোডাকশনে লুকানো থাকবে) -->
-        <div id="debugInfo" class="debug-info" style="display: none;">
-            <strong>Debug Info:</strong><br>
+            <div class="loading">🔄 ডাটা ডিক্রিপ্ট করা হচ্ছে...</div>
         </div>
     </div>
 
-    <!-- Pay Now বাটন -->
     <button id="payNowBtn" class="pay-now-btn hidden">💳 Pay Now</button>
 </body>
 </html>
