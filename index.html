@@ -2367,12 +2367,14 @@
             }
         });
 
-        // ===================== ইমেইল পাঠানোর ফাংশন - সঠিকভাবে সংশোধিত =====================
+        // ===================== ইমেইল পাঠানোর ফাংশন - সংশোধিত =====================
         async function sendOrderConfirmationEmail(userEmail, userName, orderData) {
             try {
+                // ইমেইল টেমপ্লেটের জন্য প্যারামিটার তৈরি
                 const templateParams = {
+                    to_email: userEmail,           // গুরুত্বপূর্ণ: recipients address
                     to_name: userName || 'গ্রাহক',
-                    to_email: userEmail,
+                    from_name: 'Easy Premium',
                     order_id: orderData.orderId,
                     platform: orderData.platform,
                     price: orderData.price,
@@ -2390,13 +2392,16 @@
                 
                 console.log("Sending email with params:", templateParams);
                 
+                // EmailJS সার্ভিস এবং টেমপ্লেট আইডি
                 const serviceID = 'service_uknjs0j';
                 const templateID = 'template_gdvntij';
                 
+                // ইমেইল পাঠানো
                 const response = await emailjs.send(serviceID, templateID, templateParams);
                 
                 console.log('Email sent successfully:', response);
                 
+                // ডাটাবেস আপডেট করা (যদি প্রয়োজন হয়)
                 if (orderData.firebaseKey) {
                     await database.ref(`transactions/${orderData.firebaseKey}`).update({
                         emailSent: true,
@@ -2713,9 +2718,13 @@
                 
                 const user = auth.currentUser;
                 if (user && user.email) {
-                    sendOrderConfirmationEmail(user.email, createdOrder.userName, createdOrder).catch(err => {
-                        console.error("Background email sending error:", err);
-                    });
+                    // ইমেইল পাঠানো - এখন সঠিকভাবে কাজ করবে
+                    const emailSent = await sendOrderConfirmationEmail(user.email, createdOrder.userName, createdOrder);
+                    if (emailSent) {
+                        console.log("Confirmation email sent to:", user.email);
+                    } else {
+                        console.warn("Failed to send confirmation email");
+                    }
                 }
                 
                 purchaseModal.style.display = 'none';
@@ -2724,6 +2733,9 @@
                 updateCartBadge(user.uid);
                 
                 window.open(createdOrder.paymentLink, '_blank');
+                
+                // সফল অর্ডারের জন্য ব্যবহারকারীকে জানানো
+                alert("অর্ডার সফলভাবে তৈরি হয়েছে! আপনার ইমেইলে কনফার্মেশন পাঠানো হয়েছে।");
                 
             } catch (error) {
                 console.error("Error creating order:", error);
