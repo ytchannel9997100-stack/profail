@@ -45,6 +45,7 @@
         
         .content-wrapper {
             width: 100%;
+            padding: 20px;
             padding-top: max(env(safe-area-inset-top), 20px);
             padding-right: max(env(safe-area-inset-right), 20px);
             padding-bottom: max(calc(env(safe-area-inset-bottom) + 100px), 20px);
@@ -52,7 +53,6 @@
             box-sizing: border-box;
             background: #000;
             min-height: 100vh;
-            position: relative;
         }
         
         .d-container {
@@ -127,19 +127,27 @@
             border-radius: 8px;
         }
         
+        .debug-info {
+            background: #111;
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px solid #333;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #0f0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
         @media (max-width: 768px) {
-            .content-wrapper {
-                padding-top: max(env(safe-area-inset-top), 15px);
-                padding-right: max(env(safe-area-inset-right), 15px);
-                padding-bottom: calc(max(env(safe-area-inset-bottom), 15px) + 80px);
-                padding-left: max(env(safe-area-inset-left), 15px);
-            }
+            .content-wrapper { padding: 15px; padding-bottom: 100px; }
             .d-value { font-size: 16px; padding: 15px; }
             .pay-now-btn { padding: 18px; font-size: 18px; }
         }
     </style>
     
-    <!-- Firebase SDK - নিয়মিত version 9 compat ব্যবহার করা হয়েছে -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     
@@ -160,28 +168,28 @@
         try {
             firebase.initializeApp(firebaseConfig);
             database = firebase.database();
-            console.log("Firebase initialized successfully");
+            console.log("✅ Firebase initialized");
         } catch (error) {
-            console.log("Firebase initialization error:", error);
+            console.error("❌ Firebase init error:", error);
         }
 
-        // ========== ডিক্রিপশন ফাংশন (মেইন সাইটের সাথে মিল রেখে) ==========
+        // ========== ডিক্রিপশন ফাংশন (মেইন সাইটের generatePaymentLink-এর সাথে মিল রেখে) ==========
         function decryptPaymentData(encryptedData) {
             try {
-                console.log("Raw encrypted data:", encryptedData);
+                console.log("🔐 Decrypting:", encryptedData);
                 
-                // URL ডিকোড
+                // 1. URL ডিকোড
                 const urlDecoded = decodeURIComponent(encryptedData);
-                console.log("URL decoded:", urlDecoded);
+                console.log("1️⃣ URL decoded:", urlDecoded);
                 
-                // Base64 ডিকোড
+                // 2. Base64 ডিকোড
                 const base64Decoded = atob(urlDecoded);
-                console.log("Base64 decoded:", base64Decoded);
+                console.log("2️⃣ Base64 decoded:", base64Decoded);
                 
-                // ডিক্রিপশন কী - মেইন সাইটের generatePaymentLink-এর সাথে মিল রেখে
-                const key = 'EP_SECURE_2025_KEY_!@#'; // এইটা ঠিক আছে
+                // 3. ডিক্রিপশন কী (মেইন সাইটের generatePaymentLink-এর সাথে মিল রেখে)
+                const key = 'EP_SECURE_2025_KEY_!@#';
                 
-                // XOR ডিক্রিপশন
+                // 4. XOR ডিক্রিপশন
                 let decrypted = '';
                 for (let i = 0; i < base64Decoded.length; i++) {
                     const keyChar = key.charCodeAt(i % key.length);
@@ -189,16 +197,33 @@
                     decrypted += String.fromCharCode(dataChar ^ keyChar);
                 }
                 
-                console.log("XOR decrypted string:", decrypted);
+                console.log("3️⃣ XOR decrypted:", decrypted);
                 
-                // JSON পার্স
-                const parsed = JSON.parse(decrypted);
-                console.log("Final parsed data:", parsed);
+                // 5. JSON পার্স
+                // ফরম্যাট: "orderId|platformId|price|timestamp" অথবা JSON
+                let parsed;
+                try {
+                    parsed = JSON.parse(decrypted);
+                    console.log("4️⃣ Parsed as JSON:", parsed);
+                } catch (e) {
+                    // পাইপ সেপারেটেড ফরম্যাট হতে পারে
+                    const parts = decrypted.split('|');
+                    if (parts.length >= 3) {
+                        parsed = {
+                            orderId: parts[0],
+                            platformId: parts[1],
+                            price: parts[2],
+                            timestamp: parts[3] || Date.now()
+                        };
+                        console.log("4️⃣ Parsed as pipe-separated:", parsed);
+                    } else {
+                        throw new Error("Invalid data format");
+                    }
+                }
                 
                 return parsed;
             } catch (error) {
-                console.error("Decryption error details:", error);
-                console.error("Error message:", error.message);
+                console.error("❌ Decryption error:", error);
                 return null;
             }
         }
@@ -210,37 +235,33 @@
                     throw new Error("Firebase not initialized");
                 }
                 
-                console.log("Fetching D field for platform ID:", platformId);
+                console.log("📡 Fetching D field for platform:", platformId);
                 
-                // publicData/pricingPlans রেফারেন্স
                 const dRef = firebase.database().ref(`publicData/pricingPlans/${platformId}`);
                 const snapshot = await dRef.once('value');
                 
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    console.log("Firebase data:", data);
+                    console.log("📦 Firebase data:", data);
                     
                     // D ফিল্ড খোঁজা
-                    if (data.D) {
-                        return data.D;
-                    } else if (data.description) {
-                        return data.description;
-                    } else {
-                        return JSON.stringify(data, null, 2);
-                    }
+                    if (data.D) return data.D;
+                    if (data.description) return data.description;
+                    return JSON.stringify(data, null, 2);
                 } else {
-                    console.log("No data found for platform ID:", platformId);
+                    console.log("❌ No data found for platform:", platformId);
                     return null;
                 }
             } catch (error) {
-                console.error("Firebase fetch error:", error);
+                console.error("❌ Firebase fetch error:", error);
                 return null;
             }
         }
 
-        // ========== পেজ লোড হওয়ার পর ডাটা প্রসেস ==========
+        // ========== পেজ লোড হওয়ার পর ==========
         window.addEventListener('DOMContentLoaded', async function() {
             const outputDiv = document.getElementById('output');
+            const debugDiv = document.getElementById('debugInfo');
             const payNowBtn = document.getElementById('payNowBtn');
             
             // URL থেকে data প্যারামিটার নেওয়া
@@ -248,8 +269,13 @@
             const encodedData = urlParams.get('data') || urlParams.get('v') || urlParams.get('order');
             
             if (!encodedData) {
-                outputDiv.innerHTML = '<div class="error">⚠️ URL-এ কোনো ডাটা নেই</div>';
+                outputDiv.innerHTML = '<div class="error">❌ URL-এ কোনো ডাটা নেই</div>';
                 return;
+            }
+            
+            // ডিবাগ তথ্য দেখানো
+            if (debugDiv) {
+                debugDiv.innerHTML = `<strong>Raw encoded data:</strong> ${encodedData}`;
             }
             
             // ডিক্রিপ্ট করার চেষ্টা
@@ -258,39 +284,32 @@
             if (!decryptedData) {
                 outputDiv.innerHTML = `
                     <div class="error">
-                        <strong>❌ ডাটা ডিক্রিপ্ট করা যায়নি</strong><br><br>
-                        <small style="color:#999;">এনক্রিপ্টেড ডাটা: ${encodedData.substring(0, 50)}...</small>
+                        <strong>❌ ডাটা ডিক্রিপ্ট করা যায়নি</strong>
                     </div>
                 `;
                 return;
             }
             
+            // ডিবাগ তথ্য আপডেট
+            if (debugDiv) {
+                debugDiv.innerHTML += `<br><br><strong>✅ Decrypted data:</strong><br>${JSON.stringify(decryptedData, null, 2)}`;
+            }
+            
             // ডিক্রিপ্টেড ডাটা থেকে platformId বের করা
-            const platformId = decryptedData.p || decryptedData.platformId || decryptedData.id;
+            const platformId = decryptedData.p || decryptedData.platformId || decryptedData.id || 
+                              (decryptedData.orderId ? decryptedData.orderId.split('-')[1] : null);
             
             // Firebase থেকে D ফিল্ড আনা
-            let dFieldContent = "D ফিল্ড পাওয়া যায়নি";
+            let dFieldContent = "📄 D ফিল্ড পাওয়া যায়নি";
             if (platformId && database) {
                 const firebaseData = await fetchDFromFirebase(platformId);
                 if (firebaseData) {
                     dFieldContent = firebaseData;
                 }
             } else {
-                // ফ্যালব্যাক: ডিক্রিপ্টেড ডাটা থেকেই দেখানো
+                // ফ্যালব্যাক: ডিক্রিপ্টেড ডাটা থেকে
                 dFieldContent = decryptedData.d || decryptedData.D || decryptedData.description || 
-                               JSON.stringify(decryptedData, null, 2);
-            }
-            
-            // হিডেন ডাটা সংরক্ষণ (ডিবাগিং এর জন্য)
-            const hiddenDiv = document.getElementById('hiddenData');
-            if (hiddenDiv) {
-                hiddenDiv.innerHTML = `
-                    <div style="background:#111; padding:10px; margin:10px 0; border:1px solid #333; font-size:12px;">
-                        <h4>ডিক্রিপ্টেড ডাটা:</h4>
-                        <pre>${JSON.stringify(decryptedData, null, 2)}</pre>
-                        <h4>Platform ID: ${platformId || 'N/A'}</h4>
-                    </div>
-                `;
+                               `Order ID: ${decryptedData.orderId || 'N/A'}\nPlatform: ${decryptedData.platformId || platformId || 'N/A'}\nPrice: ${decryptedData.price || 'N/A'}`;
             }
             
             // D ফিল্ড দেখানো
@@ -303,19 +322,13 @@
             // Pay Now বাটন দেখানো
             if (payNowBtn) {
                 payNowBtn.classList.remove('hidden');
-            }
-        });
-
-        // Pay Now বাটনের ক্লিক হ্যান্ডলার
-        document.addEventListener('DOMContentLoaded', function() {
-            const payNowBtn = document.getElementById('payNowBtn');
-            if (payNowBtn) {
-                payNowBtn.addEventListener('click', function() {
-                    // এখানে আপনার পেমেন্ট গেটওয়ে রিডাইরেক্ট যোগ করুন
-                    alert('পেমেন্ট প্রক্রিয়া শুরু হচ্ছে...');
-                    
-                    // উদাহরণ: window.location.href = "https://your-payment-gateway.com";
-                });
+                
+                // বাটনে ক্লিক করলে
+                payNowBtn.onclick = function() {
+                    const paymentUrl = decryptedData.paymentLink || 
+                                       `https://easy-premium.com/Pay.html?order=${decryptedData.orderId || ''}`;
+                    window.open(paymentUrl, '_blank');
+                };
             }
         });
     </script>
@@ -324,11 +337,14 @@
     <div class="content-wrapper">
         <div id="output">
             <div class="loading">
-                🔄 ডাটা লোড হচ্ছে...
+                🔄 ডাটা ডিক্রিপ্ট করা হচ্ছে...
             </div>
         </div>
         
-        <div id="hiddenData" style="display:none;"></div>
+        <!-- ডিবাগ তথ্য (প্রোডাকশনে লুকানো থাকবে) -->
+        <div id="debugInfo" class="debug-info" style="display: none;">
+            <strong>Debug Info:</strong><br>
+        </div>
     </div>
 
     <!-- Pay Now বাটন -->
