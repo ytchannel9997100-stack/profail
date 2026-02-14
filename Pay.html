@@ -299,7 +299,7 @@
                 return;
             }
             
-          
+            // D ফিল্ড আনা
             const dField = await fetchDField(data.platformId);
             
             const date = new Date(parseInt(data.timestamp));
@@ -313,7 +313,7 @@
             
             const platformName = data.platformId.replace(/_/g, ' ').toUpperCase();
             
-          য
+            // ডিবাগ তথ্য
             const debugHTML = `
                 <div class="debug-info">
                     <strong>🔧 ডিবাগ তথ্য:</strong><br>
@@ -323,12 +323,12 @@
                 </div>
             `;
             
-            
+            // D ফিল্ড HTML
             let dFieldHTML = '';
             if (dField) {
                 dFieldHTML = `
                     <div class="d-field">
-                        <div class="d-field-title">অর্ডার তথ্য</div>
+                        <div class="d-field-title">তথ্য ডাটা</div>
                         <div>${dField}</div>
                     </div>
                 `;
