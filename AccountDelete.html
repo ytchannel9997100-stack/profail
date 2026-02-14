@@ -2,17 +2,23 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>অ্যাকাউন্ট ডিলিট - EasyPremium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+
+    <!-- ================== আপনার মূল ওয়েবসাইটের মত নিরাপত্তা ফিচার ================== -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:; style-src 'self' https: 'unsafe-inline'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="format-detection" content="telephone=no, address=no, email=no">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
 
     <style>
         /* ================ RESET & BASE ================ */
@@ -732,7 +738,7 @@
         <!-- Logged In Content -->
         <div id="loggedInContent" style="display: none;">
             <div class="cards-grid">
-                
+
                 <!-- Delete Data Card -->
                 <div class="card card-warning">
                     <div class="card-header">
@@ -741,7 +747,7 @@
                         </div>
                         <h2 class="card-title">বিকল্প ১: শুধু ডাটা ডিলিট</h2>
                     </div>
-                    
+
                     <div class="card-content">
                         <p>এই অপশন শুধুমাত্র আপনার ডাটা মুছে দেবে কিন্তু অ্যাকাউন্ট থাকবে:</p>
                         <ul style="padding-left: 20px; margin: 15px 0; color: var(--text-secondary);">
@@ -751,7 +757,7 @@
                         </ul>
                         <p><strong>✅ আপনার অ্যাকাউন্টটি থাকবে</strong> - আপনি পুনরায় লগইন করতে পারবেন এবং নতুন অর্ডার দিতে পারবেন।</p>
                     </div>
-                    
+
                     <div class="alert-box warning">
                         <div class="alert-title warning">
                             <i class="fas fa-info-circle"></i>
@@ -759,7 +765,7 @@
                         </div>
                         <p class="alert-content">ডাটা মুছে ফেলার পর পুনরুদ্ধার করা সম্ভব নয়।</p>
                     </div>
-                    
+
                     <button onclick="deleteUserData()" class="btn btn-primary btn-full" id="deleteDataBtn">
                         <i class="fas fa-trash-alt"></i> ডাটা ডিলিট করুন
                     </button>
@@ -773,7 +779,7 @@
                         </div>
                         <h2 class="card-title">বিকল্প ২: সম্পূর্ণ অ্যাকাউন্ট ডিলিট</h2>
                     </div>
-                    
+
                     <div class="card-content">
                         <p>এই অপশন আপনার সম্পূর্ণ EasyPremium অ্যাকাউন্ট মুছে দেবে:</p>
                         <ul style="padding-left: 20px; margin: 15px 0; color: var(--text-secondary);">
@@ -783,7 +789,7 @@
                         </ul>
                         <p><strong>🚨 আপনার অ্যাকাউন্ট সম্পূর্ণ মুছে যাবে</strong> - পরে আপনি নতুন অ্যাকাউন্ট খুলতে পারবেন।</p>
                     </div>
-                    
+
                     <div class="alert-box danger">
                         <div class="alert-title danger">
                             <i class="fas fa-radiation-alt"></i>
@@ -791,12 +797,12 @@
                         </div>
                         <p class="alert-content">এই কাজটি সম্পূর্ণ অপরিবর্তনীয়। একবার অ্যাকাউন্ট ডিলিট করলে পুনরুদ্ধার করা যাবে না।</p>
                     </div>
-                    
+
                     <button onclick="deleteFullAccount()" class="btn btn-danger btn-full" id="deleteAccountBtn">
                         <i class="fas fa-fire"></i> অ্যাকাউন্ট ডিলিট করুন
                     </button>
                 </div>
-                
+
             </div>
         </div>
     </main>
@@ -810,11 +816,11 @@
             <a href="https://t.me/+8801770584994" class="social-link"><i class="fab fa-telegram"></i></a>
             <a href="https://wa.me/1770584994" class="social-link"><i class="fab fa-whatsapp"></i></a>
         </div>
-        
+
         <div class="copyright">
             © 2026 Easy Premium. সর্বস্বত্ব সুরক্ষিত।<br>
             কন্টাক্ট: mdashikislam017705@gmail.com | হেল্পলাইন: +8801770584994<br>
-            অফিস: বামনডাঙ্গা পোস্ট কোড: ৫৭২১ থানা/উপজেলা: সুন্দরগঞ্জ জেলা: গাইবান্ধা বিভাগ: রংপুর 
+            অফিস: বামনডাঙ্গা পোস্ট কোড: ৫৭২১ থানা/উপজেলা: সুন্দরগঞ্জ জেলা: গাইবান্ধা বিভাগ: রংপুর
         </div>
     </footer>
 
@@ -847,61 +853,214 @@
         // Global Variables
         let currentUser = null;
 
-        // Check authentication state
+        // ================== আপনার মূল ওয়েবসাইটের মত নিরাপত্তা স্ক্রিপ্ট ==================
+        (function() {
+            'use strict';
+
+            // ========== কনফিগারেশন ==========
+            const CONFIG = {
+                SESSION_TIMEOUT: 30 * 60 * 1000, // 30 মিনিট
+                MAX_ATTEMPTS: 5,
+                RATE_LIMIT_WINDOW: 15 * 60 * 1000,
+                ALERT_ON_DEVTOOLS: true,
+                ENABLE_ACTIVITY_LOG: false,
+                ENFORCE_HTTPS: true
+            };
+
+            // ========== HTTPS ফোর্স করা ==========
+            if (CONFIG.ENFORCE_HTTPS && location.protocol !== 'https:' && location.hostname !== 'localhost' && !location.hostname.includes('127.0.0.1')) {
+                location.replace('https://' + location.host + location.pathname + location.search);
+            }
+
+            // ========== ক্লিকজ্যাকিং প্রোটেকশন ==========
+            if (self !== top) {
+                try {
+                    top.location.href = self.location.href;
+                } catch (e) {
+                    document.body.innerHTML = '<h1 style="color:red;text-align:center;padding:50px;">Access Denied</h1>';
+                    throw new Error('Clickjacking protection');
+                }
+            }
+
+            // ========== ডিভ টুলস ডিটেকশন ==========
+            function detectDevTools() {
+                const start = performance.now();
+                debugger;
+                const end = performance.now();
+
+                if (end - start > 100 && CONFIG.ALERT_ON_DEVTOOLS && !window._devToolsAlertShown) {
+                    window._devToolsAlertShown = true;
+                    const alertDiv = document.createElement('div');
+                    alertDiv.style.position = 'fixed';
+                    alertDiv.style.top = '20px';
+                    alertDiv.style.left = '50%';
+                    alertDiv.style.transform = 'translateX(-50%)';
+                    alertDiv.style.background = 'rgba(255, 152, 0, 0.9)';
+                    alertDiv.style.color = 'white';
+                    alertDiv.style.padding = '10px 20px';
+                    alertDiv.style.borderRadius = '5px';
+                    alertDiv.style.zIndex = '10001';
+                    alertDiv.style.fontSize = '0.9rem';
+                    alertDiv.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+                    alertDiv.style.backdropFilter = 'blur(5px)';
+                    alertDiv.innerHTML = '<i class="fas fa-shield-alt"></i> নিরাপত্তা সতর্কতা: ডেভেলপার টুলস বন্ধ করুন';
+                    document.body.appendChild(alertDiv);
+                    setTimeout(() => {
+                        if (alertDiv.parentNode) alertDiv.remove();
+                    }, 5000);
+                }
+            }
+            setInterval(detectDevTools, 3000);
+
+            // ========== রেট লিমিটিং ==========
+            window._rateLimitStore = window._rateLimitStore || { attempts: {}, blockUntil: {} };
+            window.checkRateLimit = function(action, userId = 'anonymous') {
+                const key = `${action}_${userId}`;
+                const now = Date.now();
+                if (window._rateLimitStore.blockUntil[key] && window._rateLimitStore.blockUntil[key] > now) {
+                    const remaining = Math.ceil((window._rateLimitStore.blockUntil[key] - now) / 1000 / 60);
+                    return { allowed: false, message: `অনেক চেষ্টা করেছেন। ${remaining} মিনিট পরে আবার চেষ্টা করুন।` };
+                }
+                if (!window._rateLimitStore.attempts[key]) window._rateLimitStore.attempts[key] = [];
+                window._rateLimitStore.attempts[key] = window._rateLimitStore.attempts[key].filter(t => t > now - CONFIG.RATE_LIMIT_WINDOW);
+                if (window._rateLimitStore.attempts[key].length >= CONFIG.MAX_ATTEMPTS) {
+                    window._rateLimitStore.blockUntil[key] = now + CONFIG.RATE_LIMIT_WINDOW;
+                    return { allowed: false, message: 'অনেক চেষ্টা করেছেন। ১৫ মিনিট পরে আবার চেষ্টা করুন।' };
+                }
+                window._rateLimitStore.attempts[key].push(now);
+                return { allowed: true };
+            };
+
+            // ========== সেশন টাইমআউট ==========
+            let sessionTimer;
+            function resetSessionTimer() {
+                if (sessionTimer) clearTimeout(sessionTimer);
+                sessionTimer = setTimeout(() => {
+                    if (firebase && firebase.auth() && firebase.auth().currentUser) {
+                        if (confirm('আপনার সেশন শেষ হয়ে গেছে। আবার লগইন করবেন?')) {
+                            firebase.auth().signOut();
+                            window.location.reload();
+                        } else {
+                            firebase.auth().signOut();
+                        }
+                    }
+                }, CONFIG.SESSION_TIMEOUT);
+            }
+            ['click', 'keypress', 'scroll', 'mousemove', 'touchstart'].forEach(event => {
+                document.addEventListener(event, resetSessionTimer, { passive: true });
+            });
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().onAuthStateChanged(user => {
+                    if (user) resetSessionTimer();
+                    else if (sessionTimer) clearTimeout(sessionTimer);
+                });
+            }
+
+            // ========== XSS প্রোটেকশন ==========
+            function setupFormProtection() {
+                document.querySelectorAll('form').forEach(form => {
+                    if (form._protected) return;
+                    form._protected = true;
+                    form.addEventListener('submit', function() {
+                        const textInputs = this.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], textarea');
+                        textInputs.forEach(input => {
+                            if (input.value && /[<>"'`=]/.test(input.value)) {
+                                console.warn('সতর্কতা: ইনপুটে বিপজ্জনক ক্যারেক্টার পাওয়া গেছে');
+                            }
+                        });
+                    }, true);
+                });
+            }
+            const observer = new MutationObserver(() => setupFormProtection());
+            observer.observe(document.body, { childList: true, subtree: true });
+
+            // ========== লোকাল স্টোরেজ এনক্রিপশন ==========
+            const originalSetItem = localStorage.setItem;
+            const originalGetItem = localStorage.getItem;
+            const sensitiveKeys = ['user', 'session', 'token', 'auth'];
+            localStorage.setItem = function(key, value) {
+                if (sensitiveKeys.some(k => key.toLowerCase().includes(k))) {
+                    try {
+                        const encoded = btoa(encodeURIComponent(value));
+                        return originalSetItem.call(this, `_sec_${key}`, encoded);
+                    } catch (e) { console.warn('LocalStorage encoding error'); }
+                }
+                return originalSetItem.call(this, key, value);
+            };
+            localStorage.getItem = function(key) {
+                if (sensitiveKeys.some(k => key.toLowerCase().includes(k))) {
+                    try {
+                        const encoded = originalGetItem.call(this, `_sec_${key}`);
+                        if (encoded) return decodeURIComponent(atob(encoded));
+                    } catch (e) { console.warn('LocalStorage decoding error'); }
+                }
+                return originalGetItem.call(this, key);
+            };
+
+            // ========== কীবোর্ড শর্টকাট প্রোটেকশন ==========
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey && [85, 83].includes(e.keyCode)) || (e.ctrlKey && e.shiftKey && e.keyCode === 73) || e.keyCode === 123) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            console.log('%c🔒 Easy Premium (Delete Page) - সুরক্ষিত মোড সক্রিয়', 'color: #4caf50; font-size: 14px; font-weight: bold;');
+        })();
+
+        // ================== রাইট ক্লিক প্রোটেকশন (আলাদাভাবে) ==================
+        (function() {
+            document.addEventListener('contextmenu', (e) => e.preventDefault());
+            document.addEventListener('mousedown', (e) => { if (e.button === 2) e.preventDefault(); });
+            document.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    const timer = setTimeout(() => e.preventDefault(), 500);
+                    document.addEventListener('touchend', () => clearTimeout(timer), { once: true });
+                }
+            }, { passive: false });
+            console.log('✅ রাইট ক্লিক প্রোটেকশন চালু হয়েছে (Delete Page)');
+        })();
+
+        // ================== অ্যাকাউন্ট ডিলিট এর মূল লজিক (অপরিবর্তিত) ==================
         auth.onAuthStateChanged(function(user) {
             if (user) {
                 console.log("User logged in:", user.email);
                 currentUser = user;
-                
-                // Update UI
                 notLoggedIn.style.display = 'none';
                 loggedInContent.style.display = 'block';
-                
             } else {
                 console.log("No user logged in");
                 currentUser = null;
-                
-                // Update UI
                 notLoggedIn.style.display = 'block';
                 loggedInContent.style.display = 'none';
             }
         });
 
-        // Show loading
         function showLoading(text = "প্রক্রিয়াধীন...") {
             loadingText.textContent = text;
             loadingOverlay.style.display = 'flex';
         }
 
-        // Hide loading
         function hideLoading() {
             loadingOverlay.style.display = 'none';
         }
 
-        // Create modal
         function createModal(type, title, message, confirmText, confirmCallback, cancelText = 'বাতিল করুন') {
-            // Remove existing modal
             const existingModal = document.querySelector('.custom-modal');
             if (existingModal) existingModal.remove();
 
             const modalClass = type === 'success' ? 'modal-success' : '';
             const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
-
-            // Create modal HTML
             const modalHTML = `
                 <div class="modal-overlay custom-modal ${modalClass}" style="display: flex;">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <div class="modal-icon">
-                                <i class="fas ${icon}"></i>
-                            </div>
+                            <div class="modal-icon"><i class="fas ${icon}"></i></div>
                             <h3 class="modal-title">${title}</h3>
                         </div>
-                        <div class="modal-body">
-                            ${message.replace(/\n/g, '<br>')}
-                        </div>
+                        <div class="modal-body">${message.replace(/\n/g, '<br>')}</div>
                         <div class="modal-footer">
-                            ${type === 'success' ? 
+                            ${type === 'success' ?
                                 `<button id="modalOk" class="btn btn-primary">${confirmText}</button>` :
                                 `<button id="modalCancel" class="btn btn-secondary">${cancelText}</button>
                                  <button id="modalConfirm" class="btn btn-danger">${confirmText}</button>`
@@ -910,206 +1069,70 @@
                     </div>
                 </div>
             `;
-
-            // Add modal to body
             document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-            // Add event listeners
             const modal = document.querySelector('.custom-modal');
-            
             if (type === 'success') {
-                const okBtn = document.getElementById('modalOk');
-                okBtn.addEventListener('click', () => {
-                    modal.remove();
-                    if (confirmCallback) confirmCallback();
-                });
+                document.getElementById('modalOk').addEventListener('click', () => { modal.remove(); if (confirmCallback) confirmCallback(); });
             } else {
-                const cancelBtn = document.getElementById('modalCancel');
-                const confirmBtn = document.getElementById('modalConfirm');
-
-                cancelBtn.addEventListener('click', () => {
-                    modal.remove();
-                });
-
-                confirmBtn.addEventListener('click', () => {
-                    modal.remove();
-                    if (confirmCallback) confirmCallback();
-                });
+                document.getElementById('modalCancel').addEventListener('click', () => modal.remove());
+                document.getElementById('modalConfirm').addEventListener('click', () => { modal.remove(); if (confirmCallback) confirmCallback(); });
             }
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+        }
 
-            // Close when clicking outside
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.remove();
+        async function deleteUserData() {
+            if (!currentUser) { createModal('error', "লগইন করা নেই", "লগইন করা নেই। দয়া করে প্রথমে লগইন করুন।", "লগইন করুন", goToLogin); return; }
+            createModal('error', "ডাটা ডিলিট", `আপনি কি নিশ্চিত যে আপনি আপনার সকল ডাটা মুছে ফেলতে চান?<br><strong>ইমেইল:</strong> ${currentUser.email}<br>⚠️ ডাটা মুছে ফেলার পর পুনরুদ্ধার করা যাবে না।`, "ডিলিট করুন", async () => {
+                try {
+                    showLoading("ডাটা মুছে ফেলা হচ্ছে...");
+                    const userId = currentUser.uid;
+                    await database.ref('users/' + userId).remove();
+                    await database.ref('userOrders/' + userId).remove();
+                    try { await database.ref('userDeletions/' + userId).set({ email: currentUser.email, deletedAt: new Date().toISOString(), type: 'data_only' }); } catch (logError) {}
+                    hideLoading();
+                    createModal('success', "✅ সফল!", "আপনার ডাটা সফলভাবে মুছে ফেলা হয়েছে!<br><br>আপনার অ্যাকাউন্টটি এখনও সক্রিয় আছে। আপনি নতুন অর্ডার দিতে পারবেন।", "ঠিক আছে", () => window.location.reload());
+                } catch (error) {
+                    hideLoading();
+                    let errorMsg = "ডাটা ডিলিট করতে সমস্যা হয়েছে: " + error.message;
+                    if (error.message.includes('PERMISSION_DENIED')) errorMsg = "⚠️ অনুমতি সমস্যা!<br><br>Firebase Rules এ আপনার ডিলিট করার অনুমতি নেই।";
+                    createModal('error', "ত্রুটি!", errorMsg, "ঠিক আছে", null);
                 }
             });
         }
 
-        // 1. Delete user data only
-        async function deleteUserData() {
-            if (!currentUser) {
-                createModal('error', "লগইন করা নেই", "লগইন করা নেই। দয়া করে প্রথমে লগইন করুন।", "লগইন করুন", goToLogin);
-                return;
-            }
-
-            createModal('error',
-                "ডাটা ডিলিট",
-                `আপনি কি নিশ্চিত যে আপনি আপনার সকল ডাটা মুছে ফেলতে চান?<br>
-                <strong>ইমেইল:</strong> ${currentUser.email}<br>
-                ⚠️ ডাটা মুছে ফেলার পর পুনরুদ্ধার করা যাবে না।`,
-                "ডিলিট করুন",
-                async () => {
+        async function deleteFullAccount() {
+            if (!currentUser) { createModal('error', "লগইন করা নেই", "লগইন করা নেই। দয়া করে প্রথমে লগইন করুন।", "লগইন করুন", goToLogin); return; }
+            createModal('error', "সম্পূর্ণ অ্যাকাউন্ট ডিলিট", `🚨 চূড়ান্ত সতর্কতা!<br>আপনি কি নিশ্চিত যে আপনি আপনার সম্পূর্ণ EasyPremium অ্যাকাউন্ট মুছে ফেলতে চান?<br><strong>ইমেইল:</strong> ${currentUser.email}<br>⚠️ এই কাজটি সম্পূর্ণ অপরিবর্তনীয়!`, "নিশ্চিত করুন", () => {
+                createModal('error', "চূড়ান্ত নিশ্চিতকরণ", "আপনি কি সম্পূর্ণ নিশ্চিত?<br><br>আপনার অ্যাকাউন্ট চিরতরে মুছে যাবে এবং পুনরুদ্ধার করা যাবে না!", "ডিলিট করুন", async () => {
                     try {
-                        showLoading("ডাটা মুছে ফেলা হচ্ছে...");
-                        
+                        showLoading("অ্যাকাউন্ট মুছে ফেলা হচ্ছে...");
                         const userId = currentUser.uid;
-                        
-                        // Delete user data from database
+                        const userEmail = currentUser.email;
                         await database.ref('users/' + userId).remove();
                         await database.ref('userOrders/' + userId).remove();
-                        
-                        // Log the deletion
-                        try {
-                            await database.ref('userDeletions/' + userId).set({
-                                email: currentUser.email,
-                                deletedAt: new Date().toISOString(),
-                                type: 'data_only'
-                            });
-                        } catch (logError) {
-                            console.log("Log save failed:", logError.message);
-                        }
-                        
+                        try { await database.ref('userDeletions/' + userId).set({ email: userEmail, deletedAt: new Date().toISOString(), type: 'full_account' }); } catch (logError) {}
+                        await currentUser.delete();
+                        await auth.signOut();
                         hideLoading();
-                        
-                        createModal('success',
-                            "✅ সফল!",
-                            "আপনার ডাটা সফলভাবে মুছে ফেলা হয়েছে!<br><br>আপনার অ্যাকাউন্টটি এখনও সক্রিয় আছে। আপনি নতুন অর্ডার দিতে পারবেন।",
-                            "ঠিক আছে",
-                            () => {
-                                window.location.reload();
-                            }
-                        );
-                        
+                        createModal('success', "✅ সফল!", "আপনার অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে!<br><br>আপনার সকল তথ্য Firebase থেকে মুছে গেছে।<br><br>আপনি এখন হোমপেজে যাচ্ছেন...", "ঠিক আছে", () => window.location.href = "index.html");
                     } catch (error) {
                         hideLoading();
-                        console.error("Error deleting data:", error);
-                        
-                        let errorMsg = "ডাটা ডিলিট করতে সমস্যা হয়েছে: " + error.message;
-                        if (error.message.includes('PERMISSION_DENIED')) {
-                            errorMsg = "⚠️ অনুমতি সমস্যা!<br><br>Firebase Rules এ আপনার ডিলিট করার অনুমতি নেই।";
-                        }
-                        
+                        let errorMsg = error.message.includes('requires-recent-login') ? "⚠️ সাম্প্রতিক লগইন প্রয়োজন!<br><br>সুরক্ষার জন্য আপনাকে লগআউট করা হচ্ছে। দয়া করে পুনরায় লগইন করুন এবং আবার চেষ্টা করুন।" : "অ্যাকাউন্ট ডিলিট করতে সমস্যা হয়েছে: " + error.message;
                         createModal('error', "ত্রুটি!", errorMsg, "ঠিক আছে", null);
+                        try { await auth.signOut(); setTimeout(() => window.location.href = "index.html", 3000); } catch (signOutError) {}
                     }
-                }
-            );
+                });
+            });
         }
 
-        // 2. Delete full account
-        async function deleteFullAccount() {
-            if (!currentUser) {
-                createModal('error', "লগইন করা নেই", "লগইন করা নেই। দয়া করে প্রথমে লগইন করুন।", "লগইন করুন", goToLogin);
-                return;
-            }
+        function goToLogin() { window.location.href = "index.html"; }
 
-            createModal('error',
-                "সম্পূর্ণ অ্যাকাউন্ট ডিলিট",
-                `🚨 চূড়ান্ত সতর্কতা!<br>
-                আপনি কি নিশ্চিত যে আপনি আপনার সম্পূর্ণ EasyPremium অ্যাকাউন্ট মুছে ফেলতে চান?<br>
-                <strong>ইমেইল:</strong> ${currentUser.email}<br>
-                ⚠️ এই কাজটি সম্পূর্ণ অপরিবর্তনীয়!`,
-                "নিশ্চিত করুন",
-                () => {
-                    // Final confirmation
-                    createModal('error',
-                        "চূড়ান্ত নিশ্চিতকরণ",
-                        "আপনি কি সম্পূর্ণ নিশ্চিত?<br><br>আপনার অ্যাকাউন্ট চিরতরে মুছে যাবে এবং পুনরুদ্ধার করা যাবে না!",
-                        "ডিলিট করুন",
-                        async () => {
-                            try {
-                                showLoading("অ্যাকাউন্ট মুছে ফেলা হচ্ছে...");
-                                
-                                const userId = currentUser.uid;
-                                const userEmail = currentUser.email;
-                                
-                                // Delete user data from database
-                                await database.ref('users/' + userId).remove();
-                                await database.ref('userOrders/' + userId).remove();
-                                
-                                // Log the deletion
-                                try {
-                                    await database.ref('userDeletions/' + userId).set({
-                                        email: userEmail,
-                                        deletedAt: new Date().toISOString(),
-                                        type: 'full_account'
-                                    });
-                                } catch (logError) {
-                                    console.log("Log save failed:", logError.message);
-                                }
-                                
-                                // Delete from Firebase Authentication
-                                await currentUser.delete();
-                                
-                                // Sign out
-                                await auth.signOut();
-                                
-                                hideLoading();
-                                
-                                createModal('success',
-                                    "✅ সফল!",
-                                    "আপনার অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে!<br><br>আপনার সকল তথ্য Firebase থেকে মুছে গেছে।<br><br>আপনি এখন হোমপেজে যাচ্ছেন...",
-                                    "ঠিক আছে",
-                                    () => {
-                                        window.location.href = "index.html";
-                                    }
-                                );
-                                
-                            } catch (error) {
-                                hideLoading();
-                                console.error("Error deleting account:", error);
-                                
-                                let errorMsg = "";
-                                
-                                if (error.message.includes('requires-recent-login')) {
-                                    errorMsg = "⚠️ সাম্প্রতিক লগইন প্রয়োজন!<br><br>সুরক্ষার জন্য আপনাকে লগআউট করা হচ্ছে। দয়া করে পুনরায় লগইন করুন এবং আবার চেষ্টা করুন।";
-                                } else if (error.message.includes('PERMISSION_DENIED')) {
-                                    errorMsg = "⚠️ Firebase Rules সমস্যা!<br><br>আপনার ডাটা মুছতে অনুমতি নেই।";
-                                } else {
-                                    errorMsg = "অ্যাকাউন্ট ডিলিট করতে সমস্যা হয়েছে: " + error.message;
-                                }
-                                
-                                createModal('error', "ত্রুটি!", errorMsg, "ঠিক আছে", null);
-                                
-                                // Try to sign out anyway
-                                try {
-                                    await auth.signOut();
-                                    setTimeout(() => {
-                                        window.location.href = "index.html";
-                                    }, 3000);
-                                } catch (signOutError) {
-                                    console.log("Sign out error:", signOutError);
-                                }
-                            }
-                        }
-                    );
-                }
-            );
-        }
-
-        // Go to login page
-        function goToLogin() {
-            window.location.href = "index.html";
-        }
-
-        // Make functions globally available
         window.deleteUserData = deleteUserData;
         window.deleteFullAccount = deleteFullAccount;
         window.goToLogin = goToLogin;
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log("Premium Account Delete page loaded");
-        });
+        document.addEventListener('DOMContentLoaded', function() { console.log("Premium Account Delete page loaded with security features"); });
     </script>
 </body>
 </html>
