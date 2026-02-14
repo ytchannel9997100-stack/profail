@@ -2367,12 +2367,11 @@
             }
         });
 
-        // ===================== ইমেইল পাঠানোর ফাংশন - সংশোধিত =====================
+        // ===================== ইমেইল পাঠানোর ফাংশন =====================
         async function sendOrderConfirmationEmail(userEmail, userName, orderData) {
             try {
-                // ইমেইল টেমপ্লেটের জন্য প্যারামিটার তৈরি
                 const templateParams = {
-                    to_email: userEmail,           // গুরুত্বপূর্ণ: recipients address
+                    to_email: userEmail,
                     to_name: userName || 'গ্রাহক',
                     from_name: 'Easy Premium',
                     order_id: orderData.orderId,
@@ -2392,16 +2391,13 @@
                 
                 console.log("Sending email with params:", templateParams);
                 
-                // EmailJS সার্ভিস এবং টেমপ্লেট আইডি
                 const serviceID = 'service_uknjs0j';
                 const templateID = 'template_gdvntij';
                 
-                // ইমেইল পাঠানো
                 const response = await emailjs.send(serviceID, templateID, templateParams);
                 
                 console.log('Email sent successfully:', response);
                 
-                // ডাটাবেস আপডেট করা (যদি প্রয়োজন হয়)
                 if (orderData.firebaseKey) {
                     await database.ref(`transactions/${orderData.firebaseKey}`).update({
                         emailSent: true,
@@ -2412,39 +2408,46 @@
                 return true;
             } catch (error) {
                 console.error('Error sending email:', error);
-                console.error('Error details:', error.text || error.message);
                 return false;
             }
         }
 
-        // ===================== পেমেন্ট লিংক জেনারেটর =====================
+        // ===================== পেমেন্ট লিংক জেনারেটর - সংশোধিত =====================
         function generatePaymentLink(orderId, platform, price, platformId) {
             try {
-                const platformIdMap = {
-                    'youtube': 'youtube_premium',
-                    'youtube premium': 'youtube_premium',
-                    'facebook': 'facebook_premium', 
-                    'facebook premium': 'facebook_premium',
-                    'instagram': 'instagram_premium',
-                    'telegram': 'telegram_premium',
-                    'telegram premium': 'telegram_premium',
-                    'netflix': 'netflix_premium',
-                    'spotify': 'spotify_premium',
-                    'whatsapp': 'whatsapp_business',
-                    'whatsapp business': 'whatsapp_business',
-                    'tiktok': 'tiktok_coins',
-                    'tiktok coins': 'tiktok_coins'
-                };
-                
-                const platformLowerCase = platform ? platform.toLowerCase() : '';
+                // platformId যদি দেওয়া থাকে, সেটাই ব্যবহার করব
                 let finalPlatformId = platformId || 'unknown';
                 
-                for (const [key, value] of Object.entries(platformIdMap)) {
-                    if (platformLowerCase.includes(key)) {
-                        finalPlatformId = value;
-                        break;
+                // শুধুমাত্র যদি platformId না দেওয়া থাকে, তাহলে নাম থেকে ম্যাপ করব
+                if (!platformId || platformId === 'unknown') {
+                    const platformIdMap = {
+                        'youtube': 'youtube_premium',
+                        'youtube premium': 'youtube_premium',
+                        'facebook': 'facebook_premium', 
+                        'facebook premium': 'facebook_premium',
+                        'instagram': 'instagram_premium',
+                        'telegram': 'telegram_premium',
+                        'telegram premium': 'telegram_premium',
+                        'netflix': 'netflix_premium',
+                        'spotify': 'spotify_premium',
+                        'whatsapp': 'whatsapp_business',
+                        'whatsapp business': 'whatsapp_business',
+                        'tiktok': 'tiktok_coins',
+                        'tiktok coins': 'tiktok_coins'
+                    };
+                    
+                    const platformLowerCase = platform ? platform.toLowerCase() : '';
+                    
+                    for (const [key, value] of Object.entries(platformIdMap)) {
+                        if (platformLowerCase.includes(key)) {
+                            finalPlatformId = value;
+                            break;
+                        }
                     }
                 }
+                
+                // প্ল্যাটফর্ম আইডি থেকে সব স্পেশাল ক্যারেক্টার রিমুভ
+                finalPlatformId = finalPlatformId.replace(/[^a-zA-Z0-9_-]/g, '');
                 
                 const timestamp = Date.now();
                 const dataString = `${orderId}|${finalPlatformId}|${price}|${timestamp}`;
@@ -2452,11 +2455,20 @@
                 let encodedData = btoa(dataString);
                 encodedData = encodeURIComponent(encodedData);
                 
-                return `https://easy-premium.com/Pay.html?data=${encodedData}&v=2`;
+                console.log("✅ Payment link generated:", {
+                    orderId,
+                    originalPlatformId: platformId,
+                    finalPlatformId,
+                    platform,
+                    dataString,
+                    encodedData
+                });
+                
+                return `Pay.html?data=${encodedData}&v=2`;
                 
             } catch (error) {
                 console.error("Payment link generation error:", error);
-                return `https://easy-premium.com/Pay.html?order=${orderId}&v=2`;
+                return `Pay.html?order=${orderId}&v=2`;
             }
         }
 
@@ -2718,7 +2730,6 @@
                 
                 const user = auth.currentUser;
                 if (user && user.email) {
-                    // ইমেইল পাঠানো - এখন সঠিকভাবে কাজ করবে
                     const emailSent = await sendOrderConfirmationEmail(user.email, createdOrder.userName, createdOrder);
                     if (emailSent) {
                         console.log("Confirmation email sent to:", user.email);
@@ -2734,7 +2745,6 @@
                 
                 window.open(createdOrder.paymentLink, '_blank');
                 
-                // সফল অর্ডারের জন্য ব্যবহারকারীকে জানানো
                 alert("অর্ডার সফলভাবে তৈরি হয়েছে! আপনার ইমেইলে কনফার্মেশন পাঠানো হয়েছে।");
                 
             } catch (error) {
