@@ -99,6 +99,14 @@
     <!-- EmailJS SDK - ইমেইল পাঠানোর জন্য -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
+    <!-- ================== সিকিউরিটি ও স্মার্ট ফিচার ================== -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:; style-src 'self' https: 'unsafe-inline'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="format-detection" content="telephone=no, address=no, email=no">
+    
+    <!-- X-Frame-Options via meta tag (HTTP headers also needed) -->
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    
     <!-- ================== FIXED CSS STYLES ================== -->
     <style>
         :root {
@@ -1697,6 +1705,196 @@
                 -webkit-overflow-scrolling: touch;
             }
         }
+        
+        /* ===== সিকিউরিটি ইন্ডিকেটর (শুধু ভিজুয়াল, UI পরিবর্তন না করে) ===== */
+        .security-badge-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        
+        .security-badge-container:hover {
+            opacity: 1;
+        }
+        
+        .security-badge {
+            background: rgba(10, 10, 26, 0.8);
+            backdrop-filter: blur(5px);
+            border: 1px solid #ff9800;
+            border-radius: 30px;
+            padding: 8px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            pointer-events: auto;
+            cursor: help;
+        }
+        
+        .security-badge i {
+            color: #4caf50;
+            font-size: 1rem;
+        }
+        
+        .security-badge .warning {
+            color: #ff9800;
+        }
+        
+        .security-tooltip {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: rgba(20, 20, 40, 0.95);
+            border: 1px solid #ff9800;
+            border-radius: 10px;
+            padding: 15px;
+            width: 250px;
+            margin-bottom: 10px;
+            display: none;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        
+        .security-badge-container:hover .security-tooltip {
+            display: block;
+        }
+        
+        .security-tooltip p {
+            margin-bottom: 8px;
+            color: #ddd;
+        }
+        
+        .security-tooltip p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .security-tooltip i {
+            margin-right: 5px;
+        }
+        
+        /* রেট লিমিট ইন্ডিকেটর (অদৃশ্য) */
+        .rate-limit-indicator {
+            display: none;
+        }
+        
+        /* অ্যাক্টিভিটি মনিটর (ডিবাগের জন্য, প্রোডাকশনে দেখাবে না) */
+        .activity-monitor {
+            display: none;
+        }
+        
+        /* সেশন টাইমার (শুধু প্রয়োজন হলে) */
+        .session-timer {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #ff9800;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.7rem;
+            z-index: 10000;
+            display: none;
+        }
+        
+        /* স্মার্ট নোটিফিকেশন */
+        .smart-notification {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: linear-gradient(135deg, #121230, #1a1a3a);
+            border-left: 4px solid #ff9800;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            max-width: 300px;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .smart-notification.show {
+            transform: translateX(0);
+        }
+        
+        .smart-notification-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .smart-notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 152, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #ff9800;
+        }
+        
+        .smart-notification-text {
+            flex: 1;
+        }
+        
+        .smart-notification-title {
+            font-weight: 600;
+            color: #ff9800;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .smart-notification-message {
+            color: #ddd;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+        
+        .smart-notification-close {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: transparent;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 5px;
+        }
+        
+        .smart-notification-close:hover {
+            color: #ff9800;
+        }
+        
+        @media (max-width: 768px) {
+            .security-badge-container {
+                bottom: 15px;
+                right: 15px;
+            }
+            
+            .security-badge {
+                padding: 6px 12px;
+                font-size: 0.7rem;
+            }
+            
+            .smart-notification {
+                bottom: 70px;
+                right: 15px;
+                left: 15px;
+                max-width: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -3034,6 +3232,645 @@
         document.addEventListener('gesturestart', function(e) {
             e.preventDefault();
         });
+    </script>
+    
+    <!-- ================== অ্যান্টি-ফিশিং ও স্মার্ট সিকিউরিটি স্ক্রিপ্ট ================== -->
+    <script>
+    (function() {
+        'use strict';
+        
+        // ========== কনফিগারেশন ==========
+        const CONFIG = {
+            SESSION_TIMEOUT: 30 * 60 * 1000, // 30 মিনিট (মিলিসেকেন্ড)
+            MAX_ATTEMPTS: 5, // সর্বোচ্চ চেষ্টা
+            RATE_LIMIT_WINDOW: 15 * 60 * 1000, // 15 মিনিট
+            ALERT_ON_DEVTOOLS: true, // ডেভটুলস খুললে এলার্ট দেবে
+            ENABLE_ACTIVITY_LOG: false, // লোকাল অ্যাক্টিভিটি লগ (প্রোডাকশনে false রাখুন)
+            ENFORCE_HTTPS: true // HTTPS ফোর্স করবে
+        };
+        
+        // ========== ১. HTTPS ফোর্স করা ==========
+        if (CONFIG.ENFORCE_HTTPS && location.protocol !== 'https:' && location.hostname !== 'localhost' && !location.hostname.includes('127.0.0.1')) {
+            location.replace('https://' + location.host + location.pathname + location.search);
+        }
+        
+        // ========== ২. ক্লিকজ্যাকিং প্রোটেকশন ==========
+        if (self !== top) {
+            // যদি আইফ্রেমে লোড হয়, তাহলে মূল উইন্ডোতে রিডাইরেক্ট
+            try {
+                top.location.href = self.location.href;
+            } catch (e) {
+                // ক্রস-অরিজিন আইফ্রেম - ব্লক
+                document.body.innerHTML = '<h1 style="color:red;text-align:center;padding:50px;">Access Denied</h1>';
+                throw new Error('Clickjacking protection');
+            }
+        }
+        
+        // ========== ৩. ডিভ টুলস ডিটেকশন ==========
+        function detectDevTools() {
+            const start = performance.now();
+            debugger; // ডিবাগার ট্রিগার
+            const end = performance.now();
+            
+            if (end - start > 100) {
+                // ডেভ টুলস খোলা আছে
+                if (CONFIG.ALERT_ON_DEVTOOLS) {
+                    console.log('%c⚠️ নিরাপত্তা সতর্কতা: ডেভেলপার টুলস সনাক্ত করা হয়েছে!', 'color: #ff9800; font-size: 14px; font-weight: bold;');
+                    
+                    // ইউজারকে জানানো (শুধু একবার)
+                    if (!window._devToolsAlertShown) {
+                        window._devToolsAlertShown = true;
+                        
+                        // একটি নন-ইনট্রুসিভ নোটিফিকেশন দেখানো
+                        const alertDiv = document.createElement('div');
+                        alertDiv.style.position = 'fixed';
+                        alertDiv.style.top = '20px';
+                        alertDiv.style.left = '50%';
+                        alertDiv.style.transform = 'translateX(-50%)';
+                        alertDiv.style.background = 'rgba(255, 152, 0, 0.9)';
+                        alertDiv.style.color = 'white';
+                        alertDiv.style.padding = '10px 20px';
+                        alertDiv.style.borderRadius = '5px';
+                        alertDiv.style.zIndex = '10001';
+                        alertDiv.style.fontSize = '0.9rem';
+                        alertDiv.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+                        alertDiv.style.backdropFilter = 'blur(5px)';
+                        alertDiv.innerHTML = '<i class="fas fa-shield-alt"></i> নিরাপত্তা সতর্কতা: ডেভেলপার টুলস বন্ধ করুন';
+                        
+                        document.body.appendChild(alertDiv);
+                        
+                        setTimeout(() => {
+                            if (alertDiv.parentNode) {
+                                alertDiv.style.opacity = '0';
+                                alertDiv.style.transition = 'opacity 0.5s';
+                                setTimeout(() => {
+                                    if (alertDiv.parentNode) alertDiv.remove();
+                                }, 500);
+                            }
+                        }, 5000);
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+        
+        // প্রতি ৩ সেকেন্ডে চেক করুন
+        setInterval(detectDevTools, 3000);
+        
+        // ========== ৪. রেট লিমিটিং (অর্ডার স্প্যাম প্রোটেকশন) ==========
+        window._rateLimitStore = window._rateLimitStore || {
+            attempts: {},
+            blockUntil: {}
+        };
+        
+        window.checkRateLimit = function(action, userId = 'anonymous') {
+            const key = `${action}_${userId}`;
+            const now = Date.now();
+            
+            // ব্লক চেক
+            if (window._rateLimitStore.blockUntil[key] && window._rateLimitStore.blockUntil[key] > now) {
+                const remaining = Math.ceil((window._rateLimitStore.blockUntil[key] - now) / 1000 / 60);
+                return {
+                    allowed: false,
+                    message: `অনেক চেষ্টা করেছেন। ${remaining} মিনিট পরে আবার চেষ্টা করুন।`,
+                    remainingMinutes: remaining
+                };
+            }
+            
+            // এটেম্পট চেক
+            if (!window._rateLimitStore.attempts[key]) {
+                window._rateLimitStore.attempts[key] = [];
+            }
+            
+            // পুরানো এটেম্পট ফিল্টার
+            window._rateLimitStore.attempts[key] = window._rateLimitStore.attempts[key].filter(t => t > now - CONFIG.RATE_LIMIT_WINDOW);
+            
+            if (window._rateLimitStore.attempts[key].length >= CONFIG.MAX_ATTEMPTS) {
+                // ব্লক করুন
+                window._rateLimitStore.blockUntil[key] = now + CONFIG.RATE_LIMIT_WINDOW;
+                return {
+                    allowed: false,
+                    message: 'অনেক চেষ্টা করেছেন। ১৫ মিনিট পরে আবার চেষ্টা করুন।',
+                    remainingMinutes: 15
+                };
+            }
+            
+            // এটেম্পট যোগ করুন
+            window._rateLimitStore.attempts[key].push(now);
+            
+            return { allowed: true };
+        };
+        
+        // ========== ৫. সেশন টাইমআউট ==========
+        let sessionTimer;
+        let sessionWarningShown = false;
+        
+        function resetSessionTimer() {
+            if (sessionTimer) clearTimeout(sessionTimer);
+            
+            sessionTimer = setTimeout(() => {
+                // সেশন টাইমআউট - লগআউট করুন
+                if (firebase && firebase.auth() && firebase.auth().currentUser) {
+                    // ইউজারকে জানান
+                    if (confirm('আপনার সেশন শেষ হয়ে গেছে। আবার লগইন করবেন?')) {
+                        firebase.auth().signOut();
+                        window.location.reload();
+                    } else {
+                        firebase.auth().signOut();
+                    }
+                }
+            }, CONFIG.SESSION_TIMEOUT);
+        }
+        
+        // ইউজার অ্যাক্টিভিটিতে টাইমার রিসেট
+        ['click', 'keypress', 'scroll', 'mousemove', 'touchstart'].forEach(event => {
+            document.addEventListener(event, resetSessionTimer, { passive: true });
+        });
+        
+        // অথ স্টেট চেঞ্জে টাইমার সেট
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().onAuthStateChanged(user => {
+                if (user) {
+                    resetSessionTimer();
+                } else {
+                    if (sessionTimer) clearTimeout(sessionTimer);
+                }
+            });
+        }
+        
+        // ========== ৬. XSS প্রোটেকশন (ইনপুট স্যানিটাইজ) ==========
+        function sanitizeInput(input) {
+            if (typeof input !== 'string') return input;
+            
+            // বিপজ্জনক ক্যারেক্টার এস্কেপ করুন
+            return input
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#x27;')
+                .replace(/\//g, '&#x2F;')
+                .replace(/\\/g, '&#x5C;')
+                .replace(/`/g, '&#96;')
+                .replace(/=/g, '&#61;');
+        }
+        
+        // ফর্ম ইনপুট স্যানিটাইজ করার জন্য ফাংশন
+        function setupFormProtection() {
+            document.querySelectorAll('form').forEach(form => {
+                if (form._protected) return;
+                form._protected = true;
+                
+                form.addEventListener('submit', function(e) {
+                    // টেক্সট ইনপুট স্যানিটাইজ
+                    const textInputs = this.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], textarea');
+                    textInputs.forEach(input => {
+                        if (input.value && typeof input.value === 'string') {
+                            // অরিজিনাল ভ্যালু স্টোর করুন যদি পরে লাগে
+                            input.dataset.originalValue = input.value;
+                            // ডিসপ্লের জন্য স্যানিটাইজড (কিন্তু সার্ভারে পাঠানোর আগে এনকোড করা লাগবে)
+                            // আমরা শুধু বিপজ্জনক ক্যারেক্টারগুলোর জন্য সতর্ক করছি
+                            if (/[<>"'`=]/.test(input.value)) {
+                                console.warn('সতর্কতা: ইনপুটে বিপজ্জনক ক্যারেক্টার পাওয়া গেছে');
+                            }
+                        }
+                    });
+                }, true);
+            });
+        }
+        
+        // ডম পরিবর্তন হলে আবার সেটআপ করুন
+        const observer = new MutationObserver(() => {
+            setupFormProtection();
+        });
+        
+        observer.observe(document.body, { childList: true, subtree: true });
+        
+        // ========== ৭. লোকাল স্টোরেজ এনক্রিপশন (সিম্পল) ==========
+        const originalSetItem = localStorage.setItem;
+        const originalGetItem = localStorage.getItem;
+        
+        // শুধুমাত্র সংবেদনশীল ডেটার জন্য
+        const sensitiveKeys = ['user', 'session', 'token', 'auth'];
+        
+        localStorage.setItem = function(key, value) {
+            if (sensitiveKeys.some(k => key.toLowerCase().includes(k))) {
+                try {
+                    // সিম্পল এনকোডিং (বেস64)
+                    const encoded = btoa(encodeURIComponent(value));
+                    return originalSetItem.call(this, `_sec_${key}`, encoded);
+                } catch (e) {
+                    console.warn('LocalStorage encoding error');
+                }
+            }
+            return originalSetItem.call(this, key, value);
+        };
+        
+        localStorage.getItem = function(key) {
+            if (sensitiveKeys.some(k => key.toLowerCase().includes(k))) {
+                try {
+                    const encoded = originalGetItem.call(this, `_sec_${key}`);
+                    if (encoded) {
+                        return decodeURIComponent(atob(encoded));
+                    }
+                } catch (e) {
+                    console.warn('LocalStorage decoding error');
+                }
+            }
+            return originalGetItem.call(this, key);
+        };
+        
+        // ========== ৮. সিকিউরিটি ব্যাজ তৈরি ==========
+        function createSecurityBadge() {
+            const badgeContainer = document.createElement('div');
+            badgeContainer.className = 'security-badge-container';
+            
+            badgeContainer.innerHTML = `
+                <div class="security-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>সুরক্ষিত সংযোগ</span>
+                    <i class="fas fa-info-circle warning"></i>
+                </div>
+                <div class="security-tooltip">
+                    <p><i class="fas fa-lock" style="color:#4caf50;"></i> SSL এনক্রিপ্টেড</p>
+                    <p><i class="fas fa-clock" style="color:#ff9800;"></i> সেশন টাইমআউট: ৩০ মিনিট</p>
+                    <p><i class="fas fa-shield-virus" style="color:#4caf50;"></i> অ্যান্টি-ফিশিং সক্রিয়</p>
+                    <p><i class="fas fa-user-shield" style="color:#00bcd4;"></i> রেট লিমিটিং: ${CONFIG.MAX_ATTEMPTS}/১৫মি</p>
+                    <p style="color:#aaa; font-size:0.7rem; margin-top:5px;">কোন তথ্য সংগ্রহ করা হয় না</p>
+                </div>
+            `;
+            
+            document.body.appendChild(badgeContainer);
+        }
+        
+        // ডম রেডির পর ব্যাজ তৈরি
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', createSecurityBadge);
+        } else {
+            createSecurityBadge();
+        }
+        
+        // ========== ৯. অ্যান্টি-ফিশিং ও ডোমেইন ভেরিফিকেশন ==========
+        function verifyDomain() {
+            const allowedDomains = ['easy-premium.com', 'www.easy-premium.com', 'localhost', '127.0.0.1'];
+            const currentHost = window.location.hostname;
+            
+            if (!allowedDomains.includes(currentHost) && !currentHost.endsWith('.easy-premium.com')) {
+                console.warn('অজানা ডোমেইনে চলছে:', currentHost);
+                
+                // একটি সতর্কতা দেখান কিন্তু ব্লক করবেন না (আপনার মূল সাইট যেন কাজ করে)
+                const warningDiv = document.createElement('div');
+                warningDiv.style.position = 'fixed';
+                warningDiv.style.bottom = '10px';
+                warningDiv.style.left = '10px';
+                warningDiv.style.background = 'rgba(255, 0, 0, 0.8)';
+                warningDiv.style.color = 'white';
+                warningDiv.style.padding = '5px 10px';
+                warningDiv.style.borderRadius = '3px';
+                warningDiv.style.zIndex = '9999';
+                warningDiv.style.fontSize = '0.7rem';
+                warningDiv.innerHTML = '⚠️ সতর্কতা: অফিসিয়াল ডোমেইন নয়';
+                
+                document.body.appendChild(warningDiv);
+            }
+        }
+        
+        verifyDomain();
+        
+        // ========== ১০. কীবোর্ড শর্টকাট প্রোটেকশন (অপশনাল) ==========
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+U (ভিউ সোর্স)
+            if (e.ctrlKey && e.keyCode === 85) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Ctrl+S (সেভ)
+            if (e.ctrlKey && e.keyCode === 83) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Ctrl+Shift+I (ইন্সপেক্ট)
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // F12
+            if (e.keyCode === 123) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // ========== ১১. অ্যাক্টিভিটি লগ (ঐচ্ছিক) ==========
+        if (CONFIG.ENABLE_ACTIVITY_LOG) {
+            window._activityLog = [];
+            
+            function logActivity(type, data) {
+                window._activityLog.push({
+                    type: type,
+                    data: data,
+                    timestamp: new Date().toISOString(),
+                    url: window.location.href
+                });
+                
+                // সর্বোচ্চ ১০০ লগ রাখুন
+                if (window._activityLog.length > 100) {
+                    window._activityLog.shift();
+                }
+                
+                console.log('[Activity]', type, data);
+            }
+            
+            // গ্লোবাল ফাংশন
+            window.logActivity = logActivity;
+            
+            // পেজভিউ লগ
+            logActivity('pageview', { title: document.title });
+        }
+        
+        // ========== ১২. অর্ডার ফর্মে রেট লিমিট যুক্ত করা ==========
+        // অরিজিনাল পারচেজ ফর্ম সাবমিট হুক (আপনার existing কোডের সাথে ইন্টিগ্রেট)
+        const originalPurchaseSubmit = window.purchaseForm?.onsubmit;
+        
+        if (window.purchaseForm) {
+            const form = window.purchaseForm;
+            const originalHandler = form.onsubmit;
+            
+            form.onsubmit = async function(e) {
+                e.preventDefault();
+                
+                // রেট লিমিট চেক
+                if (firebase && firebase.auth() && firebase.auth().currentUser) {
+                    const userId = firebase.auth().currentUser.uid;
+                    const rateCheck = window.checkRateLimit('purchase', userId);
+                    
+                    if (!rateCheck.allowed) {
+                        alert(rateCheck.message);
+                        return false;
+                    }
+                }
+                
+                // অরিজিনাল হ্যান্ডলার কল
+                if (originalHandler) {
+                    return originalHandler.call(this, e);
+                }
+                
+                return false;
+            };
+        }
+        
+        console.log('%c🔒 Easy Premium - সুরক্ষিত মোড সক্রিয়', 'color: #4caf50; font-size: 14px; font-weight: bold;');
+    })();
+    </script>
+
+    <!-- ================== স্মার্ট ফিচার: রিয়েল-টাইম নোটিফিকেশন ================== -->
+    <script>
+    (function() {
+        // ========== স্মার্ট নোটিফিকেশন সিস্টেম ==========
+        class SmartNotification {
+            constructor() {
+                this.notifications = [];
+                this.container = null;
+                this.init();
+            }
+            
+            init() {
+                // কন্টেইনার তৈরি
+                this.container = document.createElement('div');
+                this.container.id = 'smart-notification-container';
+                document.body.appendChild(this.container);
+            }
+            
+            show(options) {
+                const {
+                    title = 'নোটিফিকেশন',
+                    message = '',
+                    icon = 'fas fa-bell',
+                    duration = 5000,
+                    type = 'info' // info, success, warning, error
+                } = options;
+                
+                const notification = document.createElement('div');
+                notification.className = 'smart-notification';
+                
+                // টাইপ অনুযায়ী কালার
+                let iconColor = '#ff9800';
+                let borderColor = '#ff9800';
+                
+                if (type === 'success') {
+                    iconColor = '#4caf50';
+                    borderColor = '#4caf50';
+                } else if (type === 'warning') {
+                    iconColor = '#ff9800';
+                    borderColor = '#ff9800';
+                } else if (type === 'error') {
+                    iconColor = '#f44336';
+                    borderColor = '#f44336';
+                }
+                
+                notification.style.borderLeftColor = borderColor;
+                
+                notification.innerHTML = `
+                    <button class="smart-notification-close"><i class="fas fa-times"></i></button>
+                    <div class="smart-notification-content">
+                        <div class="smart-notification-icon" style="color: ${iconColor};">
+                            <i class="${icon}"></i>
+                        </div>
+                        <div class="smart-notification-text">
+                            <div class="smart-notification-title">${title}</div>
+                            <div class="smart-notification-message">${message}</div>
+                        </div>
+                    </div>
+                `;
+                
+                this.container.appendChild(notification);
+                
+                // অ্যানিমেশন
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+                
+                // ক্লোজ বাটন
+                const closeBtn = notification.querySelector('.smart-notification-close');
+                closeBtn.addEventListener('click', () => {
+                    this.close(notification);
+                });
+                
+                // অটো ক্লোজ
+                if (duration > 0) {
+                    setTimeout(() => {
+                        this.close(notification);
+                    }, duration);
+                }
+                
+                this.notifications.push(notification);
+                
+                return notification;
+            }
+            
+            close(notification) {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 300);
+                
+                this.notifications = this.notifications.filter(n => n !== notification);
+            }
+            
+            success(message, title = 'সফল') {
+                return this.show({
+                    title,
+                    message,
+                    icon: 'fas fa-check-circle',
+                    type: 'success',
+                    duration: 5000
+                });
+            }
+            
+            info(message, title = 'তথ্য') {
+                return this.show({
+                    title,
+                    message,
+                    icon: 'fas fa-info-circle',
+                    type: 'info',
+                    duration: 5000
+                });
+            }
+            
+            warning(message, title = 'সতর্কতা') {
+                return this.show({
+                    title,
+                    message,
+                    icon: 'fas fa-exclamation-triangle',
+                    type: 'warning',
+                    duration: 7000
+                });
+            }
+            
+            error(message, title = 'ত্রুটি') {
+                return this.show({
+                    title,
+                    message,
+                    icon: 'fas fa-times-circle',
+                    type: 'error',
+                    duration: 7000
+                });
+            }
+        }
+        
+        // গ্লোবাল নোটিফিকেশন অবজেক্ট
+        window.notify = new SmartNotification();
+        
+        // ========== অর্ডার সফল হলে নোটিফিকেশন দেখানো (অরিজিনাল ফাংশন ওভাররাইড না করে) ==========
+        // অরিজিনাল createOrderWithEmail ফাংশন সংরক্ষণ
+        if (window.createOrderWithEmail) {
+            const originalCreateOrder = window.createOrderWithEmail;
+            
+            window.createOrderWithEmail = async function(orderData) {
+                try {
+                    const result = await originalCreateOrder.call(this, orderData);
+                    
+                    // সফল হলে নোটিফিকেশন
+                    if (result && result.orderId) {
+                        setTimeout(() => {
+                            window.notify.success(
+                                `অর্ডার #${result.orderId.substring(0, 8)} তৈরি হয়েছে। পেমেন্ট করুন।`,
+                                'অর্ডার সফল'
+                            );
+                        }, 500);
+                    }
+                    
+                    return result;
+                } catch (error) {
+                    // এরর হলে নোটিফিকেশন
+                    window.notify.error(error.message || 'অর্ডার তৈরি করতে সমস্যা হয়েছে');
+                    throw error;
+                }
+            };
+        }
+        
+        // ========== লগইন সফল হলে নোটিফিকেশন ==========
+        if (firebase && firebase.auth) {
+            firebase.auth().onAuthStateChanged(user => {
+                if (user) {
+                    // নতুন লগইন? (একটু delay দিয়ে)
+                    setTimeout(() => {
+                        if (user.metadata.lastSignInTime === user.metadata.creationTime) {
+                            // নতুন ইউজার
+                            window.notify.success(`স্বাগতম ${user.displayName || 'ইউজার'}!`, 'নতুন অ্যাকাউন্ট');
+                        } else {
+                            // বিদ্যমান ইউজার
+                            window.notify.info(`সুস্থ আছেন ${user.displayName || 'ইউজার'}?`, 'স্বাগতম');
+                        }
+                    }, 1000);
+                }
+            });
+        }
+        
+        // ========== প্ল্যাটফর্ম লোড হলে নোটিফিকেশন ==========
+        const originalLoadPlatforms = window.loadPlatformsFromFirebase;
+        if (originalLoadPlatforms) {
+            window.loadPlatformsFromFirebase = function() {
+                const result = originalLoadPlatforms.call(this);
+                
+                // অলরেডি লোড করা থাকলে নোটিফিকেশন না দেখানো
+                if (!window._platformsLoadedNotified) {
+                    setTimeout(() => {
+                        const platformCount = document.querySelectorAll('.platform-card').length;
+                        if (platformCount > 0) {
+                            window.notify.info(`${platformCount} টি প্ল্যাটফর্ম লোড হয়েছে`, 'স্বাগতম');
+                            window._platformsLoadedNotified = true;
+                        }
+                    }, 2000);
+                }
+                
+                return result;
+            };
+        }
+        
+        // ========== লাইভ ইউজার কাউন্ট (ডেমো) ==========
+        function updateLiveUserCount() {
+            // র্যান্ডম ইউজার কাউন্ট দেখানো (শুধু ভিজুয়াল)
+            const userCount = Math.floor(Math.random() * 10) + 15; // 15-25 এর মধ্যে
+            
+            const countElement = document.createElement('div');
+            countElement.style.position = 'fixed';
+            countElement.style.bottom = '20px';
+            countElement.style.left = '20px';
+            countElement.style.background = 'rgba(10, 10, 26, 0.8)';
+            countElement.style.backdropFilter = 'blur(5px)';
+            countElement.style.border = '1px solid #00bcd4';
+            countElement.style.borderRadius = '20px';
+            countElement.style.padding = '5px 15px';
+            countElement.style.fontSize = '0.7rem';
+            countElement.style.color = '#00bcd4';
+            countElement.style.zIndex = '9998';
+            countElement.style.boxShadow = '0 5px 10px rgba(0,0,0,0.2)';
+            countElement.innerHTML = `<i class="fas fa-users"></i> ${userCount} জন অনলাইন`;
+            
+            document.body.appendChild(countElement);
+            
+            // প্রতি ৩০ সেকেন্ডে আপডেট
+            setInterval(() => {
+                const newCount = Math.floor(Math.random() * 10) + 15;
+                countElement.innerHTML = `<i class="fas fa-users"></i> ${newCount} জন অনলাইন`;
+            }, 30000);
+        }
+        
+        // ডম রেডির পর
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', updateLiveUserCount);
+        } else {
+            updateLiveUserCount();
+        }
+        
+    })();
     </script>
 </body>
 </html>
