@@ -755,40 +755,26 @@
             'whatsapp': 'whatsapp_business',
             'whatsapp business': 'whatsapp_business',
             'tiktok': 'tiktok_coins',
-            'tiktok coins': 'tiktok_coins'
+            'tiktok coins': 'tiktok_coins',
+            'amazon': 'amazon_prime',
+            'amazon prime': 'amazon_prime',
+            'prime': 'amazon_prime'
         };
 
-        // ===== সংশোধিত অংশ: Generate encrypted data string for payment link =====
-        // আপনার Pay.html যেভাবে expects করে (সিঙ্গেল Base64 + URL encode)
+        // ===== Generate encrypted data string for payment link (সঠিক, সিঙ্গেল Base64 + URL encode) =====
         function generateEncryptedData(orderId, platform, price) {
             try {
-                // Platform ID বের করুন
                 const platformId = getPlatformId(platform);
-                
-                // টাইমস্ট্যাম্প (মিলিসেকেন্ড)
                 const timestamp = Date.now();
-                
-                // ফরম্যাট: orderId|platformId|price|timestamp
                 const dataString = `${orderId}|${platformId}|${price}|${timestamp}`;
-                
-                console.log("1. Data string:", dataString);
-                
-                // শুধু একবার Base64 এনকোড (ডাবল না)
                 let encodedData = btoa(dataString);
-                console.log("2. Base64 encoded:", encodedData);
-                
-                // URL এনকোড
                 encodedData = encodeURIComponent(encodedData);
-                console.log("3. URL encoded:", encodedData);
-                
                 return encodedData;
-                
             } catch (error) {
                 console.error("Generate encrypted data error:", error);
                 return '';
             }
         }
-        // ===== সংশোধিত অংশ শেষ =====
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -812,7 +798,6 @@
                         showAdminPanel();
                         initializeOrderSystem();
                         
-                        // Super Admin check
                         const isSuperAdmin = [
                             'mdsojib1388888@gmail.com',
                             'shahsultanshakil204571@gmail.com',
@@ -900,7 +885,6 @@
                 adminAvatar.innerHTML = `<span style="font-size: 1.2rem;">${initial}</span>`;
             }
             
-            // Save admin info to database
             try {
                 const adminRef = database.ref(`adminUsers/${user.uid}`);
                 await adminRef.update({
@@ -995,7 +979,6 @@
         function filterOrders(ordersList) {
             let filtered = [...ordersList];
             
-            // Status filter
             const statusValue = orderFilter.value;
             if (statusValue === 'pending') {
                 filtered = filtered.filter(order => order.status === 'pending');
@@ -1007,11 +990,10 @@
                 );
             }
             
-            // Search filter
             const searchValue = orderSearch.value.toLowerCase();
             if (searchValue) {
                 filtered = filtered.filter(order => 
-                    order.id.toLowerCase().includes(searchValue) ||
+                    (order.orderId && order.orderId.toLowerCase().includes(searchValue)) ||
                     (order.userName && order.userName.toLowerCase().includes(searchValue)) ||
                     (order.phoneNumber && order.phoneNumber.includes(searchValue)) ||
                     (order.whatsappNumber && order.whatsappNumber.includes(searchValue)) ||
@@ -1019,7 +1001,6 @@
                 );
             }
             
-            // Date filter
             const dateValue = dateFilter.value;
             if (dateValue !== 'all') {
                 const today = new Date();
@@ -1051,7 +1032,7 @@
             return filtered;
         }
         
-        // Display orders
+        // ===== পরিবর্তিত অংশ ১: Display orders - সঠিক অর্ডার আইডি দেখানো =====
         function displayOrders(ordersList) {
             if (ordersList.length === 0) {
                 ordersTable.innerHTML = '<tr><td colspan="8" class="no-data">কোন অর্ডার পাওয়া যায়নি</td></tr>';
@@ -1061,6 +1042,9 @@
             let html = '';
             
             ordersList.forEach(order => {
+                // অর্ডার আইডি হিসেবে আগে orderId ফিল্ড দেখাব, না থাকলে Firebase key
+                const displayOrderId = order.orderId || order.id;
+                
                 const orderDate = order.orderDate ? new Date(order.orderDate).toLocaleString('bn-BD', {
                     year: 'numeric',
                     month: 'short',
@@ -1110,7 +1094,7 @@
                 
                 html += `
                     <tr>
-                        <td style="font-family: monospace; font-size: 0.85rem;">${order.id.substring(0, 8)}...</td>
+                        <td style="font-family: monospace; font-size: 0.85rem;">${displayOrderId.substring(0, 8)}...</td>
                         <td>
                             <div style="font-weight: 600;">${order.userName || 'নাম নেই'}</div>
                             <div style="font-size: 0.8rem; color: #b0bec5;">${order.phoneNumber || 'ফোন নেই'}</div>
@@ -1132,36 +1116,31 @@
             ordersTable.innerHTML = html;
         }
         
-        // Platform Name থেকে Platform ID বের করার ফাংশন (Pay.html যেভাবে ব্যবহার করে)
+        // ===== Platform Name থেকে Platform ID বের করার ফাংশন =====
         function getPlatformId(platformName) {
             if (!platformName) return 'unknown';
             
             const lowerPlatform = platformName.toLowerCase().trim();
             
-            // ডিফল্ট ম্যাপিং
             for (const [key, value] of Object.entries(PLATFORM_ID_MAP)) {
                 if (lowerPlatform.includes(key)) {
                     return value;
                 }
             }
             
-            // কোনো ম্যাপিং না পেলে স্পেস রিমুভ করে ছোট হাতের করে দিন
             return lowerPlatform.replace(/\s+/g, '');
         }
         
-        // Generate payment link for order - আপনার দেওয়া ফরম্যাটে
+        // ===== Generate payment link =====
         function generatePaymentLink(orderId, platform, price) {
             const encryptedData = generateEncryptedData(orderId, platform, price);
-            
-            // ফরম্যাট: https://easy-premium.com/Pay.html?data=[encryptedData]&v=2
             return `${BASE_URL}?data=${encryptedData}&v=2`;
         }
         
-        // Generate WhatsApp message
+        // ===== Generate WhatsApp message (সঠিক অর্ডার আইডি ব্যবহার) =====
         function generateWhatsAppMessage(orderId, userName, platform, price) {
             const paymentLink = generatePaymentLink(orderId, platform, price);
             
-            // Message format as shown in your example
             const message = `আসসালামু আলাইকুম ${userName},
 
 আপনার অর্ডারটি কনফার্ম করতে নিচের লিংকে ক্লিক করুন:
@@ -1179,29 +1158,31 @@ Easy Premium Team`;
             return message;
         }
         
-        // Send WhatsApp message - সরাসরি WhatsApp ওপেন হবে
+        // ===== পরিবর্তিত অংশ ২: Send WhatsApp message - সঠিক orderId ব্যবহার =====
         function sendWhatsAppMessage(orderId, phoneNumber, userName, platform, price) {
-            // ফোন নম্বর থেকে সব নন-ডিজিট ক্যারেক্টার রিমুভ করুন
-            const cleanNumber = phoneNumber.replace(/\D/g, '');
+            // orderId প্যারামিটার হচ্ছে Firebase key (order.id)
+            // আমাদের দরকার order.orderId, তাই পুরো অর্ডার খুঁজে বের করি
+            const order = orders.find(o => o.id === orderId);
+            if (!order) {
+                showToast('অর্ডার পাওয়া যায়নি', 'error');
+                return;
+            }
             
+            // যে আইডি পেমেন্ট লিংকে যাবে সেটি order.orderId (EP-... ফরম্যাট)
+            const displayOrderId = order.orderId || orderId;
+            
+            const cleanNumber = phoneNumber.replace(/\D/g, '');
             if (!cleanNumber) {
                 showToast('ভ্যালিড ফোন নম্বর পাওয়া যায়নি', 'error');
                 return;
             }
             
-            // মেসেজ জেনারেট করুন
-            const message = generateWhatsAppMessage(orderId, userName, platform, price);
-            
-            // মেসেজ এনকোড করুন
+            const message = generateWhatsAppMessage(displayOrderId, userName, platform, price);
             const encodedMessage = encodeURIComponent(message);
-            
-            // WhatsApp URL তৈরি করুন
             const whatsappUrl = `https://wa.me/88${cleanNumber}?text=${encodedMessage}`;
             
-            // সরাসরি WhatsApp ওপেন করুন (নতুন ট্যাবে)
             window.open(whatsappUrl, '_blank');
             
-            // লগ সংরক্ষণ করুন
             database.ref('whatsappLogs').push({
                 orderId: orderId,
                 phoneNumber: cleanNumber,
@@ -1248,7 +1229,6 @@ Easy Premium Team`;
                     cancelModal.style.display = 'none';
                     currentOrderToCancel = null;
                     
-                    // Log the cancellation
                     database.ref('adminLogs').push({
                         action: 'order_cancelled',
                         orderId: orderId,
