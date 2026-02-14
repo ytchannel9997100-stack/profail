@@ -51,7 +51,6 @@
             border-radius: 16px; 
             padding: 20px; 
             margin-bottom: 15px;
-            box-shadow: 0 5px 15px rgba(255,152,0,0.1);
         }
         
         .info-row { 
@@ -89,46 +88,6 @@
             font-weight: 800; 
         }
         
-        /* D ফিল্ড স্টাইল */
-        .d-field { 
-            margin-top: 20px; 
-            padding: 16px; 
-            background: #0a2a1a; 
-            border-left: 5px solid #00ff88; 
-            border-radius: 8px; 
-            color: #fff; 
-            font-size: 15px;
-            line-height: 1.6;
-        }
-        
-        .d-field-title {
-            color: #00ff88;
-            font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .d-field-content {
-            color: #ddd;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-        
-        /* D ফিল্ড না থাকলে */
-        .d-field-empty {
-            margin-top: 20px;
-            padding: 15px;
-            background: #1a1a1a;
-            border: 1px dashed #ff9800;
-            border-radius: 8px;
-            color: #ff9800;
-            text-align: center;
-            font-size: 14px;
-        }
-        
         .pay-btn { 
             position: fixed; 
             bottom: 0; 
@@ -147,6 +106,35 @@
         }
         
         .pay-btn.hidden { display: none; }
+        
+        .d-field { 
+            margin-top: 20px; 
+            padding: 16px; 
+            background: #0a2a1a; 
+            border-left: 5px solid #00ff88; 
+            border-radius: 8px; 
+            color: #fff; 
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        .d-field-title {
+            color: #00ff88;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .debug-info {
+            margin-top: 15px;
+            padding: 12px;
+            background: #222;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #ffaa00;
+            font-family: monospace;
+            word-break: break-all;
+            border-left: 3px solid #ffaa00;
+        }
         
         .error, .loading { 
             text-align: center; 
@@ -175,28 +163,14 @@
             to { transform: rotate(360deg); }
         }
         
-        /* ডিবাগ ইনফো */
-        .debug-info {
-            margin-top: 10px;
-            padding: 10px;
-            background: #222;
-            border-radius: 5px;
-            font-size: 12px;
-            color: #aaa;
-            font-family: monospace;
-            word-break: break-all;
-        }
-        
         @media (min-width: 1024px) {
             .container { max-width: 1000px; }
             .header h1 { font-size: 32px; }
-            .card { padding: 25px; }
         }
         
         @media (max-width: 480px) {
             body { padding: 10px; padding-bottom: 75px; }
             .header h1 { font-size: 24px; }
-            .info-row { font-size: 14px; }
             .price { font-size: 28px; }
         }
     </style>
@@ -219,21 +193,36 @@
 
         function decryptData(encrypted) {
             try {
-                console.log("Encrypted data:", encrypted);
+                console.log("=== DECRYPTION START ===");
+                console.log("1. Encrypted data from URL:", encrypted);
                 
+                // URL ডিকোড
                 const urlDecoded = decodeURIComponent(encrypted);
-                console.log("URL Decoded:", urlDecoded);
+                console.log("2. After URL decode:", urlDecoded);
                 
+                // Base64 ডিকোড
                 const base64Decoded = atob(urlDecoded);
-                console.log("Base64 Decoded:", base64Decoded);
+                console.log("3. After Base64 decode:", base64Decoded);
                 
+                // পাইপ দিয়ে সেপারেট
                 const parts = base64Decoded.split('|');
-                console.log("Parts:", parts);
+                console.log("4. Split parts:", parts);
                 
                 if (parts.length >= 4) {
+                    // Platform ID থেকে ব্যাকস্ল্যাশ এবং বিশেষ ক্যারেক্টার ক্লিন
+                    let cleanPlatformId = parts[1];
+                    
+                    // ব্যাকস্ল্যাশ এবং এক্সট্রা ক্যারেক্টার রিমুভ
+                    cleanPlatformId = cleanPlatformId.replace(/\\/g, '');
+                    cleanPlatformId = cleanPlatformId.replace(/[^a-zA-Z0-9_-]/g, '');
+                    
+                    console.log("5. Original Platform ID:", parts[1]);
+                    console.log("6. Cleaned Platform ID:", cleanPlatformId);
+                    
                     return {
                         orderId: parts[0],
-                        platformId: parts[1],
+                        platformId: cleanPlatformId,
+                        originalPlatformId: parts[1], // ডিবাগের জন্য রাখা
                         price: parts[2],
                         timestamp: parts[3]
                     };
@@ -245,97 +234,46 @@
             }
         }
 
-        // D ফিল্ড আনার উন্নত ফাংশন - সব সম্ভাব্য পাথ চেক করে
         async function fetchDField(platformId) {
             try {
-                console.log("🔍 Searching D field for platform:", platformId);
+                console.log("🔍 Searching D field for:", platformId);
                 
-                // 1️⃣ প্রথমে pricingPlans পাথে চেক
-                const path1 = `publicData/pricingPlans/${platformId}`;
-                console.log("Checking path 1:", path1);
+                // একাধিক পাথে চেক
+                const paths = [
+                    `publicData/pricingPlans/${platformId}`,
+                    `pricingPlans/${platformId}`,
+                    `plans/${platformId}`,
+                    `platforms/${platformId}`,
+                    `products/${platformId}`
+                ];
                 
-                let snapshot = await database.ref(path1).once('value');
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    console.log("✅ Data found at path 1:", data);
+                for (const path of paths) {
+                    console.log("Checking:", path);
+                    const snapshot = await database.ref(path).once('value');
                     
-                    // সব সম্ভাব্য ফিল্ড নাম চেক
-                    if (data.D) return data.D;
-                    if (data.d) return data.d;
-                    if (data.description) return data.description;
-                    if (data.Dfield) return data.Dfield;
-                    if (data.dField) return data.dField;
-                    if (data.Description) return data.Description;
-                    if (data.info) return data.info;
-                    if (data.message) return data.message;
-                    if (data.data) return data.data;
-                    if (data.text) return data.text;
-                    if (data.content) return data.content;
-                    if (data.details) return data.details;
-                    
-                    // যদি কোনো স্ট্রিং পাওয়া যায়
-                    for (const key in data) {
-                        if (typeof data[key] === 'string' && data[key].length > 0) {
-                            console.log(`Found string in key "${key}":`, data[key]);
-                            return data[key];
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        console.log("✅ Found at:", path, data);
+                        
+                        if (data.D) return data.D;
+                        if (data.description) return data.description;
+                        if (data.d) return data.d;
+                        if (data.info) return data.info;
+                        
+                        // যদি কোনো স্ট্রিং পাওয়া যায়
+                        for (const key in data) {
+                            if (typeof data[key] === 'string' && data[key].length > 0) {
+                                return data[key];
+                            }
                         }
                     }
                 }
                 
-                // 2️⃣ plans পাথে চেক
-                const path2 = `plans/${platformId}`;
-                console.log("Checking path 2:", path2);
-                
-                snapshot = await database.ref(path2).once('value');
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    console.log("✅ Data found at path 2:", data);
-                    
-                    if (data.D) return data.D;
-                    if (data.d) return data.d;
-                    if (data.description) return data.description;
-                    if (data.Dfield) return data.Dfield;
-                }
-                
-                // 3️⃣ platform পাথে চেক (platformId থেকে _premium বাদ দিয়ে)
-                const basePlatform = platformId.replace('_premium', '').replace('_coins', '');
-                const path3 = `platforms/${basePlatform}`;
-                console.log("Checking path 3:", path3);
-                
-                snapshot = await database.ref(path3).once('value');
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    console.log("✅ Data found at path 3:", data);
-                    
-                    if (data.D) return data.D;
-                    if (data.description) return data.description;
-                }
-                
-                // 4️⃣ সরাসরি platformId দিয়ে products পাথে
-                const path4 = `products/${platformId}`;
-                console.log("Checking path 4:", path4);
-                
-                snapshot = await database.ref(path4).once('value');
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    console.log("✅ Data found at path 4:", data);
-                    
-                    if (data.D) return data.D;
-                    if (data.description) return data.description;
-                }
-                
-                console.log("❌ No D field found in any path");
-                
-                // ডিবাগের জন্য সম্পূর্ণ ডাটাবেস স্ট্রাকচার দেখি
-                const rootSnapshot = await database.ref('publicData').once('value');
-                if (rootSnapshot.exists()) {
-                    console.log("📁 Full publicData structure:", JSON.stringify(rootSnapshot.val(), null, 2));
-                }
-                
+                console.log("❌ No D field found");
                 return null;
                 
             } catch (e) {
-                console.error("Firebase error details:", e);
+                console.error("Firebase error:", e);
                 return null;
             }
         }
@@ -346,9 +284,6 @@
             
             const urlParams = new URLSearchParams(window.location.search);
             const encodedData = urlParams.get('data');
-            
-            // ডিবাগ তথ্য দেখানোর জন্য
-            let debugHTML = '';
             
             if (!encodedData) {
                 output.innerHTML = '<div class="error">❌ URL-এ ডাটা নেই</div>';
@@ -364,12 +299,8 @@
                 return;
             }
             
-            debugHTML += `<div class="debug-info">Platform ID: ${data.platformId}</div>`;
-            
             // D ফিল্ড আনা
-            console.log("📋 Fetching D field for:", data.platformId);
             const dField = await fetchDField(data.platformId);
-            console.log("📋 D field result:", dField);
             
             const date = new Date(parseInt(data.timestamp));
             const formattedDate = date.toLocaleString('bn-BD', { 
@@ -382,26 +313,23 @@
             
             const platformName = data.platformId.replace(/_/g, ' ').toUpperCase();
             
-            // D ফিল্ড HTML তৈরি
-            let dFieldHTML = '';
+            // ডিবাগ তথ্য
+            const debugHTML = `
+                <div class="debug-info">
+                    <strong>🔧 ডিবাগ তথ্য:</strong><br>
+                    Original Platform ID: ${data.originalPlatformId || 'N/A'}<br>
+                    Cleaned Platform ID: ${data.platformId}<br>
+                    Timestamp: ${data.timestamp}
+                </div>
+            `;
             
+            // D ফিল্ড HTML
+            let dFieldHTML = '';
             if (dField) {
-                // D ফিল্ড পাওয়া গেছে
                 dFieldHTML = `
                     <div class="d-field">
-                        <div class="d-field-title">
-                            <span>📄 ডি ফিল্ড ডাটা</span>
-                        </div>
-                        <div class="d-field-content">${dField}</div>
-                    </div>
-                `;
-            } else {
-                // D ফিল্ড নেই
-                dFieldHTML = `
-                    <div class="d-field-empty">
-                        ⚠️ ডি ফিল্ড ডাটা পাওয়া যায়নি
-                        <br>
-                        <small style="color:#888;">Platform ID: ${data.platformId}</small>
+                        <div class="d-field-title">📄 ডি ফিল্ড ডাটা</div>
+                        <div>${dField}</div>
                     </div>
                 `;
             }
