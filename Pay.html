@@ -2,14 +2,14 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>বিস্তারিত বিবরণ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">               
+    <title>পেমেন্ট তথ্য</title>
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <style>
-        /* সম্পূর্ণ ব্ল্যাক ব্যাকগ্রাউন্ড নিশ্চিত করতে */
+        /* সম্পূর্ণ ব্ল্যাক ব্যাকগ্রাউন্ড */
         html, body {
             background: #000 !important;
             margin: 0 !important;
@@ -32,7 +32,7 @@
             -webkit-overflow-scrolling: touch;
         }
         
-        /* সবচেয়ে গুরুত্বপূর্ণ: status bar এলাকা কালো করতে */
+        /* Safe area adjustments */
         @supports (padding-top: env(safe-area-inset-top)) {
             body {
                 padding-top: env(safe-area-inset-top);
@@ -43,37 +43,16 @@
             }
         }
         
-        /* Status bar এলাকার ব্যাকগ্রাউন্ড */
-        .status-bar-area {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: env(safe-area-inset-top);
-            background: #000;
-            z-index: 9999;
-        }
-        
-        /* iPhone notch এবং modern ডিভাইসের জন্য সেফ এরিয়া */
         .content-wrapper {
             width: 100%;
-            padding-top: max(env(safe-area-inset-top), 0px);
-            padding-right: env(safe-area-inset-right);
-            padding-bottom: calc(env(safe-area-inset-bottom) + 100px);
-            padding-left: env(safe-area-inset-left);
+            padding-top: max(env(safe-area-inset-top), 20px);
+            padding-right: max(env(safe-area-inset-right), 20px);
+            padding-bottom: max(calc(env(safe-area-inset-bottom) + 100px), 20px);
+            padding-left: max(env(safe-area-inset-left), 20px);
             box-sizing: border-box;
             background: #000;
             min-height: 100vh;
             position: relative;
-        }
-        
-        @supports (padding: max(0px)) {
-            .content-wrapper {
-                padding-left: max(env(safe-area-inset-left), 20px);
-                padding-right: max(env(safe-area-inset-right), 20px);
-                padding-top: max(env(safe-area-inset-top), 20px);
-                padding-bottom: max(calc(env(safe-area-inset-bottom) + 100px), 20px);
-            }
         }
         
         .d-container {
@@ -85,7 +64,7 @@
         .d-value {
             color: #fff;
             padding: 20px;
-            line-height: 1.6;
+            line-height: 1.8;
             font-size: 18px;
             border-radius: 8px;
             word-break: break-word;
@@ -94,9 +73,11 @@
             width: 100%;
             box-sizing: border-box;
             margin: 0;
+            border: 1px solid #333;
+            background: #111;
         }
         
-        /* Pay Now বাটনের স্টাইল - সবসময় নিচে স্থির */
+        /* Pay Now বাটন */
         .pay-now-btn {
             position: fixed;
             bottom: 0;
@@ -117,162 +98,53 @@
             font-family: 'Courier New', monospace;
             border-radius: 0;
             box-sizing: border-box;
-            /* iPhone X এবং নতুন ডিভাইসের জন্য */
             padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
         }
         
         .pay-now-btn:hover {
             background: linear-gradient(135deg, #ff2222 0%, #2700ff 100%);
-            box-shadow: 0 -4px 25px rgba(102, 126, 234, 0.4);
-        }
-        
-        .pay-now-btn:active {
-            transform: translateY(-2px);
         }
         
         .pay-now-btn.hidden {
             display: none;
         }
         
-        /* মোবাইল ডিভাইসের জন্য */
+        .loading {
+            color: #fff;
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            background: #000;
+        }
+        
+        .error {
+            color: #ff6666;
+            padding: 20px;
+            text-align: center;
+            font-size: 18px;
+            background: #111;
+            border: 1px solid #ff2222;
+            border-radius: 8px;
+        }
+        
         @media (max-width: 768px) {
             .content-wrapper {
-                padding-top: max(env(safe-area-inset-top), 0px);
+                padding-top: max(env(safe-area-inset-top), 15px);
                 padding-right: max(env(safe-area-inset-right), 15px);
                 padding-bottom: calc(max(env(safe-area-inset-bottom), 15px) + 80px);
                 padding-left: max(env(safe-area-inset-left), 15px);
             }
-            
-            .d-value {
-                font-size: 16px;
-                padding: 15px;
-                line-height: 1.8;
-            }
-            
-            .pay-now-btn {
-                padding: 18px;
-                padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-                font-size: 18px;
-            }
-        }
-        
-        /* খুব ছোট মোবাইলের জন্য */
-        @media (max-width: 480px) {
-            .content-wrapper {
-                padding-top: max(env(safe-area-inset-top), 0px);
-                padding-right: max(env(safe-area-inset-right), 10px);
-                padding-bottom: calc(max(env(safe-area-inset-bottom), 10px) + 70px);
-                padding-left: max(env(safe-area-inset-left), 10px);
-            }
-            
-            .d-value {
-                font-size: 15px;
-                padding: 12px;
-                line-height: 1.8;
-            }
-            
-            .pay-now-btn {
-                padding: 16px;
-                padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-                font-size: 16px;
-            }
-        }
-        
-        .loading {
-            color: #fff;
-            font-style: italic;
-            text-align: center;
-            padding: 40px;
-            font-size: 18px;
-            width: 100%;
-            background: #000;
-            margin: 0;
-            padding-top: 20px;
-        }
-        
-        .error {
-            color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            text-align: center;
-            font-size: 18px;
-            width: 100%;
-            background: #000;
-            margin: 0;
-            padding-top: 20px;
-        }
-        
-        .hidden-data {
-            display: none !important;
-        }
-        
-        /* স্ক্রলবার স্টাইল (যদি থাকে) */
-        ::-webkit-scrollbar {
-            width: 0px;
-            background: transparent;
-        }
-        
-        /* Android এবং iOS এর জন্য অতিরিক্ত স্টাইল */
-        @media screen and (max-width: 767px) {
-            html {
-                -webkit-text-size-adjust: 100%;
-                -moz-text-size-adjust: 100%;
-                -ms-text-size-adjust: 100%;
-                background: #000;
-            }
-            
-            body {
-                -webkit-font-smoothing: antialiased;
-                -moz-osx-font-smoothing: grayscale;
-                background: #000;
-            }
-            
-            /* iOS Safari এর জন্য বিশেষ স্টাইল */
-            @supports (-webkit-touch-callout: none) {
-                body {
-                    /* iOS notch ডিভাইসের জন্য */
-                    padding-top: constant(safe-area-inset-top);
-                    padding-top: env(safe-area-inset-top);
-                    background: #000;
-                }
-            }
-        }
-        
-        /* Samsung এবং কিছু Android ডিভাইসের জন্য */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: -9999;
-        }
-        
-        /* Android Chrome এর জন্য status bar কালো করতে */
-        @media screen and (max-width: 767px) {
-            header, nav, .header {
-                display: none !important;
-            }
-        }
-        
-        /* iOS ডিভাইসের জন্য বিশেষ স্টাইল */
-        .ios-status-bar-fix {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: env(safe-area-inset-top);
-            background-color: #000;
-            z-index: 9998;
+            .d-value { font-size: 16px; padding: 15px; }
+            .pay-now-btn { padding: 18px; font-size: 18px; }
         }
     </style>
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
-
+    
+    <!-- Firebase SDK - নিয়মিত version 9 compat ব্যবহার করা হয়েছে -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    
+    <script>
+        // ফায়ারবেস কনফিগারেশন
         const firebaseConfig = {
             apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
             authDomain: "easy-premium.firebaseapp.com",
@@ -280,318 +152,186 @@
             projectId: "easy-premium",
             storageBucket: "easy-premium.firebasestorage.app",
             messagingSenderId: "155891252265",
-            appId: "1:155891252265:web:77ab41de24231e8e5ef038",
-            measurementId: "G-CHL8K8HRPX"
+            appId: "1:155891252265:web:77ab41de24231e8e5ef038"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+        // ফায়ারবেস ইনিশিয়ালাইজ
+        let database;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.log("Firebase initialization error:", error);
+        }
 
-        window.fetchDFromFirebase = async function(platformId) {
+        // ========== ডিক্রিপশন ফাংশন (মেইন সাইটের সাথে মিল রেখে) ==========
+        function decryptPaymentData(encryptedData) {
             try {
-                console.log("Firebase থেকে D ফিল্ড লোড হচ্ছে... Platform ID:", platformId);
+                console.log("Raw encrypted data:", encryptedData);
                 
-                const dRef = ref(database, `publicData/pricingPlans/${platformId}`);
-                const snapshot = await get(dRef);
-                
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    console.log("Firebase থেকে ডাটা:", data);
-                    
-                    if (data.D) {
-                        return data.D;
-                    } else if (data.description) {
-                        return data.description;
-                    } else {
-                        return "D ফিল্ডের ডাটা পাওয়া যায়নি";
-                    }
-                } else {
-                    console.log("কোন ডাটা পাওয়া যায়নি");
-                    return "ডাটাবেসে কোনো তথ্য নেই";
-                }
-            } catch (error) {
-                console.error("Firebase থেকে ডাটা লোড করতে সমস্যা:", error);
-                return "ডাটা লোড করতে সমস্যা হয়েছে";
-            }
-        };
-    </script>
-</head>
-<body>
-    <!-- Status bar area fix for iOS -->
-    <div class="ios-status-bar-fix"></div>
-    
-    <div class="content-wrapper">
-        <div id="output">
-            <div class="loading">
-                D ফিল্ডের ডাটা লোড হচ্ছে...
-            </div>
-            
-            <div id="hiddenData" class="hidden-data"></div>
-        </div>
-    </div>
-
-    <!-- Pay Now বাটন (প্রথমে লুকানো) -->
-    <button id="payNowBtn" class="pay-now-btn hidden">Pay Now</button>
-
-    <script>
-        // পেজ লোড হওয়ার সাথে সাথে ব্ল্যাক ব্যাকগ্রাউন্ড ফোর্স করতে
-        (function() {
-            // Force black background immediately
-            document.documentElement.style.backgroundColor = '#000';
-            document.body.style.backgroundColor = '#000';
-            document.documentElement.style.overflow = 'hidden';
-            
-            // iOS specific fixes
-            if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-                // Fix for iOS status bar
-                document.body.style.paddingTop = 'env(safe-area-inset-top)';
-                document.body.style.marginTop = '0';
-                
-                // Prevent bounce effect
-                document.body.style.overflow = 'hidden';
-                document.body.style.position = 'fixed';
-                document.body.style.width = '100%';
-                document.body.style.height = '100%';
-                
-                // iOS Safari specific styles
-                document.body.style.webkitTapHighlightColor = 'transparent';
-                document.body.style.webkitTouchCallout = 'none';
-                document.body.style.webkitUserSelect = 'none';
-                document.body.style.KhtmlUserSelect = 'none';
-                document.body.style.MozUserSelect = 'none';
-                document.body.style.msUserSelect = 'none';
-                document.body.style.userSelect = 'none';
-            }
-            
-            // Android Chrome specific fixes
-            if (navigator.userAgent.match(/Android/i)) {
-                // Fix for Android status bar
-                document.body.style.paddingTop = '0';
-                document.body.style.marginTop = '0';
-                
-                // Set theme color for Android Chrome
-                const metaThemeColor = document.querySelector("meta[name=theme-color]");
-                if (metaThemeColor) {
-                    metaThemeColor.setAttribute("content", "#000000");
-                }
-                
-                // Add a new meta tag if not exists
-                if (!metaThemeColor) {
-                    const newMeta = document.createElement('meta');
-                    newMeta.name = 'theme-color';
-                    newMeta.content = '#000000';
-                    document.head.appendChild(newMeta);
-                }
-            }
-            
-            // Hide any browser UI elements
-            const hideBrowserUI = function() {
-                // Try to hide address bar
-                window.scrollTo(0, 1);
-                
-                // Hide browser toolbars
-                const fullscreenEvents = [
-                    'fullscreenchange',
-                    'webkitfullscreenchange',
-                    'mozfullscreenchange',
-                    'MSFullscreenChange'
-                ];
-                
-                fullscreenEvents.forEach(event => {
-                    document.addEventListener(event, function() {
-                        setTimeout(function() {
-                            document.documentElement.style.backgroundColor = '#000';
-                            document.body.style.backgroundColor = '#000';
-                        }, 100);
-                    });
-                });
-            };
-            
-            // Run on load and resize
-            window.addEventListener('load', hideBrowserUI);
-            window.addEventListener('resize', hideBrowserUI);
-            window.addEventListener('orientationchange', hideBrowserUI);
-            
-            // Initial call
-            setTimeout(hideBrowserUI, 100);
-        })();
-        
-        function decryptData(encryptedData) {
-            try {
+                // URL ডিকোড
                 const urlDecoded = decodeURIComponent(encryptedData);
-                const base64Decoded = atob(urlDecoded);
-                const key = 'EP_SECURE_2025_KEY_!@#';
-                let decrypted = '';
+                console.log("URL decoded:", urlDecoded);
                 
+                // Base64 ডিকোড
+                const base64Decoded = atob(urlDecoded);
+                console.log("Base64 decoded:", base64Decoded);
+                
+                // ডিক্রিপশন কী - মেইন সাইটের generatePaymentLink-এর সাথে মিল রেখে
+                const key = 'EP_SECURE_2025_KEY_!@#'; // এইটা ঠিক আছে
+                
+                // XOR ডিক্রিপশন
+                let decrypted = '';
                 for (let i = 0; i < base64Decoded.length; i++) {
                     const keyChar = key.charCodeAt(i % key.length);
                     const dataChar = base64Decoded.charCodeAt(i);
                     decrypted += String.fromCharCode(dataChar ^ keyChar);
                 }
                 
-                return JSON.parse(decrypted);
+                console.log("XOR decrypted string:", decrypted);
+                
+                // JSON পার্স
+                const parsed = JSON.parse(decrypted);
+                console.log("Final parsed data:", parsed);
+                
+                return parsed;
             } catch (error) {
-                console.error("ডিক্রিপ্ট এরর:", error);
+                console.error("Decryption error details:", error);
+                console.error("Error message:", error.message);
                 return null;
             }
         }
-        
-        function storeHiddenData(data, firebaseData) {
-            const hiddenDiv = document.getElementById('hiddenData');
-            let hiddenHtml = '';
-            
-            hiddenHtml += `<h3>ডিক্রিপ্টেড ডাটা:</h3>`;
-            for (const key in data) {
-                hiddenHtml += `<p><strong>${key}:</strong> ${data[key]}</p>`;
-            }
-            
-            if (firebaseData) {
-                hiddenHtml += `<h3>Firebase ডাটা:</h3>`;
-                if (typeof firebaseData === 'string') {
-                    hiddenHtml += `<p><strong>D ফিল্ড:</strong> ${firebaseData}</p>`;
-                } else {
-                    for (const key in firebaseData) {
-                        hiddenHtml += `<p><strong>${key}:</strong> ${firebaseData[key]}</p>`;
-                    }
+
+        // ========== ফায়ারবেস থেকে D ফিল্ড পড়া ==========
+        async function fetchDFromFirebase(platformId) {
+            try {
+                if (!database) {
+                    throw new Error("Firebase not initialized");
                 }
-            }
-            
-            hiddenDiv.innerHTML = hiddenHtml;
-        }
-        
-        function showPayNowButton() {
-            const payNowBtn = document.getElementById('payNowBtn');
-            if (payNowBtn) {
-                setTimeout(() => {
-                    payNowBtn.classList.remove('hidden');
-                    console.log("Pay Now বাটন শো করা হয়েছে");
-                }, 1000);
-            }
-        }
-        
-        function displayOnlyD(data) {
-            const outputDiv = document.getElementById('output');
-            
-            if (!outputDiv) return;
-            
-            if (data) {
-                outputDiv.innerHTML = `
-                    <div class="d-container">
-                        <div class="d-value">${data}</div>
-                    </div>
-                `;
                 
-                showPayNowButton();
-            } else {
-                outputDiv.innerHTML = `
-                    <div class="error">
-                        D ফিল্ডের ডাটা পাওয়া যায়নি
-                    </div>
-                `;
+                console.log("Fetching D field for platform ID:", platformId);
+                
+                // publicData/pricingPlans রেফারেন্স
+                const dRef = firebase.database().ref(`publicData/pricingPlans/${platformId}`);
+                const snapshot = await dRef.once('value');
+                
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    console.log("Firebase data:", data);
+                    
+                    // D ফিল্ড খোঁজা
+                    if (data.D) {
+                        return data.D;
+                    } else if (data.description) {
+                        return data.description;
+                    } else {
+                        return JSON.stringify(data, null, 2);
+                    }
+                } else {
+                    console.log("No data found for platform ID:", platformId);
+                    return null;
+                }
+            } catch (error) {
+                console.error("Firebase fetch error:", error);
+                return null;
             }
         }
-        
-        function setupPayNowButton() {
+
+        // ========== পেজ লোড হওয়ার পর ডাটা প্রসেস ==========
+        window.addEventListener('DOMContentLoaded', async function() {
+            const outputDiv = document.getElementById('output');
             const payNowBtn = document.getElementById('payNowBtn');
             
-            if (payNowBtn) {
-                payNowBtn.addEventListener('click', function() {
-                    alert("পেমেন্ট প্রক্রিয়া শুরু হচ্ছে...");
-                    console.log("Pay Now বাটনে ক্লিক করা হয়েছে");
-                    
-                    // আপনার পেমেন্ট লজিক এখানে যোগ করুন
-                    // উদাহরণ: window.location.href = "payment-page.html";
-                });
-            }
-        }
-        
-        async function processData() {
+            // URL থেকে data প্যারামিটার নেওয়া
             const urlParams = new URLSearchParams(window.location.search);
-            const encodedData = urlParams.get('data');
+            const encodedData = urlParams.get('data') || urlParams.get('v') || urlParams.get('order');
             
             if (!encodedData) {
-                document.getElementById('output').innerHTML = `
-                    <div class="error">
-                        URL-এ কোন ডাটা নেই
-                    </div>
-                `;
+                outputDiv.innerHTML = '<div class="error">⚠️ URL-এ কোনো ডাটা নেই</div>';
                 return;
             }
             
-            const decryptedData = decryptData(encodedData);
+            // ডিক্রিপ্ট করার চেষ্টা
+            const decryptedData = decryptPaymentData(encodedData);
             
             if (!decryptedData) {
-                document.getElementById('output').innerHTML = `
+                outputDiv.innerHTML = `
                     <div class="error">
-                        ডাটা ডিক্রিপ্ট করা যায়নি
+                        <strong>❌ ডাটা ডিক্রিপ্ট করা যায়নি</strong><br><br>
+                        <small style="color:#999;">এনক্রিপ্টেড ডাটা: ${encodedData.substring(0, 50)}...</small>
                     </div>
                 `;
                 return;
             }
             
-            const platformId = decryptedData.p || decryptedData.platformId;
-            let dFieldData = null;
+            // ডিক্রিপ্টেড ডাটা থেকে platformId বের করা
+            const platformId = decryptedData.p || decryptedData.platformId || decryptedData.id;
             
-            if (platformId && window.fetchDFromFirebase) {
-                try {
-                    dFieldData = await window.fetchDFromFirebase(platformId);
-                    console.log("D ফিল্ডের ডাটা:", dFieldData);
-                } catch (error) {
-                    console.error("D ফিল্ড লোড করতে সমস্যা:", error);
-                    dFieldData = "ডাটা লোড করতে সমস্যা হয়েছে";
+            // Firebase থেকে D ফিল্ড আনা
+            let dFieldContent = "D ফিল্ড পাওয়া যায়নি";
+            if (platformId && database) {
+                const firebaseData = await fetchDFromFirebase(platformId);
+                if (firebaseData) {
+                    dFieldContent = firebaseData;
                 }
             } else {
-                dFieldData = decryptedData.d || decryptedData.D || decryptedData.description || 
-                             "D ফিল্ডের ডাটা পাওয়া যায়নি";
+                // ফ্যালব্যাক: ডিক্রিপ্টেড ডাটা থেকেই দেখানো
+                dFieldContent = decryptedData.d || decryptedData.D || decryptedData.description || 
+                               JSON.stringify(decryptedData, null, 2);
             }
             
-            storeHiddenData(decryptedData, dFieldData);
-            displayOnlyD(dFieldData);
-            setupPayNowButton();
-        }
-        
+            // হিডেন ডাটা সংরক্ষণ (ডিবাগিং এর জন্য)
+            const hiddenDiv = document.getElementById('hiddenData');
+            if (hiddenDiv) {
+                hiddenDiv.innerHTML = `
+                    <div style="background:#111; padding:10px; margin:10px 0; border:1px solid #333; font-size:12px;">
+                        <h4>ডিক্রিপ্টেড ডাটা:</h4>
+                        <pre>${JSON.stringify(decryptedData, null, 2)}</pre>
+                        <h4>Platform ID: ${platformId || 'N/A'}</h4>
+                    </div>
+                `;
+            }
+            
+            // D ফিল্ড দেখানো
+            outputDiv.innerHTML = `
+                <div class="d-container">
+                    <div class="d-value">${dFieldContent.replace(/\n/g, '<br>')}</div>
+                </div>
+            `;
+            
+            // Pay Now বাটন দেখানো
+            if (payNowBtn) {
+                payNowBtn.classList.remove('hidden');
+            }
+        });
+
+        // Pay Now বাটনের ক্লিক হ্যান্ডলার
         document.addEventListener('DOMContentLoaded', function() {
-            // Ensure black background
-            document.documentElement.style.backgroundColor = '#000';
-            document.body.style.backgroundColor = '#000';
-            
-            processData();
-        });
-        
-        window.addEventListener('popstate', processData);
-        
-        // রিসাইজ বা ওরিয়েন্টেশন পরিবর্তন হলে ব্যাকগ্রাউন্ড নিশ্চিত করতে
-        window.addEventListener('resize', function() {
-            document.body.style.backgroundColor = '#000';
-            document.documentElement.style.backgroundColor = '#000';
-            
-            // iOS fix for orientation change
-            if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-                document.body.style.paddingTop = 'env(safe-area-inset-top)';
+            const payNowBtn = document.getElementById('payNowBtn');
+            if (payNowBtn) {
+                payNowBtn.addEventListener('click', function() {
+                    // এখানে আপনার পেমেন্ট গেটওয়ে রিডাইরেক্ট যোগ করুন
+                    alert('পেমেন্ট প্রক্রিয়া শুরু হচ্ছে...');
+                    
+                    // উদাহরণ: window.location.href = "https://your-payment-gateway.com";
+                });
             }
         });
-        
-        window.addEventListener('orientationchange', function() {
-            setTimeout(function() {
-                document.body.style.backgroundColor = '#000';
-                document.documentElement.style.backgroundColor = '#000';
-                
-                // Force black on orientation change
-                if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-                    document.body.style.paddingTop = 'env(safe-area-inset-top)';
-                    document.body.style.marginTop = '0';
-                }
-                
-                // Scroll to top to hide address bar
-                window.scrollTo(0, 1);
-            }, 100);
-        });
-        
-        // Additional fix for iOS Safari
-        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-            document.addEventListener('touchstart', function() {}, {passive: true});
-            document.addEventListener('touchmove', function() {}, {passive: true});
-        }
     </script>
+</head>
+<body>
+    <div class="content-wrapper">
+        <div id="output">
+            <div class="loading">
+                🔄 ডাটা লোড হচ্ছে...
+            </div>
+        </div>
+        
+        <div id="hiddenData" style="display:none;"></div>
+    </div>
+
+    <!-- Pay Now বাটন -->
+    <button id="payNowBtn" class="pay-now-btn hidden">💳 Pay Now</button>
 </body>
 </html>
