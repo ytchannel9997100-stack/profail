@@ -24,10 +24,9 @@
             justify-content: center;
         }
         
-        /* কন্টেইনার - মাঝারি সাইজ */
         .container { 
             width: 100%;
-            max-width: 900px; /* আগে ছিল 1600px, এখন কমিয়ে 900px */
+            max-width: 900px; 
             margin: 0 auto; 
         }
         
@@ -38,7 +37,7 @@
         
         .header h1 { 
             color: #ff9800; 
-            font-size: 28px; /* ফিক্সড সাইজ */
+            font-size: 28px; 
         }
         
         .header p { 
@@ -89,6 +88,48 @@
             font-weight: 800; 
         }
         
+        /* D ফিল্ড স্টাইল - ইম্পরট্যান্ট */
+        .d-field { 
+            margin-top: 20px; 
+            padding: 16px; 
+            background: #0a2a1a; 
+            border-left: 5px solid #00ff88; 
+            border-radius: 8px; 
+            color: #fff; 
+            font-size: 15px;
+            line-height: 1.6;
+            border: 1px solid #00ff8844;
+            box-shadow: 0 0 15px #00ff8822;
+        }
+        
+        .d-field-title {
+            color: #00ff88;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .d-field-content {
+            color: #ddd;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        /* D ফিল্ড না থাকলে মেসেজ */
+        .d-field-empty {
+            margin-top: 20px;
+            padding: 15px;
+            background: #1a1a1a;
+            border: 1px dashed #ff9800;
+            border-radius: 8px;
+            color: #ff9800;
+            text-align: center;
+            font-size: 14px;
+        }
+        
         .pay-btn { 
             position: fixed; 
             bottom: 0; 
@@ -107,16 +148,6 @@
         }
         
         .pay-btn.hidden { display: none; }
-        
-        .d-field { 
-            margin-top: 15px; 
-            padding: 12px; 
-            background: #0a0a0a; 
-            border-left: 4px solid #ff9800; 
-            border-radius: 4px; 
-            color: #ddd; 
-            font-size: 14px;
-        }
         
         .error, .loading { 
             text-align: center; 
@@ -145,57 +176,17 @@
             to { transform: rotate(360deg); }
         }
         
-        /* পিসির জন্য সামান্য বড় */
         @media (min-width: 1024px) {
-            .container {
-                max-width: 1000px; /* পিসিতে একটু বড় */
-            }
-            
-            .header h1 {
-                font-size: 32px;
-            }
-            
-            .card {
-                padding: 25px;
-            }
-            
-            .info-row {
-                font-size: 16px;
-            }
-            
-            .price {
-                font-size: 36px;
-            }
+            .container { max-width: 1000px; }
+            .header h1 { font-size: 32px; }
+            .card { padding: 25px; }
         }
         
-        /* ছোট মোবাইলের জন্য */
         @media (max-width: 480px) {
-            body {
-                padding: 10px;
-                padding-bottom: 75px;
-            }
-            
-            .header h1 {
-                font-size: 24px;
-            }
-            
-            .card {
-                padding: 15px;
-            }
-            
-            .info-row {
-                font-size: 14px;
-                padding: 10px 0;
-            }
-            
-            .price {
-                font-size: 28px;
-            }
-            
-            .pay-btn {
-                padding: 14px;
-                font-size: 16px;
-            }
+            body { padding: 10px; padding-bottom: 75px; }
+            .header h1 { font-size: 24px; }
+            .info-row { font-size: 14px; }
+            .price { font-size: 28px; }
         }
     </style>
     
@@ -236,16 +227,54 @@
             }
         }
 
+        // D ফিল্ড আনার উন্নত ফাংশন
         async function fetchDField(platformId) {
             try {
-                const snapshot = await database.ref(`publicData/pricingPlans/${platformId}`).once('value');
-                if (snapshot.exists()) {
-                    return snapshot.val().D || snapshot.val().description || null;
+                console.log("Fetching D field for platform:", platformId);
+                
+                // বিভিন্ন পাথে চেক করা
+                const paths = [
+                    `publicData/pricingPlans/${platformId}`,
+                    `pricingPlans/${platformId}`,
+                    `plans/${platformId}`,
+                    `data/${platformId}`
+                ];
+                
+                for (const path of paths) {
+                    const snapshot = await database.ref(path).once('value');
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        console.log("Data found at path:", path, data);
+                        
+                        // বিভিন্ন ফিল্ড নাম চেক করা
+                        if (data.D) return data.D;
+                        if (data.d) return data.d;
+                        if (data.description) return data.description;
+                        if (data.Dfield) return data.Dfield;
+                        if (data.dField) return data.dField;
+                        if (data.Description) return data.Description;
+                        if (data.info) return data.info;
+                        if (data.message) return data.message;
+                        if (data.text) return data.text;
+                        if (data.data) return data.data;
+                        
+                        // যদি কোনো স্ট্রিং পাওয়া যায়
+                        for (const key in data) {
+                            if (typeof data[key] === 'string' && data[key].length > 0) {
+                                return data[key];
+                            }
+                        }
+                    }
                 }
+                
+                // Firebase রুলস চেক করার জন্য
+                console.log("No D field found in any path");
+                return null;
+                
             } catch (e) {
-                console.error("Firebase error:", e);
+                console.error("Firebase error details:", e);
+                return null;
             }
-            return null;
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -269,6 +298,7 @@
                 return;
             }
             
+            // D ফিল্ড আনা
             const dField = await fetchDField(data.platformId);
             
             const date = new Date(parseInt(data.timestamp));
@@ -281,6 +311,30 @@
             });
             
             const platformName = data.platformId.replace(/_/g, ' ').toUpperCase();
+            
+            // D ফিল্ড HTML তৈরি
+            let dFieldHTML = '';
+            
+            if (dField) {
+                // D ফিল্ড পাওয়া গেছে
+                dFieldHTML = `
+                    <div class="d-field">
+                        <div class="d-field-title">
+                            <span>📄 ডি ফিল্ড ডাটা</span>
+                        </div>
+                        <div class="d-field-content">${dField}</div>
+                    </div>
+                `;
+            } else {
+                // D ফিল্ড নেই
+                dFieldHTML = `
+                    <div class="d-field-empty">
+                        ⚠️ ডি ফিল্ড ডাটা পাওয়া যায়নি
+                        <br>
+                        <small style="color:#888;">Platform ID: ${data.platformId}</small>
+                    </div>
+                `;
+            }
             
             output.innerHTML = `
                 <div class="card">
@@ -311,7 +365,7 @@
                         <div class="price">${data.price} ৳</div>
                     </div>
                     
-                    ${dField ? `<div class="d-field">📄 ${dField}</div>` : ''}
+                    ${dFieldHTML}
                 </div>
             `;
             
