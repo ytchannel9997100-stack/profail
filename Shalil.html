@@ -740,20 +740,55 @@
 
         // Platform ID mapping (Pay.html যে ফরম্যাট ব্যবহার করে)
         const PLATFORM_ID_MAP = {
-            'telegram': 'telegram',
-            'telegram premium': 'telegram',
-            'youtube': 'youtube',
-            'youtube premium': 'youtube',
-            'facebook': 'facebook',
-            'facebook premium': 'facebook',
-            'instagram': 'instagram',
-            'netflix': 'netflix',
-            'spotify': 'spotify',
-            'whatsapp': 'whatsapp',
-            'whatsapp business': 'whatsapp',
-            'tiktok': 'tiktok',
-            'tiktok coins': 'tiktok'
+            'telegram': 'telegram_premium',
+            'telegram premium': 'telegram_premium',
+            'youtube': 'youtube_premium',
+            'youtube premium': 'youtube_premium',
+            'facebook': 'facebook_premium',
+            'facebook premium': 'facebook_premium',
+            'instagram': 'instagram_premium',
+            'instagram premium': 'instagram_premium',
+            'netflix': 'netflix_premium',
+            'netflix premium': 'netflix_premium',
+            'spotify': 'spotify_premium',
+            'spotify premium': 'spotify_premium',
+            'whatsapp': 'whatsapp_business',
+            'whatsapp business': 'whatsapp_business',
+            'tiktok': 'tiktok_coins',
+            'tiktok coins': 'tiktok_coins'
         };
+
+        // ===== সংশোধিত অংশ: Generate encrypted data string for payment link =====
+        // আপনার Pay.html যেভাবে expects করে (সিঙ্গেল Base64 + URL encode)
+        function generateEncryptedData(orderId, platform, price) {
+            try {
+                // Platform ID বের করুন
+                const platformId = getPlatformId(platform);
+                
+                // টাইমস্ট্যাম্প (মিলিসেকেন্ড)
+                const timestamp = Date.now();
+                
+                // ফরম্যাট: orderId|platformId|price|timestamp
+                const dataString = `${orderId}|${platformId}|${price}|${timestamp}`;
+                
+                console.log("1. Data string:", dataString);
+                
+                // শুধু একবার Base64 এনকোড (ডাবল না)
+                let encodedData = btoa(dataString);
+                console.log("2. Base64 encoded:", encodedData);
+                
+                // URL এনকোড
+                encodedData = encodeURIComponent(encodedData);
+                console.log("3. URL encoded:", encodedData);
+                
+                return encodedData;
+                
+            } catch (error) {
+                console.error("Generate encrypted data error:", error);
+                return '';
+            }
+        }
+        // ===== সংশোধিত অংশ শেষ =====
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -1112,30 +1147,6 @@
             
             // কোনো ম্যাপিং না পেলে স্পেস রিমুভ করে ছোট হাতের করে দিন
             return lowerPlatform.replace(/\s+/g, '');
-        }
-        
-        // Generate encrypted data string for payment link - আপনার দেওয়া লিংকের মতো
-        function generateEncryptedData(orderId, platform, price) {
-            // Platform ID বের করুন
-            const platformId = getPlatformId(platform);
-            
-            // টাইমস্ট্যাম্প (মিলিসেকেন্ড)
-            const timestamp = Date.now();
-            
-            // আপনার দেওয়া উদাহরণের মতো ডাটা স্ট্রিং তৈরি করুন
-            // ফরম্যাট: orderId|platformId|price|timestamp
-            const dataString = `${orderId}|${platformId}|${price}|${timestamp}`;
-            
-            // প্রথম লেয়ার এনকোডিং (Base64)
-            let encodedData = btoa(dataString);
-            
-            // দ্বিতীয় লেয়ার এনকোডিং (আপনার দেওয়া লিংকে ডাবল এনকোডিং আছে বলে মনে হচ্ছে)
-            encodedData = btoa(encodedData);
-            
-            // ইউআরএল সেফ এনকোডিং (/+ কে প্রতিস্থাপন)
-            encodedData = encodedData.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-            
-            return encodedData;
         }
         
         // Generate payment link for order - আপনার দেওয়া ফরম্যাটে
