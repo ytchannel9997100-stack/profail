@@ -2391,7 +2391,7 @@
                         hour: '2-digit',
                         minute: '2-digit'
                     }),
-                    payment_link: orderData.paymentLink || `https://easy-premium.com/Pay.html?order=${orderData.orderId}&v=2`
+                    payment_link: orderData.paymentLink // এটি পুরো URL হবে, যেমন: Pay.html?data=...&v=2
                 };
                 
                 console.log("Sending email with params:", templateParams);
@@ -2417,7 +2417,7 @@
             }
         }
 
-        // ===================== পেমেন্ট লিংক জেনারেটর =====================
+        // ===================== পেমেন্ট লিংক জেনারেটর (সংশোধিত) =====================
         function generatePaymentLink(orderId, platform, price, platformId) {
             try {
                 // platformId যদি দেওয়া থাকে, সেটাই ব্যবহার করব
@@ -2460,16 +2460,20 @@
                 let encodedData = btoa(dataString);
                 encodedData = encodeURIComponent(encodedData);
                 
+                const paymentUrl = `Pay.html?data=${encodedData}&v=2`;
+                
                 console.log("✅ Payment link generated:", {
                     orderId,
                     originalPlatformId: platformId,
                     finalPlatformId,
                     platform,
                     dataString,
-                    encodedData
+                    encodedData,
+                    paymentUrl
                 });
                 
-                return `Pay.html?data=${encodedData}&v=2`;
+                // সম্পূর্ণ URL না দিয়ে শুধু পাথ দিন (কারণ ইমেইলে বেস URL নিজে থেকেই যুক্ত হবে)
+                return paymentUrl;
                 
             } catch (error) {
                 console.error("Payment link generation error:", error);
@@ -2647,13 +2651,12 @@
             });
         }
 
-        // ===================== পেমেন্ট লিংক সহ অর্ডার তৈরি ফাংশন (পরিবর্তিত) =====================
+        // ===================== পেমেন্ট লিংক সহ অর্ডার তৈরি ফাংশন (সংশোধিত) =====================
         async function createOrderWithEmail(orderData) {
             try {
                 const user = auth.currentUser;
                 if (!user) throw new Error("User not logged in");
                 
-                // .toUpperCase() সরিয়ে দেওয়া হয়েছে - অর্ডার আইডি যেভাবে আছে সেভাবে থাকবে
                 const orderId = `EP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
                 
                 const paymentLink = generatePaymentLink(orderId, orderData.platform, orderData.price, orderData.platformId);
@@ -2666,7 +2669,7 @@
                     userName: orderData.userName || user.displayName || '',
                     orderDate: new Date().toISOString(),
                     status: 'pending',
-                    paymentLink: paymentLink,
+                    paymentLink: paymentLink, // এখানে পুরো পাথ সংরক্ষণ করা হচ্ছে
                     timestamp: firebase.database.ServerValue.TIMESTAMP
                 };
                 
@@ -2749,7 +2752,9 @@
                 
                 updateCartBadge(user.uid);
                 
-                window.open(createdOrder.paymentLink, '_blank');
+                // পেমেন্ট পেজ খুলতে সম্পূর্ণ URL তৈরি করুন
+                const fullPaymentUrl = window.location.origin + '/' + createdOrder.paymentLink;
+                window.open(fullPaymentUrl, '_blank');
                 
                 alert("অর্ডার সফলভাবে তৈরি হয়েছে! আপনার ইমেইলে কনফার্মেশন পাঠানো হয়েছে।");
                 
