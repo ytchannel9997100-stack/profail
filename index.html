@@ -2248,7 +2248,7 @@
         }
 
         deleteAccountBtn.addEventListener('click', function() {
-            window.open('AccountDelete.html', '_blank');
+            window.open('AccountDelete.html', '_self');
         });
 
         profileModal.addEventListener('click', function(e) {
@@ -2750,7 +2750,7 @@
                 
                 updateCartBadge(user.uid);
                 
-                window.open(createdOrder.paymentLink, '_blank');
+                window.open(createdOrder.paymentLink, '_self');
                 
                 alert("অর্ডার সফলভাবে তৈরি হয়েছে! আপনার ইমেইলে কনফার্মেশন পাঠানো হয়েছে।");
                 
