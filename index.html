@@ -1953,17 +1953,33 @@
             document.addEventListener('touchstart', function() {}, {passive: true});
         }
         
-        // ================== FIREBASE CONFIG ==================
-        const firebaseConfig = {
-            apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
-            authDomain: "easy-premium.firebaseapp.com",
-            databaseURL: "https://easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "easy-premium",
-            storageBucket: "easy-premium.firebasestorage.app",
-            messagingSenderId: "155891252265",
-            appId: "1:155891252265:web:77ab41de24231e8e5ef038",
-            measurementId: "G-CHL8K8HRPX"
-        };
+        // ================== এনকোডেড ফায়ারবেস কনফিগ ==================
+        // নিচের স্ট্রিংটি হলো ফায়ারবেস কনফিগ অবজেক্টের base64 এনকোডেড সংস্করণ
+        const encodedFirebaseConfig = "ewogICJhcGlLZXkiOiAiQUl6YVN5QnQ5dDZtY2pVdFh4WDJpZ0FKZHNldUlJYzhwUF9RUEV3IiwKICAiYXV0aERvbWFpbiI6ICJlYXN5LXByZW1pdW0uZmlyZWJhc2VhcHAuY29tIiwKICAiZGF0YWJhc2VVUkwiOiAiaHR0cHM6Ly9lYXN5LXByZW1pdW0tZGVmYXVsdC1ydGRiLmFzaWEtc291dGhlYXN0MS5maXJlYmFzZWRhdGFiYXNlLmFwcCIsCiAgInByb2plY3RJZCI6ICJlYXN5LXByZW1pdW0iLAogICJzdG9yYWdlQnVja2V0IjogImVhc3ktcHJlbWl1bS5maXJlYmFzZXN0b3JhZ2UuYXBwIiwKICAibWVzc2FnaW5nU2VuZGVySWQiOiAiMTU1ODkxMjUyMjY1IiwKICAiYXBwSWQiOiAiMToxNTU4OTEyNTIyNjU6d2ViOjc3YWI0MWRlMjQyMzFlOGU1ZWYwMzgiLAogICJtZWFzdXJlbWVudElkIjogIkctQ0hMODFLOEhSUFgiCn0=";
+        
+        // এনকোডেড ইমেইলজেএস কনফিগ
+        const encodedEmailJsKey = "VTFJMFNWa0lfMFIxZ1JGVm4=";
+        
+        // ডিকোড ফাংশন
+        function decodeBase64(str) {
+            try {
+                return JSON.parse(atob(str));
+            } catch (e) {
+                console.error("Decoding error", e);
+                return null;
+            }
+        }
+        
+        function decodeBase64String(str) {
+            try {
+                return atob(str);
+            } catch (e) {
+                return "";
+            }
+        }
+        
+        const firebaseConfig = decodeBase64(encodedFirebaseConfig);
+        const emailJsPublicKey = decodeBase64String(encodedEmailJsKey);
 
         try {
             firebase.initializeApp(firebaseConfig);
@@ -1976,7 +1992,7 @@
         const auth = firebase.auth();
 
         // ================== EMAILJS CONFIG ==================
-        emailjs.init("U1I0SVkI_0R1gRFVn");
+        emailjs.init(emailJsPublicKey);
 
         // DOM Elements
         const loginModal = document.getElementById('loginModal');
@@ -2469,7 +2485,7 @@
                     encodedData
                 });
                 
-                // সম্পূর্ণ URL রিটার্ন করা হচ্ছে
+                // সম্পূর্ণ URL রিটার্ন করা হচ্ছে (কোনো অতিরিক্ত স্ল্যাশ নেই)
                 return `https://easy-premium.com/Pay.html?data=${encodedData}&v=2`;
                 
             } catch (error) {
@@ -2750,7 +2766,8 @@
                 
                 updateCartBadge(user.uid);
                 
-                window.open(createdOrder.paymentLink, '_self');
+                // একই ট্যাবে খোলার জন্য window.location.href ব্যবহার করা হয়েছে
+                window.location.href = createdOrder.paymentLink;
                 
                 alert("অর্ডার সফলভাবে তৈরি হয়েছে! আপনার ইমেইলে কনফার্মেশন পাঠানো হয়েছে।");
                 
@@ -3042,7 +3059,7 @@
         });
     </script>
     
-    <!-- ================== অ্যান্টি-ফিশিং ও স্মার্ট সিকিউরিটি স্ক্রিপ্ট ================== -->
+    <!-- ================== অ্যান্টি-ফিশিং ও স্মার্ট সিকিউরিটি স্ক্রিপ্ট (সংশোধিত) ================== -->
     <script>
     (function() {
         'use strict';
@@ -3052,8 +3069,8 @@
             SESSION_TIMEOUT: 30 * 60 * 1000, // 30 মিনিট (মিলিসেকেন্ড)
             MAX_ATTEMPTS: 5, // সর্বোচ্চ চেষ্টা
             RATE_LIMIT_WINDOW: 15 * 60 * 1000, // 15 মিনিট
-            ALERT_ON_DEVTOOLS: true, // ডেভটুলস খুললে এলার্ট দেবে
-            ENABLE_ACTIVITY_LOG: false, // লোকাল অ্যাক্টিভিটি লগ (প্রোডাকশনে false রাখুন)
+            ALERT_ON_DEVTOOLS: true, // ডেভটুলস খুললে রিডাইরেক্ট করবে
+            REDIRECT_URL: "https://easy-premium.com/Privacy,Refund-Policy,Terms-Of-Service.html", // রিডাইরেক্ট লিংক
             ENFORCE_HTTPS: true // HTTPS ফোর্স করবে
         };
         
@@ -3074,7 +3091,10 @@
             }
         }
         
-        // ========== ৩. ডিভ টুলস ডিটেকশন ==========
+        // ========== ৩. ডিভ টুলস ডিটেকশন ও রিডাইরেক্ট ==========
+        let devToolsOpen = false;
+        let redirectExecuted = false;
+        
         function detectDevTools() {
             const start = performance.now();
             debugger; // ডিবাগার ট্রিগার
@@ -3082,40 +3102,15 @@
             
             if (end - start > 100) {
                 // ডেভ টুলস খোলা আছে
-                if (CONFIG.ALERT_ON_DEVTOOLS) {
-                    console.log('%c⚠️ নিরাপত্তা সতর্কতা: ডেভেলপার টুলস সনাক্ত করা হয়েছে!', 'color: #ff9800; font-size: 14px; font-weight: bold;');
+                if (!devToolsOpen && !redirectExecuted) {
+                    devToolsOpen = true;
                     
-                    // ইউজারকে জানানো (শুধু একবার)
-                    if (!window._devToolsAlertShown) {
-                        window._devToolsAlertShown = true;
+                    if (CONFIG.ALERT_ON_DEVTOOLS) {
+                        console.log('%c⚠️ নিরাপত্তা সতর্কতা: ডেভেলপার টুলস সনাক্ত করা হয়েছে! রিডাইরেক্ট করা হচ্ছে...', 'color: #ff9800; font-size: 14px; font-weight: bold;');
                         
-                        // একটি নন-ইনট্রুসিভ নোটিফিকেশন দেখানো
-                        const alertDiv = document.createElement('div');
-                        alertDiv.style.position = 'fixed';
-                        alertDiv.style.top = '20px';
-                        alertDiv.style.left = '50%';
-                        alertDiv.style.transform = 'translateX(-50%)';
-                        alertDiv.style.background = 'rgba(255, 152, 0, 0.9)';
-                        alertDiv.style.color = 'white';
-                        alertDiv.style.padding = '10px 20px';
-                        alertDiv.style.borderRadius = '5px';
-                        alertDiv.style.zIndex = '10001';
-                        alertDiv.style.fontSize = '0.9rem';
-                        alertDiv.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
-                        alertDiv.style.backdropFilter = 'blur(5px)';
-                        alertDiv.innerHTML = '<i class="fas fa-shield-alt"></i> নিরাপত্তা সতর্কতা: ডেভেলপার টুলস বন্ধ করুন';
-                        
-                        document.body.appendChild(alertDiv);
-                        
-                        setTimeout(() => {
-                            if (alertDiv.parentNode) {
-                                alertDiv.style.opacity = '0';
-                                alertDiv.style.transition = 'opacity 0.5s';
-                                setTimeout(() => {
-                                    if (alertDiv.parentNode) alertDiv.remove();
-                                }, 500);
-                            }
-                        }, 5000);
+                        // রিডাইরেক্ট
+                        redirectExecuted = true;
+                        window.location.href = CONFIG.REDIRECT_URL;
                     }
                 }
                 return true;
@@ -3123,8 +3118,8 @@
             return false;
         }
         
-        // প্রতি ৩ সেকেন্ডে চেক করুন
-        setInterval(detectDevTools, 3000);
+        // প্রতি ২ সেকেন্ডে চেক করুন
+        setInterval(detectDevTools, 2000);
         
         // ========== ৪. রেট লিমিটিং (অর্ডার স্প্যাম প্রোটেকশন) ==========
         window._rateLimitStore = window._rateLimitStore || {
@@ -3341,31 +3336,7 @@
         });
         
         // ========== ১১. অ্যাক্টিভিটি লগ (ঐচ্ছিক) ==========
-        if (CONFIG.ENABLE_ACTIVITY_LOG) {
-            window._activityLog = [];
-            
-            function logActivity(type, data) {
-                window._activityLog.push({
-                    type: type,
-                    data: data,
-                    timestamp: new Date().toISOString(),
-                    url: window.location.href
-                });
-                
-                // সর্বোচ্চ ১০০ লগ রাখুন
-                if (window._activityLog.length > 100) {
-                    window._activityLog.shift();
-                }
-                
-                console.log('[Activity]', type, data);
-            }
-            
-            // গ্লোবাল ফাংশন
-            window.logActivity = logActivity;
-            
-            // পেজভিউ লগ
-            logActivity('pageview', { title: document.title });
-        }
+        // (কোনো লগ রাখা হচ্ছে না)
         
         // ========== ১২. অর্ডার ফর্মে রেট লিমিট যুক্ত করা ==========
         // অরিজিনাল পারচেজ ফর্ম সাবমিট হুক (আপনার existing কোডের সাথে ইন্টিগ্রেট)
