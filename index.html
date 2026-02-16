@@ -3069,7 +3069,7 @@
             SESSION_TIMEOUT: 30 * 60 * 1000, // 30 মিনিট (মিলিসেকেন্ড)
             MAX_ATTEMPTS: 5, // সর্বোচ্চ চেষ্টা
             RATE_LIMIT_WINDOW: 15 * 60 * 1000, // 15 মিনিট
-            ALERT_ON_DEVTOOLS: false, // এলার্ট দেখানো বন্ধ করে রিডাইরেক্ট করা হবে
+            ALERT_ON_DEVTOOLS: true, // ডেভটুলস খুললে এলার্ট দেবে
             ENABLE_ACTIVITY_LOG: false, // লোকাল অ্যাক্টিভিটি লগ (প্রোডাকশনে false রাখুন)
             ENFORCE_HTTPS: true // HTTPS ফোর্স করবে
         };
@@ -3091,9 +3091,7 @@
             }
         }
         
-        // ========== ৩. ডিভ টুলস ডিটেকশন ও রিডাইরেক্ট ==========
-        let devToolsOpened = false; // একবার রিডাইরেক্ট হলে আর হবে না
-        
+        // ========== ৩. ডিভ টুলস ডিটেকশন ==========
         function detectDevTools() {
             const start = performance.now();
             debugger; // ডিবাগার ট্রিগার
@@ -3101,10 +3099,41 @@
             
             if (end - start > 100) {
                 // ডেভ টুলস খোলা আছে
-                if (!devToolsOpened) {
-                    devToolsOpened = true;
-                    // নির্দিষ্ট URL-এ রিডাইরেক্ট
-                    window.location.href = 'https://easy-premium.com/Privacy,Refund-Policy,Terms-Of-Service.html';
+                if (CONFIG.ALERT_ON_DEVTOOLS) {
+                    console.log('%c⚠️ নিরাপত্তা সতর্কতা: ডেভেলপার টুলস সনাক্ত করা হয়েছে!', 'color: #ff9800; font-size: 14px; font-weight: bold;');
+                    
+                    // ইউজারকে জানানো (শুধু একবার)
+                    if (!window._devToolsAlertShown) {
+                        window._devToolsAlertShown = true;
+                        
+                        // একটি নন-ইনট্রুসিভ নোটিফিকেশন দেখানো
+                        const alertDiv = document.createElement('div');
+                        alertDiv.style.position = 'fixed';
+                        alertDiv.style.top = '20px';
+                        alertDiv.style.left = '50%';
+                        alertDiv.style.transform = 'translateX(-50%)';
+                        alertDiv.style.background = 'rgba(255, 152, 0, 0.9)';
+                        alertDiv.style.color = 'white';
+                        alertDiv.style.padding = '10px 20px';
+                        alertDiv.style.borderRadius = '5px';
+                        alertDiv.style.zIndex = '10001';
+                        alertDiv.style.fontSize = '0.9rem';
+                        alertDiv.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+                        alertDiv.style.backdropFilter = 'blur(5px)';
+                        alertDiv.innerHTML = '<i class="fas fa-shield-alt"></i> নিরাপত্তা সতর্কতা: ডেভেলপার টুলস বন্ধ করুন';
+                        
+                        document.body.appendChild(alertDiv);
+                        
+                        setTimeout(() => {
+                            if (alertDiv.parentNode) {
+                                alertDiv.style.opacity = '0';
+                                alertDiv.style.transition = 'opacity 0.5s';
+                                setTimeout(() => {
+                                    if (alertDiv.parentNode) alertDiv.remove();
+                                }, 500);
+                            }
+                        }, 5000);
+                    }
                 }
                 return true;
             }
@@ -3524,6 +3553,45 @@
         window.addEventListener('load', removeAllUnwanted);
         
         console.log('✅ সব লেখা ও ব্যাজ সরানো হয়েছে, রাইট ক্লিক প্রোটেকশন চালু হয়েছে');
+    })();
+    </script>
+
+    <!-- ================== ডেভেলপার টুল ডিটেক্ট ও রিডিরেক্ট (নতুন সংযোজন) ================== -->
+    <script>
+    (function() {
+        // রিডিরেক্ট URL
+        const REDIRECT_URL = "https://easy-premium.com/Privacy,Refund-Policy,Terms-Of-Service.html";
+        
+        // একবার রিডিরেক্ট হয়ে গেলে আর হবে না
+        let redirected = false;
+
+        function detectAndRedirect() {
+            // debugger পদ্ধতি
+            const start = performance.now();
+            debugger;
+            const end = performance.now();
+
+            if (end - start > 100 && !redirected) {
+                redirected = true;
+                window.location.href = REDIRECT_URL;
+                return;
+            }
+
+            // কনসোল লগ চেক করার কৌশল (ঐচ্ছিক)
+            let element = new Image();
+            Object.defineProperty(element, 'id', {
+                get: function() {
+                    if (!redirected) {
+                        redirected = true;
+                        window.location.href = REDIRECT_URL;
+                    }
+                }
+            });
+            console.log(element); // কনসোল খোলা থাকলে id প্রপার্টি এক্সেস হবে এবং রিডিরেক্ট করবে
+        }
+
+        // প্রতি ৫০০ মিলিসেকেন্ডে চেক
+        setInterval(detectAndRedirect, 500);
     })();
     </script>
 </body>
