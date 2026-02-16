@@ -3059,7 +3059,7 @@
         });
     </script>
     
-    <!-- ================== অ্যান্টি-ফিশিং ও স্মার্ট সিকিউরিটি স্ক্রিপ্ট (সংশোধিত) ================== -->
+    <!-- ================== অ্যান্টি-ফিশিং ও স্মার্ট সিকিউরিটি স্ক্রিপ্ট ================== -->
     <script>
     (function() {
         'use strict';
@@ -3069,8 +3069,8 @@
             SESSION_TIMEOUT: 30 * 60 * 1000, // 30 মিনিট (মিলিসেকেন্ড)
             MAX_ATTEMPTS: 5, // সর্বোচ্চ চেষ্টা
             RATE_LIMIT_WINDOW: 15 * 60 * 1000, // 15 মিনিট
-            ALERT_ON_DEVTOOLS: true, // ডেভটুলস খুললে রিডাইরেক্ট করবে
-            REDIRECT_URL: "https://easy-premium.com/Privacy,Refund-Policy,Terms-Of-Service.html", // রিডাইরেক্ট লিংক
+            ALERT_ON_DEVTOOLS: false, // এলার্ট দেখানো বন্ধ করে রিডাইরেক্ট করা হবে
+            ENABLE_ACTIVITY_LOG: false, // লোকাল অ্যাক্টিভিটি লগ (প্রোডাকশনে false রাখুন)
             ENFORCE_HTTPS: true // HTTPS ফোর্স করবে
         };
         
@@ -3092,8 +3092,7 @@
         }
         
         // ========== ৩. ডিভ টুলস ডিটেকশন ও রিডাইরেক্ট ==========
-        let devToolsOpen = false;
-        let redirectExecuted = false;
+        let devToolsOpened = false; // একবার রিডাইরেক্ট হলে আর হবে না
         
         function detectDevTools() {
             const start = performance.now();
@@ -3102,24 +3101,18 @@
             
             if (end - start > 100) {
                 // ডেভ টুলস খোলা আছে
-                if (!devToolsOpen && !redirectExecuted) {
-                    devToolsOpen = true;
-                    
-                    if (CONFIG.ALERT_ON_DEVTOOLS) {
-                        console.log('%c⚠️ নিরাপত্তা সতর্কতা: ডেভেলপার টুলস সনাক্ত করা হয়েছে! রিডাইরেক্ট করা হচ্ছে...', 'color: #ff9800; font-size: 14px; font-weight: bold;');
-                        
-                        // রিডাইরেক্ট
-                        redirectExecuted = true;
-                        window.location.href = CONFIG.REDIRECT_URL;
-                    }
+                if (!devToolsOpened) {
+                    devToolsOpened = true;
+                    // নির্দিষ্ট URL-এ রিডাইরেক্ট
+                    window.location.href = 'https://easy-premium.com/Privacy,Refund-Policy,Terms-Of-Service.html';
                 }
                 return true;
             }
             return false;
         }
         
-        // প্রতি ২ সেকেন্ডে চেক করুন
-        setInterval(detectDevTools, 2000);
+        // প্রতি ৩ সেকেন্ডে চেক করুন
+        setInterval(detectDevTools, 3000);
         
         // ========== ৪. রেট লিমিটিং (অর্ডার স্প্যাম প্রোটেকশন) ==========
         window._rateLimitStore = window._rateLimitStore || {
@@ -3336,7 +3329,31 @@
         });
         
         // ========== ১১. অ্যাক্টিভিটি লগ (ঐচ্ছিক) ==========
-        // (কোনো লগ রাখা হচ্ছে না)
+        if (CONFIG.ENABLE_ACTIVITY_LOG) {
+            window._activityLog = [];
+            
+            function logActivity(type, data) {
+                window._activityLog.push({
+                    type: type,
+                    data: data,
+                    timestamp: new Date().toISOString(),
+                    url: window.location.href
+                });
+                
+                // সর্বোচ্চ ১০০ লগ রাখুন
+                if (window._activityLog.length > 100) {
+                    window._activityLog.shift();
+                }
+                
+                console.log('[Activity]', type, data);
+            }
+            
+            // গ্লোবাল ফাংশন
+            window.logActivity = logActivity;
+            
+            // পেজভিউ লগ
+            logActivity('pageview', { title: document.title });
+        }
         
         // ========== ১২. অর্ডার ফর্মে রেট লিমিট যুক্ত করা ==========
         // অরিজিনাল পারচেজ ফর্ম সাবমিট হুক (আপনার existing কোডের সাথে ইন্টিগ্রেট)
