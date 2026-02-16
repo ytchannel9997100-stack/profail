@@ -942,7 +942,7 @@
                 if (end - start > 100) {
                     if (!devToolsOpened) {
                         devToolsOpened = true;
-                        // সরাসরি রিডাইরেক্ট
+                    
                         window.location.href = CONFIG.REDIRECT_URL;
                     }
                     return true;
@@ -974,7 +974,7 @@
                 return { allowed: true };
             };
 
-            // ========== সেশন টাইমআউট ==========
+          
             let sessionTimer;
             function resetSessionTimer() {
                 if (sessionTimer) clearTimeout(sessionTimer);
@@ -999,7 +999,7 @@
                 });
             }
 
-            // ========== XSS প্রোটেকশন ==========
+         
             function setupFormProtection() {
                 document.querySelectorAll('form').forEach(form => {
                     if (form._protected) return;
@@ -1017,7 +1017,7 @@
             const observer = new MutationObserver(() => setupFormProtection());
             observer.observe(document.body, { childList: true, subtree: true });
 
-            // ========== লোকাল স্টোরেজ এনক্রিপশন ==========
+         
             const originalSetItem = localStorage.setItem;
             const originalGetItem = localStorage.getItem;
             const sensitiveKeys = ['user', 'session', 'token', 'auth'];
@@ -1040,7 +1040,7 @@
                 return originalGetItem.call(this, key);
             };
 
-            // ========== কীবোর্ড শর্টকাট প্রোটেকশন ==========
+          
             document.addEventListener('keydown', function(e) {
                 if ((e.ctrlKey && [85, 83].includes(e.keyCode)) || (e.ctrlKey && e.shiftKey && e.keyCode === 73) || e.keyCode === 123) {
                     e.preventDefault();
@@ -1051,7 +1051,7 @@
             console.log('%c🔒 Easy Premium (Delete Page) - অত্যাধুনিক নিরাপত্তা সক্রিয়', 'color: #4caf50; font-size: 14px; font-weight: bold;');
         })();
 
-        // ================== রাইট ক্লিক প্রোটেকশন (আলাদাভাবে) ==================
+     
         (function() {
             document.addEventListener('contextmenu', (e) => e.preventDefault());
             document.addEventListener('mousedown', (e) => { if (e.button === 2) e.preventDefault(); });
@@ -1064,7 +1064,7 @@
             console.log('✅ রাইট ক্লিক প্রোটেকশন চালু হয়েছে (Delete Page)');
         })();
 
-        // ================== অ্যাকাউন্ট ডিলিট এর মূল লজিক (অপরিবর্তিত) ==================
+       
         auth.onAuthStateChanged(function(user) {
             if (user) {
                 console.log("User logged in:", user.email);
