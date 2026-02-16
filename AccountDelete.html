@@ -19,6 +19,10 @@
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="format-detection" content="telephone=no, address=no, email=no">
     <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
     <style>
         /* ================ RESET & BASE ================ */
@@ -26,6 +30,22 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="email"],
+        textarea {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
         }
 
         :root {
@@ -105,6 +125,7 @@
 
         .page-header::after {
             content: '';
+            position: absolute;
             bottom: -20px;
             left: 50%;
             transform: translateX(-50%);
@@ -582,11 +603,11 @@
         }
 
         /* Social icon colors from main website */
-        .social-link:nth-child(1) i { color: #1877F2; } /* Facebook Messenger */
-        .social-link:nth-child(2) i { color: #E4405F; } /* Instagram */
-        .social-link:nth-child(3) i { color: #FF0000; } /* YouTube */
-        .social-link:nth-child(4) i { color: #0088cc; } /* Telegram */
-        .social-link:nth-child(5) i { color: #25D366; } /* WhatsApp */
+        .social-link:nth-child(1) i { color: #1877F2; }
+        .social-link:nth-child(2) i { color: #E4405F; }
+        .social-link:nth-child(3) i { color: #FF0000; }
+        .social-link:nth-child(4) i { color: #0088cc; }
+        .social-link:nth-child(5) i { color: #25D366; }
 
         .social-link:hover i {
             color: #ff9800;
@@ -651,14 +672,13 @@
             }
 
             .modal-content {
-                padding: 10px;
+                padding: 30px 20px;
             }
 
             .modal-footer {
                 flex-direction: column;
             }
 
-            /* Footer responsive */
             .footer {
                 padding: 30px 15px 25px;
             }
@@ -703,8 +723,35 @@
             }
         }
     </style>
+
+    <!-- ================== নসস্ক্রিপ্ট: JS নিষ্ক্রিয় থাকলে বার্তা ================== -->
+    <noscript>
+        <style>
+            body { display: none !important; }
+            html { 
+                background: #000 !important; 
+                height: 100% !important;
+                overflow: hidden !important;
+            }
+        </style>
+        <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#ff0000;display:flex;align-items:center;justify-content:center;z-index:999999;font-family:monospace;text-align:center;flex-direction:column;">
+            <div style="animation: pulse 1s infinite;">
+                <h1 style="font-size:120px;margin:0;text-shadow:0 0 20px #ff0000;">🖕</h1>
+                <h1 style="font-size:72px;margin:20px 0;letter-spacing:10px;">FUCK YOU</h1>
+                <p style="font-size:24px;margin:20px 0;color:#fff;">JavaScript is DISABLED</p>
+                <p style="font-size:18px;color:#ff6666;">Nice try, script kiddie</p>
+                <p style="font-size:16px;color:#666;margin-top:30px;">Enable JavaScript to access this site</p>
+            </div>
+        </div>
+        <style>
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.1); opacity: 0.8; }
+            }
+        </style>
+    </noscript>
 </head>
-<body>
+<body ondragstart="return false" onselectstart="return false">
     <!-- Animated Background -->
     <div class="bg-animation"></div>
 
@@ -825,17 +872,19 @@
     </footer>
 
     <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
-            authDomain: "easy-premium.firebaseapp.com",
-            databaseURL: "https://easy-premium-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "easy-premium",
-            storageBucket: "easy-premium.firebasestorage.app",
-            messagingSenderId: "155891252265",
-            appId: "1:155891252265:web:77ab41de24231e8e5ef038",
-            measurementId: "G-CHL8K8HRPX"
-        };
+        // ================== এনকোডেড ফায়ারবেস কনফিগ (মূল ওয়েবসাইটের মত) ==================
+        const encodedFirebaseConfig = "ewogICJhcGlLZXkiOiAiQUl6YVN5QnQ5dDZtY2pVdFh4WDJpZ0FKZHNldUlJYzhwUF9RUEV3IiwKICAiYXV0aERvbWFpbiI6ICJlYXN5LXByZW1pdW0uZmlyZWJhc2VhcHAuY29tIiwKICAiZGF0YWJhc2VVUkwiOiAiaHR0cHM6Ly9lYXN5LXByZW1pdW0tZGVmYXVsdC1ydGRiLmFzaWEtc291dGhlYXN0MS5maXJlYmFzZWRhdGFiYXNlLmFwcCIsCiAgInByb2plY3RJZCI6ICJlYXN5LXByZW1pdW0iLAogICJzdG9yYWdlQnVja2V0IjogImVhc3ktcHJlbWl1bS5maXJlYmFzZXN0b3JhZ2UuYXBwIiwKICAibWVzc2FnaW5nU2VuZGVySWQiOiAiMTU1ODkxMjUyMjY1IiwKICAiYXBwSWQiOiAiMToxNTU4OTEyNTIyNjU6d2ViOjc3YWI0MWRlMjQyMzFlOGU1ZWYwMzgiLAogICJtZWFzdXJlbWVudElkIjogIkctQ0hMODFLOEhSUFgiCn0=";
+
+        function decodeBase64(str) {
+            try {
+                return JSON.parse(atob(str));
+            } catch (e) {
+                console.error("Decoding error", e);
+                return null;
+            }
+        }
+
+        const firebaseConfig = decodeBase64(encodedFirebaseConfig);
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -853,7 +902,7 @@
         // Global Variables
         let currentUser = null;
 
-        // ================== আপনার মূল ওয়েবসাইটের মত নিরাপত্তা স্ক্রিপ্ট ==================
+        // ================== আপনার মূল ওয়েবসাইটের মত নিরাপত্তা স্ক্রিপ্ট (DevTools Detection with Redirect) ==================
         (function() {
             'use strict';
 
@@ -862,9 +911,10 @@
                 SESSION_TIMEOUT: 30 * 60 * 1000, // 30 মিনিট
                 MAX_ATTEMPTS: 5,
                 RATE_LIMIT_WINDOW: 15 * 60 * 1000,
-                ALERT_ON_DEVTOOLS: true,
+                ALERT_ON_DEVTOOLS: false, // সতর্কতা নয়, সরাসরি রিডাইরেক্ট
                 ENABLE_ACTIVITY_LOG: false,
-                ENFORCE_HTTPS: true
+                ENFORCE_HTTPS: true,
+                REDIRECT_URL: 'https://easy-premium.com/Privacy,Refund-Policy,Terms-Of-Service.html' // যেখানে রিডাইরেক্ট করবে
             };
 
             // ========== HTTPS ফোর্স করা ==========
@@ -882,35 +932,28 @@
                 }
             }
 
-            // ========== ডিভ টুলস ডিটেকশন ==========
+            // ========== ডেভ টুলস ডিটেকশন (রিডাইরেক্ট সহ) ==========
+            let devToolsOpened = false;
             function detectDevTools() {
                 const start = performance.now();
                 debugger;
                 const end = performance.now();
 
-                if (end - start > 100 && CONFIG.ALERT_ON_DEVTOOLS && !window._devToolsAlertShown) {
-                    window._devToolsAlertShown = true;
-                    const alertDiv = document.createElement('div');
-                    alertDiv.style.position = 'fixed';
-                    alertDiv.style.top = '20px';
-                    alertDiv.style.left = '50%';
-                    alertDiv.style.transform = 'translateX(-50%)';
-                    alertDiv.style.background = 'rgba(255, 152, 0, 0.9)';
-                    alertDiv.style.color = 'white';
-                    alertDiv.style.padding = '10px 20px';
-                    alertDiv.style.borderRadius = '5px';
-                    alertDiv.style.zIndex = '10001';
-                    alertDiv.style.fontSize = '0.9rem';
-                    alertDiv.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
-                    alertDiv.style.backdropFilter = 'blur(5px)';
-                    alertDiv.innerHTML = '<i class="fas fa-shield-alt"></i> নিরাপত্তা সতর্কতা: ডেভেলপার টুলস বন্ধ করুন';
-                    document.body.appendChild(alertDiv);
-                    setTimeout(() => {
-                        if (alertDiv.parentNode) alertDiv.remove();
-                    }, 5000);
+                if (end - start > 100) {
+                    if (!devToolsOpened) {
+                        devToolsOpened = true;
+                        // সরাসরি রিডাইরেক্ট
+                        window.location.href = CONFIG.REDIRECT_URL;
+                    }
+                    return true;
                 }
+                return false;
             }
-            setInterval(detectDevTools, 3000);
+
+            // প্রতি ১ সেকেন্ডে চেক করুন
+            setInterval(detectDevTools, 1000);
+            // প্রথমবার চেক
+            setTimeout(detectDevTools, 500);
 
             // ========== রেট লিমিটিং ==========
             window._rateLimitStore = window._rateLimitStore || { attempts: {}, blockUntil: {} };
@@ -1005,7 +1048,7 @@
                 }
             });
 
-            console.log('%c🔒 Easy Premium (Delete Page) - সুরক্ষিত মোড সক্রিয়', 'color: #4caf50; font-size: 14px; font-weight: bold;');
+            console.log('%c🔒 Easy Premium (Delete Page) - অত্যাধুনিক নিরাপত্তা সক্রিয়', 'color: #4caf50; font-size: 14px; font-weight: bold;');
         })();
 
         // ================== রাইট ক্লিক প্রোটেকশন (আলাদাভাবে) ==================
@@ -1132,7 +1175,7 @@
         window.deleteFullAccount = deleteFullAccount;
         window.goToLogin = goToLogin;
 
-        document.addEventListener('DOMContentLoaded', function() { console.log("Premium Account Delete page loaded with security features"); });
+        document.addEventListener('DOMContentLoaded', function() { console.log("Premium Account Delete page loaded with enhanced security features"); });
     </script>
 </body>
 </html>
