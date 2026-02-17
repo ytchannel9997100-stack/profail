@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ভিডিও প্লেয়ার</title>
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: sans-serif;
+        }
+        .video-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 20px auto;
+        }
+        iframe {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16/9;
+            border: none;
+            border-radius: 8px;
+        }
+        .download-btn {
+            display: inline-block;
+            background: #1e88e5;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        .download-btn:hover {
+            background: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <!-- ভিডিও iframe - আপনার মূল কোড থেকে নেওয়া -->
+        <iframe allowfullscreen="allowfullscreen" frameborder="0" src="https://www.blogger.com/video.g?token=AD6v5dxVnG2uArnRJ83XQ_cFMcFwfdbyG0e28igaFEOO-GQOTH52TBRdHUBact1Czi9DuCnnYIZtrZmVr5TkiOHw7XeK6sW-xjBqkW5ONgHsEER8XA_hpBS3vGA3F4D8a40FOZdp7cK_"></iframe>
+        <div style="text-align: center;">
+            <!-- ডাউনলোড বাটন (সরাসরি ডাউনলোড সম্ভব নয় বলে বার্তা) -->
+            <a href="#" class="download-btn" onclick="alert('এই ভিডিওটি সরাসরি ডাউনলোড করা সম্ভব নয়।')">📥 ডাউনলোড</a>
+        </div>
+    </div>
+</body>
+</html>
