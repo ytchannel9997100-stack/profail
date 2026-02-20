@@ -1874,6 +1874,242 @@
     </footer>
 
     <script>
+        // ================== ডাটাবেজ থেকে কনফিগারেশন লোড ==================
+        // ফায়ারবেস ইতিমধ্যে initialised হয়েছে পরে
+        // আমরা এখানে গ্লোবাল ভেরিয়েবল ডিফাইন করব যেগুলো পরে অ্যাসিঙ্ক্রোনাসভাবে লোড হবে
+        
+        let TELEGRAM_BOT_TOKEN = "8272857202:AAHvM2BDlIRqM--Kl0diCI8AtWIdaZIPdIA"; // fallback
+        let TELEGRAM_ADMINS = [
+            "6183247698", // অ্যাডমিন ১
+            "6183247699", // অ্যাডমিন ২ (fallback)
+            "6183247700"  // অ্যাডমিন ৩ (fallback)
+        ];
+        
+        let EMAILJS_PUBLIC_KEY = "U1IOSVkl_OR1gRFVn"; // fallback
+        let EMAILJS_SERVICE_ID = "service_uknjsOj"; // fallback
+        let EMAILJS_TEMPLATE_ID = "template_gdvntij"; // fallback
+        
+        // ডাটাবেজ থেকে কনফিগারেশন লোড করার ফাংশন (শুধুমাত্র লগইন করা ইউজাররাই পাবে)
+        async function loadConfigFromDatabase() {
+            return new Promise(async (resolve) => {
+                try {
+                    // ইউজার লগইন করা আছে কিনা চেক করুন
+                    const user = auth.currentUser;
+                    if (!user) {
+                        console.log("No user logged in, using fallback config");
+                        return resolve(false);
+                    }
+                    
+                    // টেলিগ্রাম বট কনফিগ লোড
+                    const telegramSnapshot = await database.ref('telegramBot').once('value');
+                    if (telegramSnapshot.exists()) {
+                        const telegramData = telegramSnapshot.val();
+                        if (telegramData.token) TELEGRAM_BOT_TOKEN = telegramData.token;
+                        if (telegramData.admins) {
+                            const adminsObj = telegramData.admins;
+                            const adminsArray = [];
+                            if (adminsObj.admin1) adminsArray.push(adminsObj.admin1);
+                            if (adminsObj.admin2) adminsArray.push(adminsObj.admin2);
+                            if (adminsObj.admin3) adminsArray.push(adminsObj.admin3);
+                            if (adminsArray.length > 0) TELEGRAM_ADMINS = adminsArray;
+                        }
+                        console.log("Telegram config loaded from DB");
+                    }
+                    
+                    // ইমেইল সার্ভিস কনফিগ লোড
+                    const emailSnapshot = await database.ref('emailService').once('value');
+                    if (emailSnapshot.exists()) {
+                        const emailData = emailSnapshot.val();
+                        if (emailData.publicKey) EMAILJS_PUBLIC_KEY = emailData.publicKey;
+                        if (emailData.serviceId) EMAILJS_SERVICE_ID = emailData.serviceId;
+                        if (emailData.templateId) EMAILJS_TEMPLATE_ID = emailData.templateId;
+                        
+                        // EmailJS পুনরায় init করতে হবে নতুন publicKey দিয়ে
+                        emailjs.init(EMAILJS_PUBLIC_KEY);
+                        console.log("EmailJS config loaded from DB and re-initialized");
+                    }
+                    
+                    resolve(true);
+                } catch (error) {
+                    console.error("Error loading config from database:", error);
+                    resolve(false);
+                }
+            });
+        }
+        
+        // ================== টেলিগ্রাম নোটিফিকেশন ফাংশন (সব অ্যাডমিনকে পাঠাবে) ==================
+        async function sendTelegramNotification(userInfo) {
+            try {
+                const message = `
+🆕 <b>নতুন ভিজিটর ওয়েবসাইটে প্রবেশ করেছে</b>
+
+👤 <b>ইউজার ইনফো:</b>
+• আইপি অ্যাড্রেস: ${userInfo.ip}
+• লোকেশন: ${userInfo.city}, ${userInfo.country}
+• ডিভাইস: ${userInfo.device}
+• ব্রাউজার: ${userInfo.browser}
+• অপারেটিং সিস্টেম: ${userInfo.os}
+• স্ক্রিন সাইজ: ${userInfo.screenSize}
+• টাইমজোন: ${userInfo.timezone}
+• ভাষা: ${userInfo.language}
+• রেফারার: ${userInfo.referrer}
+• ভিজিট টাইম: ${userInfo.visitTime}
+                `;
+                
+                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+                
+                // সব অ্যাডমিনকে আলাদা আলাদাভাবে পাঠানো
+                const sendPromises = TELEGRAM_ADMINS.map(chatId => 
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: message,
+                            parse_mode: 'HTML'
+                        })
+                    }).then(res => res.json())
+                );
+                
+                const results = await Promise.allSettled(sendPromises);
+                console.log('Telegram notifications sent to all admins:', results);
+            } catch (error) {
+                console.error('Telegram notification error:', error);
+            }
+        }
+        
+        // ইউজার ইনফো সংগ্রহ ফাংশন
+        async function getUserInfo() {
+            try {
+                // আইপি এবং লোকেশন তথ্য পাওয়ার জন্য
+                const ipResponse = await fetch('https://ipapi.co/json/');
+                const ipData = await ipResponse.json();
+                
+                // ইউজার এজেন্ট পার্সিং
+                const ua = navigator.userAgent;
+                let browser = "Unknown";
+                let os = "Unknown";
+                let device = "Desktop";
+                
+                // ব্রাউজার ডিটেকশন
+                if (ua.indexOf("Firefox") > -1) browser = "Firefox";
+                else if (ua.indexOf("Chrome") > -1) browser = "Chrome";
+                else if (ua.indexOf("Safari") > -1) browser = "Safari";
+                else if (ua.indexOf("Edge") > -1) browser = "Edge";
+                else if (ua.indexOf("MSIE") > -1 || ua.indexOf("Trident") > -1) browser = "Internet Explorer";
+                
+                // অপারেটিং সিস্টেম ডিটেকশন
+                if (ua.indexOf("Windows") > -1) os = "Windows";
+                else if (ua.indexOf("Mac") > -1) os = "macOS";
+                else if (ua.indexOf("Linux") > -1) os = "Linux";
+                else if (ua.indexOf("Android") > -1) {
+                    os = "Android";
+                    device = "Mobile";
+                }
+                else if (ua.indexOf("iPhone") > -1 || ua.indexOf("iPad") > -1) {
+                    os = "iOS";
+                    device = "Mobile";
+                }
+                
+                // মোবাইল ডিভাইস চেক
+                if (/Mobi|Android|iPhone|iPad|iPod/i.test(ua)) {
+                    device = "Mobile";
+                }
+                
+                return {
+                    ip: ipData.ip || 'Unknown',
+                    city: ipData.city || 'Unknown',
+                    country: ipData.country_name || 'Unknown',
+                    device: device,
+                    browser: browser,
+                    os: os,
+                    screenSize: `${window.screen.width}x${window.screen.height}`,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown',
+                    language: navigator.language || 'Unknown',
+                    referrer: document.referrer || 'Direct Visit',
+                    visitTime: new Date().toLocaleString('bn-BD', { timeZone: 'Asia/Dhaka' })
+                };
+            } catch (error) {
+                console.error('Error getting user info:', error);
+                return {
+                    ip: 'Unknown',
+                    city: 'Unknown',
+                    country: 'Unknown',
+                    device: 'Unknown',
+                    browser: 'Unknown',
+                    os: 'Unknown',
+                    screenSize: `${window.screen.width}x${window.screen.height}`,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown',
+                    language: navigator.language || 'Unknown',
+                    referrer: document.referrer || 'Direct Visit',
+                    visitTime: new Date().toLocaleString('bn-BD', { timeZone: 'Asia/Dhaka' })
+                };
+            }
+        }
+        
+        // ================== ভিজিট ট্র্যাকিং ==================
+        let notificationSent = false;
+        
+        async function trackVisit() {
+            if (notificationSent) return; // একবারই নোটিফিকেশন পাঠাবে
+            
+            const cookieAccepted = localStorage.getItem('cookieAccepted');
+            if (cookieAccepted !== 'true') return; // কুকি এক্সেপ্ট না করলে নোটিফিকেশন পাঠাবে না
+            
+            try {
+                const userInfo = await getUserInfo();
+                await sendTelegramNotification(userInfo);
+                notificationSent = true;
+            } catch (error) {
+                console.error('Error tracking visit:', error);
+            }
+        }
+        
+        // ================== ইমেইল পাঠানোর ফাংশন (আপডেটেড) ==================
+        async function sendOrderConfirmationEmail(userEmail, userName, orderData) {
+            try {
+                const templateParams = {
+                    to_email: userEmail,
+                    to_name: userName || 'গ্রাহক',
+                    from_name: 'Easy Premium',
+                    order_id: orderData.orderId,
+                    platform: orderData.platform,
+                    price: orderData.price,
+                    phone: orderData.phoneNumber,
+                    whatsapp: orderData.whatsappNumber,
+                    order_date: new Date().toLocaleString('bn-BD', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    payment_link: orderData.paymentLink || `https://easy-premium.com/Pay.html?order=${orderData.orderId}&v=2`
+                };
+                
+                console.log("Sending email with params:", templateParams);
+                
+                // ডাটাবেজ থেকে লোড করা serviceId ও templateId ব্যবহার করুন
+                const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+                
+                console.log('Email sent successfully:', response);
+                
+                if (orderData.firebaseKey) {
+                    await database.ref(`transactions/${orderData.firebaseKey}`).update({
+                        emailSent: true,
+                        emailSentAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error sending email:', error);
+                return false;
+            }
+        }
+        
         // ================== COLOR FIX SCRIPT ==================
         function applyColorFixes() {
             document.body.style.backgroundColor = '#0a0a1a';
@@ -1954,13 +2190,10 @@
         }
         
         // ================== এনকোডেড ফায়ারবেস কনফিগ ==================
-        // নিচের স্ট্রিংটি হলো ফায়ারবেস কনফিগ অবজেক্টের base64 এনকোডেড সংস্করণ
         const encodedFirebaseConfig = "ewogICJhcGlLZXkiOiAiQUl6YVN5QnQ5dDZtY2pVdFh4WDJpZ0FKZHNldUlJYzhwUF9RUEV3IiwKICAiYXV0aERvbWFpbiI6ICJlYXN5LXByZW1pdW0uZmlyZWJhc2VhcHAuY29tIiwKICAiZGF0YWJhc2VVUkwiOiAiaHR0cHM6Ly9lYXN5LXByZW1pdW0tZGVmYXVsdC1ydGRiLmFzaWEtc291dGhlYXN0MS5maXJlYmFzZWRhdGFiYXNlLmFwcCIsCiAgInByb2plY3RJZCI6ICJlYXN5LXByZW1pdW0iLAogICJzdG9yYWdlQnVja2V0IjogImVhc3ktcHJlbWl1bS5maXJlYmFzZXN0b3JhZ2UuYXBwIiwKICAibWVzc2FnaW5nU2VuZGVySWQiOiAiMTU1ODkxMjUyMjY1IiwKICAiYXBwSWQiOiAiMToxNTU4OTEyNTIyNjU6d2ViOjc3YWI0MWRlMjQyMzFlOGU1ZWYwMzgiLAogICJtZWFzdXJlbWVudElkIjogIkctQ0hMODFLOEhSUFgiCn0=";
         
-        // এনকোডেড ইমেইলজেএস কনফিগ
         const encodedEmailJsKey = "VTFJMFNWa0lfMFIxZ1JGVm4=";
         
-        // ডিকোড ফাংশন
         function decodeBase64(str) {
             try {
                 return JSON.parse(atob(str));
@@ -1979,8 +2212,8 @@
         }
         
         const firebaseConfig = decodeBase64(encodedFirebaseConfig);
-        const emailJsPublicKey = decodeBase64String(encodedEmailJsKey);
-
+        // Note: পুরানো encodedEmailJsKey এখন আর ব্যবহার করছি না, কারণ আমরা ডাটাবেজ থেকে পাব
+        
         try {
             firebase.initializeApp(firebaseConfig);
             console.log("Firebase initialized successfully");
@@ -1991,8 +2224,9 @@
         const database = firebase.database();
         const auth = firebase.auth();
 
-        // ================== EMAILJS CONFIG ==================
-        emailjs.init(emailJsPublicKey);
+        // ================== EMAILJS কে পরে ইনিশিয়ালাইজ করব, কারণ publicKey ডাটাবেজ থেকে লোড হবে ==================
+        // আপাতত fallback দিয়ে ইনিশিয়ালাইজ
+        emailjs.init(EMAILJS_PUBLIC_KEY);
 
         // DOM Elements
         const loginModal = document.getElementById('loginModal');
@@ -2063,6 +2297,13 @@
         function acceptAllCookies() {
             localStorage.setItem('cookieAccepted', 'true');
             websiteOverlay.style.display = 'none';
+            
+            // কুকি এক্সেপ্ট করার পর ট্র্যাকিং শুরু করুন
+            // কিন্তু আগে কনফিগ লোড করা জরুরি (ইউজার লগইন না থাকলেও fallback ব্যবহার করবে)
+            loadConfigFromDatabase().then(() => {
+                trackVisit();
+            });
+            
             location.reload();
         }
         
@@ -2072,6 +2313,10 @@
             const hasAccepted = checkCookieConsent();
             
             if (hasAccepted) {
+                // কুকি এক্সেপ্ট করা থাকলে কনফিগ লোড করে তারপর ট্র্যাকিং শুরু করুন
+                loadConfigFromDatabase().then(() => {
+                    trackVisit();
+                });
                 initializeAuth();
                 loadPlatformsFromFirebase();
             } else {
@@ -2346,6 +2591,9 @@
                 
                 loginModal.style.display = 'none';
                 
+                // লগইন成功后, কনফিগ আবার লোড করুন (ইউজার এখন auth পাবে)
+                await loadConfigFromDatabase();
+                
                 updateCartBadge(result.user.uid);
                 
                 if (pendingPurchase) {
@@ -2388,58 +2636,11 @@
             }
         });
 
-        // ===================== ইমেইল পাঠানোর ফাংশন =====================
-        async function sendOrderConfirmationEmail(userEmail, userName, orderData) {
-            try {
-                const templateParams = {
-                    to_email: userEmail,
-                    to_name: userName || 'গ্রাহক',
-                    from_name: 'Easy Premium',
-                    order_id: orderData.orderId,
-                    platform: orderData.platform,
-                    price: orderData.price,
-                    phone: orderData.phoneNumber,
-                    whatsapp: orderData.whatsappNumber,
-                    order_date: new Date().toLocaleString('bn-BD', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
-                    payment_link: orderData.paymentLink || `https://easy-premium.com/Pay.html?order=${orderData.orderId}&v=2`
-                };
-                
-                console.log("Sending email with params:", templateParams);
-                
-                const serviceID = 'service_uknjs0j';
-                const templateID = 'template_gdvntij';
-                
-                const response = await emailjs.send(serviceID, templateID, templateParams);
-                
-                console.log('Email sent successfully:', response);
-                
-                if (orderData.firebaseKey) {
-                    await database.ref(`transactions/${orderData.firebaseKey}`).update({
-                        emailSent: true,
-                        emailSentAt: firebase.database.ServerValue.TIMESTAMP
-                    });
-                }
-                
-                return true;
-            } catch (error) {
-                console.error('Error sending email:', error);
-                return false;
-            }
-        }
-
-        // ===================== পেমেন্ট লিংক জেনারেটর (সংশোধিত) =====================
+        // ===================== পেমেন্ট লিংক জেনারেটর =====================
         function generatePaymentLink(orderId, platform, price, platformId) {
             try {
-                // platformId যদি দেওয়া থাকে, সেটাই ব্যবহার করব
                 let finalPlatformId = platformId || 'unknown';
                 
-                // শুধুমাত্র যদি platformId না দেওয়া থাকে, তাহলে নাম থেকে ম্যাপ করব
                 if (!platformId || platformId === 'unknown') {
                     const platformIdMap = {
                         'youtube': 'youtube_premium',
@@ -2467,7 +2668,6 @@
                     }
                 }
                 
-                // প্ল্যাটফর্ম আইডি থেকে সব স্পেশাল ক্যারেক্টার রিমুভ
                 finalPlatformId = finalPlatformId.replace(/[^a-zA-Z0-9_-]/g, '');
                 
                 const timestamp = Date.now();
@@ -2485,7 +2685,6 @@
                     encodedData
                 });
                 
-                // সম্পূর্ণ URL রিটার্ন করা হচ্ছে (কোনো অতিরিক্ত স্ল্যাশ নেই)
                 return `https://easy-premium.com/Pay.html?data=${encodedData}&v=2`;
                 
             } catch (error) {
@@ -2657,20 +2856,22 @@
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     console.log("User is signed in with UID:", user.uid);
+                    // ইউজার লগইন করলে কনফিগ লোড করুন (যাতে টেলিগ্রাম ও ইমেইল আপডেট হয়)
+                    await loadConfigFromDatabase();
                     updateCartBadge(user.uid);
                 } else {
                     console.log("No user signed in");
+                    // ইউজার লগ আউট করলে ফallback কনফিগে ফিরে যান? আমরা fallback ই আগে থেকে সেট করেছি, তাই কিছু করার নেই
                 }
             });
         }
 
-        // ===================== পেমেন্ট লিংক সহ অর্ডার তৈরি ফাংশন (পরিবর্তিত) =====================
+        // ===================== অর্ডার তৈরি ফাংশন =====================
         async function createOrderWithEmail(orderData) {
             try {
                 const user = auth.currentUser;
                 if (!user) throw new Error("User not logged in");
                 
-                // .toUpperCase() সরিয়ে দেওয়া হয়েছে - অর্ডার আইডি যেভাবে আছে সেভাবে থাকবে
                 const orderId = `EP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
                 
                 const paymentLink = generatePaymentLink(orderId, orderData.platform, orderData.price, orderData.platformId);
@@ -2766,7 +2967,6 @@
                 
                 updateCartBadge(user.uid);
                 
-                // একই ট্যাবে খোলার জন্য window.location.href ব্যবহার করা হয়েছে
                 window.location.href = createdOrder.paymentLink;
                 
                 alert("অর্ডার সফলভাবে তৈরি হয়েছে! আপনার ইমেইলে কনফার্মেশন পাঠানো হয়েছে।");
@@ -3066,84 +3266,66 @@
         
         // ========== কনফিগারেশন ==========
         const CONFIG = {
-            SESSION_TIMEOUT: 30 * 60 * 1000, // 30 মিনিট (মিলিসেকেন্ড)
-            MAX_ATTEMPTS: 5, // সর্বোচ্চ চেষ্টা
-            RATE_LIMIT_WINDOW: 15 * 60 * 1000, // 15 মিনিট
-            ALERT_ON_DEVTOOLS: true, // ডেভটুলস খুললে এলার্ট দেবে
-            ENABLE_ACTIVITY_LOG: false, // লোকাল অ্যাক্টিভিটি লগ (প্রোডাকশনে false রাখুন)
-            ENFORCE_HTTPS: true // HTTPS ফোর্স করবে
+            SESSION_TIMEOUT: 30 * 60 * 1000, // 30 মিনিট
+            MAX_ATTEMPTS: 5,
+            RATE_LIMIT_WINDOW: 15 * 60 * 1000,
+            ALERT_ON_DEVTOOLS: true,
+            ENABLE_ACTIVITY_LOG: false,
+            ENFORCE_HTTPS: true
         };
         
-        // ========== ১. HTTPS ফোর্স করা ==========
         if (CONFIG.ENFORCE_HTTPS && location.protocol !== 'https:' && location.hostname !== 'localhost' && !location.hostname.includes('127.0.0.1')) {
             location.replace('https://' + location.host + location.pathname + location.search);
         }
         
-        // ========== ২. ক্লিকজ্যাকিং প্রোটেকশন ==========
         if (self !== top) {
-            // যদি আইফ্রেমে লোড হয়, তাহলে মূল উইন্ডোতে রিডাইরেক্ট
             try {
                 top.location.href = self.location.href;
             } catch (e) {
-                // ক্রস-অরিজিন আইফ্রেম - ব্লক
                 document.body.innerHTML = '<h1 style="color:red;text-align:center;padding:50px;">Access Denied</h1>';
                 throw new Error('Clickjacking protection');
             }
         }
         
-        // ========== ৩. ডিভ টুলস ডিটেকশন ==========
         function detectDevTools() {
             const start = performance.now();
-            debugger; // ডিবাগার ট্রিগার
+            debugger;
             const end = performance.now();
             
-            if (end - start > 100) {
-                // ডেভ টুলস খোলা আছে
-                if (CONFIG.ALERT_ON_DEVTOOLS) {
-                    console.log('%c⚠️ নিরাপত্তা সতর্কতা: ডেভেলপার টুলস সনাক্ত করা হয়েছে!', 'color: #ff9800; font-size: 14px; font-weight: bold;');
-                    
-                    // ইউজারকে জানানো (শুধু একবার)
-                    if (!window._devToolsAlertShown) {
-                        window._devToolsAlertShown = true;
-                        
-                        // একটি নন-ইনট্রুসিভ নোটিফিকেশন দেখানো
-                        const alertDiv = document.createElement('div');
-                        alertDiv.style.position = 'fixed';
-                        alertDiv.style.top = '20px';
-                        alertDiv.style.left = '50%';
-                        alertDiv.style.transform = 'translateX(-50%)';
-                        alertDiv.style.background = 'rgba(255, 152, 0, 0.9)';
-                        alertDiv.style.color = 'white';
-                        alertDiv.style.padding = '10px 20px';
-                        alertDiv.style.borderRadius = '5px';
-                        alertDiv.style.zIndex = '10001';
-                        alertDiv.style.fontSize = '0.9rem';
-                        alertDiv.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
-                        alertDiv.style.backdropFilter = 'blur(5px)';
-                        alertDiv.innerHTML = '<i class="fas fa-shield-alt"></i> নিরাপত্তা সতর্কতা: ডেভেলপার টুলস বন্ধ করুন';
-                        
-                        document.body.appendChild(alertDiv);
-                        
+            if (end - start > 100 && CONFIG.ALERT_ON_DEVTOOLS && !window._devToolsAlertShown) {
+                window._devToolsAlertShown = true;
+                
+                const alertDiv = document.createElement('div');
+                alertDiv.style.position = 'fixed';
+                alertDiv.style.top = '20px';
+                alertDiv.style.left = '50%';
+                alertDiv.style.transform = 'translateX(-50%)';
+                alertDiv.style.background = 'rgba(255, 152, 0, 0.9)';
+                alertDiv.style.color = 'white';
+                alertDiv.style.padding = '10px 20px';
+                alertDiv.style.borderRadius = '5px';
+                alertDiv.style.zIndex = '10001';
+                alertDiv.style.fontSize = '0.9rem';
+                alertDiv.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+                alertDiv.style.backdropFilter = 'blur(5px)';
+                alertDiv.innerHTML = '<i class="fas fa-shield-alt"></i> নিরাপত্তা সতর্কতা: ডেভেলপার টুলস বন্ধ করুন';
+                
+                document.body.appendChild(alertDiv);
+                
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.style.opacity = '0';
+                        alertDiv.style.transition = 'opacity 0.5s';
                         setTimeout(() => {
-                            if (alertDiv.parentNode) {
-                                alertDiv.style.opacity = '0';
-                                alertDiv.style.transition = 'opacity 0.5s';
-                                setTimeout(() => {
-                                    if (alertDiv.parentNode) alertDiv.remove();
-                                }, 500);
-                            }
-                        }, 5000);
+                            if (alertDiv.parentNode) alertDiv.remove();
+                        }, 500);
                     }
-                }
-                return true;
+                }, 5000);
             }
-            return false;
         }
         
-        // প্রতি ৩ সেকেন্ডে চেক করুন
         setInterval(detectDevTools, 3000);
         
-        // ========== ৪. রেট লিমিটিং (অর্ডার স্প্যাম প্রোটেকশন) ==========
         window._rateLimitStore = window._rateLimitStore || {
             attempts: {},
             blockUntil: {}
@@ -3153,7 +3335,6 @@
             const key = `${action}_${userId}`;
             const now = Date.now();
             
-            // ব্লক চেক
             if (window._rateLimitStore.blockUntil[key] && window._rateLimitStore.blockUntil[key] > now) {
                 const remaining = Math.ceil((window._rateLimitStore.blockUntil[key] - now) / 1000 / 60);
                 return {
@@ -3163,16 +3344,13 @@
                 };
             }
             
-            // এটেম্পট চেক
             if (!window._rateLimitStore.attempts[key]) {
                 window._rateLimitStore.attempts[key] = [];
             }
             
-            // পুরানো এটেম্পট ফিল্টার
             window._rateLimitStore.attempts[key] = window._rateLimitStore.attempts[key].filter(t => t > now - CONFIG.RATE_LIMIT_WINDOW);
             
             if (window._rateLimitStore.attempts[key].length >= CONFIG.MAX_ATTEMPTS) {
-                // ব্লক করুন
                 window._rateLimitStore.blockUntil[key] = now + CONFIG.RATE_LIMIT_WINDOW;
                 return {
                     allowed: false,
@@ -3181,23 +3359,15 @@
                 };
             }
             
-            // এটেম্পট যোগ করুন
             window._rateLimitStore.attempts[key].push(now);
-            
             return { allowed: true };
         };
         
-        // ========== ৫. সেশন টাইমআউট ==========
         let sessionTimer;
-        let sessionWarningShown = false;
-        
         function resetSessionTimer() {
             if (sessionTimer) clearTimeout(sessionTimer);
-            
             sessionTimer = setTimeout(() => {
-                // সেশন টাইমআউট - লগআউট করুন
                 if (firebase && firebase.auth() && firebase.auth().currentUser) {
-                    // ইউজারকে জানান
                     if (confirm('আপনার সেশন শেষ হয়ে গেছে। আবার লগইন করবেন?')) {
                         firebase.auth().signOut();
                         window.location.reload();
@@ -3208,12 +3378,10 @@
             }, CONFIG.SESSION_TIMEOUT);
         }
         
-        // ইউজার অ্যাক্টিভিটিতে টাইমার রিসেট
         ['click', 'keypress', 'scroll', 'mousemove', 'touchstart'].forEach(event => {
             document.addEventListener(event, resetSessionTimer, { passive: true });
         });
         
-        // অথ স্টেট চেঞ্জে টাইমার সেট
         if (typeof firebase !== 'undefined' && firebase.auth) {
             firebase.auth().onAuthStateChanged(user => {
                 if (user) {
@@ -3224,11 +3392,8 @@
             });
         }
         
-        // ========== ৬. XSS প্রোটেকশন (ইনপুট স্যানিটাইজ) ==========
         function sanitizeInput(input) {
             if (typeof input !== 'string') return input;
-            
-            // বিপজ্জনক ক্যারেক্টার এস্কেপ করুন
             return input
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
@@ -3241,21 +3406,16 @@
                 .replace(/=/g, '&#61;');
         }
         
-        // ফর্ম ইনপুট স্যানিটাইজ করার জন্য ফাংশন
         function setupFormProtection() {
             document.querySelectorAll('form').forEach(form => {
                 if (form._protected) return;
                 form._protected = true;
                 
                 form.addEventListener('submit', function(e) {
-                    // টেক্সট ইনপুট স্যানিটাইজ
                     const textInputs = this.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], textarea');
                     textInputs.forEach(input => {
                         if (input.value && typeof input.value === 'string') {
-                            // অরিজিনাল ভ্যালু স্টোর করুন যদি পরে লাগে
                             input.dataset.originalValue = input.value;
-                            // ডিসপ্লের জন্য স্যানিটাইজড (কিন্তু সার্ভারে পাঠানোর আগে এনকোড করা লাগবে)
-                            // আমরা শুধু বিপজ্জনক ক্যারেক্টারগুলোর জন্য সতর্ক করছি
                             if (/[<>"'`=]/.test(input.value)) {
                                 console.warn('সতর্কতা: ইনপুটে বিপজ্জনক ক্যারেক্টার পাওয়া গেছে');
                             }
@@ -3265,24 +3425,18 @@
             });
         }
         
-        // ডম পরিবর্তন হলে আবার সেটআপ করুন
         const observer = new MutationObserver(() => {
             setupFormProtection();
         });
-        
         observer.observe(document.body, { childList: true, subtree: true });
         
-        // ========== ৭. লোকাল স্টোরেজ এনক্রিপশন (সিম্পল) ==========
         const originalSetItem = localStorage.setItem;
         const originalGetItem = localStorage.getItem;
-        
-        // শুধুমাত্র সংবেদনশীল ডেটার জন্য
         const sensitiveKeys = ['user', 'session', 'token', 'auth'];
         
         localStorage.setItem = function(key, value) {
             if (sensitiveKeys.some(k => key.toLowerCase().includes(k))) {
                 try {
-                    // সিম্পল এনকোডিং (বেস64)
                     const encoded = btoa(encodeURIComponent(value));
                     return originalSetItem.call(this, `_sec_${key}`, encoded);
                 } catch (e) {
@@ -3306,114 +3460,24 @@
             return originalGetItem.call(this, key);
         };
         
-        // ========== ৮. সিকিউরিটি ব্যাজ তৈরি (নিষ্ক্রিয় - কিছুই করবে না) ==========
-        function createSecurityBadge() {
-            // সম্পূর্ণ খালি - কিছুই করে না
-        }
-        
-        // ডম রেডির পর ব্যাজ তৈরি করার চেষ্টা করলেও কিছু হবে না
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', createSecurityBadge);
-        } else {
-            createSecurityBadge();
-        }
-        
-        // ========== ৯. অ্যান্টি-ফিশিং ও ডোমেইন ভেরিফিকেশন ==========
-        function verifyDomain() {
-            const allowedDomains = ['easy-premium.com', 'www.easy-premium.com', 'localhost', '127.0.0.1'];
-            const currentHost = window.location.hostname;
-            
-            if (!allowedDomains.includes(currentHost) && !currentHost.endsWith('.easy-premium.com')) {
-                console.warn('অজানা ডোমেইনে চলছে:', currentHost);
-            }
-        }
-        
-        verifyDomain();
-        
-        // ========== ১০. কীবোর্ড শর্টকাট প্রোটেকশন (অপশনাল) ==========
         document.addEventListener('keydown', function(e) {
-            // Ctrl+U (ভিউ সোর্স)
             if (e.ctrlKey && e.keyCode === 85) {
                 e.preventDefault();
                 return false;
             }
-            
-            // Ctrl+S (সেভ)
             if (e.ctrlKey && e.keyCode === 83) {
                 e.preventDefault();
                 return false;
             }
-            
-            // Ctrl+Shift+I (ইন্সপেক্ট)
             if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
                 e.preventDefault();
                 return false;
             }
-            
-            // F12
             if (e.keyCode === 123) {
                 e.preventDefault();
                 return false;
             }
         });
-        
-        // ========== ১১. অ্যাক্টিভিটি লগ (ঐচ্ছিক) ==========
-        if (CONFIG.ENABLE_ACTIVITY_LOG) {
-            window._activityLog = [];
-            
-            function logActivity(type, data) {
-                window._activityLog.push({
-                    type: type,
-                    data: data,
-                    timestamp: new Date().toISOString(),
-                    url: window.location.href
-                });
-                
-                // সর্বোচ্চ ১০০ লগ রাখুন
-                if (window._activityLog.length > 100) {
-                    window._activityLog.shift();
-                }
-                
-                console.log('[Activity]', type, data);
-            }
-            
-            // গ্লোবাল ফাংশন
-            window.logActivity = logActivity;
-            
-            // পেজভিউ লগ
-            logActivity('pageview', { title: document.title });
-        }
-        
-        // ========== ১২. অর্ডার ফর্মে রেট লিমিট যুক্ত করা ==========
-        // অরিজিনাল পারচেজ ফর্ম সাবমিট হুক (আপনার existing কোডের সাথে ইন্টিগ্রেট)
-        const originalPurchaseSubmit = window.purchaseForm?.onsubmit;
-        
-        if (window.purchaseForm) {
-            const form = window.purchaseForm;
-            const originalHandler = form.onsubmit;
-            
-            form.onsubmit = async function(e) {
-                e.preventDefault();
-                
-                // রেট লিমিট চেক
-                if (firebase && firebase.auth() && firebase.auth().currentUser) {
-                    const userId = firebase.auth().currentUser.uid;
-                    const rateCheck = window.checkRateLimit('purchase', userId);
-                    
-                    if (!rateCheck.allowed) {
-                        alert(rateCheck.message);
-                        return false;
-                    }
-                }
-                
-                // অরিজিনাল হ্যান্ডলার কল
-                if (originalHandler) {
-                    return originalHandler.call(this, e);
-                }
-                
-                return false;
-            };
-        }
         
         console.log('%c🔒 Easy Premium - সুরক্ষিত মোড সক্রিয়', 'color: #4caf50; font-size: 14px; font-weight: bold;');
     })();
@@ -3424,7 +3488,6 @@
     (function() {
         'use strict';
         
-        // ========== সরাতে হবে এমন লেখার তালিকা ==========
         const forbiddenTexts = [
             'স্বাগতম',
             'সুস্থ আছেন',
@@ -3447,7 +3510,6 @@
             'রেট লিমিটিং'
         ];
         
-        // ========== রাইট ক্লিক প্রোটেকশন ==========
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             return false;
@@ -3476,13 +3538,10 @@
             }
         }, { passive: false });
         
-        // ========== সব লেখা ও এলিমেন্ট সরানোর ফাংশন ==========
         function removeAllUnwanted() {
-            // সব এলিমেন্ট চেক করা
             const allElements = document.querySelectorAll('*');
             
             allElements.forEach(el => {
-                // ক্লাস বা আইডিতে নিষিদ্ধ শব্দ থাকলে সরান
                 const classAndId = (el.className || '') + ' ' + (el.id || '');
                 const forbiddenClasses = [
                     'security', 'badge', 'notification', 'smart', 'online', 
@@ -3496,7 +3555,6 @@
                     }
                 });
                 
-                // টেক্সট কন্টেন্টে নিষিদ্ধ লেখা থাকলে সরান
                 if (!shouldRemove && el.children && el.children.length === 0 && el.textContent) {
                     const text = el.textContent.trim();
                     forbiddenTexts.forEach(forbidden => {
@@ -3515,7 +3573,6 @@
                 }
             });
             
-            // নির্দিষ্ট সিলেক্টর দিয়ে সরানো
             const selectors = [
                 '[class*="security"]', '[id*="security"]',
                 '[class*="badge"]', '[id*="badge"]',
@@ -3531,7 +3588,6 @@
             });
         }
         
-        // ========== DOM পরিবর্তন পর্যবেক্ষণ ==========
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.addedNodes.length > 0) {
@@ -3542,11 +3598,9 @@
         
         observer.observe(document.body, { childList: true, subtree: true });
         
-        // ========== নিয়মিত পরিষ্কার করা ==========
         removeAllUnwanted();
         setInterval(removeAllUnwanted, 500);
         
-        // লোড ইভেন্টে পরিষ্কার
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', removeAllUnwanted);
         }
@@ -3556,17 +3610,13 @@
     })();
     </script>
 
-    <!-- ================== ডেভেলপার টুল ডিটেক্ট ও রিডিরেক্ট (নতুন সংযোজন) ================== -->
+    <!-- ================== ডেভেলপার টুল ডিটেক্ট ও রিডিরেক্ট ================== -->
     <script>
     (function() {
-        // রিডিরেক্ট URL
         const REDIRECT_URL = "https://easy-premium.com/Privacy,Refund-Policy,Terms-Of-Service.html";
-        
-        // একবার রিডিরেক্ট হয়ে গেলে আর হবে না
         let redirected = false;
 
         function detectAndRedirect() {
-            // debugger পদ্ধতি
             const start = performance.now();
             debugger;
             const end = performance.now();
@@ -3577,7 +3627,6 @@
                 return;
             }
 
-            // কনসোল লগ চেক করার কৌশল (ঐচ্ছিক)
             let element = new Image();
             Object.defineProperty(element, 'id', {
                 get: function() {
@@ -3587,10 +3636,9 @@
                     }
                 }
             });
-            console.log(element); // কনসোল খোলা থাকলে id প্রপার্টি এক্সেস হবে এবং রিডিরেক্ট করবে
+            console.log(element);
         }
 
-        // প্রতি ৫০০ মিলিসেকেন্ডে চেক
         setInterval(detectAndRedirect, 500);
     })();
     </script>
