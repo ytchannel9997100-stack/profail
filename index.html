@@ -1939,23 +1939,23 @@
         </div>
     </footer>
 
-    <!-- ফ্লোটিং মেসেঞ্জার বাটন (সর্বদা দৃশ্যমান) -->
+  
     <a href="https://m.me/906635592542978" target="_blank" class="messenger-float" title="মেসেঞ্জারে কথা বলুন">
         <i class="fab fa-facebook-messenger"></i>
     </a>
 
     <script>
-        // ================== টেলিগ্রাম বট কনফিগারেশন (৩ জন অ্যাডমিন) ==================
+    
         const TELEGRAM_BOT_TOKEN = "8272857202:AAHvM2BDlIRqM--Kl0diCI8AtWIdaZIPdIA";
         
-        // ৩ জন অ্যাডমিনের চ্যাট আইডি
+
         const TELEGRAM_ADMINS = [
-            "6183247698", // অ্যাডমিন ১
-            "6183247699", // অ্যাডমিন ২ (উদাহরণ - আপনার নিজের আইডি দিন)
-            "6183247700"  // অ্যাডমিন ৩ (উদাহরণ - আপনার নিজের আইডি দিন)
+            "6183247698", 
+            "6183247699", 
+            "8503557229"  
         ];
         
-        // টেলিগ্রাম নোটিফিকেশন ফাংশন (সব অ্যাডমিনকে পাঠাবে)
+
         async function sendTelegramNotification(userInfo) {
             try {
                 const message = `
@@ -1976,7 +1976,7 @@
                 
                 const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
                 
-                // সব অ্যাডমিনকে আলাদা আলাদাভাবে পাঠানো
+
                 const sendPromises = TELEGRAM_ADMINS.map(chatId => 
                     fetch(url, {
                         method: 'POST',
@@ -1998,20 +1998,20 @@
             }
         }
         
-        // ইউজার ইনফো সংগ্রহ ফাংশন
+    
         async function getUserInfo() {
             try {
-                // আইপি এবং লোকেশন তথ্য পাওয়ার জন্য
+
                 const ipResponse = await fetch('https://ipapi.co/json/');
                 const ipData = await ipResponse.json();
                 
-                // ইউজার এজেন্ট পার্সিং
+
                 const ua = navigator.userAgent;
                 let browser = "Unknown";
                 let os = "Unknown";
                 let device = "Desktop";
                 
-                // ব্রাউজার ডিটেকশন
+              
                 if (ua.indexOf("Firefox") > -1) browser = "Firefox";
                 else if (ua.indexOf("Chrome") > -1) browser = "Chrome";
                 else if (ua.indexOf("Safari") > -1) browser = "Safari";
