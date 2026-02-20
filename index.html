@@ -2141,7 +2141,7 @@
             }
         }
 
-        // Load EmailJS config from database (requires auth)
+        // Load EmailJS config from database (requires auth) – সঠিক পাথ adminUsers/emailService
         async function loadEmailJSConfig() {
             const user = auth.currentUser;
             if (!user) {
@@ -2152,7 +2152,8 @@
             try {
                 console.log("Loading EmailJS config from database for user:", user.uid);
                 
-                const snapshot = await database.ref('emailService').once('value');
+                // সঠিক পাথ: adminUsers/emailService
+                const snapshot = await database.ref('adminUsers/emailService').once('value');
                 const emailConfig = snapshot.val();
                 
                 if (emailConfig) {
@@ -2160,10 +2161,10 @@
                     EMAILJS_SERVICE_ID = emailConfig.serviceId || "";
                     EMAILJS_TEMPLATE_ID = emailConfig.templateId || "";
                     
-                    console.log("EmailJS config loaded from DB:", { 
-                        publicKey: EMAILJS_PUBLIC_KEY ? "✅" : "❌", 
-                        serviceId: EMAILJS_SERVICE_ID ? "✅" : "❌", 
-                        templateId: EMAILJS_TEMPLATE_ID ? "✅" : "❌" 
+                    console.log("✅ EmailJS config loaded from DB:", { 
+                        publicKey: EMAILJS_PUBLIC_KEY ? EMAILJS_PUBLIC_KEY.substring(0,5)+'...' : '❌', 
+                        serviceId: EMAILJS_SERVICE_ID ? '✅' : '❌', 
+                        templateId: EMAILJS_TEMPLATE_ID ? '✅' : '❌' 
                     });
                     
                     // Initialize EmailJS with the public key
@@ -2171,7 +2172,7 @@
                     
                     return true;
                 } else {
-                    console.warn("EmailJS config not found in database");
+                    console.warn("⚠️ EmailJS config not found in database (adminUsers/emailService)");
                     return false;
                 }
             } catch (error) {
@@ -2180,8 +2181,8 @@
             }
         }
 
-        // Fallback hardcoded values (only used if DB load fails)
-        const FALLBACK_PUBLIC_KEY = "U1I0SVkl_OR1gRFVn";
+        // Fallback hardcoded values (ডাটাবেজের সাথে মিলিয়ে দেওয়া হয়েছে)
+        const FALLBACK_PUBLIC_KEY = "U1I0SVkI_0R1gRFVn";  // JSON-এ যেটা আছে
         const FALLBACK_SERVICE_ID = "service_uknjs0j";
         const FALLBACK_TEMPLATE_ID = "template_gdvntij";
 
@@ -2194,7 +2195,7 @@
                     templateId: EMAILJS_TEMPLATE_ID
                 };
             } else {
-                console.warn("Using fallback EmailJS config");
+                console.warn("Using fallback EmailJS config (DB not loaded)");
                 return {
                     publicKey: FALLBACK_PUBLIC_KEY,
                     serviceId: FALLBACK_SERVICE_ID,
@@ -2207,7 +2208,7 @@
         (function initEmailJSWithFallback() {
             const fallbackConfig = getEmailJSConfig();
             emailjs.init(fallbackConfig.publicKey);
-            console.log("EmailJS initialized with fallback key");
+            console.log("EmailJS initialized with fallback key:", fallbackConfig.publicKey.substring(0,5)+'...');
         })();
 
         // DOM Elements
@@ -2566,7 +2567,7 @@
                     console.error("Error in user database operation:", error);
                 }
                 
-                // Load EmailJS config after successful login
+                // Load EmailJS config after successful login (সঠিক পাথ adminUsers/emailService)
                 await loadEmailJSConfig();
                 
                 loginModal.style.display = 'none';
@@ -2645,8 +2646,8 @@
                 
                 console.log("Sending email with params:", templateParams);
                 console.log("Using EmailJS config:", { 
-                    serviceId: config.serviceId ? "✅" : "❌", 
-                    templateId: config.templateId ? "✅" : "❌" 
+                    serviceId: config.serviceId ? config.serviceId : '❌', 
+                    templateId: config.templateId ? '✅' : '❌' 
                 });
                 
                 if (!config.serviceId || !config.templateId) {
@@ -2655,7 +2656,7 @@
                 
                 const response = await emailjs.send(config.serviceId, config.templateId, templateParams);
                 
-                console.log('Email sent successfully:', response);
+                console.log('✅ Email sent successfully:', response);
                 
                 if (orderData.firebaseKey) {
                     await database.ref(`transactions/${orderData.firebaseKey}`).update({
@@ -2666,7 +2667,7 @@
                 
                 return true;
             } catch (error) {
-                console.error('Error sending email:', error);
+                console.error('❌ Error sending email:', error);
                 return false;
             }
         }
@@ -2891,7 +2892,7 @@
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     console.log("User is signed in with UID:", user.uid);
-                    // Load EmailJS config when user signs in
+                    // Load EmailJS config when user signs in (সঠিক পাথ adminUsers/emailService)
                     await loadEmailJSConfig();
                     updateCartBadge(user.uid);
                 } else {
