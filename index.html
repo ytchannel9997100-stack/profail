@@ -2128,8 +2128,87 @@
         const database = firebase.database();
         const auth = firebase.auth();
 
-        // ================== EMAILJS CONFIG ==================
-        emailjs.init(emailJsPublicKey);
+        // ================== EMAILJS CONFIG (Globals - will be set from DB) ==================
+        let EMAILJS_PUBLIC_KEY = "";
+        let EMAILJS_SERVICE_ID = "";
+        let EMAILJS_TEMPLATE_ID = "";
+
+        // Initialize EmailJS only after we have the key
+        function initEmailJS(publicKey) {
+            if (publicKey) {
+                emailjs.init(publicKey);
+                console.log("EmailJS initialized with key from database");
+            }
+        }
+
+        // Load EmailJS config from database (requires auth)
+        async function loadEmailJSConfig() {
+            const user = auth.currentUser;
+            if (!user) {
+                console.log("No user logged in, cannot load EmailJS config");
+                return false;
+            }
+            
+            try {
+                console.log("Loading EmailJS config from database for user:", user.uid);
+                
+                const snapshot = await database.ref('emailService').once('value');
+                const emailConfig = snapshot.val();
+                
+                if (emailConfig) {
+                    EMAILJS_PUBLIC_KEY = emailConfig.publicKey || "";
+                    EMAILJS_SERVICE_ID = emailConfig.serviceId || "";
+                    EMAILJS_TEMPLATE_ID = emailConfig.templateId || "";
+                    
+                    console.log("EmailJS config loaded from DB:", { 
+                        publicKey: EMAILJS_PUBLIC_KEY ? "✅" : "❌", 
+                        serviceId: EMAILJS_SERVICE_ID ? "✅" : "❌", 
+                        templateId: EMAILJS_TEMPLATE_ID ? "✅" : "❌" 
+                    });
+                    
+                    // Initialize EmailJS with the public key
+                    initEmailJS(EMAILJS_PUBLIC_KEY);
+                    
+                    return true;
+                } else {
+                    console.warn("EmailJS config not found in database");
+                    return false;
+                }
+            } catch (error) {
+                console.error("Error loading EmailJS config:", error);
+                return false;
+            }
+        }
+
+        // Fallback hardcoded values (only used if DB load fails)
+        const FALLBACK_PUBLIC_KEY = "U1I0SVkl_OR1gRFVn";
+        const FALLBACK_SERVICE_ID = "service_uknjs0j";
+        const FALLBACK_TEMPLATE_ID = "template_gdvntij";
+
+        // Get EmailJS config (DB first, then fallback)
+        function getEmailJSConfig() {
+            if (EMAILJS_PUBLIC_KEY && EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID) {
+                return {
+                    publicKey: EMAILJS_PUBLIC_KEY,
+                    serviceId: EMAILJS_SERVICE_ID,
+                    templateId: EMAILJS_TEMPLATE_ID
+                };
+            } else {
+                console.warn("Using fallback EmailJS config");
+                return {
+                    publicKey: FALLBACK_PUBLIC_KEY,
+                    serviceId: FALLBACK_SERVICE_ID,
+                    templateId: FALLBACK_TEMPLATE_ID
+                };
+            }
+        }
+
+        // Initialize EmailJS with fallback initially (so email sending works before login)
+        (function initEmailJSWithFallback() {
+            const fallbackConfig = getEmailJSConfig();
+            emailjs.init(fallbackConfig.publicKey);
+            console.log("EmailJS initialized with fallback key");
+        })();
 
         // DOM Elements
         const loginModal = document.getElementById('loginModal');
@@ -2487,6 +2566,9 @@
                     console.error("Error in user database operation:", error);
                 }
                 
+                // Load EmailJS config after successful login
+                await loadEmailJSConfig();
+                
                 loginModal.style.display = 'none';
                 
                 updateCartBadge(result.user.uid);
@@ -2531,9 +2613,17 @@
             }
         });
 
-        // ===================== ইমেইল পাঠানোর ফাংশন =====================
+        // ===================== ইমেইল পাঠানোর ফাংশন (USES DB CONFIG) =====================
         async function sendOrderConfirmationEmail(userEmail, userName, orderData) {
             try {
+                // Get current EmailJS config (from DB if available, otherwise fallback)
+                const config = getEmailJSConfig();
+                
+                // Ensure EmailJS is initialized with the correct key
+                if (config.publicKey) {
+                    emailjs.init(config.publicKey);
+                }
+                
                 const templateParams = {
                     to_email: userEmail,
                     to_name: userName || 'গ্রাহক',
@@ -2554,11 +2644,16 @@
                 };
                 
                 console.log("Sending email with params:", templateParams);
+                console.log("Using EmailJS config:", { 
+                    serviceId: config.serviceId ? "✅" : "❌", 
+                    templateId: config.templateId ? "✅" : "❌" 
+                });
                 
-                const serviceID = 'service_uknjs0j';
-                const templateID = 'template_gdvntij';
+                if (!config.serviceId || !config.templateId) {
+                    throw new Error("EmailJS service ID or template ID not configured");
+                }
                 
-                const response = await emailjs.send(serviceID, templateID, templateParams);
+                const response = await emailjs.send(config.serviceId, config.templateId, templateParams);
                 
                 console.log('Email sent successfully:', response);
                 
@@ -2796,9 +2891,14 @@
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     console.log("User is signed in with UID:", user.uid);
+                    // Load EmailJS config when user signs in
+                    await loadEmailJSConfig();
                     updateCartBadge(user.uid);
                 } else {
                     console.log("No user signed in");
+                    // Reset to fallback config when user signs out
+                    const fallbackConfig = getEmailJSConfig();
+                    emailjs.init(fallbackConfig.publicKey);
                 }
             });
         }
