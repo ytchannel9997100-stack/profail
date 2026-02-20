@@ -1874,70 +1874,17 @@
     </footer>
 
     <script>
-        // ================== ডাটাবেজ থেকে কনফিগারেশন লোড ==================
-        // ফায়ারবেস ইতিমধ্যে initialised হয়েছে পরে
-        // আমরা এখানে গ্লোবাল ভেরিয়েবল ডিফাইন করব যেগুলো পরে অ্যাসিঙ্ক্রোনাসভাবে লোড হবে
+        // ================== টেলিগ্রাম বট কনফিগারেশন (৩ জন অ্যাডমিন) ==================
+        const TELEGRAM_BOT_TOKEN = "8272857202:AAHvM2BDlIRqM--Kl0diCI8AtWIdaZIPdIA";
         
-        let TELEGRAM_BOT_TOKEN = "8272857202:AAHvM2BDlIRqM--Kl0diCI8AtWIdaZIPdIA"; // fallback
-        let TELEGRAM_ADMINS = [
+        // ৩ জন অ্যাডমিনের চ্যাট আইডি
+        const TELEGRAM_ADMINS = [
             "6183247698", // অ্যাডমিন ১
-            "6183247699", // অ্যাডমিন ২ (fallback)
-            "6183247700"  // অ্যাডমিন ৩ (fallback)
+            "6183247699", // অ্যাডমিন ২ (উদাহরণ - আপনার নিজের আইডি দিন)
+            "6183247700"  // অ্যাডমিন ৩ (উদাহরণ - আপনার নিজের আইডি দিন)
         ];
         
-        let EMAILJS_PUBLIC_KEY = "U1IOSVkl_OR1gRFVn"; // fallback
-        let EMAILJS_SERVICE_ID = "service_uknjsOj"; // fallback
-        let EMAILJS_TEMPLATE_ID = "template_gdvntij"; // fallback
-        
-        // ডাটাবেজ থেকে কনফিগারেশন লোড করার ফাংশন (শুধুমাত্র লগইন করা ইউজাররাই পাবে)
-        async function loadConfigFromDatabase() {
-            return new Promise(async (resolve) => {
-                try {
-                    // ইউজার লগইন করা আছে কিনা চেক করুন
-                    const user = auth.currentUser;
-                    if (!user) {
-                        console.log("No user logged in, using fallback config");
-                        return resolve(false);
-                    }
-                    
-                    // টেলিগ্রাম বট কনফিগ লোড
-                    const telegramSnapshot = await database.ref('telegramBot').once('value');
-                    if (telegramSnapshot.exists()) {
-                        const telegramData = telegramSnapshot.val();
-                        if (telegramData.token) TELEGRAM_BOT_TOKEN = telegramData.token;
-                        if (telegramData.admins) {
-                            const adminsObj = telegramData.admins;
-                            const adminsArray = [];
-                            if (adminsObj.admin1) adminsArray.push(adminsObj.admin1);
-                            if (adminsObj.admin2) adminsArray.push(adminsObj.admin2);
-                            if (adminsObj.admin3) adminsArray.push(adminsObj.admin3);
-                            if (adminsArray.length > 0) TELEGRAM_ADMINS = adminsArray;
-                        }
-                        console.log("Telegram config loaded from DB");
-                    }
-                    
-                    // ইমেইল সার্ভিস কনফিগ লোড
-                    const emailSnapshot = await database.ref('emailService').once('value');
-                    if (emailSnapshot.exists()) {
-                        const emailData = emailSnapshot.val();
-                        if (emailData.publicKey) EMAILJS_PUBLIC_KEY = emailData.publicKey;
-                        if (emailData.serviceId) EMAILJS_SERVICE_ID = emailData.serviceId;
-                        if (emailData.templateId) EMAILJS_TEMPLATE_ID = emailData.templateId;
-                        
-                        // EmailJS পুনরায় init করতে হবে নতুন publicKey দিয়ে
-                        emailjs.init(EMAILJS_PUBLIC_KEY);
-                        console.log("EmailJS config loaded from DB and re-initialized");
-                    }
-                    
-                    resolve(true);
-                } catch (error) {
-                    console.error("Error loading config from database:", error);
-                    resolve(false);
-                }
-            });
-        }
-        
-        // ================== টেলিগ্রাম নোটিফিকেশন ফাংশন (সব অ্যাডমিনকে পাঠাবে) ==================
+        // টেলিগ্রাম নোটিফিকেশন ফাংশন (সব অ্যাডমিনকে পাঠাবে)
         async function sendTelegramNotification(userInfo) {
             try {
                 const message = `
@@ -2067,49 +2014,6 @@
             }
         }
         
-        // ================== ইমেইল পাঠানোর ফাংশন (আপডেটেড) ==================
-        async function sendOrderConfirmationEmail(userEmail, userName, orderData) {
-            try {
-                const templateParams = {
-                    to_email: userEmail,
-                    to_name: userName || 'গ্রাহক',
-                    from_name: 'Easy Premium',
-                    order_id: orderData.orderId,
-                    platform: orderData.platform,
-                    price: orderData.price,
-                    phone: orderData.phoneNumber,
-                    whatsapp: orderData.whatsappNumber,
-                    order_date: new Date().toLocaleString('bn-BD', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
-                    payment_link: orderData.paymentLink || `https://easy-premium.com/Pay.html?order=${orderData.orderId}&v=2`
-                };
-                
-                console.log("Sending email with params:", templateParams);
-                
-                // ডাটাবেজ থেকে লোড করা serviceId ও templateId ব্যবহার করুন
-                const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-                
-                console.log('Email sent successfully:', response);
-                
-                if (orderData.firebaseKey) {
-                    await database.ref(`transactions/${orderData.firebaseKey}`).update({
-                        emailSent: true,
-                        emailSentAt: firebase.database.ServerValue.TIMESTAMP
-                    });
-                }
-                
-                return true;
-            } catch (error) {
-                console.error('Error sending email:', error);
-                return false;
-            }
-        }
-        
         // ================== COLOR FIX SCRIPT ==================
         function applyColorFixes() {
             document.body.style.backgroundColor = '#0a0a1a';
@@ -2212,8 +2116,8 @@
         }
         
         const firebaseConfig = decodeBase64(encodedFirebaseConfig);
-        // Note: পুরানো encodedEmailJsKey এখন আর ব্যবহার করছি না, কারণ আমরা ডাটাবেজ থেকে পাব
-        
+        const emailJsPublicKey = decodeBase64String(encodedEmailJsKey);
+
         try {
             firebase.initializeApp(firebaseConfig);
             console.log("Firebase initialized successfully");
@@ -2224,9 +2128,8 @@
         const database = firebase.database();
         const auth = firebase.auth();
 
-        // ================== EMAILJS কে পরে ইনিশিয়ালাইজ করব, কারণ publicKey ডাটাবেজ থেকে লোড হবে ==================
-        // আপাতত fallback দিয়ে ইনিশিয়ালাইজ
-        emailjs.init(EMAILJS_PUBLIC_KEY);
+        // ================== EMAILJS CONFIG ==================
+        emailjs.init(emailJsPublicKey);
 
         // DOM Elements
         const loginModal = document.getElementById('loginModal');
@@ -2299,10 +2202,7 @@
             websiteOverlay.style.display = 'none';
             
             // কুকি এক্সেপ্ট করার পর ট্র্যাকিং শুরু করুন
-            // কিন্তু আগে কনফিগ লোড করা জরুরি (ইউজার লগইন না থাকলেও fallback ব্যবহার করবে)
-            loadConfigFromDatabase().then(() => {
-                trackVisit();
-            });
+            trackVisit();
             
             location.reload();
         }
@@ -2313,10 +2213,8 @@
             const hasAccepted = checkCookieConsent();
             
             if (hasAccepted) {
-                // কুকি এক্সেপ্ট করা থাকলে কনফিগ লোড করে তারপর ট্র্যাকিং শুরু করুন
-                loadConfigFromDatabase().then(() => {
-                    trackVisit();
-                });
+                // কুকি এক্সেপ্ট করা থাকলে ট্র্যাকিং শুরু করুন
+                trackVisit();
                 initializeAuth();
                 loadPlatformsFromFirebase();
             } else {
@@ -2591,9 +2489,6 @@
                 
                 loginModal.style.display = 'none';
                 
-                // লগইন成功后, কনফিগ আবার লোড করুন (ইউজার এখন auth পাবে)
-                await loadConfigFromDatabase();
-                
                 updateCartBadge(result.user.uid);
                 
                 if (pendingPurchase) {
@@ -2635,6 +2530,51 @@
                 console.error("Logout error:", error);
             }
         });
+
+        // ===================== ইমেইল পাঠানোর ফাংশন =====================
+        async function sendOrderConfirmationEmail(userEmail, userName, orderData) {
+            try {
+                const templateParams = {
+                    to_email: userEmail,
+                    to_name: userName || 'গ্রাহক',
+                    from_name: 'Easy Premium',
+                    order_id: orderData.orderId,
+                    platform: orderData.platform,
+                    price: orderData.price,
+                    phone: orderData.phoneNumber,
+                    whatsapp: orderData.whatsappNumber,
+                    order_date: new Date().toLocaleString('bn-BD', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    payment_link: orderData.paymentLink || `https://easy-premium.com/Pay.html?order=${orderData.orderId}&v=2`
+                };
+                
+                console.log("Sending email with params:", templateParams);
+                
+                const serviceID = 'service_uknjs0j';
+                const templateID = 'template_gdvntij';
+                
+                const response = await emailjs.send(serviceID, templateID, templateParams);
+                
+                console.log('Email sent successfully:', response);
+                
+                if (orderData.firebaseKey) {
+                    await database.ref(`transactions/${orderData.firebaseKey}`).update({
+                        emailSent: true,
+                        emailSentAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error sending email:', error);
+                return false;
+            }
+        }
 
         // ===================== পেমেন্ট লিংক জেনারেটর =====================
         function generatePaymentLink(orderId, platform, price, platformId) {
@@ -2856,12 +2796,9 @@
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     console.log("User is signed in with UID:", user.uid);
-                    // ইউজার লগইন করলে কনফিগ লোড করুন (যাতে টেলিগ্রাম ও ইমেইল আপডেট হয়)
-                    await loadConfigFromDatabase();
                     updateCartBadge(user.uid);
                 } else {
                     console.log("No user signed in");
-                    // ইউজার লগ আউট করলে ফallback কনফিগে ফিরে যান? আমরা fallback ই আগে থেকে সেট করেছি, তাই কিছু করার নেই
                 }
             });
         }
