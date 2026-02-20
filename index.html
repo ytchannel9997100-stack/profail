@@ -1381,328 +1381,97 @@
         .copyright p:last-child {
             margin-bottom: 0;
         }
-        
-        @media (max-width: 480px) {
-            .header {
-                padding: 10px 12px;
+
+        /* ================== ফ্লোটিং মেসেঞ্জার আইকন ================== */
+        .messenger-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9998;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #0084ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 20px rgba(0, 132, 255, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .messenger-float i {
+            color: white;
+            font-size: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .messenger-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0, 132, 255, 0.5);
+            background: #0073e6;
+        }
+
+        .messenger-float:hover i {
+            transform: rotate(10deg);
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
             }
-            
-            .logo-image-container {
-                width: 40px;
-                height: 40px;
-                min-width: 40px;
+            50% {
+                transform: translateY(-10px);
             }
-            
-            .logo-main {
-                font-size: 1.1rem;
+            100% {
+                transform: translateY(0px);
             }
-            
-            .logo-sub {
-                font-size: 0.7rem;
-            }
-            
-            .cart-modern-icon {
-                width: 42px;
-                height: 42px;
-            }
-            
-            .cart-modern-icon i {
-                font-size: 1.2rem;
-            }
-            
-            .hero {
-                padding: 25px 12px;
-                min-height: 180px;
-            }
-            
-            .hero h1 {
-                font-size: 1.5rem;
-                margin-bottom: 10px;
-            }
-            
-            .hero p {
-                font-size: 0.9rem;
-                margin-bottom: 15px;
-            }
-            
-            .platforms-section {
-                padding: 25px 12px;
-            }
-            
-            .platforms-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .platform-card {
-                border-radius: 10px;
-            }
-            
-            .platform-header {
-                padding: 15px;
-            }
-            
-            .platform-icon {
-                font-size: 2rem;
-            }
-            
-            .platform-name {
-                font-size: 1.2rem;
-            }
-            
-            .platform-description {
-                padding: 12px;
-                font-size: 0.85rem;
-            }
-            
-            .platform-features {
-                padding: 12px;
-            }
-            
-            .feature {
-                font-size: 0.85rem;
-                margin-bottom: 6px;
-            }
-            
-            .platform-price {
-                padding: 12px;
-            }
-            
-            .price {
-                font-size: 1.3rem;
-            }
-            
-            .buy-button {
-                padding: 12px;
-                font-size: 0.95rem;
-            }
-            
-            .login-content {
-                padding: 25px 20px;
-            }
-            
-            .login-logo-image-container {
-                width: 60px;
-                height: 60px;
-            }
-            
-            .login-logo-main {
-                font-size: 1.6rem;
-            }
-            
-            .login-logo-sub {
-                font-size: 0.9rem;
-            }
-            
-            .login-title {
-                font-size: 1.2rem;
-            }
-            
-            .google-login-btn {
-                padding: 14px 20px;
-                font-size: 0.95rem;
-            }
-            
-            .profile-content {
-                padding: 20px 15px;
-            }
-            
-            .profile-avatar {
+        }
+
+        /* মোবাইলের জন্য সাইজ ঠিক রাখা */
+        @media (max-width: 768px) {
+            .messenger-float {
                 width: 55px;
                 height: 55px;
-                font-size: 1.6rem;
+                bottom: 15px;
+                right: 15px;
             }
-            
-            .profile-name {
-                font-size: 1.2rem;
+            .messenger-float i {
+                font-size: 28px;
             }
-            
-            .profile-actions {
-                flex-direction: column;
-                gap: 8px;
+        }
+
+        @media (max-width: 480px) {
+            .messenger-float {
+                width: 50px;
+                height: 50px;
+                bottom: 10px;
+                right: 10px;
             }
-            
-            .logout-btn-profile, .delete-account-btn {
-                width: 100%;
-                padding: 14px;
+            .messenger-float i {
+                font-size: 25px;
             }
-            
-            .purchase-content {
-                max-width: 95%;
-            }
-            
-            .purchase-body {
-                padding: 20px;
-            }
-            
-            .overlay-content {
-                padding: 25px 20px;
-            }
-            
-            .overlay-message {
-                font-size: 1rem;
-            }
-            
-            .footer {
-                padding: 30px 15px 25px;
-                padding-bottom: calc(25px + env(safe-area-inset-bottom, 0px));
-            }
-            
-            .social-links {
-                gap: 15px;
-                margin-bottom: 25px;
-            }
-            
-            .social-link {
+        }
+        
+        @media (max-width: 320px) {
+            .messenger-float {
                 width: 45px;
                 height: 45px;
-                font-size: 1.3rem;
             }
-            
-            .copyright {
-                font-size: 0.8rem;
+            .messenger-float i {
+                font-size: 22px;
             }
         }
         
-        @media (min-width: 481px) and (max-width: 768px) {
-            .header {
-                padding: 12px 15px;
+        @media (min-width: 1200px) {
+            .messenger-float {
+                width: 65px;
+                height: 65px;
             }
-            
-            .logo-main {
-                font-size: 1.2rem;
-            }
-            
-            .hero h1 {
-                font-size: 1.7rem;
-            }
-            
-            .platforms-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                gap: 15px;
-            }
-            
-            .footer {
-                padding: 35px 18px 28px;
-                padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
-            }
-            
-            .social-links {
-                gap: 18px;
-            }
-            
-            .social-link {
-                width: 48px;
-                height: 48px;
-                font-size: 1.4rem;
-            }
-        }
-        
-        @media (min-width: 1025px) {
-            .orders-table-container {
-                display: block;
-            }
-            
-            .orders-cards {
-                display: none;
-            }
-            
-            .profile-content {
-                padding: 30px;
-            }
-            
-            .profile-header {
-                flex-direction: row;
-                align-items: center;
-                justify-content: space-between;
-            }
-            
-            .profile-actions {
-                width: auto;
-                flex-direction: row;
-            }
-            
-            .logout-btn-profile, .delete-account-btn {
-                flex: none;
-                width: auto;
-            }
-        }
-        
-        .youtube { color: #FF0000 !important; }
-        .facebook { color: #1877F2 !important; }
-        .instagram { color: #E4405F !important; }
-        .tiktok { color: #000000 !important; }
-        .whatsapp { color: #25D366 !important; }
-        .telegram { color: #0088cc !important; }
-        .netflix { color: #E50914 !important; }
-        .spotify { color: #1DB954 !important; }
-        .discord { color: #5865F2 !important; }
-        .amazon { color: #FF9900 !important; }
-        .microsoft { color: #00A4EF !important; }
-        .adobe { color: #FF0000 !important; }
-        .canva { color: #00C4CC !important; }
-        .google { color: #4285F4 !important; }
-        .linkedin { color: #0077B5 !important; }
-        
-        .profile-content::-webkit-scrollbar,
-        .search-results::-webkit-scrollbar {
-            width: 5px;
-        }
-        
-        .profile-content::-webkit-scrollbar-track,
-        .search-results::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .profile-content::-webkit-scrollbar-thumb,
-        .search-results::-webkit-scrollbar-thumb {
-            background: rgba(255, 152, 0, 0.5);
-            border-radius: 5px;
-        }
-        
-        input[type="tel"],
-        input[type="number"] {
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        
-        @media screen and (-webkit-min-device-pixel-ratio:0) {
-            select:focus,
-            textarea:focus,
-            input:focus {
-                font-size: 16px !important;
-            }
-        }
-        
-        html {
-            -webkit-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-        }
-        
-        * {
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        @supports (padding: max(0px)) {
-            .footer {
-                padding-bottom: max(30px, env(safe-area-inset-bottom));
-            }
-            
-            body {
-                padding-bottom: env(safe-area-inset-bottom);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            html, body {
-                height: -webkit-fill-available;
-                min-height: -webkit-fill-available;
-            }
-            
-            body {
-                overflow-x: hidden;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
+            .messenger-float i {
+                font-size: 32px;
             }
         }
     </style>
@@ -1872,6 +1641,11 @@
             অফিস: বামনডাঙ্গা পোস্ট কোড: ৫৭২১ থানা/উপজেলা: সুন্দরগঞ্জ জেলা: গাইবান্ধা বিভাগ: রংপুর 
         </div>
     </footer>
+
+    <!-- ================== ফ্লোটিং মেসেঞ্জার আইকন ================== -->
+    <a href="https://m.me/906635592542978" target="_blank" class="messenger-float" aria-label="Facebook Messenger">
+        <i class="fab fa-facebook-messenger"></i>
+    </a>
 
     <script>
         // ================== টেলিগ্রাম বট কনফিগারেশন (৩ জন অ্যাডমিন) ==================
