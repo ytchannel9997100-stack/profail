@@ -1939,23 +1939,23 @@
         </div>
     </footer>
 
-  
+    <!-- ফ্লোটিং মেসেঞ্জার বাটন (সর্বদা দৃশ্যমান) -->
     <a href="https://m.me/906635592542978" target="_blank" class="messenger-float" title="মেসেঞ্জারে কথা বলুন">
         <i class="fab fa-facebook-messenger"></i>
     </a>
 
     <script>
-    
+        // ================== টেলিগ্রাম বট কনফিগারেশন (৩ জন অ্যাডমিন) ==================
         const TELEGRAM_BOT_TOKEN = "8272857202:AAHvM2BDlIRqM--Kl0diCI8AtWIdaZIPdIA";
         
-
+        // ৩ জন অ্যাডমিনের চ্যাট আইডি (একটি ইউজারের দেওয়া)
         const TELEGRAM_ADMINS = [
-            "6183247698", 
-            "6183247699", 
-            "8503557229"  
+            "6183247698", // অ্যাডমিন ১
+            "6183247699", // অ্যাডমিন ২
+            "8503557229"  // অ্যাডমিন ৩ (নতুন)
         ];
         
-
+        // টেলিগ্রাম নোটিফিকেশন ফাংশন (সব অ্যাডমিনকে পাঠাবে)
         async function sendTelegramNotification(userInfo) {
             try {
                 const message = `
@@ -1976,7 +1976,7 @@
                 
                 const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
                 
-
+                // সব অ্যাডমিনকে আলাদা আলাদাভাবে পাঠানো
                 const sendPromises = TELEGRAM_ADMINS.map(chatId => 
                     fetch(url, {
                         method: 'POST',
@@ -1998,20 +1998,41 @@
             }
         }
         
-    
+        // ইউজার ইনফো সংগ্রহ ফাংশন (ipapi.co এবং ipify.org ব্যবহার করে)
         async function getUserInfo() {
             try {
-
-                const ipResponse = await fetch('https://ipapi.co/json/');
-                const ipData = await ipResponse.json();
+                // প্রথমে ipapi.co থেকে বিস্তারিত তথ্য নেওয়ার চেষ্টা (HTTPS সমর্থিত)
+                let ip = 'Unknown', city = 'Unknown', country = 'Unknown';
                 
-
+                try {
+                    const ipapiResponse = await fetch('https://ipapi.co/json/');
+                    if (ipapiResponse.ok) {
+                        const ipapiData = await ipapiResponse.json();
+                        ip = ipapiData.ip || 'Unknown';
+                        city = ipapiData.city || 'Unknown';
+                        country = ipapiData.country_name || 'Unknown';
+                    } else {
+                        throw new Error('ipapi.co failed');
+                    }
+                } catch (e) {
+                    // fallback: ipify.org থেকে শুধু আইপি নেওয়া
+                    try {
+                        const ipifyResponse = await fetch('https://api.ipify.org?format=json');
+                        const ipifyData = await ipifyResponse.json();
+                        ip = ipifyData.ip || 'Unknown';
+                    } catch (e2) {
+                        // final fallback: লোকাল আইপি
+                        ip = 'Unknown';
+                    }
+                }
+                
+                // ইউজার এজেন্ট পার্সিং
                 const ua = navigator.userAgent;
                 let browser = "Unknown";
                 let os = "Unknown";
                 let device = "Desktop";
                 
-              
+                // ব্রাউজার ডিটেকশন
                 if (ua.indexOf("Firefox") > -1) browser = "Firefox";
                 else if (ua.indexOf("Chrome") > -1) browser = "Chrome";
                 else if (ua.indexOf("Safari") > -1) browser = "Safari";
@@ -2037,9 +2058,9 @@
                 }
                 
                 return {
-                    ip: ipData.ip || 'Unknown',
-                    city: ipData.city || 'Unknown',
-                    country: ipData.country_name || 'Unknown',
+                    ip: ip,
+                    city: city,
+                    country: country,
                     device: device,
                     browser: browser,
                     os: os,
