@@ -1,44 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
-    <title>    Home - Panel Sell
-</title>
+    <title>Home - Panel Sell</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Discover the ultimate destination for game panel at panelsell the latest apk mod and panel online. Enjoy competitive prices, fast delivery, and excellent customer service. Elevate your gaming experience with panelsell.store." />
     <meta name="keywords" content="Free Fire,Topup,Id code,Free diamond,Garena,Topup garena,Fftopup,Ff topup,Ff hack,Diamond hack,Low price diamond,BD Games Bazar,bdgamesbazar.com,bdgamesbazar com,bdgamesbazar net,Free fire topup,Free fire airdrop,Garena shell,Uid topup,Weekly topup,Monthly topup,100℅ bonus topup free fire,Less is more topup,Unipin voucher bd,Unipin buy,Weekly lite,panelsell,panel sell,free fire panel" />
-
-            
-        <link rel="shortcut icon" type="image/png" href="https://panelsell.store/uploads/settings/01KHMXWJC5P33DMJ9H83YMC5E2.jpg">
     
-    
+    <link rel="shortcut icon" type="image/png" href="https://panelsell.store/uploads/settings/01KHMXWJC5P33DMJ9H83YMC5E2.jpg" />
     
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://panelsell.store">
-    <meta property="og:title" content="    Home - Panel Sell
-">
+    <meta property="og:title" content="Home - Panel Sell">
     <meta property="og:description" content="Discover the ultimate destination for game panel at panelsell the latest apk mod and panel online. Enjoy competitive prices, fast delivery, and excellent customer service. Elevate your gaming experience with panelsell.store.">
-    
     
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://panelsell.store">
-    <meta property="twitter:title" content="    Home - Panel Sell
-">
+    <meta property="twitter:title" content="Home - Panel Sell">
     <meta property="twitter:description" content="Discover the ultimate destination for game panel at panelsell the latest apk mod and panel online. Enjoy competitive prices, fast delivery, and excellent customer service. Elevate your gaming experience with panelsell.store.">
     
-    
+    <!-- Bootstrap & Styles -->
     <link rel="stylesheet" href="https://panelsell.store/assets/template/css/bootstrap/bootstrap.min.css">
-
-    
     <link rel="stylesheet" href="https://panelsell.store/assets/template/fonts/fontawesome/css/all.min.css">
-
-    
     <link rel="stylesheet" href="https://panelsell.store/assets/template/js/toastr/toastr.min.css">
-
-    
     <link rel="stylesheet" href="https://panelsell.store/assets/template/css/styles.css?6335">
+
+    <!-- Firebase SDK (modular) -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAy4ST9A4KUBzQpuNpjdD6aU40s8p1YNEg",
+            authDomain: "top-up-4db01.firebaseapp.com",
+            databaseURL: "https://top-up-4db01-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "top-up-4db01",
+            storageBucket: "top-up-4db01.appspot.com",
+            messagingSenderId: "264548197473",
+            appId: "1:264548197473:web:17a5f1b5622d464f5d7620",
+            measurementId: "G-ZEMKJ3BD0G"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // DOM elements
+        const loginBtn = document.querySelector('a[href="https://panelsell.store/login"]');
+        const registerBtn = document.querySelector('a[href="https://panelsell.store/register"]');
+        const navContainer = document.querySelector('.header .flex.items-center.justify-between .flex.items-center'); // parent of login/register
+
+        // Function to update UI based on auth state
+        function updateUI(user) {
+            if (!navContainer) return;
+
+            if (user) {
+                // User is logged in: replace login/register with user info & logout
+                const userEmail = user.email;
+                const photoURL = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User');
+                
+                navContainer.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <img src="${photoURL}" alt="avatar" class="w-8 h-8 rounded-full border-2 border-primary-500">
+                        <span class="text-sm font-medium text-gray-700 hidden md:inline-block">${user.displayName || userEmail}</span>
+                        <button id="firebaseLogoutBtn" class="btn-pro btn-pro-login rounded border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition px-3 py-1 text-sm">LOGOUT</button>
+                    </div>
+                `;
+
+                // Attach logout event
+                document.getElementById('firebaseLogoutBtn').addEventListener('click', async () => {
+                    try {
+                        await signOut(auth);
+                        toastr.success('Logged out successfully');
+                    } catch (error) {
+                        toastr.error('Logout failed: ' + error.message);
+                    }
+                });
+            } else {
+                // User is logged out: restore original login/register buttons
+                navContainer.innerHTML = `
+                    <a href="#" id="fakeLoginBtn" class="router-link-active router-link-exact-active btn-pro btn-pro-login rounded mx-2 border-2 text-primary-500 border-primary-500" aria-current="page">LOGIN</a>
+                    <a href="#" id="fakeRegisterBtn" class="btn-pro btn-register rounded ml-2 border-2 border-primary-500 bg-primary-500 text-white">REGISTER</a>
+                `;
+
+                // Attach Google sign-in to both buttons
+                document.getElementById('fakeLoginBtn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleGoogleSignIn();
+                });
+                document.getElementById('fakeRegisterBtn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleGoogleSignIn();
+                });
+            }
+        }
+
+        // Google Sign-In handler
+        async function handleGoogleSignIn() {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                toastr.success(`Welcome ${user.displayName || user.email}!`);
+                // UI updates via onAuthStateChanged
+            } catch (error) {
+                toastr.error('Login failed: ' + error.message);
+            }
+        }
+
+        // Listen to auth state changes
+        onAuthStateChanged(auth, (user) => {
+            updateUI(user);
+        });
+
+        // Initial check: if buttons exist, override their default behavior and start with login state
+        window.addEventListener('DOMContentLoaded', () => {
+            // The original buttons have href links, we need to override them even if user is not logged in.
+            // But we will replace them completely via updateUI based on auth state.
+            // However, to avoid flash of original buttons, we can hide them initially and let updateUI decide.
+            // But simpler: we run updateUI(auth.currentUser) after DOM ready.
+            updateUI(auth.currentUser);
+        });
+
+        // Optional: Add a global logout if needed
+    </script>
 
     <style>
         :root {
@@ -52,137 +142,114 @@
             --footer-font-color: #ffffff;
             --content-box-color: #ffffff;
 
-                            --background-image: linear-gradient(350deg, rgb(244, 249, 255), rgba(237, 244, 255, 0.79)),
-                    url(data:image/png;base64,UklGRtQEAABXRUJQVlA4TMgEAAAvj8FjAAVFA4Bqa9f7P14MQ4yIiBgSsRgW316rZvat/3ZOEf135LaNJGVOc3Nplk5c8QfO8avRaXkRWzSJMwnO2STKiUVTMWJoE02L4ldsGHwygXeHpUKw1OFMGJK3gS8r5EeuWk4KaKnosum7bvrOZhcthXAYqjpaIL8GxVvYZiz66o7BwCiFkAxsgV03/LowWxj5Am15/DrU00fDYaTpjyo+n9GrATIcB7BecDyzXnCHJoaPLPqzQl8cvwrlcaKgO47Eh1gG5XEaxodgr/wzyA/BHbLyL8s/2EVUfjEL8ENwVGIID8EZ6sL4NSaoN1KxzkgcLQHJlRSWNjtQZ7pRzS7WPjtmS0gXKZ0wzQXX6PKNFPFccMErVSFIbYqhxhvVCsRtUfzIB5a7vkSTr18DSoPjcfRuIhipDAQXwsn31lFsA/WRJoIzUrlzkUJIE8E+8oBzImhjwUBpIJiDp0Xxa9MO3zREOJvgWU0Fm4aIRibB1EyC/wnmx+SmBbENnsY4Lz944nJQCA4DwRnnhfm4nzrAtFzgwdPYzwvjQHBUCCZeDb+OxDKfnTIkuTWdiimp3lrZ7pHnM8JRbq1sgVgVguO1lRXCohDM6Put6VQI7rdWVhLkOQZhwr4UflVrpAldZivtUFaBDUOZxItgrfvQIP4owyiGUY+hake9y4xISsHF8UL4HcAGG9XqPQBbvAeD/SRQTB4KSAODh5Isxi7DsQ5+lG3e3GHy5sI7eozB5DEeRo+R1sFvHR78Ovit445qHfyyDYNYit/1Dre87g73l5Ufr5/fu/6/8Ae+WQc/EMtJjc9f957PX2d8/hbTd30d/F7Yn8b37E/Ty/rTTOvg16Fa/nrS6+a3Ypjf0DS/8Uvnt3XwO9mxUm8w+RvN6G/Aj9aISg4d42MqMPobzeRvBJ3gC7qF8DsbUpW53AxXqQmS0f9TCC5IcntYdJWNZ/D/xOj/JUjXDxWyQnAlbOdS+J1SvMkfj6Dwx7MYjHU38seTxh9PI3/cWfzxrPDHweaP+yLnMvit4z7vX2B+PvCoFyI07K/VSE6/+Caa/bXUBuqTZn9N9GtojmI17K8hjXoiDn5R/I5WPNbrlbKLtU03MdOtW+2IZbZtKW243xm4yUTwbL+zTwWH4X5nkykGxH7rSNN0a7TV6NJFZkX/g2Ed/JSX2OLpsOw/O8v+80m+6wTf959FN815Oi37z86y/3yQl8HV+Lr4nf1HD+m9h4jSPy4f4LqgAQNdcg6L43dWKCgGHzX7l+VnYnxZfsZnMgjGAvVcHr+TTBcN/TPv1LtBEzs6l8HvZXc7mCxVX3lHVU13VGi8U18Hv9+cO/X/cOTet/+593nuffufez++Mb/tf+5dmXvf/ufe65flt/3PvT819779z72/f+59+597H+fet/+591Huffufe3efwW/7n3v/dz33vv3PvY9y79v/3DuOa/ufe3cfwG/7n3v349r+5963/7n3NeTet/+593vuffufe/+Y3Pv2P/cOGgzb/9z79j/3XpaRey/btNz79j/3Dg8M2//cO8wEb/9z72+fe9/+595Bh2H7n3vf/ufev3ruffufex/k3rf/ufcPzL1v/3Pvv2659+1/7n1Fufftf+59+597PwE=);
-                    }
+            /* New beautiful gradient background */
+            --background-image: linear-gradient(135deg, #fdf2f8 0%, #e0f2fe 50%, #f0f9ff 100%);
+        }
+
+        body {
+            background: var(--background-image);
+            background-attachment: fixed;
+        }
+
+        /* Ensure buttons have consistent hover */
+        #firebaseLogoutBtn:hover {
+            background-color: #ef4444;
+            color: white;
+        }
     </style>
 
     <style>
-            </style>
-
-        <style>
         .notice-style {
             background-color: #077acb;
             color: #ffffff;
         }
-
         .notice-style .btn-close {
             font-size: 12px;
         }
-
         .notice-style .notice-heading {
             font-size: 18px;
             font-weight: 500;
             padding-bottom: 4px;
         }
-
         .notice-text {
             font-size: 12px;
             font-weight: 400;
             font-family: "Times New Roman", Times, serif;
-
         }
     </style>
 
-
-    
     <link rel="stylesheet" href="https://panelsell.store/assets/template/css/tailwindcss.css">
-    <link rel="stylesheet" href="https://panelsell.store/assets/template/css/custom-styles.css?3101"> 
+    <link rel="stylesheet" href="https://panelsell.store/assets/template/css/custom-styles.css?3101">
 
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-SKT869XM9G"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-SKT869XM9G');
-</script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SKT869XM9G"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-SKT869XM9G');
+    </script>
 </head>
-
 <body>
 <div class="body-bg">
-
-
 
 <div class="header">
   <div class="container m-auto p-2 py-3 md:py-5 md:px-0">
     <nav class="flex items-center justify-between">
       <a href="https://panelsell.store" class="">
-        <img src="https://panelsell.store/uploads/settings/01KHN43K3QP9B17GMYGKF40ZVD.png"  alt="Panel Sell" data-nuxt-img="" srcset="https://panelsell.store/uploads/settings/01KHN43K3QP9B17GMYGKF40ZVD.png 1x, https://panelsell.store/uploads/settings/01KHN43K3QP9B17GMYGKF40ZVD.png 2x" class="w-28 md:w-48 logo">
+        <img src="https://panelsell.store/uploads/settings/01KHN43K3QP9B17GMYGKF40ZVD.png" alt="Panel Sell" data-nuxt-img="" srcset="https://panelsell.store/uploads/settings/01KHN43K3QP9B17GMYGKF40ZVD.png 1x, https://panelsell.store/uploads/settings/01KHN43K3QP9B17GMYGKF40ZVD.png 2x" class="w-28 md:w-48 logo">
       </a>
       <div class="relative">
         <div class="flex items-center">
           <nav class="text-left hidden md:block">
             <div class="w-full flex-grow flex items-center lg:w-auto">
               <div class="text-sm flex-grow animated jackinthebox mx-auto">
-                <a href="https://panelsell.store#topup" class="block inline-block text-md font-bold mx-2 p-1 rounded-lg fb-normal link"> Topup </a>
-                <a href="https://panelsell.store/page/contact-us" class="block inline-block text-md font-bold mx-2 p-1 rounded-lg fb-normal link"> Contact Us </a>
+                <a href="https://panelsell.store#topup" class="block inline-block text-md font-bold mx-2 p-1 rounded-lg fb-normal link">Topup</a>
+                <a href="https://panelsell.store/page/contact-us" class="block inline-block text-md font-bold mx-2 p-1 rounded-lg fb-normal link">Contact Us</a>
               </div>
             </div>
           </nav>
-                      <div class="flex items-center">
-            <a href="https://panelsell.store/login" class="router-link-active router-link-exact-active btn-pro btn-pro-login rounded mx-2 border-2 text-primary-500 border-primary-500" aria-current="page"> LOGIN </a>
-            <a href="https://panelsell.store/register" class="btn-pro  btn-register rounded ml-2 border-2 border-primary-500 bg-primary-500 text-white"> REGISTER </a>
+          <!-- This div will be dynamically replaced by Firebase login/logout UI -->
+          <div class="flex items-center">
+            <!-- Original static buttons will be replaced by JS, but we keep a placeholder to avoid layout shift -->
+            <a href="https://panelsell.store/login" class="router-link-active router-link-exact-active btn-pro btn-pro-login rounded mx-2 border-2 text-primary-500 border-primary-500" aria-current="page">LOGIN</a>
+            <a href="https://panelsell.store/register" class="btn-pro btn-register rounded ml-2 border-2 border-primary-500 bg-primary-500 text-white">REGISTER</a>
           </div>
-                    </div>
-        
-
-                    <!---->
+        </div>
       </div>
     </nav>
   </div>
 </div>
 
-    
-
-    <div>
-            <div class="p-2">
+<div>
+    <div class="p-2">
  
-    
-
-<!--- slider --->
-    
-              <section class="container m-auto">
+<!-- slider -->
+<section class="container m-auto">
   <section class="carousel my-4" dir="ltr" aria-label="Gallery" tabindex="0" style="margin-bottom:10px !important;">
     <div class="carousel__viewport">
       <ol class="carousel__track" style="transform: translateX(0px); transition: all 0ms ease 0s;">
-
-                        <li class="carousel__slide">
+        <li class="carousel__slide">
           <div class="carousel__item">
-                                      <img src="https://panelsell.store/uploads/media/51/01JXVCDWKGWJ6Q010KKJRH5DE5.png" class="rounded-md">
-                        
-
-
+            <img src="https://panelsell.store/uploads/media/51/01JXVCDWKGWJ6Q010KKJRH5DE5.png" class="rounded-md">
           </div>
         </li>
-                        <li class="carousel__slide">
+        <li class="carousel__slide">
           <div class="carousel__item">
-                                     <a href="https://youtu.be/nZ2maK61xeY?si=7Qdke_tOqTQDcqMX" target="_blank">
+            <a href="https://youtu.be/nZ2maK61xeY?si=7Qdke_tOqTQDcqMX" target="_blank">
               <img src="https://panelsell.store/uploads/media/85/01KHV2K8NSFKJ6FB92BX29X2CK.jpg" class="rounded-md">
             </a>
-                        
-
-
           </div>
         </li>
-                        <li class="carousel__slide">
+        <li class="carousel__slide">
           <div class="carousel__item">
-                                     <a href="https://youtu.be/MZn1LSL-Foc?si=2Bf6PgacO3T_jh-w" target="_blank">
+            <a href="https://youtu.be/MZn1LSL-Foc?si=2Bf6PgacO3T_jh-w" target="_blank">
               <img src="https://panelsell.store/uploads/media/86/01KHV2NY1TTSEKRS4SD51YFD69.jpg" class="rounded-md">
             </a>
-                        
-
-
           </div>
         </li>
-                
- 
-  
       </ol>
     </div>
-
-
     <button type="button" class="carousel__prev" aria-label="Navigate to previous slide">
       <svg class="carousel__icon" viewBox="0 0 24 24" role="img" aria-label="Arrow pointing to the left">
         <title>Arrow pointing to the left</title>
@@ -196,149 +263,135 @@
       </svg>
     </button>
     <ol class="carousel__pagination">
-
-            <li class="carousel__pagination-item">
-            <button type="button" class="carousel__pagination-button carousel__pagination-button--active" aria-label="Navigate to slide 1"></button>
-        </li>
-            <li class="carousel__pagination-item">
-            <button type="button" class="carousel__pagination-button " aria-label="Navigate to slide 2"></button>
-        </li>
-            <li class="carousel__pagination-item">
-            <button type="button" class="carousel__pagination-button " aria-label="Navigate to slide 3"></button>
-        </li>
-    
+      <li class="carousel__pagination-item">
+        <button type="button" class="carousel__pagination-button carousel__pagination-button--active" aria-label="Navigate to slide 1"></button>
+      </li>
+      <li class="carousel__pagination-item">
+        <button type="button" class="carousel__pagination-button" aria-label="Navigate to slide 2"></button>
+      </li>
+      <li class="carousel__pagination-item">
+        <button type="button" class="carousel__pagination-button" aria-label="Navigate to slide 3"></button>
+      </li>
     </ol>
   </section>
 </section>
 
-              <!--- /slider --->
-
-
- <!--- products --->
-          <section class="my-2" id="topup">
-                <div class="container mx-auto">
-                  <div class="text-center">
-                    <div class="flex items-center justify-center px-4 mt-0 md:mt-2 section-contact-gap pb-4">
-                      <hr role="separator" aria-orientation="horizontal" class="section-divider v-divider theme--light">
-                      <h3 class="text-2xl sm:text-3xl text-center font-primary font-bold mx-4 text-secondary-900">ALL ITEMS
-</h3>
-                      <hr role="separator" aria-orientation="horizontal" class="section-divider v-divider theme--light">
-                    </div>
-                  </div>
-
-                  <div class="pb-1 md:pb-10">
-                    <div class="md:py-5 md:px-0 grid md:grid-cols-6 sm:grid-cols-4 grid-cols-3 md:gap-8 gap-4">
-             <div class="single-game-product mb-2 md:mb-6">
-                        <a href="https://panelsell.store/topup/Drip%20Client%20Apk%20Mod" class="triangle">
-                          <div class="cursor-pointer">
+<!-- products -->
+<section class="my-2" id="topup">
+    <div class="container mx-auto">
+        <div class="text-center">
+            <div class="flex items-center justify-center px-4 mt-0 md:mt-2 section-contact-gap pb-4">
+                <hr role="separator" aria-orientation="horizontal" class="section-divider v-divider theme--light">
+                <h3 class="text-2xl sm:text-3xl text-center font-primary font-bold mx-4 text-secondary-900">ALL ITEMS</h3>
+                <hr role="separator" aria-orientation="horizontal" class="section-divider v-divider theme--light">
+            </div>
+        </div>
+        <div class="pb-1 md:pb-10">
+            <div class="md:py-5 md:px-0 grid md:grid-cols-6 sm:grid-cols-4 grid-cols-3 md:gap-8 gap-4">
+                <div class="single-game-product mb-2 md:mb-6">
+                    <a href="https://panelsell.store/topup/Drip%20Client%20Apk%20Mod" class="triangle">
+                        <div class="cursor-pointer">
                             <div class="inset-0 opacity-25"></div>
                             <div class="inset-0 transform hover:scale-90 transition duration-300">
-                              <div class="h-full w-full text-center mx-auto">
-                                <img src="https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png" width="200" height="100" alt="" data-nuxt-img="" sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 400px" srcset="https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png 1w, https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png 2w, https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png 320w, https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png 400w, https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png 640w, https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png 800w" class="rounded-md">
-                              </div>
-                            </div>
-                          </div>
-                          <div>
-                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-secondary-500">Drip Client Apk Mod</h1>
-                          </div>
-                        </a>
-                      </div>
-             <div class="single-game-product mb-2 md:mb-6">
-                        <a href="https://panelsell.store/topup/hg-cheats" class="triangle">
-                          <div class="cursor-pointer">
-                            <div class="inset-0 opacity-25"></div>
-                            <div class="inset-0 transform hover:scale-90 transition duration-300">
-                              <div class="h-full w-full text-center mx-auto">
-                                <img src="https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png" width="200" height="100" alt="" data-nuxt-img="" sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 400px" srcset="https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png 1w, https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png 2w, https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png 320w, https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png 400w, https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png 640w, https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png 800w" class="rounded-md">
-                              </div>
-                            </div>
-                          </div>
-                          <div>
-                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-secondary-500">HG Cheats</h1>
-                          </div>
-                        </a>
-                      </div>
-             <div class="single-game-product mb-2 md:mb-6">
-                        <a href="https://panelsell.store/topup/dark-patch" class="triangle">
-                          <div class="cursor-pointer">
-                            <div class="inset-0 opacity-25"></div>
-                            <div class="inset-0 transform hover:scale-90 transition duration-300">
-                              <div class="h-full w-full text-center mx-auto">
-                                <img src="https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png" width="200" height="100" alt="" data-nuxt-img="" sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 400px" srcset="https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png 1w, https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png 2w, https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png 320w, https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png 400w, https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png 640w, https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png 800w" class="rounded-md">
-                              </div>
-                            </div>
-                          </div>
-                          <div>
-                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-secondary-500">Dark Patch</h1>
-                          </div>
-                        </a>
-                      </div>
-             <div class="single-game-product mb-2 md:mb-6">
-                        <a href="https://panelsell.store/topup/pato-team-apk-mod" class="triangle">
-                          <div class="cursor-pointer">
-                            <div class="inset-0 opacity-25"></div>
-                            <div class="inset-0 transform hover:scale-90 transition duration-300">
-                              <div class="h-full w-full text-center mx-auto">
-                                <img src="https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png" width="200" height="100" alt="" data-nuxt-img="" sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 400px" srcset="https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png 1w, https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png 2w, https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png 320w, https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png 400w, https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png 640w, https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png 800w" class="rounded-md">
-                              </div>
-                            </div>
-                          </div>
-                          <div>
-                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-secondary-500">Pato team apk mod</h1>
-                          </div>
-                        </a>
-                      </div>
+                                <div class="h-full w-full text-center mx-auto">
+                                    <img src="https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png" width="200" height="100" alt="" data-nuxt-img="" sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 400px" srcset="https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png 1w, https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png 2w, https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png 320w, https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png 400w, https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png 640w, https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png 800w" class="rounded-md">
                                 </div>
-                  </div>
-              </div>
-           </section>
+                            </div>
+                        </div>
+                        <div>
+                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-secondary-500">Drip Client Apk Mod</h1>
+                        </div>
+                    </a>
+                </div>
+                <div class="single-game-product mb-2 md:mb-6">
+                    <a href="https://panelsell.store/topup/hg-cheats" class="triangle">
+                        <div class="cursor-pointer">
+                            <div class="inset-0 opacity-25"></div>
+                            <div class="inset-0 transform hover:scale-90 transition duration-300">
+                                <div class="h-full w-full text-center mx-auto">
+                                    <img src="https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png" width="200" height="100" alt="" data-nuxt-img="" sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 400px" srcset="https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png 1w, https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png 2w, https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png 320w, https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png 400w, https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png 640w, https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png 800w" class="rounded-md">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-secondary-500">HG Cheats</h1>
+                        </div>
+                    </a>
+                </div>
+                <div class="single-game-product mb-2 md:mb-6">
+                    <a href="https://panelsell.store/topup/dark-patch" class="triangle">
+                        <div class="cursor-pointer">
+                            <div class="inset-0 opacity-25"></div>
+                            <div class="inset-0 transform hover:scale-90 transition duration-300">
+                                <div class="h-full w-full text-center mx-auto">
+                                    <img src="https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png" width="200" height="100" alt="" data-nuxt-img="" sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 400px" srcset="https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png 1w, https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png 2w, https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png 320w, https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png 400w, https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png 640w, https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png 800w" class="rounded-md">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-secondary-500">Dark Patch</h1>
+                        </div>
+                    </a>
+                </div>
+                <div class="single-game-product mb-2 md:mb-6">
+                    <a href="https://panelsell.store/topup/pato-team-apk-mod" class="triangle">
+                        <div class="cursor-pointer">
+                            <div class="inset-0 opacity-25"></div>
+                            <div class="inset-0 transform hover:scale-90 transition duration-300">
+                                <div class="h-full w-full text-center mx-auto">
+                                    <img src="https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png" width="200" height="100" alt="" data-nuxt-img="" sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 400px" srcset="https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png 1w, https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png 2w, https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png 320w, https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png 400w, https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png 640w, https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png 800w" class="rounded-md">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-secondary-500">Pato team apk mod</h1>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-    <script src="https://panelsell.store/assets/template/js/slider.js?1879"></script>
+<script src="https://panelsell.store/assets/template/js/slider.js?1879"></script>
     
 </div>
 </div>
-    
-    <script src="https://panelsell.store/assets/template/js/jquery-3.7.1.min.js"></script>
 
-    
-    <script src="https://panelsell.store/assets/template/js/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="https://panelsell.store/assets/template/js/jquery-3.7.1.min.js"></script>
+<script src="https://panelsell.store/assets/template/js/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="https://panelsell.store/assets/template/js/toastr/toastr.min.js"></script>
 
-    
-    <script src="https://panelsell.store/assets/template/js/toastr/toastr.min.js"></script>
-
-    
-    <script>
-        $(document).ready(function() {
-  $('.top-profile').click(function(event) {
-    event.stopPropagation();
-    $('#userMenu').toggleClass('hidden');
-  });
-  $('.nav-overlay').click(function(event) {
-    event.stopPropagation();
-    $('#userMenu').addClass('hidden');
-  });
-
-});
-        $(document).ready(function() {
-            $('#accountButton').click(function() {
-                $('.right-side-menu').toggleClass('active');
-                $('#overlay').toggle();
-            });
-
-            $('#closeButton').click(function() {
-                $('.right-side-menu').removeClass('active');
-                $('#overlay').hide();
-            });
-
-            $('#overlay').click(function() {
-                $('.right-side-menu').removeClass('active');
-                $('#overlay').hide();
-            });
+<script>
+    // Original scripts (kept unchanged)
+    $(document).ready(function() {
+        $('.top-profile').click(function(event) {
+            event.stopPropagation();
+            $('#userMenu').toggleClass('hidden');
         });
-    </script>
+        $('.nav-overlay').click(function(event) {
+            event.stopPropagation();
+            $('#userMenu').addClass('hidden');
+        });
+    });
+    $(document).ready(function() {
+        $('#accountButton').click(function() {
+            $('.right-side-menu').toggleClass('active');
+            $('#overlay').toggle();
+        });
+        $('#closeButton').click(function() {
+            $('.right-side-menu').removeClass('active');
+            $('#overlay').hide();
+        });
+        $('#overlay').click(function() {
+            $('.right-side-menu').removeClass('active');
+            $('#overlay').hide();
+        });
+    });
+</script>
 
-    
-        <script>
+<!-- Popup script (unchanged) -->
+<script>
     $(document).ready(function() {
         function createAndShowModal(url, image_url, content, button_text) {
             const modalHtml = `
@@ -364,32 +417,24 @@
 
         function fetchPopups() {
             const popupRoute = 'https://panelsell.store/get-popup';
-
             fetch(popupRoute)
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Error fetching popups from ${popupRoute}: ${response.statusText}`);
-                    }
+                    if (!response.ok) throw new Error(`Error fetching popups: ${response.statusText}`);
                     return response.json();
                 })
                 .then(data => {
                     const popups = data.popups;
                     popups.forEach(popup => {
-                        createAndShowModal(popup.url, popup.image_url, popup.content, popup
-                            .button_text);
+                        createAndShowModal(popup.url, popup.image_url, popup.content, popup.button_text);
                     });
                 })
-                .catch(error => {
-                    console.error('Error fetching popups:', error.message);
-                });
+                .catch(error => console.error('Error fetching popups:', error.message));
         }
 
-                    fetchPopups();
-            });
+        fetchPopups();
+    });
 </script>
 
-    
 </div>
 </body>
-
 </html>
