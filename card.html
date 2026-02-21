@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rewarble Gift Cards</title>
+    <style>
+        body {
+            background-color: #1a1b2e; /* Dark navy background */
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .gift-card-container {
+            width: 100%;
+            max-width: 600px;
+        }
+        .gift-card-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #24253a; /* Slightly lighter dark for items */
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        .logo {
+            width: 60px;          /* Visa card-এর সাইজ – চাইলে বাড়ান */
+            height: auto;
+            margin-right: 15px;
+            border-radius: 6px;   /* হালকা rounded corners */
+            object-fit: contain;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5); /* হালকা shadow দিয়ে প্রিমিয়াম লুক */
+        }
+        .info {
+            flex: 1;
+        }
+        .title {
+            font-size: 18px;
+            margin: 0;
+        }
+        .fee {
+            font-size: 14px;
+            color: #b0b0b0;
+            margin: 2px 0;
+        }
+        .earn {
+            font-size: 14px;
+            color: #00ffea; /* Cyan for earn text */
+            margin: 2px 0;
+        }
+        .price {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 20px;
+        }
+        .buy-button {
+            background-color: #007bff; /* Blue button */
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .buy-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="gift-card-container">
+        <div class="gift-card-item">
+            <img src="https://d28wu8o6itv89t.cloudfront.net/images/Visadebitcardpng-1599584312349.png" alt="Visa Debit Card" class="logo">
+            <div class="info">
+                <h3 class="title">Rewarble gift card - $5</h3>
+                <p class="fee">51% Service Fee</p>
+                <p class="earn">Earn 9 Skine Coins</p>
+            </div>
+            <span class="price">$5</span>
+            <button class="buy-button">Buy Now</button>
+        </div>
+        <div class="gift-card-item">
+            <img src="https://d28wu8o6itv89t.cloudfront.net/images/Visadebitcardpng-1599584312349.png" alt="Visa Debit Card" class="logo">
+            <div class="info">
+                <h3 class="title">Rewarble gift card - $10</h3>
+                <p class="fee">27% Service Fee</p>
+                <p class="earn">Earn 16 Skine Coins</p>
+            </div>
+            <span class="price">$10</span>
+            <button class="buy-button">Buy Now</button>
+        </div>
+        <div class="gift-card-item">
+            <img src="https://d28wu8o6itv89t.cloudfront.net/images/Visadebitcardpng-1599584312349.png" alt="Visa Debit Card" class="logo">
+            <div class="info">
+                <h3 class="title">Rewarble gift card - $15</h3>
+                <p class="fee">20% Service Fee</p>
+                <p class="earn">Earn 22 Skine Coins</p>
+            </div>
+            <span class="price">$15</span>
+            <button class="buy-button">Buy Now</button>
+        </div>
+        <div class="gift-card-item">
+            <img src="https://d28wu8o6itv89t.cloudfront.net/images/Visadebitcardpng-1599584312349.png" alt="Visa Debit Card" class="logo">
+            <div class="info">
+                <h3 class="title">Rewarble gift card - $20</h3>
+                <p class="fee">16% Service Fee</p>
+                <p class="earn">Earn 29 Skine Coins</p>
+            </div>
+            <span class="price">$20</span>
+            <button class="buy-button">Buy Now</button>
+        </div>
+        <div class="gift-card-item">
+            <img src="https://d28wu8o6itv89t.cloudfront.net/images/Visadebitcardpng-1599584312349.png" alt="Visa Debit Card" class="logo">
+            <div class="info">
+                <h3 class="title">Rewarble gift card - $25</h3>
+                <p class="fee">13% Service Fee</p>
+                <p class="earn">Earn 35 Skine Coins</p>
+            </div>
+            <span class="price">$25</span>
+            <button class="buy-button">Buy Now</button>
+        </div>
+        <div class="gift-card-item">
+            <img src="https://d28wu8o6itv89t.cloudfront.net/images/Visadebitcardpng-1599584312349.png" alt="Visa Debit Card" class="logo">
+            <div class="info">
+                <h3 class="title">Rewarble gift card - $30</h3>
+                <p class="fee">12% Service Fee</p>
+                <p class="earn">Earn 42 Skine Coins</p>
+            </div>
+            <span class="price">$30</span>
+            <button class="buy-button">Buy Now</button>
+        </div>
+    </div>
+</body>
+</html>
