@@ -51,29 +51,26 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // DOM elements
-        const loginBtn = document.querySelector('a[href="https://panelsell.store/login"]');
-        const registerBtn = document.querySelector('a[href="https://panelsell.store/register"]');
-        const navContainer = document.querySelector('.header .flex.items-center.justify-between .flex.items-center'); // parent of login/register
+        // DOM element - parent container of login/register area
+        const navContainer = document.querySelector('.header .flex.items-center.justify-between .flex.items-center');
 
         // Function to update UI based on auth state
         function updateUI(user) {
             if (!navContainer) return;
 
             if (user) {
-                // User is logged in: replace login/register with user info & logout
+                // Logged in: show avatar + logout
                 const userEmail = user.email;
                 const photoURL = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User');
                 
                 navContainer.innerHTML = `
                     <div class="flex items-center space-x-3">
                         <img src="${photoURL}" alt="avatar" class="w-8 h-8 rounded-full border-2 border-primary-500">
-                        <span class="text-sm font-medium text-gray-700 hidden md:inline-block">${user.displayName || userEmail}</span>
+                        <span class="text-sm font-medium text-gray-200 hidden md:inline-block">${user.displayName || userEmail}</span>
                         <button id="firebaseLogoutBtn" class="btn-pro btn-pro-login rounded border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition px-3 py-1 text-sm">LOGOUT</button>
                     </div>
                 `;
 
-                // Attach logout event
                 document.getElementById('firebaseLogoutBtn').addEventListener('click', async () => {
                     try {
                         await signOut(auth);
@@ -83,18 +80,12 @@
                     }
                 });
             } else {
-                // User is logged out: restore original login/register buttons
+                // Logged out: show only LOGIN button
                 navContainer.innerHTML = `
-                    <a href="#" id="fakeLoginBtn" class="router-link-active router-link-exact-active btn-pro btn-pro-login rounded mx-2 border-2 text-primary-500 border-primary-500" aria-current="page">LOGIN</a>
-                    <a href="#" id="fakeRegisterBtn" class="btn-pro btn-register rounded ml-2 border-2 border-primary-500 bg-primary-500 text-white">REGISTER</a>
+                    <a href="#" id="fakeLoginBtn" class="router-link-active router-link-exact-active btn-pro btn-pro-login rounded mx-2 border-2 text-primary-500 border-primary-500 hover:bg-primary-500 hover:text-white transition px-4 py-2" aria-current="page">LOGIN WITH GOOGLE</a>
                 `;
 
-                // Attach Google sign-in to both buttons
                 document.getElementById('fakeLoginBtn').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    handleGoogleSignIn();
-                });
-                document.getElementById('fakeRegisterBtn').addEventListener('click', (e) => {
                     e.preventDefault();
                     handleGoogleSignIn();
                 });
@@ -107,7 +98,6 @@
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
                 toastr.success(`Welcome ${user.displayName || user.email}!`);
-                // UI updates via onAuthStateChanged
             } catch (error) {
                 toastr.error('Login failed: ' + error.message);
             }
@@ -118,47 +108,138 @@
             updateUI(user);
         });
 
-        // Initial check: if buttons exist, override their default behavior and start with login state
+        // Initial call
         window.addEventListener('DOMContentLoaded', () => {
-            // The original buttons have href links, we need to override them even if user is not logged in.
-            // But we will replace them completely via updateUI based on auth state.
-            // However, to avoid flash of original buttons, we can hide them initially and let updateUI decide.
-            // But simpler: we run updateUI(auth.currentUser) after DOM ready.
             updateUI(auth.currentUser);
         });
-
-        // Optional: Add a global logout if needed
     </script>
 
+    <!-- Dark Theme Styles (overriding original) -->
     <style>
         :root {
-            --theme-color: #fb00ff;
-            --logo-color: #5e5e5e;
-            --background-color: #000000;
-            --primary-font-color: #000000;
-            --navigation-background-color: #ffffff;
-            --navigation-font-color: #000000;
-            --footer-color: #f200ff;
-            --footer-font-color: #ffffff;
-            --content-box-color: #ffffff;
-
-            /* New beautiful gradient background */
-            --background-image: linear-gradient(135deg, #fdf2f8 0%, #e0f2fe 50%, #f0f9ff 100%);
+            --theme-color: #bb86fc;        /* softer purple for dark mode */
+            --logo-color: #ffffff;
+            --background-color: #121212;
+            --primary-font-color: #e0e0e0;
+            --navigation-background-color: #1e1e1e;
+            --navigation-font-color: #ffffff;
+            --footer-color: #1a1a1a;
+            --footer-font-color: #bbbbbb;
+            --content-box-color: #2a2a2a;
+            --background-image: none;       /* remove old gradient, use solid dark */
         }
 
         body {
-            background: var(--background-image);
-            background-attachment: fixed;
+            background-color: #121212 !important;
+            color: #e0e0e0 !important;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* Ensure buttons have consistent hover */
-        #firebaseLogoutBtn:hover {
-            background-color: #ef4444;
-            color: white;
+        /* Header background */
+        .header {
+            background-color: #1e1e1e;
+            border-bottom: 1px solid #333;
+        }
+
+        /* Logo filter (if needed) */
+        .logo {
+            filter: brightness(0) invert(1); /* makes dark logo light - adjust if your logo is already light */
+        }
+
+        /* Links and text */
+        a, .link {
+            color: #bb86fc;
+        }
+        a:hover {
+            color: #d0a0ff;
+        }
+
+        /* Product titles */
+        .single-game-product h1 {
+            color: #ffffff !important;
+            font-weight: 500 !important;
+        }
+
+        /* Section titles (ALL ITEMS) */
+        .text-secondary-900 {
+            color: #ffffff !important;
+        }
+
+        /* Buttons (login) */
+        .btn-pro-login {
+            border-color: #bb86fc !important;
+            color: #bb86fc !important;
+            background: transparent !important;
+        }
+        .btn-pro-login:hover {
+            background-color: #bb86fc !important;
+            color: #121212 !important;
+        }
+
+        /* Modal / popup background */
+        .modal-content {
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+        .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+
+        /* Carousel pagination dots */
+        .carousel__pagination-button {
+            background-color: #555;
+        }
+        .carousel__pagination-button--active {
+            background-color: #bb86fc;
+        }
+
+        /* Divider lines */
+        .section-divider {
+            border-color: #444;
+        }
+
+        /* Ensure text in footer is light */
+        .footer, .footer * {
+            color: #bbbbbb !important;
+        }
+
+        /* Override any remaining white backgrounds */
+        .card, .panel, .box {
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+        }
+
+        /* Toastr customization for dark mode */
+        #toast-container > div {
+            background-color: #333 !important;
+            color: #fff !important;
+            box-shadow: 0 0 12px rgba(0,0,0,0.5);
+        }
+
+        /* Additional global */
+        hr {
+            border-color: #444;
+        }
+
+        /* For any hardcoded text in old styles, force light color */
+        body, p, h1, h2, h3, h4, h5, h6, span, div:not(.carousel__icon) {
+            color: #e0e0e0;
+        }
+
+        /* Buttons inside modals etc */
+        .btn.theme-btn {
+            background-color: #bb86fc;
+            color: #121212;
+            border: none;
+        }
+        .btn.theme-btn:hover {
+            background-color: #d0a0ff;
         }
     </style>
 
     <style>
+        /* Original notice style (unchanged except colors may be overridden) */
         .notice-style {
             background-color: #077acb;
             color: #ffffff;
@@ -211,9 +292,8 @@
           </nav>
           <!-- This div will be dynamically replaced by Firebase login/logout UI -->
           <div class="flex items-center">
-            <!-- Original static buttons will be replaced by JS, but we keep a placeholder to avoid layout shift -->
+            <!-- Only one static button (LOGIN) as placeholder; register button removed -->
             <a href="https://panelsell.store/login" class="router-link-active router-link-exact-active btn-pro btn-pro-login rounded mx-2 border-2 text-primary-500 border-primary-500" aria-current="page">LOGIN</a>
-            <a href="https://panelsell.store/register" class="btn-pro btn-register rounded ml-2 border-2 border-primary-500 bg-primary-500 text-white">REGISTER</a>
           </div>
         </div>
       </div>
