@@ -28,12 +28,10 @@
 
     <!-- Firebase SDK (modular) -->
     <script type="module">
-        // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAy4ST9A4KUBzQpuNpjdD6aU40s8p1YNEg",
             authDomain: "top-up-4db01.firebaseapp.com",
@@ -45,32 +43,25 @@
             measurementId: "G-ZEMKJ3BD0G"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // DOM element - parent container of login/register area
         const navContainer = document.querySelector('.header .flex.items-center.justify-between .flex.items-center');
 
-        // Function to update UI based on auth state
         function updateUI(user) {
             if (!navContainer) return;
 
             if (user) {
-                // Logged in: show avatar + logout
-                const userEmail = user.email;
                 const photoURL = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User');
-                
                 navContainer.innerHTML = `
                     <div class="flex items-center space-x-3">
                         <img src="${photoURL}" alt="avatar" class="w-8 h-8 rounded-full border-2 border-primary-500">
-                        <span class="text-sm font-medium text-gray-200 hidden md:inline-block">${user.displayName || userEmail}</span>
+                        <span class="text-sm font-medium text-gray-800 hidden md:inline-block">${user.displayName || user.email}</span>
                         <button id="firebaseLogoutBtn" class="btn-pro btn-pro-login rounded border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition px-3 py-1 text-sm">LOGOUT</button>
                     </div>
                 `;
-
                 document.getElementById('firebaseLogoutBtn').addEventListener('click', async () => {
                     try {
                         await signOut(auth);
@@ -80,11 +71,9 @@
                     }
                 });
             } else {
-                // Logged out: show only LOGIN button
                 navContainer.innerHTML = `
                     <a href="#" id="fakeLoginBtn" class="router-link-active router-link-exact-active btn-pro btn-pro-login rounded mx-2 border-2 text-primary-500 border-primary-500 hover:bg-primary-500 hover:text-white transition px-4 py-2" aria-current="page">LOGIN WITH GOOGLE</a>
                 `;
-
                 document.getElementById('fakeLoginBtn').addEventListener('click', (e) => {
                     e.preventDefault();
                     handleGoogleSignIn();
@@ -92,7 +81,6 @@
             }
         }
 
-        // Google Sign-In handler
         async function handleGoogleSignIn() {
             try {
                 const result = await signInWithPopup(auth, provider);
@@ -103,30 +91,28 @@
             }
         }
 
-        // Listen to auth state changes
         onAuthStateChanged(auth, (user) => {
             updateUI(user);
         });
 
-        // Initial call
         window.addEventListener('DOMContentLoaded', () => {
             updateUI(auth.currentUser);
         });
     </script>
 
-    <!-- Dark Theme Styles (overriding original) -->
+    <!-- Dark Theme with Light Header -->
     <style>
         :root {
-            --theme-color: #bb86fc;        /* softer purple for dark mode */
+            --theme-color: #bb86fc;
             --logo-color: #ffffff;
             --background-color: #121212;
             --primary-font-color: #e0e0e0;
-            --navigation-background-color: #1e1e1e;
-            --navigation-font-color: #ffffff;
+            --navigation-background-color: #ffffff;  /* light header */
+            --navigation-font-color: #000000;
             --footer-color: #1a1a1a;
             --footer-font-color: #bbbbbb;
             --content-box-color: #2a2a2a;
-            --background-image: none;       /* remove old gradient, use solid dark */
+            --background-image: none;
         }
 
         body {
@@ -135,37 +121,26 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* Header background */
+        /* Header background light */
         .header {
-            background-color: #1e1e1e;
-            border-bottom: 1px solid #333;
+            background-color: #ffffff;
+            border-bottom: 1px solid #ddd;
         }
 
-        /* Logo filter (if needed) */
+        /* Logo: no filter, natural colors */
         .logo {
-            filter: brightness(0) invert(1); /* makes dark logo light - adjust if your logo is already light */
+            filter: none;
         }
 
-        /* Links and text */
-        a, .link {
-            color: #bb86fc;
+        /* Header navigation links */
+        .header .link {
+            color: #333 !important;
         }
-        a:hover {
-            color: #d0a0ff;
-        }
-
-        /* Product titles */
-        .single-game-product h1 {
-            color: #ffffff !important;
-            font-weight: 500 !important;
+        .header .link:hover {
+            color: #bb86fc !important;
         }
 
-        /* Section titles (ALL ITEMS) */
-        .text-secondary-900 {
-            color: #ffffff !important;
-        }
-
-        /* Buttons (login) */
+        /* Login button in light header */
         .btn-pro-login {
             border-color: #bb86fc !important;
             color: #bb86fc !important;
@@ -173,20 +148,29 @@
         }
         .btn-pro-login:hover {
             background-color: #bb86fc !important;
-            color: #121212 !important;
+            color: #ffffff !important;
         }
 
-        /* Modal / popup background */
+        /* Dark content area */
+        .single-game-product h1 {
+            color: #ffffff !important;
+            font-weight: 500 !important;
+        }
+
+        .text-secondary-900 {
+            color: #ffffff !important;
+        }
+
         .modal-content {
             background-color: #2a2a2a;
             color: #e0e0e0;
             border: 1px solid #444;
         }
+
         .btn-close {
             filter: invert(1) grayscale(100%) brightness(200%);
         }
 
-        /* Carousel pagination dots */
         .carousel__pagination-button {
             background-color: #555;
         }
@@ -194,40 +178,28 @@
             background-color: #bb86fc;
         }
 
-        /* Divider lines */
         .section-divider {
             border-color: #444;
         }
 
-        /* Ensure text in footer is light */
         .footer, .footer * {
             color: #bbbbbb !important;
         }
 
-        /* Override any remaining white backgrounds */
-        .card, .panel, .box {
-            background-color: #2a2a2a;
-            color: #e0e0e0;
-        }
-
-        /* Toastr customization for dark mode */
         #toast-container > div {
             background-color: #333 !important;
             color: #fff !important;
             box-shadow: 0 0 12px rgba(0,0,0,0.5);
         }
 
-        /* Additional global */
         hr {
             border-color: #444;
         }
 
-        /* For any hardcoded text in old styles, force light color */
         body, p, h1, h2, h3, h4, h5, h6, span, div:not(.carousel__icon) {
             color: #e0e0e0;
         }
 
-        /* Buttons inside modals etc */
         .btn.theme-btn {
             background-color: #bb86fc;
             color: #121212;
@@ -235,27 +207,6 @@
         }
         .btn.theme-btn:hover {
             background-color: #d0a0ff;
-        }
-    </style>
-
-    <style>
-        /* Original notice style (unchanged except colors may be overridden) */
-        .notice-style {
-            background-color: #077acb;
-            color: #ffffff;
-        }
-        .notice-style .btn-close {
-            font-size: 12px;
-        }
-        .notice-style .notice-heading {
-            font-size: 18px;
-            font-weight: 500;
-            padding-bottom: 4px;
-        }
-        .notice-text {
-            font-size: 12px;
-            font-weight: 400;
-            font-family: "Times New Roman", Times, serif;
         }
     </style>
 
@@ -278,6 +229,7 @@
   <div class="container m-auto p-2 py-3 md:py-5 md:px-0">
     <nav class="flex items-center justify-between">
       <a href="https://panelsell.store" class="">
+        <!-- Original logo, no filter, will appear in full color -->
         <img src="https://panelsell.store/uploads/settings/01KHN43K3QP9B17GMYGKF40ZVD.png" alt="Panel Sell" data-nuxt-img="" srcset="https://panelsell.store/uploads/settings/01KHN43K3QP9B17GMYGKF40ZVD.png 1x, https://panelsell.store/uploads/settings/01KHN43K3QP9B17GMYGKF40ZVD.png 2x" class="w-28 md:w-48 logo">
       </a>
       <div class="relative">
@@ -290,9 +242,9 @@
               </div>
             </div>
           </nav>
-          <!-- This div will be dynamically replaced by Firebase login/logout UI -->
+          <!-- Dynamic login / user area -->
           <div class="flex items-center">
-            <!-- Only one static button (LOGIN) as placeholder; register button removed -->
+            <!-- Placeholder will be replaced by Firebase -->
             <a href="https://panelsell.store/login" class="router-link-active router-link-exact-active btn-pro btn-pro-login rounded mx-2 border-2 text-primary-500 border-primary-500" aria-current="page">LOGIN</a>
           </div>
         </div>
@@ -443,7 +395,6 @@
 <script src="https://panelsell.store/assets/template/js/toastr/toastr.min.js"></script>
 
 <script>
-    // Original scripts (kept unchanged)
     $(document).ready(function() {
         $('.top-profile').click(function(event) {
             event.stopPropagation();
@@ -470,7 +421,6 @@
     });
 </script>
 
-<!-- Popup script (unchanged) -->
 <script>
     $(document).ready(function() {
         function createAndShowModal(url, image_url, content, button_text) {
