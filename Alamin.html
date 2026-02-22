@@ -195,6 +195,20 @@
         section, .section, [class*="section"] {
             border: none !important;
         }
+
+        /* slider এর সব বাটন এবং আইকন লুকানো */
+        .carousel__prev, .carousel__next, .carousel__pagination, 
+        .carousel__pagination-item, .carousel__pagination-button,
+        button[class*="carousel"], svg[class*="carousel"] {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+            position: absolute !important;
+            pointer-events: none !important;
+        }
     </style>
 
     <link rel="stylesheet" href="https://panelsell.store/assets/template/css/tailwindcss.css">
@@ -268,6 +282,8 @@
         </li>
       </ol>
     </div>
+    
+    <!-- এই বাটনগুলি এখন CSS দ্বারা লুকানো হবে -->
     <button type="button" class="carousel__prev" aria-label="Navigate to previous slide">
       <svg class="carousel__icon" viewBox="0 0 24 24" role="img" aria-label="Arrow pointing to the left">
         <title>Previous</title>
@@ -280,6 +296,8 @@
         <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"></path>
       </svg>
     </button>
+    
+    <!-- প্যাজিনেশন ডটস - এখন CSS দ্বারা লুকানো হবে -->
     <ol class="carousel__pagination">
       <li class="carousel__pagination-item">
         <button type="button" class="carousel__pagination-button carousel__pagination-button--active" aria-label="Navigate to slide 1"></button>
@@ -368,6 +386,65 @@
 </section>
 
 <script src="https://panelsell.store/assets/template/js/slider.js?1879"></script>
+
+<!-- জাভাস্ক্রিপ্ট দিয়ে slider এর বাটন এবং ডটস সরানো হচ্ছে -->
+<script>
+    (function() {
+        // পৃষ্ঠা লোড হওয়ার পর এবং সামান্য দেরি করে run করবে (slider.js লোড হওয়ার জন্য)
+        function removeSliderElements() {
+            // সব carousel বাটন এবং ডটস খুঁজে বের করা
+            const elementsToRemove = [
+                ...document.querySelectorAll('.carousel__prev'),
+                ...document.querySelectorAll('.carousel__next'),
+                ...document.querySelectorAll('.carousel__pagination'),
+                ...document.querySelectorAll('.carousel__pagination-item'),
+                ...document.querySelectorAll('.carousel__pagination-button'),
+                ...document.querySelectorAll('button[class*="carousel"]'),
+                ...document.querySelectorAll('svg[class*="carousel"]')
+            ];
+            
+            // প্রতিটি এলিমেন্ট সরিয়ে দেওয়া
+            elementsToRemove.forEach(el => {
+                if (el && el.parentNode) {
+                    el.style.display = 'none';
+                    el.style.opacity = '0';
+                    el.style.visibility = 'hidden';
+                    el.style.width = '0';
+                    el.style.height = '0';
+                    el.style.overflow = 'hidden';
+                    el.style.position = 'absolute';
+                    el.style.pointerEvents = 'none';
+                }
+            });
+            
+            // বিশেষ করে pagination খুঁজে বের করা
+            const pagination = document.querySelector('.carousel__pagination');
+            if (pagination) {
+                pagination.innerHTML = ''; // খালি করে দেওয়া
+                pagination.style.display = 'none';
+            }
+        }
+        
+        // এখনই একবার 실행
+        removeSliderElements();
+        
+        // DOM পরিবর্তন হলে আবার 실행 (কিছু স্ক্রিপ্ট পরে এলিমেন্ট যোগ করতে পারে)
+        const observer = new MutationObserver(function(mutations) {
+            removeSliderElements();
+        });
+        
+        // সম্পূর্ণ ডকুম্বেন্ট পর্যবেক্ষণ করা
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+        
+        // কিছুক্ষণ পর আবার চেষ্টা করা
+        setTimeout(removeSliderElements, 500);
+        setTimeout(removeSliderElements, 1000);
+        setTimeout(removeSliderElements, 2000);
+    })();
+</script>
     
 </div>
 </div>
@@ -375,7 +452,7 @@
 <!-- Footer Section - সম্পূর্ণ কালো, কোন বর্ডার/লাইন নেই -->
 <footer class="footer" style="padding-bottom: calc(30px + env(safe-area-inset-bottom)); background-color: #000000 !important; border: none !important; border-top: none !important; outline: none !important; box-shadow: none !important;">
     <div class="copyright">
-        © 2026 Easy Premium. সর্বস্বত্ব সংরক্ষিত।<br>
+        © 2026  Panel Sell সর্বস্বত্ব সংরক্ষিত।<br>
         কন্টাক্ট: mdalamin@gmail.com | হেল্পলাইন: +880174584994
     </div>
 </footer>
