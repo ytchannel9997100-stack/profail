@@ -53,7 +53,7 @@
                 navContainer.innerHTML = `
                     <div class="flex items-center space-x-3">
                         <img src="${user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User')}" alt="avatar" class="w-8 h-8 rounded-full border-2 border-primary-500">
-                        <span class="text-sm font-medium text-gray-800 hidden md:inline-block">${user.displayName || user.email}</span>
+                        <span class="text-sm font-medium text-gray-300 hidden md:inline-block">${user.displayName || user.email}</span>
                         <button id="firebaseLogoutBtn" class="btn-pro btn-pro-login rounded border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition px-3 py-1 text-sm">LOGOUT</button>
                     </div>
                 `;
@@ -62,7 +62,7 @@
                 });
             } else {
                 navContainer.innerHTML = `
-                    <a href="#" id="fakeLoginBtn" class="btn-pro btn-pro-login rounded mx-2 border-2 text-primary-500 border-primary-500 hover:bg-primary-500 hover:text-white transition px-4 py-2">LOGIN WITH GOOGLE</a>
+                    <a href="#" id="fakeLoginBtn" class="btn-pro btn-pro-login rounded mx-2 border-2 text-primary-500 border-primary-500 hover:bg-primary-500 hover:text-white transition px-4 py-2">LOGIN</a>
                 `;
                 document.getElementById('fakeLoginBtn')?.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -74,7 +74,7 @@
         onAuthStateChanged(auth, updateUI);
     </script>
 
-    <!-- Dark Theme with Light Header -->
+    <!-- সম্পূর্ণ ডার্ক থিম - কোন সাদা লাইন নেই -->
     <style>
         :root {
             --theme-color: #000000;
@@ -86,14 +86,20 @@
         }
 
         body {
-            background-color: #121212 !important;
+            background-color: #000000 !important;
             color: #e0e0e0 !important;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
         }
 
+        .body-bg {
+            background-color: #000000 !important;
+        }
+
         .header {
+            background-color: #000000 !important;
+            border-bottom: none !important;
         }
 
         .logo {
@@ -117,24 +123,43 @@
         }
 
         .section-divider {
-            border-color: #444;
+            border-color: #333 !important;
         }
 
         hr {
-            border-color: #444;
+            border-color: #333 !important;
         }
 
-        body, p, h1, h2, h3, h4, h5, h6, span {
+        body, p, h1, h2, h3, h4, h5, h6, span, div, section, .container {
             color: #e0e0e0;
         }
 
-        /* Footer Styles - Pure Black */
+        /* কোন প্রকার বর্ডার বা আউটলাইন সাদা না হয় */
+        * {
+            border-color: #333 !important;
+        }
+
+        /* হেডারের কোন বর্ডার নেই */
+        .header, .header * {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        nav, .nav, [class*="nav"] {
+            border: none !important;
+        }
+
+        /* ফুটার - সম্পূর্ণ কালো, কোন বর্ডার নেই */
         .footer {
             background-color: #000000 !important;
             padding: 40px 20px 30px;
             text-align: center;
-            border-top: 1px solid #333;
             margin-top: 40px;
+            border: none !important;
+            border-top: none !important;
+            outline: none !important;
+            box-shadow: none !important;
         }
         
         .copyright {
@@ -148,6 +173,27 @@
         .logo-container {
             display: flex;
             align-items: center;
+        }
+
+        /* মোবাইল রেস্পন্সিভ */
+        @media (max-width: 768px) {
+            .header .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
+            .footer {
+                padding: 30px 15px 25px;
+            }
+        }
+
+        /* কোন সাদা লাইন যেন না থাকে */
+        .container, .container-fluid, [class*="container"] {
+            border: none !important;
+        }
+
+        section, .section, [class*="section"] {
+            border: none !important;
         }
     </style>
 
@@ -168,7 +214,7 @@
 
 <div class="header">
   <div class="container m-auto p-2 py-3 md:py-5 md:px-0">
-    <nav class="flex items-center justify-between">
+    <nav class="flex items-center justify-between" style="border: none !important; outline: none !important;">
       <a href="https://panelsell.store" class="logo-container">
         <img src="https://panelsell.store/uploads/settings/01KHN43K3QP9B17GMYGKF40ZVD.png" 
              alt="Panel Sell" 
@@ -326,8 +372,8 @@
 </div>
 </div>
 
-<!-- Footer Section - Pure Black Background -->
-<footer class="footer" style="padding-bottom: calc(30px + env(safe-area-inset-bottom)); background-color: #000000 !important;">
+<!-- Footer Section - সম্পূর্ণ কালো, কোন বর্ডার/লাইন নেই -->
+<footer class="footer" style="padding-bottom: calc(30px + env(safe-area-inset-bottom)); background-color: #000000 !important; border: none !important; border-top: none !important; outline: none !important; box-shadow: none !important;">
     <div class="copyright">
         © 2026 Easy Premium. সর্বস্বত্ব সংরক্ষিত।<br>
         কন্টাক্ট: mdalamin@gmail.com | হেল্পলাইন: +880174584994
