@@ -52,9 +52,9 @@
             if (user) {
                 navContainer.innerHTML = `
                     <div class="flex items-center space-x-3">
-                        <img src="${user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User')}" alt="avatar" class="w-8 h-8 rounded-full border-2 border-purple-500">
-                        <span class="text-sm font-medium text-gray-300 hidden md:inline-block">${user.displayName || user.email}</span>
-                        <button id="firebaseLogoutBtn" class="btn-pro-login rounded border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition px-3 py-1 text-sm">LOGOUT</button>
+                        <img src="${user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User')}" alt="avatar" class="w-8 h-8 rounded-full border-2 border-primary-500">
+                        <span class="text-sm font-medium text-gray-800 hidden md:inline-block">${user.displayName || user.email}</span>
+                        <button id="firebaseLogoutBtn" class="btn-pro btn-pro-login rounded border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition px-3 py-1 text-sm">LOGOUT</button>
                     </div>
                 `;
                 document.getElementById('firebaseLogoutBtn')?.addEventListener('click', async () => {
@@ -62,7 +62,7 @@
                 });
             } else {
                 navContainer.innerHTML = `
-                    <a href="#" id="fakeLoginBtn" class="btn-pro-login rounded mx-2 border-2 text-purple-400 border-purple-400 hover:bg-purple-500 hover:text-white transition px-4 py-2">LOGIN WITH GOOGLE</a>
+                    <a href="#" id="fakeLoginBtn" class="btn-pro btn-pro-login rounded mx-2 border-2 text-primary-500 border-primary-500 hover:bg-primary-500 hover:text-white transition px-4 py-2">LOGIN WITH GOOGLE</a>
                 `;
                 document.getElementById('fakeLoginBtn')?.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -74,55 +74,35 @@
         onAuthStateChanged(auth, updateUI);
     </script>
 
-    <!-- সম্পূর্ণ ডার্ক থিম - মোবাইলের জন্য অপ্টিমাইজড -->
+    <!-- Dark Theme with Light Header -->
     <style>
-        /* গ্লোবাল ডার্ক থিম */
-        * {
-            box-sizing: border-box;
+        :root {
+            --theme-color: #000000;
+            --background-color: #000000;
+            --primary-font-color: #e0e0e0;
+            --navigation-background-color: #000000;
+            --footer-color: #000000;
+            --footer-font-color: #bbbbbb;
         }
 
         body {
-            background-color: #000000 !important;
+            background-color: #121212 !important;
             color: #e0e0e0 !important;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            min-height: 100vh;
         }
 
-        .body-bg {
-            background-color: #000000 !important;
-        }
-
-        /* হেডার - সম্পূর্ণ কালো */
         .header {
-            background-color: #000000 !important;
-            border-bottom: 1px solid #222;
+            background-color: #000 !important;
         }
 
-        /* লোগো */
         .logo {
             filter: none;
-            max-height: 50px;
+            max-height: 60px;
             width: auto;
         }
-        
-        @media (max-width: 768px) {
-            .logo {
-                max-height: 40px;
-            }
-        }
 
-        /* নেভিগেশন লিংক */
-        .link {
-            color: #cccccc !important;
-            transition: color 0.3s;
-        }
-        .link:hover {
-            color: #bb86fc !important;
-        }
-
-        /* লগইন বাটন */
         .btn-pro-login {
             border-color: #bb86fc !important;
             color: #bb86fc !important;
@@ -130,148 +110,45 @@
         }
         .btn-pro-login:hover {
             background-color: #bb86fc !important;
-            color: #000000 !important;
+            color: #ffffff !important;
         }
 
-        /* কন্টেইনার ব্যাকগ্রাউন্ড */
-        .container, .container-fluid, [class*="container"] {
-            background-color: transparent;
-        }
-
-        /* সমস্ত ডিভ, সেকশন */
-        div, section, main, header, footer, nav, article, aside {
-            background-color: transparent;
-        }
-
-        /* স্পেসিফিক এলিমেন্ট */
-        .p-2, .my-2, .my-4, .py-3, .py-5, .px-4, .pb-4, .pb-10, .pt-3 {
-            background-color: transparent;
-        }
-
-        /* টেক্সট কালার - সব সাদা/ধূসর */
-        h1, h2, h3, h4, h5, h6, p, span, a:not(.btn-pro-login), div, label, .text-secondary-900, .text-secondary-500 {
-            color: #e0e0e0 !important;
-        }
-
-        /* প্রোডাক্ট টাইটেল */
         .single-game-product h1 {
             color: #ffffff !important;
-            font-size: 0.75rem;
         }
 
-        @media (min-width: 768px) {
-            .single-game-product h1 {
-                font-size: 0.875rem;
-            }
-        }
-
-        /* সেকশন ডিভাইডার */
         .section-divider {
-            border-color: #333 !important;
-            opacity: 0.5;
+            border-color: #444;
         }
 
         hr {
-            border-color: #333 !important;
+            border-color: #444;
         }
 
-        /* ইমেজ হোভার ইফেক্ট */
-        .inset-0.transform.hover\:scale-90:hover {
-            opacity: 0.9;
+        body, p, h1, h2, h3, h4, h5, h6, span {
+            color: #e0e0e0;
         }
 
-        /* কারousel ডটস */
-        .carousel__pagination-button {
-            background-color: #444 !important;
-        }
-        .carousel__pagination-button--active {
-            background-color: #bb86fc !important;
-        }
-
-        /* কারousel এরো */
-        .carousel__icon {
-            fill: #ffffff;
-        }
-
-        /* ফুটার - সম্পূর্ণ কালো */
+        /* Footer Styles - Pure Black */
         .footer {
             background-color: #000000 !important;
-            padding: 30px 15px 25px;
+            padding: 40px 20px 30px;
             text-align: center;
-            border-top: 1px solid #222;
-            margin-top: 30px;
+            border-top: 1px solid #333;
+            margin-top: 40px;
         }
         
         .copyright {
-            color: #999 !important;
-            font-size: 13px;
-            line-height: 1.6;
+            color: #999;
+            font-size: 14px;
+            line-height: 1.8;
             max-width: 800px;
             margin: 0 auto;
         }
         
-        .copyright a {
-            color: #bb86fc !important;
-            text-decoration: none;
-        }
-
-        /* লোগো কন্টেইনার */
         .logo-container {
             display: flex;
             align-items: center;
-        }
-
-        /* গ্রিড আইটেম */
-        .grid {
-            background-color: transparent;
-        }
-
-        /* প্রোডাক্ট কার্ড */
-        .single-game-product {
-            background-color: transparent;
-        }
-
-        /* টোস্ট মেসেজ ডার্ক */
-        #toast-container > div {
-            background-color: #222 !important;
-            color: #fff !important;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-
-        /* মোবাইল রেস্পন্সিভ ফিক্স */
-        @media (max-width: 640px) {
-            .header .container {
-                padding-left: 10px;
-                padding-right: 10px;
-            }
-            
-            .footer {
-                padding: 25px 10px 20px;
-            }
-            
-            .copyright {
-                font-size: 12px;
-            }
-        }
-
-        /* স্ক্রলবার ডার্ক */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #111;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #444;
         }
     </style>
 
@@ -310,7 +187,7 @@
         </nav>
         <!-- Dynamic login / user area -->
         <div class="flex items-center">
-          <a href="https://panelsell.store/login" class="btn-pro-login rounded mx-2 border-2 text-purple-400 border-purple-400 hover:bg-purple-500 hover:text-white transition px-4 py-2 text-sm md:text-base">LOGIN</a>
+          <a href="https://panelsell.store/login" class="btn-pro btn-pro-login rounded mx-2 border-2 text-primary-500 border-primary-500">LOGIN</a>
         </div>
       </div>
     </nav>
@@ -327,20 +204,20 @@
       <ol class="carousel__track" style="transform: translateX(0px);">
         <li class="carousel__slide">
           <div class="carousel__item">
-            <img src="https://panelsell.store/uploads/media/51/01JXVCDWKGWJ6Q010KKJRH5DE5.png" class="rounded-md" alt="slide 1" style="border: 1px solid #222;">
+            <img src="https://panelsell.store/uploads/media/51/01JXVCDWKGWJ6Q010KKJRH5DE5.png" class="rounded-md" alt="slide 1">
           </div>
         </li>
         <li class="carousel__slide">
           <div class="carousel__item">
             <a href="https://youtu.be/nZ2maK61xeY?si=7Qdke_tOqTQDcqMX" target="_blank">
-              <img src="https://panelsell.store/uploads/media/85/01KHV2K8NSFKJ6FB92BX29X2CK.jpg" class="rounded-md" alt="slide 2" style="border: 1px solid #222;">
+              <img src="https://panelsell.store/uploads/media/85/01KHV2K8NSFKJ6FB92BX29X2CK.jpg" class="rounded-md" alt="slide 2">
             </a>
           </div>
         </li>
         <li class="carousel__slide">
           <div class="carousel__item">
             <a href="https://youtu.be/MZn1LSL-Foc?si=2Bf6PgacO3T_jh-w" target="_blank">
-              <img src="https://panelsell.store/uploads/media/86/01KHV2NY1TTSEKRS4SD51YFD69.jpg" class="rounded-md" alt="slide 3" style="border: 1px solid #222;">
+              <img src="https://panelsell.store/uploads/media/86/01KHV2NY1TTSEKRS4SD51YFD69.jpg" class="rounded-md" alt="slide 3">
             </a>
           </div>
         </li>
@@ -377,9 +254,9 @@
     <div class="container mx-auto">
         <div class="text-center">
             <div class="flex items-center justify-center px-4 mt-0 md:mt-2 pb-4">
-                <hr role="separator" aria-orientation="horizontal" class="section-divider v-divider theme--light" style="border-color: #333;">
-                <h3 class="text-2xl sm:text-3xl text-center font-primary font-bold mx-4 text-white">ALL ITEMS</h3>
-                <hr role="separator" aria-orientation="horizontal" class="section-divider v-divider theme--light" style="border-color: #333;">
+                <hr role="separator" aria-orientation="horizontal" class="section-divider v-divider theme--light">
+                <h3 class="text-2xl sm:text-3xl text-center font-primary font-bold mx-4 text-secondary-900">ALL ITEMS</h3>
+                <hr role="separator" aria-orientation="horizontal" class="section-divider v-divider theme--light">
             </div>
         </div>
         <div class="pb-1 md:pb-10">
@@ -389,12 +266,12 @@
                         <div class="cursor-pointer">
                             <div class="inset-0 transform hover:scale-90 transition duration-300">
                                 <div class="h-full w-full text-center mx-auto">
-                                    <img src="https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png" width="200" height="100" alt="Drip Client" class="rounded-md" style="border: 1px solid #222;">
+                                    <img src="https://panelsell.store/uploads/media/83/01KHN8S679GWKE0HGMHXWAK31T.png" width="200" height="100" alt="Drip Client" class="rounded-md">
                                 </div>
                             </div>
                         </div>
                         <div>
-                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-gray-300">Drip Client Apk Mod</h1>
+                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-secondary-500">Drip Client Apk Mod</h1>
                         </div>
                     </a>
                 </div>
@@ -403,12 +280,12 @@
                         <div class="cursor-pointer">
                             <div class="inset-0 transform hover:scale-90 transition duration-300">
                                 <div class="h-full w-full text-center mx-auto">
-                                    <img src="https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png" width="200" height="100" alt="HG Cheats" class="rounded-md" style="border: 1px solid #222;">
+                                    <img src="https://panelsell.store/uploads/media/84/01KHN90YSX3QTEWMK2DWR6NT0D.png" width="200" height="100" alt="HG Cheats" class="rounded-md">
                                 </div>
                             </div>
                         </div>
                         <div>
-                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-gray-300">HG Cheats</h1>
+                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-secondary-500">HG Cheats</h1>
                         </div>
                     </a>
                 </div>
@@ -417,12 +294,12 @@
                         <div class="cursor-pointer">
                             <div class="inset-0 transform hover:scale-90 transition duration-300">
                                 <div class="h-full w-full text-center mx-auto">
-                                    <img src="https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png" width="200" height="100" alt="Dark Patch" class="rounded-md" style="border: 1px solid #222;">
+                                    <img src="https://panelsell.store/uploads/media/82/01KHN8PTJDD3HXWSKFM265KD9E.png" width="200" height="100" alt="Dark Patch" class="rounded-md">
                                 </div>
                             </div>
                         </div>
                         <div>
-                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-gray-300">Dark Patch</h1>
+                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-secondary-500">Dark Patch</h1>
                         </div>
                     </a>
                 </div>
@@ -431,12 +308,12 @@
                         <div class="cursor-pointer">
                             <div class="inset-0 transform hover:scale-90 transition duration-300">
                                 <div class="h-full w-full text-center mx-auto">
-                                    <img src="https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png" width="200" height="100" alt="Pato Team" class="rounded-md" style="border: 1px solid #222;">
+                                    <img src="https://panelsell.store/uploads/media/87/01KHZXWT4J6RZCKPMTFKT74J09.png" width="200" height="100" alt="Pato Team" class="rounded-md">
                                 </div>
                             </div>
                         </div>
                         <div>
-                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-gray-300">Pato team apk mod</h1>
+                            <h1 class="capitalize text-xs text-center pt-3 font-primary font-extralight text-secondary-500">Pato team apk mod</h1>
                         </div>
                     </a>
                 </div>
@@ -450,7 +327,7 @@
 </div>
 </div>
 
-<!-- Footer Section - সম্পূর্ণ কালো -->
+<!-- Footer Section - Pure Black Background -->
 <footer class="footer" style="padding-bottom: calc(30px + env(safe-area-inset-bottom)); background-color: #000000 !important;">
     <div class="copyright">
         © 2026 Easy Premium. সর্বস্বত্ব সংরক্ষিত।<br>
