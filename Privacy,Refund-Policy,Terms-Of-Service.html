@@ -602,7 +602,7 @@
 
         <div class="content-wrapper">
            
-            <!-- ========== সেকশন ১: আমাদের সম্পর্কে ও রিসেলার তথ্য (স্পষ্ট করা হয়েছে) ========== -->
+            <!-- ========== সেকশন ১: আমাদের সম্পর্কে ও রিসেলার তথ্য ========== -->
             <section class="section-card">
                 <div class="section-header">
                     <div class="section-icon">
@@ -621,8 +621,8 @@
                 </div>
             </section>
             
-            <!-- ========== সেকশন ২: আমরা কোন তথ্য সংগ্রহ করি? (স্বচ্ছতা যোগ করা হয়েছে) ========== -->
-            <section class="section-card">
+            <!-- ========== সেকশন ২: আমরা কোন তথ্য সংগ্রহ করি? (Privacy Policy মূল অংশ) ========== -->
+            <section class="section-card" id="privacy-policy">
                 <div class="section-header">
                     <div class="section-icon">
                         <i class="fas fa-database"></i>
@@ -663,7 +663,7 @@
                 </div>
             </section>
             
-            <!-- ========== সেকশন ৪: তথ্যের সুরক্ষা (আরও জোরালো করা হয়েছে) ========== -->
+            <!-- ========== সেকশন ৪: তথ্যের সুরক্ষা ========== -->
             <section class="section-card">
                 <div class="section-header">
                     <div class="section-icon">
@@ -686,7 +686,7 @@
                 </div>
             </section>
             
-            <!-- ========== সেকশন ৫: বিশেষ সতর্কতা (অপরিবর্তিত) ========== -->
+            <!-- ========== সেকশন ৫: বিশেষ সতর্কতা ========== -->
             <section class="section-card">
                 <div class="section-header">
                     <div class="section-icon">
@@ -707,7 +707,7 @@
                 </div>
             </section>
             
-            <!-- ========== সেকশন ৬: ব্যক্তিগত তথ্য ও তার সুরক্ষা (অপরিবর্তিত) ========== -->
+            <!-- ========== সেকশন ৬: ব্যক্তিগত তথ্য ও তার সুরক্ষা ========== -->
             <section class="section-card">
                 <div class="section-header">
                     <div class="section-icon">
@@ -729,8 +729,8 @@
                 </div>
             </section>
             
-            <!-- ========== সেকশন ৭: রিফান্ড পলিসি (সম্পূর্ণ পরিষ্কার ও গোছানো হয়েছে) ========== -->
-            <section class="section-card">
+            <!-- ========== সেকশন ৭: রিফান্ড পলিসি (Refund & Payment Solutions) ========== -->
+            <section class="section-card" id="refund-policy">
                 <div class="section-header">
                     <div class="section-icon">
                         <i class="fas fa-money-bill-wave"></i>
@@ -778,8 +778,8 @@
                 </div>
             </section>
 
-            <!-- ========== সেকশন ৮: পরিষেবার শর্তাবলী (স্পষ্ট ও আইনি ভিত্তি সহ) ========== -->
-            <section class="section-card">
+            <!-- ========== সেকশন ৮: পরিষেবার শর্তাবলী (Terms and Conditions) ========== -->
+            <section class="section-card" id="terms-conditions">
                 <div class="section-header">
                     <div class="section-icon">
                         <i class="fas fa-file-contract"></i>
@@ -836,7 +836,7 @@
         </footer>
     </div>
 
-    <!-- JavaScript (সম্পূর্ণ অপরিবর্তিত) -->
+    <!-- JavaScript (সম্পূর্ণ অপরিবর্তিত + URL স্ক্রলিং যুক্ত) -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const observerOptions = {
@@ -877,6 +877,29 @@
             adjustHeight();
             window.addEventListener('resize', adjustHeight);
             window.addEventListener('orientationchange', adjustHeight);
+            
+            // ========== URL প্যারামিটার অনুযায়ী স্ক্রলিং ==========
+            const urlParams = new URLSearchParams(window.location.search);
+            const dataParam = urlParams.get('data');
+            if (dataParam) {
+                // ম্যাপিং: URL প্যারামিটার থেকে সেকশন আইডি
+                const sectionMap = {
+                    'PrivacyPolicy': 'privacy-policy',
+                    'PaymentSolutions': 'refund-policy',      // পেমেন্ট সলিউশন রিফান্ড সেকশনে দেখাবে
+                    'TermsandConditions': 'terms-conditions',
+                    'RefundandReturnsPolicy': 'refund-policy'
+                };
+                const targetId = sectionMap[dataParam];
+                if (targetId) {
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        // ছোট বিলম্ব যাতে পৃষ্ঠা পুরোপুরি রেন্ডার হয়
+                        setTimeout(() => {
+                            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 300);
+                    }
+                }
+            }
         });
     </script>
     
