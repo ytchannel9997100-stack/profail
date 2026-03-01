@@ -1,141 +1,429 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rewarble Gift Cards</title>
+    <title>Relograde অর্ডার ফর্ম</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            background-color: #1a1b2e; /* Dark navy background */
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding: 20px;
         }
-        .gift-card-container {
-            width: 100%;
-            max-width: 600px;
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
         }
-        .gift-card-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: #24253a; /* Slightly lighter dark for items */
-            padding: 15px 20px;
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
             margin-bottom: 10px;
-            border-radius: 8px;
         }
-        .logo {
-            width: 110px;          /* Visa card-এর সাইজ – চাইলে বাড়ান */
-            height: auto;
-            margin-right: 20px;
-            border-radius: 6px;   /* হালকা rounded corners */
-            object-fit: contain;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.5); /* হালকা shadow দিয়ে প্রিমিয়াম লুক */
-        }
-        .info {
-            flex: 1;
-        }
-        .title {
-            font-size: 18px;
-            margin: 0;
-        }
-        .fee {
-            font-size: 14px;
-            color: #b0b0b0;
-            margin: 2px 0;
-        }
-        .earn {
-            font-size: 14px;
-            color: #00ffea; /* Cyan for earn text */
-            margin: 2px 0;
-        }
-        .price {
-            font-size: 20px;
-            font-weight: bold;
-            margin: 0 20px;
-        }
-        .buy-button {
-            background-color: #007bff; /* Blue button */
-            color: #ffffff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
+        
+        .header p {
+            opacity: 0.9;
             font-size: 16px;
         }
-        .buy-button:hover {
-            background-color: #0056b3;
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .api-key-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .api-key-section h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .api-key-display {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .order-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        
+        .order-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .response-section {
+            margin-top: 30px;
+            border-top: 2px solid #f0f0f0;
+            padding-top: 20px;
+        }
+        
+        .response-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .response-box {
+            background: #1e1e2f;
+            color: #00ff88;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #0c5460;
+        }
+        
+        .product-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .product-item {
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .product-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .product-item.selected {
+            background: #e8f0fe;
+            border-left: 3px solid #667eea;
+        }
+        
+        .product-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .product-price {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="gift-card-container">
-        <div class="gift-card-item">
-            <img src="https://www.cibc.com/content/dam/global-assets/card-art/credit-cards/aventura-cards/cibc-us-dollar-aventura-gold-visa-card/cibc-visa-aventura-us-dollar-en.png/_jcr_content/renditions/cq5dam.web.767.767.png" alt="Visa Debit Card" class="logo">
-            <div class="info">
-                <h3 class="title">Virtual Visa card - $5</h3>
-                <p class="fee">No Bank Account</p>
-                <p class="earn">Global Server</p>
-            </div>
-            <span class="price">৳930</span>
-            <button class="buy-button">Buy Now</button>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 Relograde অটোমেটিক অর্ডার সিস্টেম</h1>
+            <p>আপনার API Key দিয়ে সরাসরি অর্ডার করুন</p>
         </div>
-        <div class="gift-card-item">
-            <img src="https://www.cibc.com/content/dam/global-assets/card-art/credit-cards/aventura-cards/cibc-us-dollar-aventura-gold-visa-card/cibc-visa-aventura-us-dollar-en.png/_jcr_content/renditions/cq5dam.web.767.767.png" alt="Visa Debit Card" class="logo">
-            <div class="info">
-                <h3 class="title">Virtual Visa card - $10</h3>
-                <p class="fee">No Bank Account</p>
-                <p class="earn">Global Server</p>
+        
+        <div class="content">
+            <!-- API Key সেকশন -->
+            <div class="api-key-section">
+                <h3>🔑 আপনার API Key (Sandbox)</h3>
+                <div class="api-key-display" id="apiKeyDisplay">
+                    1c30124b-fd3c-4807-9b0b-a8b535af570a
+                </div>
+                <p style="margin-top: 10px; font-size: 13px; color: #666;">
+                    ⚠️ এই Key গোপন রাখুন। Sandbox environment-এ পরীক্ষার জন্য ব্যবহার করুন।
+                </p>
             </div>
-            <span class="price">৳1400</span>
-            <button class="buy-button">Buy Now</button>
-        </div>
-        <div class="gift-card-item">
-            <img src="https://www.cibc.com/content/dam/global-assets/card-art/credit-cards/aventura-cards/cibc-us-dollar-aventura-gold-visa-card/cibc-visa-aventura-us-dollar-en.png/_jcr_content/renditions/cq5dam.web.767.767.png" alt="Visa Debit Card" class="logo">
-            <div class="info">
-                <h3 class="title">Virtual Visa card - $15</h3>
-                <p class="fee">No Bank Account</p>
-                <p class="earn">Global Server</p>
+            
+            <!-- তথ্য বক্স -->
+            <div class="info-box">
+                <strong>ℹ️ জানুন:</strong> আপনি Sandbox environment-এ আছেন। এখানে আসল টাকা খরচ হবে না। প্রথমে প্রোডাক্ট লিস্ট দেখে নিন, তারপর অর্ডার দিন।
             </div>
-            <span class="price">৳2220</span>
-            <button class="buy-button">Buy Now</button>
-        </div>
-        <div class="gift-card-item">
-            <img src="https://www.cibc.com/content/dam/global-assets/card-art/credit-cards/aventura-cards/cibc-us-dollar-aventura-gold-visa-card/cibc-visa-aventura-us-dollar-en.png/_jcr_content/renditions/cq5dam.web.767.767.png" alt="Visa Debit Card" class="logo">
-            <div class="info">
-                <h3 class="title">Virtual Visa card - $20</h3>
-                <p class="fee">No Bank Account</p>
-                <p class="earn">Global Server</p>
+            
+            <!-- অর্ডার ফর্ম -->
+            <form id="orderForm">
+                <div class="form-group">
+                    <label for="action">আপনি কী করতে চান?</label>
+                    <select id="action" class="form-control" onchange="toggleAction()">
+                        <option value="products">📋 প্রোডাক্ট লিস্ট দেখুন</option>
+                        <option value="order" selected>🛍️ নতুন অর্ডার দিন</option>
+                        <option value="check">🔍 অর্ডার স্ট্যাটাস চেক করুন</option>
+                        <option value="balance">💰 অ্যাকাউন্ট ব্যালেন্স দেখুন</option>
+                    </select>
+                </div>
+                
+                <!-- অর্ডার ফর্ম (ডিফল্ট দেখাবে) -->
+                <div id="orderFields">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productId">প্রোডাক্ট আইডি</label>
+                            <input type="text" id="productId" class="form-control" placeholder="e.g., Rewarble Mastercard 5 USD" value="Rewarble Mastercard 5.00 USD">
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity">পরিমাণ</label>
+                            <input type="number" id="quantity" class="form-control" value="1" min="1" max="100">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customerEmail">গ্রাহকের ইমেইল (ঐচ্ছিক)</label>
+                        <input type="email" id="customerEmail" class="form-control" placeholder="customer@example.com">
+                    </div>
+                </div>
+                
+                <!-- অর্ডার স্ট্যাটাস চেক ফর্ম (লুকানো থাকবে) -->
+                <div id="checkFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="orderId">অর্ডার আইডি দিন</label>
+                        <input type="text" id="orderId" class="form-control" placeholder="e.g., order_123456">
+                    </div>
+                </div>
+                
+                <!-- প্রোডাক্ট লিস্ট (স্যাম্পল) -->
+                <div id="sampleProducts" style="margin-top: 20px; margin-bottom: 20px;">
+                    <label>স্যাম্পল প্রোডাক্ট (Sandbox):</label>
+                    <div class="product-list">
+                        <div class="product-item" onclick="selectProduct('prod_rew_5', 'Rewarble Mastercard 5 USD', '5.00')">
+                            <div class="product-name">Rewarble Mastercard 5 USD</div>
+                            <div class="product-price">ফেস ভ্যালু: $5.00 | প্রোডাক্ট আইডি: prod_rew_5</div>
+                        </div>
+                        <div class="product-item" onclick="selectProduct('prod_rew_10', 'Rewarble Mastercard 10 USD', '10.00')">
+                            <div class="product-name">Rewarble Mastercard 10 USD</div>
+                            <div class="product-price">ফেস ভ্যালু: $10.00 | প্রোডাক্ট আইডি: prod_rew_10</div>
+                        </div>
+                        <div class="product-item" onclick="selectProduct('prod_rew_25', 'Rewarble Mastercard 25 USD', '25.00')">
+                            <div class="product-name">Rewarble Mastercard 25 USD</div>
+                            <div class="product-price">ফেস ভ্যালু: $25.00 | প্রোডাক্ট আইডি: prod_rew_25</div>
+                        </div>
+                        <div class="product-item" onclick="selectProduct('prod_rew_var', 'Rewarble Mastercard Variable', '5-1000')">
+                            <div class="product-name">Rewarble Mastercard Variable</div>
+                            <div class="product-price">ফেস ভ্যালু: $5-1000 | প্রোডাক্ট আইডি: prod_rew_var</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" class="order-btn" onclick="submitRequest()">
+                    🚀 রিকোয়েস্ট পাঠান
+                </button>
+            </form>
+            
+            <!-- লোডিং -->
+            <div class="loading" id="loading"></div>
+            
+            <!-- রেসপন্স দেখানোর জায়গা -->
+            <div class="response-section">
+                <h3>📥 API রেসপন্স</h3>
+                <div class="response-box" id="responseBox">
+                    // এখানে API থেকে রেসপন্স দেখাবে
+                    // প্রথমে প্রোডাক্ট লিস্ট দেখতে "প্রোডাক্ট লিস্ট দেখুন" সিলেক্ট করে 
+                    // রিকোয়েস্ট পাঠান বাটনে ক্লিক করুন
+                </div>
             </div>
-            <span class="price">৳2600</span>
-            <button class="buy-button">Buy Now</button>
-        </div>
-        <div class="gift-card-item">
-            <img src="https://www.cibc.com/content/dam/global-assets/card-art/credit-cards/aventura-cards/cibc-us-dollar-aventura-gold-visa-card/cibc-visa-aventura-us-dollar-en.png/_jcr_content/renditions/cq5dam.web.767.767.png" alt="Visa Debit Card" class="logo">
-            <div class="info">
-                <h3 class="title">Virtual Visa card - $25</h3>
-                <p class="fee">No Bank Account</p>
-                <p class="earn">Global Server</p>
-            </div>
-            <span class="price">৳3300</span>
-            <button class="buy-button">Buy Now</button>
-        </div>
-        <div class="gift-card-item">
-            <img src="https://www.cibc.com/content/dam/global-assets/card-art/credit-cards/aventura-cards/cibc-us-dollar-aventura-gold-visa-card/cibc-visa-aventura-us-dollar-en.png/_jcr_content/renditions/cq5dam.web.767.767.png" alt="Visa Debit Card" class="logo">
-            <div class="info">
-                <h3 class="title">Virtual Visa card - $30</h3>
-                <p class="fee">No Bank Account</p>
-                <p class="earn">Global Server</p>
-            </div>
-            <span class="price">৳3900</span>
-            <button class="buy-button">Buy Now</button>
         </div>
     </div>
+    
+    <script>
+        const API_KEY = '1c30124b-fd3c-4807-9b0b-a8b535af570a';
+        const BASE_URL = 'https://connect.relograde.com/api/1.02';
+        
+        function toggleAction() {
+            const action = document.getElementById('action').value;
+            const orderFields = document.getElementById('orderFields');
+            const checkFields = document.getElementById('checkFields');
+            
+            if (action === 'order') {
+                orderFields.style.display = 'block';
+                checkFields.style.display = 'none';
+            } else if (action === 'check') {
+                orderFields.style.display = 'none';
+                checkFields.style.display = 'block';
+            } else {
+                orderFields.style.display = 'none';
+                checkFields.style.display = 'none';
+            }
+        }
+        
+        function selectProduct(productId, name, price) {
+            document.getElementById('productId').value = name;
+            showResponse(`প্রোডাক্ট সিলেক্ট করেছেন: ${name}\nপ্রোডাক্ট আইডি: ${productId}\nদাম: $${price}\n\nএখন "রিকোয়েস্ট পাঠান" বাটনে ক্লিক করে অর্ডার করুন।`);
+        }
+        
+        async function submitRequest() {
+            const action = document.getElementById('action').value;
+            const responseBox = document.getElementById('responseBox');
+            const loading = document.getElementById('loading');
+            
+            loading.style.display = 'block';
+            responseBox.innerHTML = '// রিকোয়েস্ট পাঠানো হচ্ছে...';
+            
+            try {
+                let url = '';
+                let options = {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                };
+                
+                // অ্যাকশন অনুযায়ী URL এবং মেথড সেট করা
+                if (action === 'products') {
+                    url = `${BASE_URL}/products`;
+                } else if (action === 'balance') {
+                    url = `${BASE_URL}/account`;
+                } else if (action === 'order') {
+                    url = `${BASE_URL}/orders`;
+                    options.method = 'POST';
+                    
+                    // অর্ডার ডাটা তৈরি
+                    const orderData = {
+                        product_id: document.getElementById('productId').value,
+                        quantity: parseInt(document.getElementById('quantity').value),
+                        customer_email: document.getElementById('customerEmail').value || undefined
+                    };
+                    
+                    options.body = JSON.stringify(orderData);
+                } else if (action === 'check') {
+                    const orderId = document.getElementById('orderId').value;
+                    url = `${BASE_URL}/orders/${orderId}`;
+                }
+                
+                // API রিকোয়েস্ট পাঠানো
+                const response = await fetch(url, options);
+                const data = await response.json();
+                
+                // রেসপন্স দেখানো
+                responseBox.innerHTML = JSON.stringify({
+                    status: response.status,
+                    statusText: response.statusText,
+                    data: data
+                }, null, 2);
+                
+            } catch (error) {
+                responseBox.innerHTML = JSON.stringify({
+                    error: true,
+                    message: error.message,
+                    tip: 'নেটওয়ার্ক সমস্যা বা API Key ভ্যালিড নয়'
+                }, null, 2);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // ফর্ম সাবমিট হলে পেজ রিলোড না হওয়ার জন্য
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+        });
+        
+        // ডিফল্ট কিছু মেসেজ দেখানো
+        window.onload = function() {
+            showResponse('👋 স্বাগতম! আপনি এখন Relograde API টেস্ট করতে প্রস্তুত।\n\nপ্রথমে "প্রোডাক্ট লিস্ট দেখুন" সিলেক্ট করে রিকোয়েস্ট পাঠান বাটনে ক্লিক করুন।');
+        };
+        
+        function showResponse(message) {
+            document.getElementById('responseBox').innerHTML = message;
+        }
+    </script>
 </body>
 </html>
