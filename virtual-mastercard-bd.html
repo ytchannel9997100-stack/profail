@@ -25,7 +25,7 @@
     <meta name="twitter:description" content="$৫-২০ যেকোনো এমাউন্টে কার্ড লোড করুন। ফেসবুক, ইউটিউব, টেলিগ্রামে পেমেন্ট করুন।">
     <meta name="twitter:image" content="https://baxity.com/store/wp-content/uploads/2025/08/MASTERCARD-GPT-270x170.png">
 
-    <!-- স্ট্রাকচার্ড ডেটা (JSON-LD) - পণ্যের তথ্য, এখন প্রতিটি অফারে shippingDetails ও returnPolicy যুক্ত -->
+    <!-- স্ট্রাকচার্ড ডেটা (JSON-LD) - পণ্যের তথ্য, সমস্ত GSC ত্রুটি সংশোধন করা হয়েছে -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -49,7 +49,11 @@
                     "@type": "OfferShippingDetails",
                     "shippingDestination": {
                         "@type": "DefinedRegion",
-                        "name": "Bangladesh"
+                        "name": "Bangladesh",
+                        "addressCountry": {
+                            "@type": "Country",
+                            "name": "BD"
+                        }
                     },
                     "deliveryMethod": "http://schema.org/DigitalDelivery",
                     "shippingRate": {
@@ -61,7 +65,10 @@
                 "hasMerchantReturnPolicy": {
                     "@type": "MerchantReturnPolicy",
                     "url": "https://easy-premium.com/Privacy,Refund-Policy,Terms-Of-Service.html",
-                    "applicableCountry": "BD",
+                    "applicableCountry": {
+                        "@type": "Country",
+                        "name": "BD"
+                    },
                     "returnPolicyCategory": "https://schema.org/RefundConditionally"
                 }
             },
@@ -76,7 +83,11 @@
                     "@type": "OfferShippingDetails",
                     "shippingDestination": {
                         "@type": "DefinedRegion",
-                        "name": "Bangladesh"
+                        "name": "Bangladesh",
+                        "addressCountry": {
+                            "@type": "Country",
+                            "name": "BD"
+                        }
                     },
                     "deliveryMethod": "http://schema.org/DigitalDelivery",
                     "shippingRate": {
@@ -88,7 +99,10 @@
                 "hasMerchantReturnPolicy": {
                     "@type": "MerchantReturnPolicy",
                     "url": "https://easy-premium.com/Privacy,Refund-Policy,Terms-Of-Service.html",
-                    "applicableCountry": "BD",
+                    "applicableCountry": {
+                        "@type": "Country",
+                        "name": "BD"
+                    },
                     "returnPolicyCategory": "https://schema.org/RefundConditionally"
                 }
             },
@@ -103,7 +117,11 @@
                     "@type": "OfferShippingDetails",
                     "shippingDestination": {
                         "@type": "DefinedRegion",
-                        "name": "Bangladesh"
+                        "name": "Bangladesh",
+                        "addressCountry": {
+                            "@type": "Country",
+                            "name": "BD"
+                        }
                     },
                     "deliveryMethod": "http://schema.org/DigitalDelivery",
                     "shippingRate": {
@@ -115,7 +133,10 @@
                 "hasMerchantReturnPolicy": {
                     "@type": "MerchantReturnPolicy",
                     "url": "https://easy-premium.com/Privacy,Refund-Policy,Terms-Of-Service.html",
-                    "applicableCountry": "BD",
+                    "applicableCountry": {
+                        "@type": "Country",
+                        "name": "BD"
+                    },
                     "returnPolicyCategory": "https://schema.org/RefundConditionally"
                 }
             }
