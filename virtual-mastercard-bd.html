@@ -68,21 +68,35 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: #333;
             line-height: 1.6;
-            padding: 20px;
+            /* padding সরিয়ে দেওয়া হয়েছে */
+            padding: 0;
+            /* নিশ্চিত করা যে body পুরো স্ক্রিন নেয় */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         .container {
-            max-width: 1100px;
-            margin: 0 auto;
+            /* পুরো প্রস্থ নেওয়ার জন্য max-width সরানো হয়েছে */
+            width: 100%;
+            max-width: none;
+            margin: 0; /* সেন্টার করার প্রয়োজন নেই */
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            overflow: hidden;
+            border-radius: 0; /* বড় স্ক্রিনে গোলাকার কর্নার অপসারণ */
+            box-shadow: none; /* বড় স্ক্রিনে ছায়া অপসারণ */
+            flex: 1;
+        }
+        /* বড় স্ক্রিনে যদি কন্টেন্ট খুব চওড়া হয়ে যায়, তাহলে ভেতরের অংশে適當 প্যাডিং দিন */
+        @media (min-width: 1200px) {
+            .content {
+                max-width: 1100px;
+                margin: 0 auto; /* কন্টেন্টকে সেন্টার করবে, কিন্তু ব্যাকগ্রাউন্ড থাকবে পুরো প্রস্থে */
+            }
         }
         .banner {
             width: 100%;
             text-align: center;
             padding: 20px;
-            background: transparent; /* ব্যাকগ্রাউন্ড কালার সরিয়ে দেওয়া হয়েছে */
+            background: transparent;
         }
         .banner img {
             max-width: 100%;
@@ -155,6 +169,7 @@
             text-align: center;
             padding: 15px;
             font-size: 0.9em;
+            width: 100%;
         }
         .footer-note a {
             color: #ff9800;
@@ -166,7 +181,6 @@
             border-radius: 8px;
             margin: 20px 0;
         }
-        /* Easy Premium নীতিমালা সেকশনের জন্য স্টাইল */
         .policy-section {
             background: #f0f4f8;
             padding: 25px;
@@ -186,6 +200,7 @@
         .policy-section a:hover {
             text-decoration: underline;
         }
+        /* মোবাইল ডিভাইসের জন্য অভ্যন্তরীণ প্যাডিং কমানো */
         @media (max-width: 768px) {
             .content {
                 padding: 20px;
@@ -205,7 +220,7 @@
 </head>
 <body>
     <div class="container">
-        <!-- ব্যানার ইমেজ (সবার উপরে) - ব্যাকগ্রাউন্ড কালার সরানো হয়েছে -->
+        <!-- ব্যানার ইমেজ (সবার উপরে) -->
         <div class="banner">
             <img src="https://baxity.com/store/wp-content/uploads/2025/08/MASTERCARD-GPT-270x170.png" alt="Virtual Mastercard Banner" loading="lazy">
         </div>
@@ -291,7 +306,7 @@
                 <p>📢 <strong>পরামর্শ:</strong> প্রথমে ছোট ডিনোমিনেশন ($8) কিনে নিন, আপনার পছন্দের সাইটে কাজ করছে কিনা পরীক্ষা করুন। তারপর বড় ডিনোমিনেশন কিনুন। এতে আপনার অভিজ্ঞতা হবে নির্বিঘ্ন ও ঝুঁকিমুক্ত।</p>
             </div>
 
-            <!-- ইজি প্রিমিয়ামের নীতি ও শর্তাবলী সেকশন (নতুন সংযোজন) -->
+            <!-- ইজি প্রিমিয়ামের নীতি ও শর্তাবলী সেকশন -->
             <div class="policy-section">
                 <h2>ইজি প্রিমিয়ামের নীতি ও শর্তাবলী</h2>
                 <p>Easy Premium হল <strong>Rewarble (Centiward B.V.)</strong>-এর একটি অনুমোদিত পুনঃবিক্রেতা। কার্ডগুলি ইস্যু করে Centiward B.V. (নেদারল্যান্ডস) এবং তাদের অংশীদার ব্যাংকগুলি। আপনার তথ্য ও লেনদেনের নিরাপত্তা আমাদের অগ্রাধিকার। নিচে আমাদের মূল নীতিমালার সংক্ষিপসার দেওয়া হলো:</p>
