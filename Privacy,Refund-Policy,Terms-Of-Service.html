@@ -9,25 +9,34 @@
     <meta name="description" content="Easy Premium - আপনার তথ্যের নিরাপত্তা ও স্বচ্ছতা আমাদের অগ্রাধিকার। আমাদের গোপনীয়তা নীতি, রিফান্ড নীতি এবং ব্যবহারের শর্তাবলী জানুন।">
     <meta name="keywords" content="Easy Premium, Privacy Policy, Refund Policy, Terms of Service, গোপনীয়তা নীতি, রিফান্ড পলিসি, শর্তাবলী, ডেটা সুরক্ষা">
     <meta name="author" content="Easy Premium">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     
-    <!-- Canonical Tag - এই URL-কে মূল হিসেবে চিহ্নিত করে -->
-    <link rel="canonical" href="https://easy-premium.com/Privacy,Refund-Policy,Terms-Of-Service.html" />
+    <!-- Canonical Tag - ইউআরএল ঠিক করা হয়েছে (লোয়ারকেস) -->
+    <link rel="canonical" href="https://easy-premium.com/privacy-refund-policy-terms-of-service.html" />
     
-    <!-- Open Graph Meta Tags -->
+    <!-- Open Graph Meta Tags (আপডেট করা হয়েছে) -->
     <meta property="og:title" content="গোপনীয়তা নীতি ও শর্তাবলী - Easy Premium">
     <meta property="og:description" content="আপনার ডেটা নিরাপত্তা আমাদের অগ্রাধিকার। Easy Premium এর সকল নীতিমালা ও শর্তাবলী।">
     <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/8701/8701941.png">
-    <meta property="og:url" content="https://easy-premium.com/Privacy,Refund-Policy,Terms-Of-Service.html">
+    <meta property="og:url" content="https://easy-premium.com/privacy-refund-policy-terms-of-service.html">
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Easy Premium">
+    
+    <!-- Twitter Card Meta Tags (নতুন যোগ করা হয়েছে) -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="গোপনীয়তা নীতি ও শর্তাবলী - Easy Premium">
+    <meta name="twitter:description" content="আপনার ডেটা নিরাপত্তা আমাদের অগ্রাধিকার। Easy Premium এর সকল নীতিমালা ও শর্তাবলী।">
+    <meta name="twitter:image" content="https://cdn-icons-png.flaticon.com/512/8701/8701941.png">
     
     <!-- Mobile Meta Tags -->
     <meta name="theme-color" content="#0a0a1a">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no, address=no, email=no">
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/512/8701/8701941.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/8701/8701941.png">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -35,10 +44,13 @@
     <!-- Security Meta Tags -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:; style-src 'self' https: 'unsafe-inline'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta name="format-detection" content="telephone=no, address=no, email=no">
     <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     
-    <!-- Styles (সম্পূর্ণ অপরিবর্তিত) -->
+    <!-- Verification Meta Tags (নতুন যোগ করা হয়েছে) -->
+    <meta name="google-site-verification" content="আপনার-ভেরিফিকেশন-কোড-দিন">
+    
+    <!-- Styles (সম্পূর্ণ অপরিবর্তিত) - আপনার দেওয়া সম্পূর্ণ CSS এখানে থাকবে -->
     <style>
         :root {
             --primary-bg: #0a0a1a;
@@ -589,6 +601,45 @@
                 padding-bottom: calc(25px + env(safe-area-inset-bottom));
             }
         }
+        
+        /* Breadcrumb styles (নতুন যোগ করা হয়েছে) */
+        .breadcrumb {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 10px 0 20px;
+            list-style: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .breadcrumb-item:not(:last-child)::after {
+            content: '›';
+            margin: 0 8px;
+            color: var(--accent-color);
+        }
+        
+        .breadcrumb-item a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--text-color);
+        }
+        
+        /* Article schema styles */
+        .article-schema {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -605,6 +656,14 @@
         </section>
 
         <div class="content-wrapper">
+            
+            <!-- Breadcrumb (নতুন যোগ করা হয়েছে - SEO-র জন্য) -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="https://easy-premium.com">হোম</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">গোপনীয়তা নীতি ও শর্তাবলী</li>
+                </ol>
+            </nav>
            
             <!-- ========== সেকশন ১: আমাদের সম্পর্কে ও রিসেলার তথ্য ========== -->
             <section class="section-card">
@@ -842,6 +901,54 @@
             </div>
         </footer>
     </div>
+    
+    <!-- JSON-LD Structured Data (নতুন যোগ করা হয়েছে - Google-এর জন্য অত্যন্ত গুরুত্বপূর্ণ) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "গোপনীয়তা নীতি ও শর্তাবলী - Easy Premium",
+        "description": "Easy Premium - আপনার তথ্যের নিরাপত্তা ও স্বচ্ছতা আমাদের অগ্রাধিকার। আমাদের গোপনীয়তা নীতি, রিফান্ড নীতি এবং ব্যবহারের শর্তাবলী জানুন।",
+        "url": "https://easy-premium.com/privacy-refund-policy-terms-of-service.html",
+        "mainEntity": {
+            "@type": "Article",
+            "headline": "গোপনীয়তা নীতি ও শর্তাবলী",
+            "datePublished": "2026-03-01",
+            "dateModified": "2026-03-09",
+            "author": {
+                "@type": "Organization",
+                "name": "Easy Premium",
+                "url": "https://easy-premium.com"
+            },
+            "publisher": {
+                "@type": "Organization",
+                "name": "Easy Premium",
+                "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://cdn-icons-png.flaticon.com/512/8701/8701941.png"
+                }
+            }
+        }
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "হোম",
+            "item": "https://easy-premium.com"
+        },{
+            "@type": "ListItem",
+            "position": 2,
+            "name": "গোপনীয়তা নীতি ও শর্তাবলী",
+            "item": "https://easy-premium.com/privacy-refund-policy-terms-of-service.html"
+        }]
+    }
+    </script>
 
     <!-- JavaScript (সম্পূর্ণ অপরিবর্তিত + URL স্ক্রলিং যুক্ত) -->
     <script>
