@@ -1387,9 +1387,9 @@
         .social-link:nth-child(1) i { color: #1877F2 !important; } /* Facebook */
         .social-link:nth-child(2) i { color: #E4405F !important; } /* Instagram */
         .social-link:nth-child(3) i { color: #FF0000 !important; } /* YouTube */
-        .social-link:nth-child(4) i { color: #0088cc !important; } /* Telegram */
+        .social-link:nth-child(4) i { color: #000000 !important; } /* Twitter/X */
         .social-link:nth-child(5) i { color: #25D366 !important; } /* WhatsApp */
-        .social-link:nth-child(6) i { color: #000000 !important; } /* Twitter/X */
+        .social-link:nth-child(6) i { color: #0088cc !important; } /* Telegram */
         
         .social-link:hover i {
             color: var(--accent-color) !important;
@@ -1451,6 +1451,181 @@
             100% {
                 box-shadow: 0 0 0 0 rgba(0, 132, 255, 0);
             }
+        }
+
+        /* ================== ডোর / ড্রয়ার স্টাইল ================== */
+        .menu-icon-container {
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+        }
+
+        .menu-modern-icon {
+            position: relative;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: linear-gradient(145deg, rgba(255, 152, 0, 0.15), rgba(255, 87, 34, 0.1));
+            border: 2px solid rgba(255, 152, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+        }
+
+        .menu-modern-icon i {
+            font-size: 1.4rem;
+            color: var(--accent-color) !important;
+            transition: all 0.4s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .menu-icon-container:hover .menu-modern-icon {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .menu-icon-container:hover .menu-modern-icon i {
+            color: #ffffff !important;
+            transform: scale(1.1);
+        }
+
+        /* ড্রয়ার ওভারলে */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .drawer-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ড্রয়ার */
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: -350px; /* প্রস্থের চেয়ে বেশি সরিয়ে রাখা */
+            width: 300px;
+            height: 100vh;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-left: 2px solid var(--accent-color);
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+            z-index: 2001;
+            transition: right 0.3s ease;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drawer.active {
+            right: 0;
+        }
+
+        /* ড্রয়ারের ক্লোজ বাটন */
+        .drawer-close {
+            align-self: flex-end;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+
+        .drawer-close:hover {
+            transform: rotate(90deg);
+            color: #ff5722;
+        }
+
+        /* ড্রয়ারের বাটনসমূহ */
+        .drawer-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .drawer-btn {
+            background: rgba(255, 152, 0, 0.1);
+            border: 1px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .drawer-btn i {
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
+
+        .drawer-btn:hover {
+            background: var(--accent-color);
+            color: #000;
+            transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .drawer-btn:hover i {
+            color: #000;
+        }
+
+        /* মোবাইলে ড্রয়ারের প্রস্থ 80% */
+        @media (max-width: 768px) {
+            .drawer {
+                width: 80%;
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .menu-modern-icon {
+                width: 42px;
+                height: 42px;
+            }
+            .menu-modern-icon i {
+                font-size: 1.2rem;
+            }
+            .drawer {
+                width: 85%;
+                max-width: 280px;
+            }
+        }
+
+        /* হেডারের ডান অংশের জন্য ফ্লেক্স অ্যাডজাস্টমেন্ট */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         /* মোবাইলের জন্য সাইজ অ্যাডজাস্ট */
@@ -1940,15 +2115,41 @@
             </div>
         </div>
         
-        <div class="cart-icon-container" id="cartIcon">
-            <div class="cart-modern-icon">
-                <i class="fas fa-shopping-cart"></i>
+        <div class="header-right">
+            <div class="cart-icon-container" id="cartIcon">
+                <div class="cart-modern-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
             </div>
-            <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+
+            <!-- মেনু আইকন (ডোর ওপেন করার জন্য) -->
+            <div class="menu-icon-container" id="menuIcon">
+                <div class="menu-modern-icon">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
         </div>
         
         <nav class="nav-links"></nav>
     </header>
+
+    <!-- ড্রয়ার ওভারলে -->
+    <div id="drawerOverlay" class="drawer-overlay"></div>
+
+    <!-- ড্রয়ার (ডোর) -->
+    <div id="drawer" class="drawer">
+        <button class="drawer-close" id="drawerClose"><i class="fas fa-times"></i></button>
+        <div class="drawer-buttons">
+            <a href="https://easy-premium.com/privacy-refund-policy-terms-of-service.html?data=PrivacyPolicy" class="drawer-btn"><i class="fas fa-lock"></i> গোপনীয়তা নীতি</a>
+            <a href="https://easy-premium.com/privacy-refund-policy-terms-of-service.html?data=PaymentSolutions" class="drawer-btn"><i class="fas fa-credit-card"></i> পেমেন্ট সলিউশন</a>
+            <a href="https://easy-premium.com/privacy-refund-policy-terms-of-service.html?data=TermsandConditions" class="drawer-btn"><i class="fas fa-file-contract"></i> শর্তাবলী</a>
+            <a href="https://easy-premium.com/privacy-refund-policy-terms-of-service.html?data=RefundandReturnsPolicy" class="drawer-btn"><i class="fas fa-undo-alt"></i> রিফান্ড ও রিটার্ন</a>
+            <a href="https://m.me/906635592542978" class="drawer-btn"><i class="fab fa-facebook-messenger"></i> মেসেঞ্জার</a>
+            <a href="https://wa.me/1770584994" class="drawer-btn"><i class="fab fa-whatsapp"></i> হোয়াটসঅ্যাপ</a>
+            <a href="https://t.me/Easy_Pemium" class="drawer-btn"><i class="fab fa-telegram"></i> টেলিগ্রাম</a>
+        </div>
+    </div>
 
     <!-- Hero Section -->
     <section class="hero">
@@ -2182,13 +2383,13 @@
                 el.style.color = '#00bcd4';
             });
             
-            const buttons = document.querySelectorAll('.buy-button, .submit-btn, .accept-btn, .google-login-btn, .logout-btn-profile');
+            const buttons = document.querySelectorAll('.buy-button, .submit-btn, .accept-btn, .google-login-btn, .logout-btn-profile, .drawer-btn');
             buttons.forEach(btn => {
                 btn.style.background = 'linear-gradient(45deg, #ff9800, #ff5722)';
                 btn.style.color = 'white';
             });
             
-            const cards = document.querySelectorAll('.platform-card, .profile-content, .login-content, .overlay-content');
+            const cards = document.querySelectorAll('.platform-card, .profile-content, .login-content, .overlay-content, .drawer');
             cards.forEach(card => {
                 card.style.background = 'rgba(20, 20, 40, 0.9)';
                 card.style.border = '1px solid rgba(255, 152, 0, 0.2)';
@@ -2383,6 +2584,35 @@
         
         const cartIcon = document.getElementById('cartIcon');
         const cartBadge = document.getElementById('cartBadge');
+
+        // ড্রয়ার এলিমেন্ট
+        const menuIcon = document.getElementById('menuIcon');
+        const drawer = document.getElementById('drawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const drawerClose = document.getElementById('drawerClose');
+
+        // মেনু আইকনে ক্লিক → ড্রয়ার খোলা
+        menuIcon.addEventListener('click', function() {
+            drawer.classList.add('active');
+            drawerOverlay.classList.add('active');
+        });
+
+        // ওভারলে ক্লিক → ড্রয়ার বন্ধ
+        drawerOverlay.addEventListener('click', function() {
+            drawer.classList.remove('active');
+            drawerOverlay.classList.remove('active');
+        });
+
+        // ক্লোজ বাটন ক্লিক → ড্রয়ার বন্ধ
+        drawerClose.addEventListener('click', function() {
+            drawer.classList.remove('active');
+            drawerOverlay.classList.remove('active');
+        });
+
+        // ড্রয়ারের ভিতরে ক্লিক করলে যেন বন্ধ না হয় (স্টপ প্রোপাগেশন)
+        drawer.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
 
         // Variables
         let pendingPurchase = null;
