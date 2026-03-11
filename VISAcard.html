@@ -3008,26 +3008,20 @@
             }
         }
 
-        // ===================== পেমেন্ট লিংক জেনারেটর =====================
+        // ===================== পেমেন্ট লিংক জেনারেটর (শুধু ভিসা কার্ডের জন্য) =====================
         function generatePaymentLink(orderId, platform, price, platformId) {
             try {
                 let finalPlatformId = platformId || 'unknown';
                 
+                // প্ল্যাটফর্ম আইডি না থাকলে শুধু ভিসা কার্ড ম্যাপিং ব্যবহার করা হবে
                 if (!platformId || platformId === 'unknown') {
+                    // শুধু ভিসা কার্ডের জন্য ম্যাপিং রাখা হয়েছে
                     const platformIdMap = {
-                        'youtube': 'youtube_premium',
-                        'youtube premium': 'youtube_premium',
-                        'facebook': 'facebook_premium', 
-                        'facebook premium': 'facebook_premium',
-                        'instagram': 'instagram_premium',
-                        'telegram': 'telegram_premium',
-                        'telegram premium': 'telegram_premium',
-                        'netflix': 'netflix_premium',
-                        'spotify': 'spotify_premium',
-                        'whatsapp': 'whatsapp_business',
-                        'whatsapp business': 'whatsapp_business',
-                        'tiktok': 'tiktok_coins',
-                        'tiktok coins': 'tiktok_coins'
+                        'visa': 'visa_premium',
+                        'visa card': 'visa_premium',
+                        'visa_card': 'visa_premium',
+                        'visa-card': 'visa_premium',
+                        'ভিসা': 'visa_premium'
                     };
                     
                     const platformLowerCase = platform ? platform.toLowerCase() : '';
@@ -3037,6 +3031,11 @@
                             finalPlatformId = value;
                             break;
                         }
+                    }
+                    
+                    // যদি কোনো ম্যাচ না পাওয়া যায়, তাহলে ডিফল্ট হিসেবে visa_premium সেট করুন
+                    if (finalPlatformId === 'unknown') {
+                        finalPlatformId = 'visa_premium';
                     }
                 }
                 
