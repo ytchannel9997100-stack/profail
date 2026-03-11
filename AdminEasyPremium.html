@@ -897,7 +897,7 @@
                         <div class="form-group">
                             <label class="form-label">ডিটেইলস (D ফিল্ড) *</label>
                             <p style="color: #b0bec5; font-size: 0.85rem; margin-top: -5px; margin-bottom: 10px;">
-                                বিস্তারিত বর্ণনা - এই তথ্য ইউজারকে দেখানো হবে
+                                বিস্তারিত বর্ণনা - এই তথ্য ইউজারকে দেখানো হবে (বাংলা বা হিন্দিতে লিখুন)
                             </p>
                             <textarea id="platformDField" class="form-textarea d-field-textarea" placeholder="প্ল্যাটফর্মের সম্পূর্ণ বিস্তারিত বর্ণনা লিখুন... (হিন্দি বা বাংলায়)" required></textarea>
                         </div>
@@ -1437,6 +1437,7 @@
         function loadPlatforms() {
             platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে...</p></div>';
             
+            // Important: We are loading from pricingPlans (not pricingPlans2) - adjust if needed
             database.ref('publicData/pricingPlans').on('value', (snapshot) => {
                 const data = snapshot.val();
                 platforms = [];
@@ -1473,8 +1474,8 @@
                 const iconInfo = platformIcons.find(icon => icon.id === platform.icon) || platformIcons[0];
                 const featuresList = platform.features ? platform.features.join(', ') : 'কোন ফিচার নেই';
                 
-                // Get D field content with preview
-                const dFieldContent = platform.D || platform.d || platform.details || platform.description || 'ডিটেইলস নেই';
+                // Get D field content with preview - use the field "D" as per new requirement
+                const dFieldContent = platform.D || platform.d || platform.details || 'ডিটেইলস নেই';
                 const dFieldPreview = dFieldContent.length > 150 
                     ? dFieldContent.substring(0, 150) + '...' 
                     : dFieldContent;
@@ -1502,7 +1503,7 @@
                         <p style="color: #6c757d; font-size: 0.8rem; margin-bottom: 10px;"><strong>ফিচার:</strong> ${featuresList}</p>
                         <p style="color: #6c757d; font-size: 0.8rem; margin-bottom: 10px;"><strong>ক্যাটাগরি:</strong> ${platform.category || 'N/A'}</p>
                         <p style="color: #6c757d; font-size: 0.8rem; margin-bottom: 10px;"><strong>স্ট্যাটাস:</strong> ${platform.status === 'active' ? '✅ একটিভ' : '❌ ইনএকটিভ'}</p>
-                        <p style="color: #6c757d; font-size: 0.8rem; margin-bottom: 10px;"><strong>D ফিল্ড:</strong> ${dFieldContent.length} characters</p>
+                        <p style="color: #6c757d; font-size: 0.8rem; margin-bottom: 10px;"><strong>D ফিল্ড দৈর্ঘ্য:</strong> ${dFieldContent.length} অক্ষর</p>
                         <div class="platform-actions">
                             <button class="btn-sm btn-edit" data-id="${platform.id}">
                                 <i class="fas fa-edit"></i> এডিট
@@ -1548,6 +1549,7 @@
             platformName.value = platform.name || '';
             platformPrice.value = platform.price || '';
             platformDescription.value = platform.description || '';
+            // For D field, use the field "D" (preferred)
             platformDField.value = platform.D || platform.d || platform.details || '';
             platformFeatures.value = platform.features ? platform.features.join('\n') : '';
             platformCategory.value = platform.category || 'streaming';
@@ -1600,7 +1602,8 @@
                 price: platformPrice.value.trim(),
                 icon: selectedIcon,
                 description: platformDescription.value.trim(),
-                D: platformDField.value.trim(), // D field added here
+                // Save D field as "D" (capital D) - consistent with new requirement
+                D: platformDField.value.trim(),
                 features: featuresArray,
                 category: platformCategory.value,
                 order: parseInt(platformOrder.value) || 1,
@@ -1660,7 +1663,7 @@
             currentEditingPlatformId = platformId;
             currentEditingPlatformName = platformName;
             
-            // Get D field content
+            // Get D field content - use "D" as primary
             const dFieldContent = platform.D || platform.d || platform.details || '';
             
             dFieldModalTitle.textContent = 'D ফিল্ড এডিট করুন';
@@ -1729,11 +1732,11 @@
             const lineCount = dFieldContent.split('\n').length;
             
             let statsHTML = `
-                <p><strong>Character Count:</strong> ${charCount}</p>
-                <p><strong>Word Count:</strong> ${wordCount}</p>
-                <p><strong>Line Count:</strong> ${lineCount}</p>
-                <p><strong>Platform ID:</strong> ${currentEditingPlatformId}</p>
-                <p><strong>Last Updated:</strong> ${new Date().toLocaleString('bn-BD')}</p>
+                <p><strong>মোট অক্ষর:</strong> ${charCount}</p>
+                <p><strong>মোট শব্দ:</strong> ${wordCount}</p>
+                <p><strong>মোট লাইন:</strong> ${lineCount}</p>
+                <p><strong>প্ল্যাটফর্ম আইডি:</strong> ${currentEditingPlatformId}</p>
+                <p><strong>সর্বশেষ আপডেট:</strong> ${new Date().toLocaleString('bn-BD')}</p>
             `;
             
             dFieldStats.innerHTML = statsHTML;
