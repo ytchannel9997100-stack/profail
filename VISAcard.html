@@ -609,6 +609,9 @@
         .search-result-icon {
             font-size: 1.5rem;
             min-width: 30px;
+            height: 1.5rem;
+            width: auto;
+            object-fit: contain;
         }
         
         .search-result-content {
@@ -1211,8 +1214,10 @@
         }
         
         .platform-icon {
-            font-size: 2.5rem;
+            width: auto;
+            height: 2.5rem;
             margin-bottom: 10px;
+            object-fit: contain;
         }
         
         .platform-name {
@@ -1699,7 +1704,8 @@
             }
             
             .platform-icon {
-                font-size: 2rem;
+                height: 2rem;
+                margin-bottom: 8px;
             }
             
             .platform-name {
@@ -1907,21 +1913,11 @@
             }
         }
         
-        .youtube { color: #FF0000 !important; }
-        .facebook { color: #1877F2 !important; }
-        .instagram { color: #E4405F !important; }
-        .tiktok { color: #000000 !important; }
-        .whatsapp { color: #25D366 !important; }
-        .telegram { color: #0088cc !important; }
-        .netflix { color: #E50914 !important; }
-        .spotify { color: #1DB954 !important; }
-        .discord { color: #5865F2 !important; }
-        .amazon { color: #FF9900 !important; }
-        .microsoft { color: #00A4EF !important; }
-        .adobe { color: #FF0000 !important; }
-        .canva { color: #00C4CC !important; }
-        .google { color: #4285F4 !important; }
-        .linkedin { color: #0077B5 !important; }
+        /* ভিসা ইমেজের জন্য ক্লাস */
+        .platform-icon, .search-result-icon {
+            display: inline-block;
+            vertical-align: middle;
+        }
         
         .profile-content::-webkit-scrollbar,
         .search-results::-webkit-scrollbar {
@@ -2138,9 +2134,9 @@
     <div id="drawer" class="drawer">
         <button class="drawer-close" id="drawerClose"><i class="fas fa-times"></i></button>
         <div class="drawer-buttons">
-            <a href="https://easy-premium.com/AccountDelete.html" class="drawer-btn"></i>অ্যাকাউন্ট ডিলিট</a>
-            <a href="https://easy-premium.com/privacy-refund-policy-terms-of-service.html?data=PaymentSolutions" class="drawer-btn"></i>মাস্টার কার্ড</a>
-            <a href="https://easy-premium.com/privacy-refund-policy-terms-of-service.html?data=TermsandConditions" class="drawer-btn"></i>ভিসা কার্ড</a>
+            <a href="https://easy-premium.com/AccountDelete.html" class="drawer-btn">অ্যাকাউন্ট ডিলিট</a>
+            <a href="https://easy-premium.com/privacy-refund-policy-terms-of-service.html?data=PaymentSolutions" class="drawer-btn">মাস্টার কার্ড</a>
+            <a href="https://easy-premium.com/privacy-refund-policy-terms-of-service.html?data=TermsandConditions" class="drawer-btn">ভিসা কার্ড</a>
             <a href="https://easy-premium.com/privacy-refund-policy-terms-of-service.html?data=RefundandReturnsPolicy" class="drawer-btn"><i class="fas fa-undo-alt"></i> রিফান্ড ও রিটার্ন</a>
         </div>
     </div>
@@ -2780,37 +2776,11 @@
                 return;
             }
             
-            function getIconClass(iconName) {
-                const iconMap = {
-                    'youtube': 'fab fa-youtube youtube',
-                    'facebook': 'fab fa-facebook-f facebook',
-                    'instagram': 'fab fa-instagram instagram',
-                    'tiktok': 'fab fa-tiktok tiktok',
-                    'whatsapp': 'fab fa-whatsapp whatsapp',
-                    'telegram': 'fab fa-telegram telegram',
-                    'netflix': 'fas fa-film netflix',
-                    'spotify': 'fab fa-spotify spotify',
-                    'discord': 'fab fa-discord discord',
-                    'amazon': 'fab fa-amazon amazon',
-                    'microsoft': 'fab fa-microsoft microsoft',
-                    'adobe': 'fas fa-paint-brush adobe',
-                    'canva': 'fas fa-paint-brush canva',
-                    'google': 'fab fa-google google',
-                    'linkedin': 'fab fa-linkedin linkedin'
-                };
-                
-                const lowerIconName = iconName ? iconName.toLowerCase() : '';
-                return iconMap[lowerIconName] || 'fas fa-cube';
-            }
-            
             platforms.forEach(platform => {
-                const iconSource = platform.icon || platform.name || '';
-                const iconClass = getIconClass(iconSource);
-                
                 const resultItem = document.createElement('div');
                 resultItem.className = 'search-result-item';
                 resultItem.innerHTML = `
-                    <i class="${iconClass} search-result-icon"></i>
+                    <img src="https://bd.visa.com/dam/VCOM/regional/ap/bangladesh/global-elements/images/bd-visa-classic-card-498x280.png" alt="Visa" class="search-result-icon">
                     <div class="search-result-content">
                         <div class="search-result-name">${platform.name || 'প্ল্যাটফর্ম'}</div>
                         <div class="search-result-desc">${platform.description || 'প্রিমিয়াম সেবা পান সবচেয়ে কম দামে।'}</div>
@@ -3176,35 +3146,9 @@
             platformCard.setAttribute('data-platform-name', platform.name);
             platformCard.setAttribute('data-platform-id', platform.id);
             
-            function getIconClass(iconName) {
-                const iconMap = {
-                    'youtube': 'fab fa-youtube youtube',
-                    'facebook': 'fab fa-facebook-f facebook',
-                    'instagram': 'fab fa-instagram instagram',
-                    'tiktok': 'fab fa-tiktok tiktok',
-                    'whatsapp': 'fab fa-whatsapp whatsapp',
-                    'telegram': 'fab fa-telegram telegram',
-                    'netflix': 'fas fa-film netflix',
-                    'spotify': 'fab fa-spotify spotify',
-                    'discord': 'fab fa-discord discord',
-                    'amazon': 'fab fa-amazon amazon',
-                    'microsoft': 'fab fa-microsoft microsoft',
-                    'adobe': 'fas fa-paint-brush adobe',
-                    'canva': 'fas fa-paint-brush canva',
-                    'google': 'fab fa-google google',
-                    'linkedin': 'fab fa-linkedin linkedin'
-                };
-                
-                const lowerIconName = iconName ? iconName.toLowerCase() : '';
-                return iconMap[lowerIconName] || 'fas fa-cube';
-            }
-
-            const iconSource = platform.icon || platform.name || '';
-            const iconClass = getIconClass(iconSource);
-
             platformCard.innerHTML = `
                 <div class="platform-header">
-                    <i class="${iconClass} platform-icon"></i>
+                    <img src="https://bd.visa.com/dam/VCOM/regional/ap/bangladesh/global-elements/images/bd-visa-classic-card-498x280.png" alt="Visa" class="platform-icon">
                     <div class="platform-name">${platform.name || 'প্ল্যাটফর্ম'}</div>
                 </div>
                 <div class="platform-description">
@@ -3845,4 +3789,207 @@
                     const encoded = btoa(encodeURIComponent(value));
                     return originalSetItem.call(this, `_sec_${key}`, encoded);
                 } catch (e) {
-                    console.warn('LocalStorage
+                    console.warn('LocalStorage encoding error');
+                }
+            }
+            return originalSetItem.call(this, key, value);
+        };
+        
+        localStorage.getItem = function(key) {
+            if (sensitiveKeys.some(k => key.toLowerCase().includes(k))) {
+                try {
+                    const encoded = originalGetItem.call(this, `_sec_${key}`);
+                    if (encoded) {
+                        return decodeURIComponent(atob(encoded));
+                    }
+                } catch (e) {
+                    console.warn('LocalStorage decoding error');
+                }
+            }
+            return originalGetItem.call(this, key);
+        };
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.keyCode === 85) {
+                e.preventDefault();
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode === 83) {
+                e.preventDefault();
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+                e.preventDefault();
+                return false;
+            }
+            if (e.keyCode === 123) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        console.log('%c🔒 Easy Premium - সুরক্ষিত মোড সক্রিয়', 'color: #4caf50; font-size: 14px; font-weight: bold;');
+    })();
+    </script>
+
+    <!-- ================== রাইট ক্লিক প্রোটেকশন ও সব লেখা সরানোর চূড়ান্ত স্ক্রিপ্ট ================== -->
+    <script>
+    (function() {
+        'use strict';
+        
+        const forbiddenTexts = [
+            'স্বাগতম',
+            'সুস্থ আছেন',
+            'লোড হয়েছে',
+            'প্ল্যাটফর্ম লোড',
+            'সুরক্ষিত সংযোগ',
+            'security badge',
+            'সুরক্ষিত',
+            'নিরাপত্তা সতর্কতা',
+            'নোটিফিকেশন',
+            'অর্ডার সফল',
+            'নতুন অ্যাকাউন্ট',
+            'জন অনলাইন',
+            'online',
+            'Security',
+            'Badge',
+            'SSL',
+            'এনক্রিপ্টেড',
+            'সেশন টাইমআউট',
+            'রেট লিমিটিং'
+        ];
+        
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        document.addEventListener('mousedown', function(e) {
+            if (e.button === 2) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        document.addEventListener('touchstart', function(e) {
+            let touchTimer;
+            const handleTouchEnd = function() {
+                clearTimeout(touchTimer);
+                document.removeEventListener('touchend', handleTouchEnd);
+            };
+            
+            if (e.touches.length === 1) {
+                touchTimer = setTimeout(function() {
+                    e.preventDefault();
+                }, 500);
+                
+                document.addEventListener('touchend', handleTouchEnd, { once: true });
+            }
+        }, { passive: false });
+        
+        function removeAllUnwanted() {
+            const allElements = document.querySelectorAll('*');
+            
+            allElements.forEach(el => {
+                const classAndId = (el.className || '') + ' ' + (el.id || '');
+                const forbiddenClasses = [
+                    'security', 'badge', 'notification', 'smart', 'online', 
+                    'counter', 'user-count', 'alert', 'tooltip', 'popup'
+                ];
+                
+                let shouldRemove = false;
+                forbiddenClasses.forEach(fc => {
+                    if (classAndId.toLowerCase().includes(fc)) {
+                        shouldRemove = true;
+                    }
+                });
+                
+                if (!shouldRemove && el.children && el.children.length === 0 && el.textContent) {
+                    const text = el.textContent.trim();
+                    forbiddenTexts.forEach(forbidden => {
+                        if (text.includes(forbidden)) {
+                            shouldRemove = true;
+                        }
+                    });
+                    
+                    if (/\d+\s*টি/.test(text) || /\d+\s*জন/.test(text)) {
+                        shouldRemove = true;
+                    }
+                }
+                
+                if (shouldRemove) {
+                    el.remove();
+                }
+            });
+            
+            const selectors = [
+                '[class*="security"]', '[id*="security"]',
+                '[class*="badge"]', '[id*="badge"]',
+                '[class*="notification"]', '[id*="notification"]',
+                '[class*="smart"]', '[id*="smart"]',
+                '[class*="online"]', '[id*="online"]',
+                '[class*="counter"]', '[id*="counter"]'
+            ];
+            
+            selectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => el.remove());
+            });
+        }
+        
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes.length > 0) {
+                    removeAllUnwanted();
+                }
+            });
+        });
+        
+        observer.observe(document.body, { childList: true, subtree: true });
+        
+        removeAllUnwanted();
+        setInterval(removeAllUnwanted, 500);
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', removeAllUnwanted);
+        }
+        window.addEventListener('load', removeAllUnwanted);
+        
+        console.log('✅ সব লেখা ও ব্যাজ সরানো হয়েছে, রাইট ক্লিক প্রোটেকশন চালু হয়েছে');
+    })();
+    </script>
+
+    <!-- ================== ডেভেলপার টুল ডিটেক্ট ও রিডিরেক্ট ================== -->
+    <script>
+    (function() {
+        const REDIRECT_URL = "https://easy-premium.com/Privacy,Refund-Policy,Terms-Of-Service.html";
+        let redirected = false;
+
+        function detectAndRedirect() {
+            const start = performance.now();
+            debugger;
+            const end = performance.now();
+
+            if (end - start > 100 && !redirected) {
+                redirected = true;
+                window.location.href = REDIRECT_URL;
+                return;
+            }
+
+            let element = new Image();
+            Object.defineProperty(element, 'id', {
+                get: function() {
+                    if (!redirected) {
+                        redirected = true;
+                        window.location.href = REDIRECT_URL;
+                    }
+                }
+            });
+            console.log(element);
+        }
+
+        setInterval(detectAndRedirect, 500);
+    })();
+    </script>
+</body>
+</html>
