@@ -454,39 +454,6 @@
             box-shadow: 0 0 10px rgba(255, 87, 34, 0.3);
         }
         
-        /* Icon Selection */
-        .icon-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .icon-option {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid transparent;
-            border-radius: 8px;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .icon-option:hover {
-            background: rgba(255, 152, 0, 0.1);
-            border-color: #ff9800;
-        }
-        
-        .icon-option.selected {
-            background: rgba(255, 152, 0, 0.2);
-            border-color: #ff9800;
-        }
-        
-        .icon-option i {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-        }
-        
         /* Orders Table */
         .orders-table {
             width: 100%;
@@ -690,10 +657,6 @@
                 grid-template-columns: 1fr;
             }
             
-            .icon-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
             .form-row {
                 grid-template-columns: 1fr;
             }
@@ -731,10 +694,6 @@
                 font-size: 1.5rem;
             }
             
-            .icon-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
             .platform-actions {
                 flex-direction: column;
             }
@@ -762,6 +721,7 @@
         .canva { color: #00C4CC; }
         .google { color: #4285F4; }
         .linkedin { color: #0077B5; }
+        .visa { color: #1A1F71; } /* ভিসার জন্য নতুন রঙ যোগ করা হলো */
     </style>
 </head>
 <body>
@@ -921,12 +881,7 @@
                             </select>
                         </div>
                         
-                        <div class="form-group">
-                            <label class="form-label">আইকন সিলেক্ট করুন</label>
-                            <div class="icon-grid" id="iconGrid">
-                                <!-- Icons will be loaded here -->
-                            </div>
-                        </div>
+                        <!-- আইকন সিলেক্ট অপশন সরানো হয়েছে -->
                         
                         <div class="form-group">
                             <label class="form-label">অর্ডার নম্বর (ছোট থেকে বড় সাজাতে)</label>
@@ -1143,7 +1098,6 @@
         const platformName = document.getElementById('platformName');
         const platformPrice = document.getElementById('platformPrice');
         const platformDField = document.getElementById('platformDField');
-        const iconGrid = document.getElementById('iconGrid');
         const platformDescription = document.getElementById('platformDescription');
         const platformFeatures = document.getElementById('platformFeatures');
         const platformCategory = document.getElementById('platformCategory');
@@ -1185,7 +1139,6 @@
         let platforms = [];
         let orders = [];
         let adminUsers = [];
-        let selectedIcon = 'youtube';
         let currentAdminEmail = null;
         let isSuperAdmin = false;
         let currentEditingPlatformId = null;
@@ -1198,8 +1151,9 @@
             'admin@easy-premium.com'
         ];
         
-        // Available icons
+        // Available icons (ভিসা যোগ করা হলো)
         const platformIcons = [
+            { id: 'visa', name: 'Visa', icon: 'fab fa-cc-visa', color: '#1A1F71' },
             { id: 'youtube', name: 'YouTube', icon: 'fab fa-youtube', color: '#FF0000' },
             { id: 'facebook', name: 'Facebook', icon: 'fab fa-facebook-f', color: '#1877F2' },
             { id: 'instagram', name: 'Instagram', icon: 'fab fa-instagram', color: '#E4405F' },
@@ -1227,7 +1181,7 @@
         function initializeApp() {
             checkAdminAuth();
             setupEventListeners();
-            initializeIconGrid();
+            // iconGrid initialization সরানো হয়েছে
         }
         
         // Check admin authentication
@@ -1404,35 +1358,6 @@
             }
         }
         
-        // Initialize icon grid
-        function initializeIconGrid() {
-            iconGrid.innerHTML = '';
-            
-            platformIcons.forEach(icon => {
-                const iconOption = document.createElement('div');
-                iconOption.className = 'icon-option';
-                iconOption.setAttribute('data-icon', icon.id);
-                iconOption.innerHTML = `
-                    <i class="${icon.icon} ${icon.id}" style="color: ${icon.color};"></i>
-                    <div style="font-size: 0.7rem; margin-top: 5px;">${icon.name}</div>
-                `;
-                
-                iconOption.addEventListener('click', function() {
-                    document.querySelectorAll('.icon-option').forEach(opt => {
-                        opt.classList.remove('selected');
-                    });
-                    this.classList.add('selected');
-                    selectedIcon = icon.id;
-                });
-                
-                iconGrid.appendChild(iconOption);
-            });
-            
-            if (iconGrid.firstChild) {
-                iconGrid.firstChild.classList.add('selected');
-            }
-        }
-        
         // Load platforms from pricingPlans2
         function loadPlatforms() {
             platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে (pricingPlans2)...</p></div>';
@@ -1470,7 +1395,8 @@
             }
             
             platforms.forEach(platform => {
-                const iconInfo = platformIcons.find(icon => icon.id === platform.icon) || platformIcons[0];
+                // যদি আইকন না থাকে বা পাওয়া না যায়, তাহলে ভিসা দেখাবে
+                const iconInfo = platformIcons.find(icon => icon.id === (platform.icon || 'visa')) || platformIcons[0];
                 const featuresList = platform.features ? platform.features.join(', ') : 'কোন ফিচার নেই';
                 
                 // Get D field content with preview - use the field "D" as per new requirement
@@ -1484,7 +1410,7 @@
                 platformCard.innerHTML = `
                     <div class="platform-header">
                         <div class="platform-icon">
-                            <i class="${iconInfo.icon} ${platform.icon}" style="color: ${iconInfo.color};"></i>
+                            <i class="${iconInfo.icon} ${platform.icon || 'visa'}" style="color: ${iconInfo.color};"></i>
                         </div>
                         <div>
                             <div class="platform-name">${platform.name}</div>
@@ -1554,14 +1480,9 @@
             platformCategory.value = platform.category || 'streaming';
             platformOrder.value = platform.order || 1;
             platformStatus.value = platform.status || 'active';
-            selectedIcon = platform.icon || 'youtube';
-            
-            document.querySelectorAll('.icon-option').forEach(opt => {
-                opt.classList.remove('selected');
-                if (opt.getAttribute('data-icon') === selectedIcon) {
-                    opt.classList.add('selected');
-                }
-            });
+            // আইকন সিলেক্ট করা নেই, তাই icon ফিল্ড এডিট করার সময় কিছু করা হচ্ছে না
+            // ডিফল্ট হিসেবে যা আছে তাই থাকবে, পরিবর্তন করতে চাইলে ডাটাবেসে আপডেট করতে হবে আলাদাভাবে
+            // কিন্তু আমরা চাইলে icon ফিল্ড না দেখিয়ে দিতে পারি, তাই এখানে কিছু করছি না
             
             document.getElementById('formTitle').textContent = 'প্ল্যাটফর্ম এডিট করুন (pricingPlans2)';
             document.getElementById('platformsSection').scrollIntoView({ behavior: 'smooth' });
@@ -1596,10 +1517,11 @@
                 ? platformFeatures.value.trim().split('\n').filter(f => f.trim())
                 : [];
             
+            // আইকন হিসেবে 'visa' ডিফল্টভাবে পাঠানো হচ্ছে
             const platformData = {
                 name: platformName.value.trim(),
                 price: platformPrice.value.trim(),
-                icon: selectedIcon,
+                icon: 'visa',   // সবসময় ভিসা আইকন
                 description: platformDescription.value.trim(),
                 // Save D field as "D" (capital D) - consistent with new requirement
                 D: platformDField.value.trim(),
@@ -1634,18 +1556,10 @@
         function resetPlatformForm() {
             platformForm.reset();
             platformId.value = '';
-            selectedIcon = 'youtube';
             platformOrder.value = 1;
             platformStatus.value = 'active';
             platformCategory.value = 'streaming';
             platformDField.value = '';
-            
-            document.querySelectorAll('.icon-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            if (iconGrid.firstChild) {
-                iconGrid.firstChild.classList.add('selected');
-            }
             
             document.getElementById('formTitle').textContent = 'নতুন প্ল্যাটফর্ম যোগ করুন (pricingPlans2)';
         }
@@ -2123,6 +2037,7 @@
                 <p><strong>ফায়ারবেস প্রজেক্ট:</strong> Easy Premium</p>
                 <p><strong>ডাটাবেস URL:</strong> ${firebaseConfig.databaseURL}</p>
                 <p><strong>অ্যাকটিভ ডাটাবেস পাথ:</strong> publicData/pricingPlans2</p>
+                <p><strong>আইকন সিলেক্ট:</strong> সরানো হয়েছে (সব প্ল্যাটফর্মে ভিসা আইকন)</p>
             `;
             
             systemInfo.innerHTML = info;
