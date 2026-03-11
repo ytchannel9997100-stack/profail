@@ -818,7 +818,7 @@
                     <i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড
                 </button>
                 <button class="nav-btn" data-section="platforms">
-                    <i class="fas fa-th-large"></i> প্ল্যাটফর্ম ম্যানেজমেন্ট
+                    <i class="fas fa-th-large"></i> প্ল্যাটফর্ম ম্যানেজমেন্ট (pricingPlans2)
                 </button>
                 <button class="nav-btn" data-section="orders">
                     <i class="fas fa-shopping-cart"></i> অর্ডার ম্যানেজমেন্ট
@@ -838,7 +838,7 @@
                 <div class="form-row" style="margin-bottom: 30px;">
                     <div class="stats-card">
                         <div class="stat-value" id="totalPlatforms">0</div>
-                        <div class="stat-label">মোট প্ল্যাটফর্ম</div>
+                        <div class="stat-label">মোট প্ল্যাটফর্ম (pricingPlans2)</div>
                     </div>
                     
                     <div class="stats-card">
@@ -865,16 +865,16 @@
                 </div>
             </section>
             
-            <!-- Platforms Management Section -->
+            <!-- Platforms Management Section (pricingPlans2) -->
             <section class="section" id="platformsSection">
-                <h2 class="section-title">প্ল্যাটফর্ম ম্যানেজমেন্ট</h2>
+                <h2 class="section-title">প্ল্যাটফর্ম ম্যানেজমেন্ট (pricingPlans2)</h2>
                 
                 <div class="platforms-grid" id="platformsGrid">
                     <!-- Platforms will be loaded here -->
                 </div>
                 
                 <div class="add-platform-form">
-                    <h3 style="color: #00bcd4; margin-bottom: 20px;" id="formTitle">নতুন প্ল্যাটফর্ম যোগ করুন</h3>
+                    <h3 style="color: #00bcd4; margin-bottom: 20px;" id="formTitle">নতুন প্ল্যাটফর্ম যোগ করুন (pricingPlans2)</h3>
                     
                     <form id="platformForm">
                         <input type="hidden" id="platformId" value="">
@@ -943,7 +943,7 @@
                         
                         <div style="display: flex; gap: 15px; margin-top: 20px;">
                             <button type="submit" class="nav-btn" style="background: #ff9800;">
-                                <i class="fas fa-save"></i> সেভ করুন
+                                <i class="fas fa-save"></i> সেভ করুন (pricingPlans2)
                             </button>
                             <button type="button" class="nav-btn" onclick="resetPlatformForm()">
                                 <i class="fas fa-redo"></i> রিসেট
@@ -1068,7 +1068,7 @@
     <div id="dFieldModal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title" id="dFieldModalTitle">D ফিল্ড এডিট করুন</h2>
+                <h2 class="modal-title" id="dFieldModalTitle">D ফিল্ড এডিট করুন (pricingPlans2)</h2>
                 <button class="close-modal" onclick="closeDFieldModal()">&times;</button>
             </div>
             
@@ -1079,7 +1079,7 @@
             
             <div style="display: flex; gap: 15px; margin-top: 20px;">
                 <button class="nav-btn" onclick="saveDField()" style="background: #ff9800;">
-                    <i class="fas fa-save"></i> সেভ করুন
+                    <i class="fas fa-save"></i> সেভ করুন (pricingPlans2)
                 </button>
                 <button class="nav-btn" onclick="closeDFieldModal()" style="background: #6c757d;">
                     <i class="fas fa-times"></i> বাতিল
@@ -1393,9 +1393,9 @@
         
         // Initialize admin panel
         function initializeAdminPanel() {
-            loadPlatforms();
+            loadPlatforms();      // loads from pricingPlans2
             loadOrders();
-            loadStats();
+            loadStats();          // totalPlatforms from pricingPlans2
             loadSystemSettings();
             
             const adminNavBtn = document.querySelector('[data-section="admins"]');
@@ -1433,17 +1433,16 @@
             }
         }
         
-        // Load platforms
+        // Load platforms from pricingPlans2
         function loadPlatforms() {
-            platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে...</p></div>';
+            platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে (pricingPlans2)...</p></div>';
             
-            // Important: We are loading from pricingPlans (not pricingPlans2) - adjust if needed
-            database.ref('publicData/pricingPlans').on('value', (snapshot) => {
+            database.ref('publicData/pricingPlans2').on('value', (snapshot) => {
                 const data = snapshot.val();
                 platforms = [];
                 
                 if (!data) {
-                    platformsGrid.innerHTML = '<p style="text-align: center; color: #b0bec5; padding: 40px;">কোন প্ল্যাটফর্ম পাওয়া যায়নি</p>';
+                    platformsGrid.innerHTML = '<p style="text-align: center; color: #b0bec5; padding: 40px;">কোন প্ল্যাটফর্ম পাওয়া যায়নি (pricingPlans2)</p>';
                     updatePlatformCount(0);
                     return;
                 }
@@ -1466,7 +1465,7 @@
             platformsGrid.innerHTML = '';
             
             if (platforms.length === 0) {
-                platformsGrid.innerHTML = '<p style="text-align: center; color: #b0bec5; padding: 40px;">কোন প্ল্যাটফর্ম পাওয়া যায়নি</p>';
+                platformsGrid.innerHTML = '<p style="text-align: center; color: #b0bec5; padding: 40px;">কোন প্ল্যাটফর্ম পাওয়া যায়নি (pricingPlans2)</p>';
                 return;
             }
             
@@ -1536,7 +1535,7 @@
             });
         }
         
-        // Edit platform
+        // Edit platform (from pricingPlans2)
         function editPlatform(id) {
             const platform = platforms.find(p => p.id === id);
             
@@ -1564,17 +1563,17 @@
                 }
             });
             
-            document.getElementById('formTitle').textContent = 'প্ল্যাটফর্ম এডিট করুন';
+            document.getElementById('formTitle').textContent = 'প্ল্যাটফর্ম এডিট করুন (pricingPlans2)';
             document.getElementById('platformsSection').scrollIntoView({ behavior: 'smooth' });
         }
         
-        // Delete platform
+        // Delete platform from pricingPlans2
         function deletePlatform(id) {
-            if (!confirm('আপনি কি এই প্ল্যাটফর্মটি ডিলিট করতে চান?')) {
+            if (!confirm('আপনি কি এই প্ল্যাটফর্মটি ডিলিট করতে চান? (pricingPlans2)')) {
                 return;
             }
             
-            database.ref(`publicData/pricingPlans/${id}`).remove()
+            database.ref(`publicData/pricingPlans2/${id}`).remove()
                 .then(() => {
                     showToast('প্ল্যাটফর্ম সফলভাবে ডিলিট হয়েছে', 'success');
                 })
@@ -1584,7 +1583,7 @@
                 });
         }
         
-        // Handle platform form submission
+        // Handle platform form submission (pricingPlans2)
         async function handlePlatformFormSubmit(e) {
             e.preventDefault();
             
@@ -1614,13 +1613,13 @@
             
             try {
                 if (platformId.value) {
-                    await database.ref(`publicData/pricingPlans/${platformId.value}`).update(platformData);
-                    showToast('প্ল্যাটফর্ম সফলভাবে আপডেট হয়েছে', 'success');
+                    await database.ref(`publicData/pricingPlans2/${platformId.value}`).update(platformData);
+                    showToast('প্ল্যাটফর্ম সফলভাবে আপডেট হয়েছে (pricingPlans2)', 'success');
                 } else {
                     platformData.createdAt = firebase.database.ServerValue.TIMESTAMP;
                     platformData.createdBy = currentAdminEmail;
-                    await database.ref('publicData/pricingPlans').push(platformData);
-                    showToast('নতুন প্ল্যাটফর্ম সফলভাবে যোগ হয়েছে', 'success');
+                    await database.ref('publicData/pricingPlans2').push(platformData);
+                    showToast('নতুন প্ল্যাটফর্ম সফলভাবে যোগ হয়েছে (pricingPlans2)', 'success');
                 }
                 
                 resetPlatformForm();
@@ -1648,10 +1647,10 @@
                 iconGrid.firstChild.classList.add('selected');
             }
             
-            document.getElementById('formTitle').textContent = 'নতুন প্ল্যাটফর্ম যোগ করুন';
+            document.getElementById('formTitle').textContent = 'নতুন প্ল্যাটফর্ম যোগ করুন (pricingPlans2)';
         }
         
-        // Edit D Field
+        // Edit D Field (from pricingPlans2)
         function editDField(platformId, platformName) {
             const platform = platforms.find(p => p.id === platformId);
             
@@ -1666,7 +1665,7 @@
             // Get D field content - use "D" as primary
             const dFieldContent = platform.D || platform.d || platform.details || '';
             
-            dFieldModalTitle.textContent = 'D ফিল্ড এডিট করুন';
+            dFieldModalTitle.textContent = 'D ফিল্ড এডিট করুন (pricingPlans2)';
             modalPlatformName.textContent = platformName;
             dFieldEditTextarea.value = dFieldContent;
             
@@ -1676,7 +1675,7 @@
             dFieldModal.style.display = 'flex';
         }
         
-        // Save D Field
+        // Save D Field (to pricingPlans2)
         function saveDField() {
             if (!currentEditingPlatformId) return;
             
@@ -1693,9 +1692,9 @@
                 updatedBy: currentAdminEmail
             };
             
-            database.ref(`publicData/pricingPlans/${currentEditingPlatformId}`).update(updates)
+            database.ref(`publicData/pricingPlans2/${currentEditingPlatformId}`).update(updates)
                 .then(() => {
-                    showToast('D ফিল্ড সফলভাবে আপডেট হয়েছে', 'success');
+                    showToast('D ফিল্ড সফলভাবে আপডেট হয়েছে (pricingPlans2)', 'success');
                     
                     // Update local data
                     const platformIndex = platforms.findIndex(p => p.id === currentEditingPlatformId);
@@ -2080,9 +2079,9 @@
             }
         }
         
-        // Load stats
+        // Load stats (total platforms from pricingPlans2)
         function loadStats() {
-            database.ref('publicData/pricingPlans').once('value')
+            database.ref('publicData/pricingPlans2').once('value')
                 .then(snapshot => {
                     const data = snapshot.val();
                     totalPlatforms.textContent = data ? Object.keys(data).length : 0;
@@ -2123,6 +2122,7 @@
                 <p><strong>স্ট্যাটাস:</strong> ${isSuperAdmin ? 'সুপার এডমিন' : 'এডমিন'}</p>
                 <p><strong>ফায়ারবেস প্রজেক্ট:</strong> Easy Premium</p>
                 <p><strong>ডাটাবেস URL:</strong> ${firebaseConfig.databaseURL}</p>
+                <p><strong>অ্যাকটিভ ডাটাবেস পাথ:</strong> publicData/pricingPlans2</p>
             `;
             
             systemInfo.innerHTML = info;
