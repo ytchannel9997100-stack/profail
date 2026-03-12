@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>বিকাশ · নগদ · রকেট – পেমেন্ট UI</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #f2f4f8;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 20px;
+        }
+        .payment-container {
+            max-width: 700px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+            padding: 30px 25px;
+        }
+        .payment-container h2 {
+            font-size: 26px;
+            font-weight: 600;
+            color: #1f2a3a;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eef2f6;
+            padding-bottom: 15px;
+        }
+        /* payment methods list */
+        .wc_payment_methods {
+            list-style: none;
+            margin: 0 0 25px 0;
+            padding: 0;
+        }
+        .wc_payment_method {
+            margin-bottom: 10px;
+            border: 1px solid #e4e8ec;
+            border-radius: 16px;
+            background: #fafbfc;
+            transition: all 0.15s;
+        }
+        .wc_payment_method.selected-method {
+            border-color: #2d6ff7;
+            background: #f0f5ff;
+        }
+        .wc_payment_method input[type="radio"] {
+            margin: 0 12px 0 16px;
+            transform: scale(1.1);
+            accent-color: #1e73be;
+            vertical-align: middle;
+        }
+        .wc_payment_method label {
+            display: inline-flex;
+            align-items: center;
+            width: calc(100% - 50px);
+            padding: 16px 10px 16px 0;
+            font-size: 18px;
+            font-weight: 500;
+            color: #1d2329;
+            cursor: pointer;
+        }
+        .wc_payment_method label img {
+            width: 32px;
+            height: 32px;
+            margin-left: 10px;
+            border-radius: 6px;
+            object-fit: contain;
+        }
+        /* payment box */
+        .payment_box {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 20px 22px;
+            margin: 0 12px 18px 12px;
+            border: 1px solid #dee4eb;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            display: none;
+        }
+        .payment_box.active-box {
+            display: block;
+        }
+        .bdpg-total-amount {
+            background: #eaf7e9;
+            border-radius: 40px;
+            padding: 14px 20px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #1c6b2b;
+            margin-bottom: 22px;
+            border: 1px solid #b8e0b5;
+            text-align: center;
+        }
+        .bdpg-total-amount b {
+            font-size: 26px;
+            margin-left: 8px;
+            color: #0b4f1a;
+        }
+        .bdpg-available-accounts {
+            background: #f6f9fe;
+            padding: 18px 18px 12px 18px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+            border: 1px solid #dde5f0;
+        }
+        .bdpg-s__acc p {
+            margin: 8px 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .account-number-text {
+            font-size: 18px;
+            background: #ffffff;
+            padding: 6px 15px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            font-family: 'Courier New', monospace;
+            margin: 0 8px;
+        }
+        .copy-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 6px rgba(0,100,0,0.2);
+            border: 1px solid #3e9144;
+        }
+        .copy-btn:hover {
+            background: #3e9144;
+        }
+        .copy-btn.copied {
+            background: #0d6efd !important;
+            border-color: #0a58ca;
+        }
+        .bdpg-user__acc {
+            margin-top: 18px;
+            border-top: 2px dashed #bcc9db;
+            padding-top: 20px;
+        }
+        .bdpg-user__field {
+            margin-bottom: 18px;
+        }
+        .bdpg-user__field label {
+            display: block;
+            font-weight: 600;
+            font-size: 15px;
+            color: #2c3e50;
+            margin-bottom: 6px;
+        }
+        .bdpg-user__field input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid #cbd5e1;
+            border-radius: 50px;
+            font-size: 15px;
+            background: white;
+            transition: 0.15s;
+        }
+        .bdpg-user__field input:focus {
+            border-color: #1e73be;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30,115,190,0.15);
+        }
+        .place-order-btn {
+            margin-top: 25px;
+            text-align: center;
+        }
+        .place-order-btn button {
+            background: #1e73be;
+            color: white;
+            border: none;
+            font-size: 20px;
+            font-weight: 600;
+            padding: 16px 40px;
+            border-radius: 60px;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(30,115,190,0.3);
+            transition: 0.2s;
+            border: 1px solid #15599b;
+        }
+        .place-order-btn button:hover {
+            background: #15599b;
+        }
+        .instruction-note {
+            font-size: 15px;
+            color: #4b5a6b;
+            background: #f7f9fb;
+            padding: 14px 18px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            line-height: 1.7;
+            border-left: 5px solid #1e73be;
+        }
+        .bdpg-acc_d p {
+            margin: 10px 0;
+        }
+        .account-type-text {
+            font-weight: 600;
+            background: #e1e9f5;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 14px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<div class="payment-container">
+    <h2>🛒 পেমেন্ট সম্পন্ন করুন</h2>
+
+    <!-- payment method list (exactly like the reference) -->
+    <ul class="wc_payment_methods payment_methods methods">
+        <!-- bKash Personal -->
+        <li class="wc_payment_method" id="method-bkash">
+            <input id="payment_method_woo_bkash" type="radio" class="input-radio" name="payment_method" value="woo_bkash" checked>
+            <label for="payment_method_woo_bkash">
+                bKash Personal
+                <img src="https://www.bdgameghor.net/wp-content/plugins/bangladeshi-payment-gateways/assets/images/Bkash.png" alt="bKash" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23E2136E%22%2F%3E%3Ctext%20x%3D%225%22%20y%3D%2222%22%20fill%3D%22white%22%20font-size%3D%2212%22%3EBkash%3C%2Ftext%3E%3C%2Fsvg%3E'">
+            </label>
+            <!-- payment box for bKash -->
+            <div class="payment_box payment_method_woo_bkash active-box" id="box-bkash">
+                <div class="instruction-note">
+                    ১। নিচে দেওয়া bKash Personal Number এ টাকা পাঠান।<br>
+                    ২। টাকা পাঠানোর পর, bKash Number বক্সে যে Number থেকে টাকা পাঠিয়েছেন সেই Number লিখুন।<br>
+                    ৩। bKash Transaction ID বক্সে Transaction ID লিখুন। (যেমন: 9EV2G0PDE9)
+                </div>
+                <div class="bdpg-total-amount">
+                    You need to send us <b>৳ 154</b>
+                </div>
+                <div class="bdpg-available-accounts">
+                    <div class="bdpg-s__acc">
+                        <!-- dynamically generated style but we hardcode with copy button built in -->
+                        <p>
+                            <span class="account-type-text">Personal</span><br>
+                            <strong>bKash:</strong> 
+                            <b class="account-number-text">01785926770</b>
+                            <button type="button" class="copy-btn" data-number="01785926770">Copy</button>
+                        </p>
+                    </div>
+                    <div class="bdpg-user__acc">
+                        <div class="bdpg-user__field">
+                            <label for="bkash_acc_no">Your bKash Account Number (আপনার বিকাশ নাম্বার দিন)</label>
+                            <input type="text" id="bkash_acc_no" name="bKash_acc_no" placeholder="e.g. 01XXXXXXXXX">
+                        </div>
+                        <div class="bdpg-user__field">
+                            <label for="bkash_trans_id">bKash Transaction ID</label>
+                            <input type="text" id="bkash_trans_id" name="bKash_trans_id" placeholder="AH855PR805">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>
+
+        <!-- Nagad Personal -->
+        <li class="wc_payment_method" id="method-nagad">
+            <input id="payment_method_woo_nagad" type="radio" class="input-radio" name="payment_method" value="woo_nagad">
+            <label for="payment_method_woo_nagad">
+                Nagad Personal
+                <img src="https://www.bdgameghor.net/wp-content/plugins/bangladeshi-payment-gateways/assets/images/Nagad.png" alt="Nagad" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23F48221%22%2F%3E%3Ctext%20x%3D%225%22%20y%3D%2222%22%20fill%3D%22white%22%20font-size%3D%2212%22%3ENagad%3C%2Ftext%3E%3C%2Fsvg%3E'">
+            </label>
+            <div class="payment_box payment_method_woo_nagad" id="box-nagad">
+                <div class="instruction-note">
+                    ১। নিচে দেওয়া Nagad Personal Number এ টাকা পাঠান।<br>
+                    ২। টাকা পাঠানোর পর, Nagad Number বক্সে যে Number থেকে টাকা পাঠিয়েছেন সেই Number লিখুন।<br>
+                    ৩। Nagad Transaction ID বক্সে Transaction ID লিখুন। (যেমন: 719AQ34C)
+                </div>
+                <div class="bdpg-total-amount">
+                    You need to send us <b>৳ 154</b>
+                </div>
+                <div class="bdpg-available-accounts">
+                    <div class="bdpg-s__acc">
+                        <p>
+                            <span class="account-type-text">Personal</span><br>
+                            <strong>Nagad:</strong> 
+                            <b class="account-number-text">01338156280</b>
+                            <button type="button" class="copy-btn" data-number="01338156280">Copy</button>
+                        </p>
+                    </div>
+                    <div class="bdpg-user__acc">
+                        <div class="bdpg-user__field">
+                            <label for="nagad_acc_no">Your Nagad Account Number (আপনার নগদ নাম্বার দিন)</label>
+                            <input type="text" id="nagad_acc_no" name="nagad_acc_no" placeholder="e.g. 01XXXXXXXXX">
+                        </div>
+                        <div class="bdpg-user__field">
+                            <label for="nagad_trans_id">Nagad Transaction ID</label>
+                            <input type="text" id="nagad_trans_id" name="nagad_trans_id" placeholder="719AQ34C">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>
+
+        <!-- Rocket Personal -->
+        <li class="wc_payment_method" id="method-rocket">
+            <input id="payment_method_woo_rocket" type="radio" class="input-radio" name="payment_method" value="woo_rocket">
+            <label for="payment_method_woo_rocket">
+                Rocket Personal
+                <img src="https://www.bdgameghor.net/wp-content/plugins/bangladeshi-payment-gateways/assets/images/Rocket.png" alt="Rocket" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23DA291C%22%2F%3E%3Ctext%20x%3D%224%22%20y%3D%2222%22%20fill%3D%22white%22%20font-size%3D%2212%22%3ERocket%3C%2Ftext%3E%3C%2Fsvg%3E'">
+            </label>
+            <div class="payment_box payment_method_woo_rocket" id="box-rocket">
+                <div class="instruction-note">
+                    ১। নিচে দেওয়া Rocket Personal Number এ টাকা পাঠান।<br>
+                    ২। টাকা পাঠানোর পর, Rocket Number বক্সে যে Number থেকে টাকা পাঠিয়েছেন সেই Number লিখুন।<br>
+                    ৩। Rocket Transaction ID বক্সে Transaction ID লিখুন। (যেমন: 2988708467)
+                </div>
+                <div class="bdpg-total-amount">
+                    You need to send us <b>৳ 154</b>
+                </div>
+                <div class="bdpg-available-accounts">
+                    <div class="bdpg-s__acc">
+                        <p>
+                            <span class="account-type-text">Personal</span><br>
+                            <strong>Rocket:</strong> 
+                            <b class="account-number-text">014013018874</b>
+                            <button type="button" class="copy-btn" data-number="014013018874">Copy</button>
+                        </p>
+                    </div>
+                    <div class="bdpg-user__acc">
+                        <div class="bdpg-user__field">
+                            <label for="rocket_acc_no">Your Rocket Account Number (আপনার রকেট নাম্বার দিন)</label>
+                            <input type="text" id="rocket_acc_no" name="rocket_acc_no" placeholder="e.g. 01XXXXXXXXX">
+                        </div>
+                        <div class="bdpg-user__field">
+                            <label for="rocket_trans_id">Rocket Transaction ID</label>
+                            <input type="text" id="rocket_trans_id" name="rocket_trans_id" placeholder="2988708467">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </ul>
+
+    <!-- optional place order button (like original) -->
+    <div class="place-order-btn">
+        <button type="button" onclick="alert('অর্ডার কনফার্মেশন ফাংশন (ডেমো)')">✅ Place order (demo)</button>
+    </div>
+    <p style="text-align: center; margin-top: 16px; color: #5f6b7a; font-size: 14px;">শুধু পেমেন্ট UI ডেমো — ব্যাংক অ্যাকাউন্ট নম্বর ডেমো</p>
+</div>
+
+<!-- JavaScript for toggle and copy -->
+<script>
+    (function() {
+        // ----- 1. Payment method toggle (radio switch) -----
+        const radios = document.querySelectorAll('input[name="payment_method"]');
+        const bkashBox = document.getElementById('box-bkash');
+        const nagadBox = document.getElementById('box-nagad');
+        const rocketBox = document.getElementById('box-rocket');
+        const methodItems = document.querySelectorAll('.wc_payment_method');
+
+        function updatePaymentBoxes(selectedValue) {
+            // hide all boxes first
+            bkashBox.classList.remove('active-box');
+            nagadBox.classList.remove('active-box');
+            rocketBox.classList.remove('active-box');
+
+            // remove highlight from all method items
+            methodItems.forEach(item => item.classList.remove('selected-method'));
+
+            // show selected and highlight parent li
+            if (selectedValue === 'woo_bkash') {
+                bkashBox.classList.add('active-box');
+                document.getElementById('method-bkash').classList.add('selected-method');
+            } else if (selectedValue === 'woo_nagad') {
+                nagadBox.classList.add('active-box');
+                document.getElementById('method-nagad').classList.add('selected-method');
+            } else if (selectedValue === 'woo_rocket') {
+                rocketBox.classList.add('active-box');
+                document.getElementById('method-rocket').classList.add('selected-method');
+            }
+        }
+
+        // initial call (default checked is bKash)
+        updatePaymentBoxes('woo_bkash');
+
+        radios.forEach(radio => {
+            radio.addEventListener('change', function(e) {
+                updatePaymentBoxes(this.value);
+            });
+        });
+
+        // ----- 2. Copy button functionality (exactly as reference) -----
+        const copyButtons = document.querySelectorAll('.copy-btn');
+
+        copyButtons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const number = this.getAttribute('data-number');
+                if (!number) return;
+
+                // copy to clipboard
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(number).catch(err => console.warn);
+                } else {
+                    // fallback
+                    const tempInput = document.createElement('input');
+                    tempInput.value = number;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                }
+
+                // mark button as copied (permanent blue, text "Copied")
+                this.classList.add('copied');
+                this.textContent = 'Copied';
+            });
+        });
+
+        // ----- 3. Fix labels – just to be sure we show correct naming (but we already hardcoded, still we ensure style) -----
+        // Not needed because we built the exact structure, but we'll add a tweak to match dynamic nature if any.
+        // The original script also changed "Number: " to "bKash: " etc. We already have "bKash:" in our hardcoded html.
+        // So we're fine.
+
+        // additionally if someone wants the exact dynamic text replacement (like original fixLabels) we can simulate:
+        // but since we already have correct names, skip.
+
+        // also mimic the original "copied" permanent style. We already included .copied background.
+
+        // For any later added copy buttons (none), it's ok.
+    })();
+</script>
+
+<!-- fallback for older browsers: ensure place order does not submit -->
+</body>
+</html>
