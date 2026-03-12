@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>পেমেন্ট তথ্য - Easy Premium</title>
+    <title>পেমেন্ট তথ্য · Easy Premium</title>
     <meta name="theme-color" content="#0a0a1a">
     
     <!-- ================== সিকিউরিটি হেডার ================== -->
@@ -105,6 +105,7 @@
             word-break: break-word;
         }
         
+        /* ফিক্সড পেমেন্ট টগল বাটন */
         .pay-btn { 
             position: fixed; 
             bottom: 0; 
@@ -130,25 +131,221 @@
             box-shadow: 0 -5px 25px rgba(255, 152, 0, 0.5);
         }
         
-        .pay-btn.hidden { display: none; }
+        /* পেমেন্ট প্যানেল - শুরুতে লুকানো */
+        #paymentPanel {
+            display: none;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
         
-        .d-field { 
-            margin-top: 20px; 
-            padding: 16px; 
-            background: rgba(20, 20, 40, 0.7);
-            border-radius: 8px; 
-            color: #fff; 
-            font-size: 15px;
-            line-height: 1.6;
+        /* ডার্ক থিমে পেমেন্ট UI স্টাইল */
+        .wc_payment_methods {
+            list-style: none;
+            margin: 0 0 20px 0;
+            padding: 0;
+        }
+        .wc_payment_method {
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 152, 0, 0.4);
+            border-radius: 16px;
+            background: rgba(15, 15, 30, 0.8);
             backdrop-filter: blur(5px);
+            transition: all 0.15s;
         }
-        
-        .d-field-title {
-            color: #00bcd4;
-            font-weight: bold;
-            margin-bottom: 8px;
+        .wc_payment_method.selected-method {
+            border-color: #ff9800;
+            background: rgba(255, 152, 0, 0.15);
         }
-        
+        .wc_payment_method input[type="radio"] {
+            margin: 0 12px 0 16px;
+            transform: scale(1.1);
+            accent-color: #ff9800;
+            vertical-align: middle;
+        }
+        .wc_payment_method label {
+            display: inline-flex;
+            align-items: center;
+            width: calc(100% - 50px);
+            padding: 16px 10px 16px 0;
+            font-size: 18px;
+            font-weight: 500;
+            color: #eee;
+            cursor: pointer;
+        }
+        .wc_payment_method label img {
+            width: 32px;
+            height: 32px;
+            margin-left: 10px;
+            border-radius: 6px;
+            object-fit: contain;
+            filter: brightness(0.9);
+        }
+        .payment_box {
+            background: rgba(10, 10, 25, 0.9);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            padding: 20px 22px;
+            margin: 0 12px 18px 12px;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+            display: none;
+        }
+        .payment_box.active-box {
+            display: block;
+        }
+        .bdpg-total-amount {
+            background: rgba(255, 152, 0, 0.1);
+            border-radius: 40px;
+            padding: 14px 20px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #ff9800;
+            margin-bottom: 22px;
+            border: 1px solid rgba(255, 152, 0, 0.5);
+            text-align: center;
+        }
+        .bdpg-total-amount b {
+            font-size: 26px;
+            margin-left: 8px;
+            color: #ffb74d;
+        }
+        .bdpg-available-accounts {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 18px 18px 12px 18px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 152, 0, 0.2);
+        }
+        .bdpg-s__acc p {
+            margin: 8px 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            color: #ccc;
+        }
+        .account-number-text {
+            font-size: 18px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 15px;
+            border-radius: 40px;
+            border: 1px solid #ff9800;
+            font-family: 'Courier New', monospace;
+            margin: 0 8px;
+            color: #ff9800;
+        }
+        .copy-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 6px rgba(0,100,0,0.2);
+            border: 1px solid #3e9144;
+        }
+        .copy-btn:hover {
+            background: #3e9144;
+        }
+        .copy-btn.copied {
+            background: #0d6efd !important;
+            border-color: #0a58ca;
+        }
+        .bdpg-user__acc {
+            margin-top: 18px;
+            border-top: 2px dashed rgba(255, 152, 0, 0.3);
+            padding-top: 20px;
+        }
+        .bdpg-user__field {
+            margin-bottom: 18px;
+        }
+        .bdpg-user__field label {
+            display: block;
+            font-weight: 600;
+            font-size: 15px;
+            color: #ff9800;
+            margin-bottom: 6px;
+        }
+        .bdpg-user__field input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid rgba(255, 152, 0, 0.5);
+            border-radius: 50px;
+            font-size: 15px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            transition: 0.15s;
+        }
+        .bdpg-user__field input:focus {
+            border-color: #ff9800;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+        }
+        .instruction-note {
+            font-size: 15px;
+            color: #b0bec5;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 14px 18px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            line-height: 1.7;
+            border-left: 5px solid #ff9800;
+        }
+        .account-type-text {
+            font-weight: 600;
+            background: rgba(255, 152, 0, 0.2);
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 14px;
+            display: inline-block;
+            color: #ff9800;
+        }
+        .spinner {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .button-loader {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .required-star { color: #ff6666; margin-left: 4px; }
+        .small-hint { font-size: 13px; color: #aaa; margin-top: 4px; }
+
+        /* পেমেন্ট প্যানেলের ভিতরের ভেরিফাই বাটন */
+        .verify-inside-btn {
+            background: linear-gradient(45deg, #ff9800, #ff2222);
+            color: white;
+            border: none;
+            font-size: 18px;
+            font-weight: 600;
+            padding: 14px 30px;
+            border-radius: 60px;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #ff9800;
+            margin-top: 10px;
+        }
+        .verify-inside-btn:hover {
+            background: linear-gradient(45deg, #ff2222, #0008ff);
+        }
+        .verify-inside-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .error, .loading { 
             text-align: center; 
             padding: 30px; 
@@ -158,10 +355,8 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 152, 0, 0.3);
         }
-        
         .error { color: #ff6666; }
         .loading { color: #888; }
-        
         .loading::after {
             content: '';
             display: inline-block;
@@ -173,29 +368,23 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* পিসির জন্য */
+
         @media (min-width: 1024px) {
             .header h1 { font-size: 36px; }
             .card { padding: 30px; }
             .info-row { font-size: 18px; }
         }
-        
-        /* মোবাইলের জন্য */
         @media (max-width: 480px) {
             body { padding: 10px; padding-bottom: 75px; }
             .header h1 { font-size: 24px; }
         }
     </style>
     
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     
-    <!-- ================== সিকিউরিটি স্ক্রিপ্ট ================== -->
+    <!-- ================== সিকিউরিটি স্ক্রিপ্ট (অপরিবর্তিত) ================== -->
     <script>
     (function() {
         'use strict';
@@ -328,7 +517,7 @@
             }
         }, { passive: false });
         
-        // ========== ৬. সেশন টাইমআউট (যদি ফায়ারবেস ইউজার থাকে) ==========
+        // ========== ৬. সেশন টাইমআউট ==========
         let sessionTimer;
         
         function resetSessionTimer() {
@@ -365,7 +554,7 @@
                 .replace(/=/g, '&#61;');
         }
         
-        // ডম পরিবর্তন পর্যবেক্ষণ করে নতুন এলিমেন্ট চেক
+        // ডম পরিবর্তন পর্যবেক্ষণ
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.addedNodes.length > 0) {
@@ -382,11 +571,12 @@
         
         observer.observe(document.body, { childList: true, subtree: true });
         
-        console.log('✅ নিরাপত্তা মোড সক্রিয় - AccountDelete');
+        console.log('✅ নিরাপত্তা মোড সক্রিয় - Easy Premium');
     })();
     </script>
     
     <script>
+        // Firebase initialization (same as original)
         firebase.initializeApp({
             apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
             authDomain: "easy-premium.firebaseapp.com",
@@ -479,9 +669,11 @@
             }
         }
 
+        // মূল পেজ লজিক + পেমেন্ট প্যানেল টগল
         window.addEventListener('DOMContentLoaded', async () => {
             const output = document.getElementById('output');
             const payBtn = document.getElementById('payBtn');
+            const paymentPanel = document.getElementById('paymentPanel');
             
             const urlParams = new URLSearchParams(window.location.search);
             const encodedData = urlParams.get('data');
@@ -551,7 +743,25 @@
                 </div>
             `;
             
+            // ডাইনামিকভাবে পেমেন্ট প্যানেলে মোট টাকার পরিমাণ সেট করুন
+            const totalAmountSpans = document.querySelectorAll('.bdpg-total-amount b');
+            totalAmountSpans.forEach(span => {
+                span.textContent = `৳ ${data.price}`;
+            });
+
+            // পেমেন্ট টগল বাটন
             payBtn.classList.remove('hidden');
+            
+            // টগল functionality
+            payBtn.addEventListener('click', function() {
+                if (paymentPanel.style.display === 'none' || paymentPanel.style.display === '') {
+                    paymentPanel.style.display = 'block';
+                    payBtn.textContent = '✕ পেমেন্ট বন্ধ করুন';
+                } else {
+                    paymentPanel.style.display = 'none';
+                    payBtn.textContent = '💳 পেমেন্ট কনফার্ম করুন';
+                }
+            });
         });
     </script>
 </head>
@@ -563,8 +773,243 @@
         </div>
         
         <div id="output"></div>
+
+        <!-- ========== পেমেন্ট প্যানেল (bKash/Nagad/Rocket) ========== -->
+        <div id="paymentPanel">
+            <ul class="wc_payment_methods">
+                <!-- bKash -->
+                <li class="wc_payment_method" id="method-bkash">
+                    <input id="payment_method_woo_bkash" type="radio" class="input-radio" name="payment_method" value="woo_bkash" checked>
+                    <label for="payment_method_woo_bkash">
+                        bKash Personal
+                        <img src="https://www.bdgameghor.net/wp-content/plugins/bangladeshi-payment-gateways/assets/images/Bkash.png" alt="bKash" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23E2136E%22%2F%3E%3Ctext%20x%3D%225%22%20y%3D%2222%22%20fill%3D%22white%22%20font-size%3D%2212%22%3EBkash%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                    </label>
+                    <div class="payment_box payment_method_woo_bkash active-box" id="box-bkash">
+                        <div class="instruction-note">
+                            ১। নিচে দেওয়া bKash Personal Number এ টাকা পাঠান।<br>
+                            ২। টাকা পাঠানোর পর, bKash Number বক্সে যে Number থেকে টাকা পাঠিয়েছেন সেই Number লিখুন।<br>
+                            ৩। bKash Transaction ID বক্সে Transaction ID লিখুন। (যেমন: 9EV2G0PDE9)
+                        </div>
+                        <div class="bdpg-total-amount">
+                            You need to send us <b>৳ 154</b>
+                        </div>
+                        <div class="bdpg-available-accounts">
+                            <div class="bdpg-s__acc">
+                                <p>
+                                    <span class="account-type-text">Personal</span><br>
+                                    <strong>bKash:</strong> 
+                                    <b class="account-number-text">01785926770</b>
+                                    <button type="button" class="copy-btn" data-number="01785926770">Copy</button>
+                                </p>
+                            </div>
+                            <div class="bdpg-user__acc">
+                                <div class="bdpg-user__field">
+                                    <label for="bkash_acc_no">Your bKash Account Number <span class="required-star">*</span></label>
+                                    <input type="text" id="bkash_acc_no" name="bKash_acc_no" placeholder="01XXXXXXXXX">
+                                </div>
+                                <div class="bdpg-user__field">
+                                    <label for="bkash_trans_id">bKash Transaction ID <span class="required-star">*</span></label>
+                                    <input type="text" id="bkash_trans_id" name="bKash_trans_id" placeholder="AH855PR805">
+                                </div>
+                                <div class="small-hint">যে নম্বর থেকে টাকা পাঠিয়েছেন এবং Transaction ID অবশ্যই দিন</div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <!-- Nagad -->
+                <li class="wc_payment_method" id="method-nagad">
+                    <input id="payment_method_woo_nagad" type="radio" class="input-radio" name="payment_method" value="woo_nagad">
+                    <label for="payment_method_woo_nagad">
+                        Nagad Personal
+                        <img src="https://www.bdgameghor.net/wp-content/plugins/bangladeshi-payment-gateways/assets/images/Nagad.png" alt="Nagad" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23F48221%22%2F%3E%3Ctext%20x%3D%225%22%20y%3D%2222%22%20fill%3D%22white%22%20font-size%3D%2212%22%3ENagad%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                    </label>
+                    <div class="payment_box payment_method_woo_nagad" id="box-nagad">
+                        <div class="instruction-note">
+                            ১। নিচে দেওয়া Nagad Personal Number এ টাকা পাঠান।<br>
+                            ২। টাকা পাঠানোর পর, Nagad Number বক্সে যে Number থেকে টাকা পাঠিয়েছেন সেই Number লিখুন।<br>
+                            ৩। Nagad Transaction ID বক্সে Transaction ID লিখুন। (যেমন: 719AQ34C)
+                        </div>
+                        <div class="bdpg-total-amount">
+                            You need to send us <b>৳ 154</b>
+                        </div>
+                        <div class="bdpg-available-accounts">
+                            <div class="bdpg-s__acc">
+                                <p>
+                                    <span class="account-type-text">Personal</span><br>
+                                    <strong>Nagad:</strong> 
+                                    <b class="account-number-text">01338156280</b>
+                                    <button type="button" class="copy-btn" data-number="01338156280">Copy</button>
+                                </p>
+                            </div>
+                            <div class="bdpg-user__acc">
+                                <div class="bdpg-user__field">
+                                    <label for="nagad_acc_no">Your Nagad Account Number <span class="required-star">*</span></label>
+                                    <input type="text" id="nagad_acc_no" name="nagad_acc_no" placeholder="01XXXXXXXXX">
+                                </div>
+                                <div class="bdpg-user__field">
+                                    <label for="nagad_trans_id">Nagad Transaction ID <span class="required-star">*</span></label>
+                                    <input type="text" id="nagad_trans_id" name="nagad_trans_id" placeholder="719AQ34C">
+                                </div>
+                                <div class="small-hint">যে নম্বর থেকে টাকা পাঠিয়েছেন এবং Transaction ID অবশ্যই দিন</div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <!-- Rocket -->
+                <li class="wc_payment_method" id="method-rocket">
+                    <input id="payment_method_woo_rocket" type="radio" class="input-radio" name="payment_method" value="woo_rocket">
+                    <label for="payment_method_woo_rocket">
+                        Rocket Personal
+                        <img src="https://www.bdgameghor.net/wp-content/plugins/bangladeshi-payment-gateways/assets/images/Rocket.png" alt="Rocket" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23DA291C%22%2F%3E%3Ctext%20x%3D%224%22%20y%3D%2222%22%20fill%3D%22white%22%20font-size%3D%2212%22%3ERocket%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                    </label>
+                    <div class="payment_box payment_method_woo_rocket" id="box-rocket">
+                        <div class="instruction-note">
+                            ১। নিচে দেওয়া Rocket Personal Number এ টাকা পাঠান।<br>
+                            ২। টাকা পাঠানোর পর, Rocket Number বক্সে যে Number থেকে টাকা পাঠিয়েছেন সেই Number লিখুন।<br>
+                            ৩। Rocket Transaction ID বক্সে Transaction ID লিখুন। (যেমন: 2988708467)
+                        </div>
+                        <div class="bdpg-total-amount">
+                            You need to send us <b>৳ 154</b>
+                        </div>
+                        <div class="bdpg-available-accounts">
+                            <div class="bdpg-s__acc">
+                                <p>
+                                    <span class="account-type-text">Personal</span><br>
+                                    <strong>Rocket:</strong> 
+                                    <b class="account-number-text">014013018874</b>
+                                    <button type="button" class="copy-btn" data-number="014013018874">Copy</button>
+                                </p>
+                            </div>
+                            <div class="bdpg-user__acc">
+                                <div class="bdpg-user__field">
+                                    <label for="rocket_acc_no">Your Rocket Account Number <span class="required-star">*</span></label>
+                                    <input type="text" id="rocket_acc_no" name="rocket_acc_no" placeholder="01XXXXXXXXX">
+                                </div>
+                                <div class="bdpg-user__field">
+                                    <label for="rocket_trans_id">Rocket Transaction ID <span class="required-star">*</span></label>
+                                    <input type="text" id="rocket_trans_id" name="rocket_trans_id" placeholder="2988708467">
+                                </div>
+                                <div class="small-hint">যে নম্বর থেকে টাকা পাঠিয়েছেন এবং Transaction ID অবশ্যই দিন</div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <!-- পেমেন্ট প্যানেলের নিজস্ব ভেরিফাই বাটন -->
+            <button class="verify-inside-btn" id="verifyInsideBtn">✅ ভেরিফাই ও পেমেন্ট সম্পন্ন করুন</button>
+        </div>
     </div>
     
-    <button id="payBtn" class="pay-btn hidden" onclick="alert('পেমেন্ট গেটওয়ে সংযুক্ত হবে')">💳 পেমেন্ট কনফার্ম করুন</button>
+    <!-- ফিক্সড পেমেন্ট টগল বাটন (মূল) -->
+    <button id="payBtn" class="pay-btn hidden">💳 পেমেন্ট কনফার্ম করুন</button>
+
+    <!-- পেমেন্ট UI-এর জন্য স্ক্রিপ্ট (রেডিও টগল, কপি, ভেরিফাই) -->
+    <script>
+        (function() {
+            // রেডিও বাটন টগল (payment method switch)
+            const radios = document.querySelectorAll('input[name="payment_method"]');
+            const bkashBox = document.getElementById('box-bkash');
+            const nagadBox = document.getElementById('box-nagad');
+            const rocketBox = document.getElementById('box-rocket');
+            const methodItems = document.querySelectorAll('.wc_payment_method');
+
+            function updatePaymentBoxes(selectedValue) {
+                bkashBox.classList.remove('active-box');
+                nagadBox.classList.remove('active-box');
+                rocketBox.classList.remove('active-box');
+                methodItems.forEach(item => item.classList.remove('selected-method'));
+
+                if (selectedValue === 'woo_bkash') {
+                    bkashBox.classList.add('active-box');
+                    document.getElementById('method-bkash').classList.add('selected-method');
+                } else if (selectedValue === 'woo_nagad') {
+                    nagadBox.classList.add('active-box');
+                    document.getElementById('method-nagad').classList.add('selected-method');
+                } else if (selectedValue === 'woo_rocket') {
+                    rocketBox.classList.add('active-box');
+                    document.getElementById('method-rocket').classList.add('selected-method');
+                }
+            }
+            // প্রাথমিক অবস্থা (bKash সিলেক্টেড)
+            updatePaymentBoxes('woo_bkash');
+            
+            radios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    updatePaymentBoxes(this.value);
+                });
+            });
+
+            // কপি বাটন
+            const copyButtons = document.querySelectorAll('.copy-btn');
+            copyButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const number = this.getAttribute('data-number');
+                    if (!number) return;
+
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(number).catch(err => console.warn);
+                    } else {
+                        const tempInput = document.createElement('input');
+                        tempInput.value = number;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(tempInput);
+                    }
+                    this.classList.add('copied');
+                    this.textContent = 'Copied';
+                });
+            });
+
+            // প্যানেলের ভিতরের ভেরিফাই বাটন (ফিল্ড ভ্যালিডেশন + লোডিং)
+            const verifyInside = document.getElementById('verifyInsideBtn');
+            if (verifyInside) {
+                verifyInside.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    
+                    // কোন পদ্ধতি সিলেক্ট করা আছে?
+                    const selected = document.querySelector('input[name="payment_method"]:checked');
+                    if (!selected) {
+                        alert('কোন পেমেন্ট পদ্ধতি নির্বাচন করুন');
+                        return;
+                    }
+
+                    let accountInput, transInput;
+                    if (selected.value === 'woo_bkash') {
+                        accountInput = document.getElementById('bkash_acc_no');
+                        transInput = document.getElementById('bkash_trans_id');
+                    } else if (selected.value === 'woo_nagad') {
+                        accountInput = document.getElementById('nagad_acc_no');
+                        transInput = document.getElementById('nagad_trans_id');
+                    } else {
+                        accountInput = document.getElementById('rocket_acc_no');
+                        transInput = document.getElementById('rocket_trans_id');
+                    }
+
+                    const accountVal = accountInput ? accountInput.value.trim() : '';
+                    const transVal = transInput ? transInput.value.trim() : '';
+
+                    if (!accountVal || !transVal) {
+                        alert('দয়া করে অ্যাকাউন্ট নম্বর এবং ট্রানজেকশন আইডি উভয়ই পূরণ করুন।');
+                        return;
+                    }
+
+                    // লোডিং ইফেক্ট
+                    const originalText = verifyInside.textContent;
+                    verifyInside.disabled = true;
+                    verifyInside.innerHTML = '<span class="button-loader"><span class="spinner"></span> Processing...</span>';
+
+                    // সিমুলেট নেটওয়ার্ক ডেল
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    verifyInside.innerHTML = originalText;
+                    verifyInside.disabled = false;
+
+                    alert('✅ পেমেন্ট তথ্য জমা দেওয়া হয়েছে (ডেমো)');
+                });
+            }
+        })();
+    </script>
 </body>
 </html>
