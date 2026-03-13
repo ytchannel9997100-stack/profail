@@ -33,7 +33,6 @@
             position: relative;
         }
 
-        /* রেডিয়াল গ্রেডিয়েন্ট ইফেক্ট */
         body::before {
             content: '';
             position: fixed;
@@ -384,24 +383,21 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     
-    <!-- ================== সিকিউরিটি স্ক্রিপ্ট (অপরিবর্তিত) ================== -->
+    <!-- ================== সিকিউরিটি স্ক্রিপ্ট ================== -->
     <script>
     (function() {
         'use strict';
         
-        // ========== কনফিগারেশন ==========
         const CONFIG = {
-            SESSION_TIMEOUT: 30 * 60 * 1000, // 30 মিনিট
+            SESSION_TIMEOUT: 30 * 60 * 1000,
             ALERT_ON_DEVTOOLS: true,
             ENFORCE_HTTPS: true
         };
         
-        // ========== ১. HTTPS ফোর্স করা ==========
         if (CONFIG.ENFORCE_HTTPS && location.protocol !== 'https:' && location.hostname !== 'localhost' && !location.hostname.includes('127.0.0.1')) {
             location.replace('https://' + location.host + location.pathname + location.search);
         }
         
-        // ========== ২. ক্লিকজ্যাকিং প্রোটেকশন ==========
         if (self !== top) {
             try {
                 top.location.href = self.location.href;
@@ -411,7 +407,6 @@
             }
         }
         
-        // ========== ৩. ডিভ টুলস ডিটেকশন ==========
         function detectDevTools() {
             const start = performance.now();
             debugger;
@@ -455,74 +450,31 @@
         
         setInterval(detectDevTools, 3000);
         
-        // ========== ৪. কীবোর্ড শর্টকাট প্রোটেকশন ==========
         document.addEventListener('keydown', function(e) {
-            // Ctrl+U (ভিউ সোর্স)
-            if (e.ctrlKey && e.keyCode === 85) {
-                e.preventDefault();
-                return false;
-            }
-            
-            // Ctrl+S (সেভ)
-            if (e.ctrlKey && e.keyCode === 83) {
-                e.preventDefault();
-                return false;
-            }
-            
-            // Ctrl+Shift+I (ইন্সপেক্ট)
-            if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
-                e.preventDefault();
-                return false;
-            }
-            
-            // F12
-            if (e.keyCode === 123) {
-                e.preventDefault();
-                return false;
-            }
-            
-            // Ctrl+U (ভিউ সোর্সের বিকল্প)
-            if (e.ctrlKey && e.keyCode === 85) {
-                e.preventDefault();
-                return false;
-            }
+            if (e.ctrlKey && e.keyCode === 85) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.keyCode === 83) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 73) { e.preventDefault(); return false; }
+            if (e.keyCode === 123) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.keyCode === 85) { e.preventDefault(); return false; }
         });
         
-        // ========== ৫. রাইট ক্লিক প্রোটেকশন ==========
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            return false;
-        });
-        
-        document.addEventListener('mousedown', function(e) {
-            if (e.button === 2) {
-                e.preventDefault();
-                return false;
-            }
-        });
-        
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+        document.addEventListener('mousedown', function(e) { if (e.button === 2) { e.preventDefault(); return false; } });
         document.addEventListener('touchstart', function(e) {
             let touchTimer;
             const handleTouchEnd = function() {
                 clearTimeout(touchTimer);
                 document.removeEventListener('touchend', handleTouchEnd);
             };
-            
             if (e.touches.length === 1) {
-                touchTimer = setTimeout(function() {
-                    e.preventDefault();
-                }, 500);
-                
+                touchTimer = setTimeout(function() { e.preventDefault(); }, 500);
                 document.addEventListener('touchend', handleTouchEnd, { once: true });
             }
         }, { passive: false });
         
-        // ========== ৬. সেশন টাইমআউট ==========
         let sessionTimer;
-        
         function resetSessionTimer() {
             if (sessionTimer) clearTimeout(sessionTimer);
-            
             sessionTimer = setTimeout(() => {
                 if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
                     if (confirm('আপনার সেশন শেষ হয়ে গেছে। পৃষ্ঠা রিফ্রেশ করবেন?')) {
@@ -531,17 +483,13 @@
                 }
             }, CONFIG.SESSION_TIMEOUT);
         }
-        
         ['click', 'keypress', 'scroll', 'mousemove', 'touchstart'].forEach(event => {
             document.addEventListener(event, resetSessionTimer, { passive: true });
         });
-        
         resetSessionTimer();
         
-        // ========== ৭. XSS প্রোটেকশন (ইনপুট স্যানিটাইজ) ==========
         function sanitizeInput(input) {
             if (typeof input !== 'string') return input;
-            
             return input
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
@@ -554,7 +502,6 @@
                 .replace(/=/g, '&#61;');
         }
         
-        // ডম পরিবর্তন পর্যবেক্ষণ
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.addedNodes.length > 0) {
@@ -568,7 +515,6 @@
                 }
             });
         });
-        
         observer.observe(document.body, { childList: true, subtree: true });
         
         console.log('✅ নিরাপত্তা মোড সক্রিয় - Easy Premium');
@@ -576,7 +522,7 @@
     </script>
     
     <script>
-        // Firebase initialization (same as original)
+        // Firebase initialization
         firebase.initializeApp({
             apiKey: "AIzaSyBt9t6mcjUtXxX2igAJdseuIIc8pP_QPEw",
             authDomain: "easy-premium.firebaseapp.com",
@@ -593,25 +539,18 @@
             try {
                 console.log("=== DECRYPTION START ===");
                 console.log("1. Encrypted data from URL:", encrypted);
-                
                 const urlDecoded = decodeURIComponent(encrypted);
                 console.log("2. After URL decode:", urlDecoded);
-                
                 const base64Decoded = atob(urlDecoded);
                 console.log("3. After Base64 decode:", base64Decoded);
-                
                 const parts = base64Decoded.split('|');
                 console.log("4. Split parts:", parts);
-                
                 if (parts.length >= 4) {
                     let cleanPlatformId = parts[1];
-                    
                     cleanPlatformId = cleanPlatformId.replace(/\\/g, '');
                     cleanPlatformId = cleanPlatformId.replace(/[^a-zA-Z0-9_-]/g, '');
-                    
                     console.log("5. Original Platform ID:", parts[1]);
                     console.log("6. Cleaned Platform ID:", cleanPlatformId);
-                    
                     return {
                         orderId: parts[0],
                         platformId: cleanPlatformId,
@@ -630,7 +569,6 @@
         async function fetchDField(platformId) {
             try {
                 console.log("🔍 Searching D field for:", platformId);
-                
                 const paths = [
                     `publicData/pricingPlans/${platformId}`,
                     `pricingPlans/${platformId}`,
@@ -638,20 +576,16 @@
                     `platforms/${platformId}`,
                     `products/${platformId}`
                 ];
-                
                 for (const path of paths) {
                     console.log("Checking:", path);
                     const snapshot = await database.ref(path).once('value');
-                    
                     if (snapshot.exists()) {
                         const data = snapshot.val();
                         console.log("✅ Found at:", path, data);
-                        
                         if (data.D) return data.D;
                         if (data.description) return data.description;
                         if (data.d) return data.d;
                         if (data.info) return data.info;
-                        
                         for (const key in data) {
                             if (typeof data[key] === 'string' && data[key].length > 0) {
                                 return data[key];
@@ -659,22 +593,102 @@
                         }
                     }
                 }
-                
                 console.log("❌ No D field found");
                 return null;
-                
             } catch (e) {
                 console.error("Firebase error:", e);
                 return null;
             }
         }
 
-        // মূল পেজ লজিক + পেমেন্ট প্যানেল টগল
+        // ========== নতুন ফাংশন: সক্রিয় এডমিনের নম্বর বের করা এবং UI আপডেট ==========
+        async function setActiveAdminNumber() {
+            try {
+                const snapshot = await database.ref('/').once('value');
+                const data = snapshot.val();
+
+                // ১. super_admin এবং active যাদের
+                const admins = [];
+                for (let key in data) {
+                    if (data[key] && data[key].role === 'super_admin' && data[key].status === 'active') {
+                        admins.push({
+                            uid: key,
+                            name: data[key].name,
+                            number: data[key].number
+                        });
+                    }
+                }
+
+                const statusData = data.Status || {};  // { Ashik: "...", Shakil: "...", Sojib: "..." }
+
+                // বর্তমান বাংলাদেশ সময় (ধরে নিচ্ছি ক্লায়েন্টও বাংলাদেশ টাইমজোনে)
+                const now = new Date();
+                const oneMinuteAgo = new Date(now.getTime() - 60 * 1000); // ১ মিনিট আগের সময়
+
+                let activeAdminNumber = null;
+                let latestTimestamp = 0;
+
+                for (let admin of admins) {
+                    const name = admin.name;
+                    const timeStr = statusData[name]; // যেমন "2026/03/13-01:56PM"
+                    if (!timeStr) continue;
+
+                    // স্ট্রিং পার্স করা
+                    const parts = timeStr.split('-');
+                    if (parts.length !== 2) continue;
+                    const datePart = parts[0]; // "2026/03/13"
+                    const timePart = parts[1]; // "01:56PM"
+                    const [year, month, day] = datePart.split('/').map(Number);
+                    let hour = parseInt(timePart.slice(0, 2));
+                    const minute = parseInt(timePart.slice(3, 5));
+                    const ampm = timePart.slice(5);
+                    if (ampm === 'PM' && hour !== 12) hour += 12;
+                    if (ampm === 'AM' && hour === 12) hour = 0;
+                    const adminDate = new Date(year, month - 1, day, hour, minute); // লোকাল টাইম
+
+                    if (adminDate >= oneMinuteAgo) {
+                        // এই এডমিন গত ১ মিনিটের মধ্যে active
+                        if (adminDate.getTime() > latestTimestamp) {
+                            latestTimestamp = adminDate.getTime();
+                            activeAdminNumber = admin.number;
+                        }
+                    }
+                }
+
+                const numberSpans = document.querySelectorAll('.account-number-text');
+                const copyButtons = document.querySelectorAll('.copy-btn');
+                const panel = document.getElementById('paymentPanel');
+                const payBtn = document.getElementById('payBtn');
+
+                if (activeAdminNumber) {
+                    // নম্বর আপডেট
+                    numberSpans.forEach(span => {
+                        span.textContent = activeAdminNumber;
+                    });
+                    copyButtons.forEach(btn => {
+                        btn.setAttribute('data-number', activeAdminNumber);
+                    });
+                    // প্যানেল দেখানোর জন্য payBtn কে visible করা (class hidden সরানো হবে পরে, এখানে না)
+                } else {
+                    // কোনো active এডমিন নেই → পুরো প্যান্ট ব্লক
+                    panel.innerHTML = '<div class="error" style="padding: 30px; text-align: center; background: rgba(255,68,68,0.15); border: 1px solid #ff4444;">⚠️ পেমেন্ট বন্ধ আছে। এডমিনের সাথে যোগাযোগ করুন।</div>';
+                    payBtn.style.display = 'none'; // পেমেন্ট বাটন লুকানো
+                }
+            } catch (e) {
+                console.error("Error in setActiveAdminNumber:", e);
+            }
+        }
+
+        // ========== মূল পেজ লজিক ==========
         window.addEventListener('DOMContentLoaded', async () => {
             const output = document.getElementById('output');
             const payBtn = document.getElementById('payBtn');
             const paymentPanel = document.getElementById('paymentPanel');
             
+            // ১. ডাটাবেস থেকে সক্রিয় এডমিন নম্বর সেট করি (await দিয়ে)
+            await setActiveAdminNumber();
+
+            // ২. URL ডিক্রিপ্ট ও ডাটা দেখানো (আগের মতো)
             const urlParams = new URLSearchParams(window.location.search);
             const encodedData = urlParams.get('data');
             
@@ -749,8 +763,12 @@
                 span.textContent = `৳ ${data.price}`;
             });
 
-            // পেমেন্ট টগল বাটন
-            payBtn.classList.remove('hidden');
+            // পেমেন্ট টগল বাটন (যদি active এডমিন থাকে তাহলে hidden সরাবে, নাহলে hidden আগেই দেয়া)
+            // setActiveAdminNumber এ already payBtn display none হতে পারে, কিন্তু hidden class সরানো হয়নি।
+            // hidden class সরানোর আগে চেক করি payBtn দৃশ্যমান কিনা
+            if (payBtn.style.display !== 'none') {
+                payBtn.classList.remove('hidden');
+            }
             
             // টগল functionality
             payBtn.addEventListener('click', function() {
@@ -906,7 +924,7 @@
     <!-- পেমেন্ট UI-এর জন্য স্ক্রিপ্ট (রেডিও টগল, কপি, ভেরিফাই) -->
     <script>
         (function() {
-            // রেডিও বাটন টগল (payment method switch)
+            // রেডিও বাটন টগল
             const radios = document.querySelectorAll('input[name="payment_method"]');
             const bkashBox = document.getElementById('box-bkash');
             const nagadBox = document.getElementById('box-nagad');
@@ -930,7 +948,6 @@
                     document.getElementById('method-rocket').classList.add('selected-method');
                 }
             }
-            // প্রাথমিক অবস্থা (bKash সিলেক্টেড)
             updatePaymentBoxes('woo_bkash');
             
             radios.forEach(radio => {
@@ -962,13 +979,12 @@
                 });
             });
 
-            // প্যানেলের ভিতরের ভেরিফাই বাটন (ফিল্ড ভ্যালিডেশন + লোডিং)
+            // প্যানেলের ভিতরের ভেরিফাই বাটন
             const verifyInside = document.getElementById('verifyInsideBtn');
             if (verifyInside) {
                 verifyInside.addEventListener('click', async function(e) {
                     e.preventDefault();
                     
-                    // কোন পদ্ধতি সিলেক্ট করা আছে?
                     const selected = document.querySelector('input[name="payment_method"]:checked');
                     if (!selected) {
                         alert('কোন পেমেন্ট পদ্ধতি নির্বাচন করুন');
@@ -995,12 +1011,10 @@
                         return;
                     }
 
-                    // লোডিং ইফেক্ট
                     const originalText = verifyInside.textContent;
                     verifyInside.disabled = true;
                     verifyInside.innerHTML = '<span class="button-loader"><span class="spinner"></span> Processing...</span>';
 
-                    // সিমুলেট নেটওয়ার্ক ডেল
                     await new Promise(resolve => setTimeout(resolve, 2000));
 
                     verifyInside.innerHTML = originalText;
