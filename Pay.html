@@ -680,6 +680,9 @@
             const payBtn = document.getElementById('payBtn');
             const paymentPanel = document.getElementById('paymentPanel');
             
+            // টাইমার আইডি সংরক্ষণের জন্য ভেরিয়েবল
+            let paymentTimer = null;
+
             // ১. ডাটাবেস থেকে সক্রিয় এডমিন নম্বর সেট করি
             await setActiveAdminNumber();
 
@@ -763,16 +766,89 @@
                 payBtn.classList.remove('hidden');
             }
             
-            // টগল functionality
-            payBtn.addEventListener('click', function() {
-                if (paymentPanel.style.display === 'none' || paymentPanel.style.display === '') {
-                    paymentPanel.style.display = 'block';
-                    payBtn.textContent = '✕ পেমেন্ট বন্ধ করুন';
-                } else {
-                    paymentPanel.style.display = 'none';
-                    payBtn.textContent = '💳 পেমেন্ট কনফার্ম করুন';
+            // পুনরায় ক্লিক ইভেন্ট যাতে একাধিক লিসেনার না জুড়ে যায়
+            // পুরানো লিসেনার সরিয়ে নতুন যোগ করা (যদি আগে থেকে থাকে)
+            payBtn.replaceWith(payBtn.cloneNode(true));
+            const newPayBtn = document.getElementById('payBtn');
+            
+            // টগল functionality পরিবর্তন করে নতুন নিয়ম
+            newPayBtn.addEventListener('click', function() {
+                // আগের কোনো টাইমার থাকলে ক্যান্সেল করুন
+                if (paymentTimer) {
+                    clearTimeout(paymentTimer);
+                    paymentTimer = null;
                 }
+                
+                // অর্ডার ডিটেলস এবং পেমেন্ট বাটন লুকান
+                output.style.display = 'none';
+                newPayBtn.style.display = 'none';
+                
+                // পেমেন্ট প্যানেল দেখান
+                paymentPanel.style.display = 'block';
+                
+                // ৫ মিনিট পর পেমেন্ট প্যানেল বন্ধ করুন
+                paymentTimer = setTimeout(function() {
+                    paymentPanel.style.display = 'none';
+                    // টাইমার ক্লিয়ার
+                    paymentTimer = null;
+                    // (আর কিছু না, কোন মেসেজ দেখানো হবে না)
+                }, 5 * 60 * 1000); // 5 মিনিট = 300000 ms
             });
+
+            // ভেরিফাই বাটনের ক্লিক ইভেন্টে টাইমার ক্যান্সেল করুন (যদি পেমেন্ট সম্পন্ন হয়)
+            const verifyInside = document.getElementById('verifyInsideBtn');
+            if (verifyInside) {
+                // পুরানো লিসেনার ক্লোন দিয়ে রিপ্লেস (যাতে একাধিক না হয়)
+                verifyInside.replaceWith(verifyInside.cloneNode(true));
+                const newVerify = document.getElementById('verifyInsideBtn');
+                
+                newVerify.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    
+                    // টাইমার ক্যান্সেল করি, কারণ পেমেন্ট সম্পন্ন হয়েছে
+                    if (paymentTimer) {
+                        clearTimeout(paymentTimer);
+                        paymentTimer = null;
+                    }
+                    
+                    const selected = document.querySelector('input[name="payment_method"]:checked');
+                    if (!selected) {
+                        alert('কোন পেমেন্ট পদ্ধতি নির্বাচন করুন');
+                        return;
+                    }
+
+                    let accountInput, transInput;
+                    if (selected.value === 'woo_bkash') {
+                        accountInput = document.getElementById('bkash_acc_no');
+                        transInput = document.getElementById('bkash_trans_id');
+                    } else if (selected.value === 'woo_nagad') {
+                        accountInput = document.getElementById('nagad_acc_no');
+                        transInput = document.getElementById('nagad_trans_id');
+                    } else {
+                        accountInput = document.getElementById('rocket_acc_no');
+                        transInput = document.getElementById('rocket_trans_id');
+                    }
+
+                    const accountVal = accountInput ? accountInput.value.trim() : '';
+                    const transVal = transInput ? transInput.value.trim() : '';
+
+                    if (!accountVal || !transVal) {
+                        alert('দয়া করে অ্যাকাউন্ট নম্বর এবং ট্রানজেকশন আইডি উভয়ই পূরণ করুন।');
+                        return;
+                    }
+
+                    const originalText = newVerify.textContent;
+                    newVerify.disabled = true;
+                    newVerify.innerHTML = '<span class="button-loader"><span class="spinner"></span> Processing...</span>';
+
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    newVerify.innerHTML = originalText;
+                    newVerify.disabled = false;
+
+                    alert('✅ পেমেন্ট তথ্য জমা দেওয়া হয়েছে (ডেমো)');
+                });
+            }
         });
     </script>
 </head>
@@ -913,110 +989,5 @@
     
     <!-- ফিক্সড পেমেন্ট টগল বাটন (মূল) -->
     <button id="payBtn" class="pay-btn hidden">💳 পেমেন্ট কনফার্ম করুন</button>
-
-    <!-- পেমেন্ট UI-এর জন্য স্ক্রিপ্ট (রেডিও টগল, কপি, ভেরিফাই) -->
-    <script>
-        (function() {
-            // রেডিও বাটন টগল
-            const radios = document.querySelectorAll('input[name="payment_method"]');
-            const bkashBox = document.getElementById('box-bkash');
-            const nagadBox = document.getElementById('box-nagad');
-            const rocketBox = document.getElementById('box-rocket');
-            const methodItems = document.querySelectorAll('.wc_payment_method');
-
-            function updatePaymentBoxes(selectedValue) {
-                bkashBox.classList.remove('active-box');
-                nagadBox.classList.remove('active-box');
-                rocketBox.classList.remove('active-box');
-                methodItems.forEach(item => item.classList.remove('selected-method'));
-
-                if (selectedValue === 'woo_bkash') {
-                    bkashBox.classList.add('active-box');
-                    document.getElementById('method-bkash').classList.add('selected-method');
-                } else if (selectedValue === 'woo_nagad') {
-                    nagadBox.classList.add('active-box');
-                    document.getElementById('method-nagad').classList.add('selected-method');
-                } else if (selectedValue === 'woo_rocket') {
-                    rocketBox.classList.add('active-box');
-                    document.getElementById('method-rocket').classList.add('selected-method');
-                }
-            }
-            updatePaymentBoxes('woo_bkash');
-            
-            radios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    updatePaymentBoxes(this.value);
-                });
-            });
-
-            // কপি বাটন
-            const copyButtons = document.querySelectorAll('.copy-btn');
-            copyButtons.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const number = this.getAttribute('data-number');
-                    if (!number) return;
-
-                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                        navigator.clipboard.writeText(number).catch(err => console.warn);
-                    } else {
-                        const tempInput = document.createElement('input');
-                        tempInput.value = number;
-                        document.body.appendChild(tempInput);
-                        tempInput.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(tempInput);
-                    }
-                    this.classList.add('copied');
-                    this.textContent = 'Copied';
-                });
-            });
-
-            // প্যানেলের ভিতরের ভেরিফাই বাটন
-            const verifyInside = document.getElementById('verifyInsideBtn');
-            if (verifyInside) {
-                verifyInside.addEventListener('click', async function(e) {
-                    e.preventDefault();
-                    
-                    const selected = document.querySelector('input[name="payment_method"]:checked');
-                    if (!selected) {
-                        alert('কোন পেমেন্ট পদ্ধতি নির্বাচন করুন');
-                        return;
-                    }
-
-                    let accountInput, transInput;
-                    if (selected.value === 'woo_bkash') {
-                        accountInput = document.getElementById('bkash_acc_no');
-                        transInput = document.getElementById('bkash_trans_id');
-                    } else if (selected.value === 'woo_nagad') {
-                        accountInput = document.getElementById('nagad_acc_no');
-                        transInput = document.getElementById('nagad_trans_id');
-                    } else {
-                        accountInput = document.getElementById('rocket_acc_no');
-                        transInput = document.getElementById('rocket_trans_id');
-                    }
-
-                    const accountVal = accountInput ? accountInput.value.trim() : '';
-                    const transVal = transInput ? transInput.value.trim() : '';
-
-                    if (!accountVal || !transVal) {
-                        alert('দয়া করে অ্যাকাউন্ট নম্বর এবং ট্রানজেকশন আইডি উভয়ই পূরণ করুন।');
-                        return;
-                    }
-
-                    const originalText = verifyInside.textContent;
-                    verifyInside.disabled = true;
-                    verifyInside.innerHTML = '<span class="button-loader"><span class="spinner"></span> Processing...</span>';
-
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-
-                    verifyInside.innerHTML = originalText;
-                    verifyInside.disabled = false;
-
-                    alert('✅ পেমেন্ট তথ্য জমা দেওয়া হয়েছে (ডেমো)');
-                });
-            }
-        })();
-    </script>
 </body>
 </html>
