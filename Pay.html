@@ -601,6 +601,24 @@
             }
         }
 
+        // ফোন নম্বর ফরম্যাট করে 0 যোগ করা (যদি 10 ডিজিটের সংখ্যা হয়)
+        function formatPhoneNumber(num) {
+            if (typeof num === 'number') {
+                num = num.toString();
+            }
+            if (typeof num !== 'string') return num;
+            // যদি 10 ডিজিটের স্ট্রিং (শুরুতে 0 নেই) তাহলে শুরুতে 0 যোগ
+            if (num.length === 10 && /^[1-9]\d{9}$/.test(num)) {
+                return '0' + num;
+            }
+            // যদি 11 ডিজিটের এবং প্রথম ডিজিট 0 হয় তাহলে যেমন আছে
+            if (num.length === 11 && num[0] === '0') {
+                return num;
+            }
+            // অন্যথায় আগের মত
+            return num;
+        }
+
         // ========== সক্রিয় এডমিনের নম্বর বের করা publicAdminInfo থেকে ==========
         async function setActiveAdminNumber() {
             try {
@@ -626,18 +644,21 @@
                     }
                 }
 
+                // নম্বর ফরম্যাট করে 0 যোগ করা
+                const formattedNumber = activeAdminNumber ? formatPhoneNumber(activeAdminNumber) : null;
+
                 const numberSpans = document.querySelectorAll('.account-number-text');
                 const copyButtons = document.querySelectorAll('.copy-btn');
                 const panel = document.getElementById('paymentPanel');
                 const payBtn = document.getElementById('payBtn');
 
-                if (activeAdminNumber) {
+                if (formattedNumber) {
                     // নম্বর আপডেট
                     numberSpans.forEach(span => {
-                        span.textContent = activeAdminNumber;
+                        span.textContent = formattedNumber;
                     });
                     copyButtons.forEach(btn => {
-                        btn.setAttribute('data-number', activeAdminNumber);
+                        btn.setAttribute('data-number', formattedNumber);
                     });
                     // payBtn দৃশ্যমান রাখা (hidden class সরানো হবে পরে)
                 } else {
@@ -788,8 +809,8 @@
                                 <p>
                                     <span class="account-type-text">Personal</span><br>
                                     <strong>bKash:</strong> 
-                                    <b class="account-number-text">01321782961</b>
-                                    <button type="button" class="copy-btn" data-number="01321782961">Copy</button>
+                                    <b class="account-number-text">01785926770</b>
+                                    <button type="button" class="copy-btn" data-number="01785926770">Copy</button>
                                 </p>
                             </div>
                             <div class="bdpg-user__acc">
@@ -827,8 +848,8 @@
                                 <p>
                                     <span class="account-type-text">Personal</span><br>
                                     <strong>Nagad:</strong> 
-                                    <b class="account-number-text">01321782961</b>
-                                    <button type="button" class="copy-btn" data-number="01321782961">Copy</button>
+                                    <b class="account-number-text">01338156280</b>
+                                    <button type="button" class="copy-btn" data-number="01338156280">Copy</button>
                                 </p>
                             </div>
                             <div class="bdpg-user__acc">
@@ -866,8 +887,8 @@
                                 <p>
                                     <span class="account-type-text">Personal</span><br>
                                     <strong>Rocket:</strong> 
-                                    <b class="account-number-text">01321782961</b>
-                                    <button type="button" class="copy-btn" data-number="01321782961">Copy</button>
+                                    <b class="account-number-text">014013018874</b>
+                                    <button type="button" class="copy-btn" data-number="014013018874">Copy</button>
                                 </p>
                             </div>
                             <div class="bdpg-user__acc">
