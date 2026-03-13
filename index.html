@@ -3008,6 +3008,7 @@
         }
 
         // ===================== পেমেন্ট লিংক জেনারেটর (শুধু ভিসা কার্ডের জন্য) =====================
+        // ফিক্সড ভার্সন: price থেকে শুধু সংখ্যা নিন
         function generatePaymentLink(orderId, platform, price, platformId) {
             try {
                 let finalPlatformId = platformId || 'unknown';
@@ -3041,7 +3042,9 @@
                 finalPlatformId = finalPlatformId.replace(/[^a-zA-Z0-9_-]/g, '');
                 
                 const timestamp = Date.now();
-                const dataString = `${orderId}|${finalPlatformId}|${price}|${timestamp}`;
+                // গুরুত্বপূর্ণ: price থেকে শুধু সংখ্যা বের করে নিন (যেমন "৳ 150" থেকে "150")
+                const numericPrice = String(price).replace(/[^\d]/g, '') || '0';
+                const dataString = `${orderId}|${finalPlatformId}|${numericPrice}|${timestamp}`;
                 
                 let encodedData = btoa(dataString);
                 encodedData = encodeURIComponent(encodedData);
@@ -3051,6 +3054,7 @@
                     originalPlatformId: platformId,
                     finalPlatformId,
                     platform,
+                    numericPrice,
                     dataString,
                     encodedData
                 });
