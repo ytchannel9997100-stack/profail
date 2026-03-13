@@ -188,15 +188,46 @@
             display: block;
         }
         .bdpg-total-amount {
+            background: rgba(255, 152, 0, 0.1);
+            border-radius: 40px;
+            padding: 14px 20px;
             font-size: 18px;
             font-weight: 500;
             color: #ff9800;
             margin-bottom: 22px;
+            border: 1px solid rgba(255, 152, 0, 0.5);
             text-align: center;
         }
         .bdpg-total-amount b {
+            font-size: 26px;
             margin-left: 8px;
             color: #ffb74d;
+        }
+        .price-breakdown {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 18px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 152, 0, 0.2);
+        }
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 16px;
+        }
+        .breakdown-row.total {
+            font-weight: bold;
+            color: #ff9800;
+            border-top: 1px dashed rgba(255,152,0,0.3);
+            margin-top: 8px;
+            padding-top: 12px;
+        }
+        .breakdown-label {
+            color: #b0bec5;
+        }
+        .breakdown-value {
+            color: #fff;
         }
         .bdpg-available-accounts {
             background: rgba(0, 0, 0, 0.3);
@@ -358,14 +389,24 @@
             animation: spin 1s linear infinite;
         }
 
-        @media (min-width: 1024px) {
-            .header h1 { font-size: 36px; }
-            .card { padding: 30px; }
-            .info-row { font-size: 18px; }
-        }
+        /* মোবাইল সাইজে ফন্ট ছোট করা */
         @media (max-width: 480px) {
             body { padding: 10px; padding-bottom: 75px; }
             .header h1 { font-size: 24px; }
+            .header p { font-size: 14px; }
+            .info-row { font-size: 14px; }
+            .wc_payment_method label { font-size: 16px; padding: 14px 5px; }
+            .instruction-note { font-size: 13px; padding: 12px; }
+            .bdpg-total-amount { font-size: 16px; padding: 12px; }
+            .bdpg-total-amount b { font-size: 22px; }
+            .breakdown-row { font-size: 14px; }
+            .bdpg-s__acc p { font-size: 14px; }
+            .account-number-text { font-size: 15px; padding: 4px 10px; }
+            .copy-btn { font-size: 12px; padding: 4px 12px; }
+            .bdpg-user__field label { font-size: 13px; }
+            .bdpg-user__field input { padding: 12px 15px; font-size: 14px; }
+            .verify-inside-btn { font-size: 16px; padding: 12px; }
+            .pay-btn { font-size: 16px; padding: 14px; }
         }
     </style>
     
@@ -556,41 +597,6 @@
             }
         }
 
-        async function fetchDField(platformId) {
-            try {
-                console.log("🔍 Searching D field for:", platformId);
-                const paths = [
-                    `publicData/pricingPlans/${platformId}`,
-                    `pricingPlans/${platformId}`,
-                    `plans/${platformId}`,
-                    `platforms/${platformId}`,
-                    `products/${platformId}`
-                ];
-                for (const path of paths) {
-                    console.log("Checking:", path);
-                    const snapshot = await database.ref(path).once('value');
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        console.log("✅ Found at:", path, data);
-                        if (data.D) return data.D;
-                        if (data.description) return data.description;
-                        if (data.d) return data.d;
-                        if (data.info) return data.info;
-                        for (const key in data) {
-                            if (typeof data[key] === 'string' && data[key].length > 0) {
-                                return data[key];
-                            }
-                        }
-                    }
-                }
-                console.log("❌ No D field found");
-                return null;
-            } catch (e) {
-                console.error("Firebase error:", e);
-                return null;
-            }
-        }
-
         // ফোন নম্বর ফরম্যাট করে 0 যোগ করা (যদি 10 ডিজিটের সংখ্যা হয়)
         function formatPhoneNumber(num) {
             if (typeof num === 'number') {
@@ -664,6 +670,34 @@
             }
         }
 
+        // নতুন ফাংশন: প্ল্যানের সম্পূর্ণ ডাটা fetch করা (D field, service charge, etc.)
+        async function fetchPlanData(platformId) {
+            try {
+                console.log("🔍 Fetching plan data for:", platformId);
+                const paths = [
+                    `publicData/pricingPlans/${platformId}`,
+                    `pricingPlans/${platformId}`,
+                    `plans/${platformId}`,
+                    `platforms/${platformId}`,
+                    `products/${platformId}`
+                ];
+                for (const path of paths) {
+                    console.log("Checking:", path);
+                    const snapshot = await database.ref(path).once('value');
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        console.log("✅ Found at:", path, data);
+                        return data; // পুরো অবজেক্ট রিটার্ন করবে
+                    }
+                }
+                console.log("❌ No plan data found");
+                return null;
+            } catch (e) {
+                console.error("Firebase error:", e);
+                return null;
+            }
+        }
+
         // ========== মূল পেজ লজিক ==========
         window.addEventListener('DOMContentLoaded', async () => {
             const output = document.getElementById('output');
@@ -694,7 +728,23 @@
                 return;
             }
             
-            const dField = await fetchDField(data.platformId);
+            // ৩. প্ল্যান ডাটা fetch করি (D field ও service charge সহ)
+            const planData = await fetchPlanData(data.platformId);
+            
+            // service charge ডিফল্ট 0
+            let serviceCharge = 0;
+            if (planData && planData.ServicCharge !== undefined) {
+                // ServicCharge নামের ফিল্ড (S বড় হাতের)
+                serviceCharge = Number(planData.ServicCharge) || 0;
+            } else if (planData && planData.serviceCharge !== undefined) {
+                serviceCharge = Number(planData.serviceCharge) || 0;
+            }
+            
+            const productPrice = Number(data.price) || 0;
+            const totalAmount = productPrice + serviceCharge;
+            
+            // D field (বিবরণ) দেখানোর জন্য
+            const dField = planData && (planData.D || planData.description || planData.d || planData.info || '');
             
             const date = new Date(parseInt(data.timestamp));
             const formattedDate = date.toLocaleString('bn-BD', { 
@@ -733,23 +783,33 @@
                     
                     <div class="info-row">
                         <span class="label">মূল্য:</span>
-                        <span class="value">${data.price} ৳</span>
+                        <span class="value">${productPrice} ৳</span>
                     </div>
                     
                     <div class="info-row">
-                        <span class="label">তারিখ:</span>
-                        <span class="value">${formattedDate}</span>
+                        <span class="label">সার্ভিস চার্জ:</span>
+                        <span class="value">${serviceCharge} ৳</span>
+                    </div>
+                    
+                    <div class="info-row" style="border-bottom: none;">
+                        <span class="label"><strong>সর্বমোট:</strong></span>
+                        <span class="value" style="color:#ffb74d; font-size:1.2rem;">${totalAmount} ৳</span>
                     </div>
                     
                     ${dFieldHTML}
                 </div>
             `;
             
-            // ডাইনামিকভাবে পেমেন্ট প্যানেলে মোট টাকার পরিমাণ সেট করুন
+            // ৪. পেমেন্ট প্যানেলে মূল্য, সার্ভিস চার্জ এবং মোট টাকা আপডেট করা
+            const priceSpans = document.querySelectorAll('.product-price-value');
+            const serviceSpans = document.querySelectorAll('.service-charge-value');
+            const totalSpans = document.querySelectorAll('.total-amount-value');
             const totalAmountSpans = document.querySelectorAll('.bdpg-total-amount b');
-            totalAmountSpans.forEach(span => {
-                span.textContent = `৳ ${data.price}`;
-            });
+            
+            priceSpans.forEach(span => span.textContent = productPrice);
+            serviceSpans.forEach(span => span.textContent = serviceCharge);
+            totalSpans.forEach(span => span.textContent = totalAmount);
+            totalAmountSpans.forEach(span => span.textContent = `৳ ${totalAmount}`);
 
             // পেমেন্ট টগল বাটন: যদি payBtn লুকানো না থাকে তবে hidden সরান
             if (payBtn.style.display !== 'none') {
@@ -757,45 +817,30 @@
             }
             
             // পুনরায় ক্লিক ইভেন্ট যাতে একাধিক লিসেনার না জুড়ে যায়
-            // পুরানো লিসেনার সরিয়ে নতুন যোগ করা (যদি আগে থেকে থাকে)
             payBtn.replaceWith(payBtn.cloneNode(true));
             const newPayBtn = document.getElementById('payBtn');
             
-            // টগল functionality পরিবর্তন করে নতুন নিয়ম
+            // টগল functionality
             newPayBtn.addEventListener('click', function() {
-                // আগের কোনো টাইমার থাকলে ক্যান্সেল করুন
-                if (paymentTimer) {
-                    clearTimeout(paymentTimer);
-                    paymentTimer = null;
-                }
-                
-                // অর্ডার ডিটেলস এবং পেমেন্ট বাটন লুকান
+                if (paymentTimer) clearTimeout(paymentTimer);
                 output.style.display = 'none';
                 newPayBtn.style.display = 'none';
-                
-                // পেমেন্ট প্যানেল দেখান
                 paymentPanel.style.display = 'block';
-                
-                // ৫ মিনিট পর পেমেন্ট প্যানেল বন্ধ করুন
-                paymentTimer = setTimeout(function() {
+                paymentTimer = setTimeout(() => {
                     paymentPanel.style.display = 'none';
-                    // টাইমার ক্লিয়ার
                     paymentTimer = null;
-                    // (আর কিছু না, কোন মেসেজ দেখানো হবে না)
-                }, 5 * 60 * 1000); // 5 মিনিট = 300000 ms
+                }, 5 * 60 * 1000);
             });
 
-            // ভেরিফাই বাটনের ক্লিক ইভেন্টে টাইমার ক্যান্সেল করুন (যদি পেমেন্ট সম্পন্ন হয়)
+            // ভেরিফাই বাটন
             const verifyInside = document.getElementById('verifyInsideBtn');
             if (verifyInside) {
-                // পুরানো লিসেনার ক্লোন দিয়ে রিপ্লেস (যাতে একাধিক না হয়)
                 verifyInside.replaceWith(verifyInside.cloneNode(true));
                 const newVerify = document.getElementById('verifyInsideBtn');
                 
                 newVerify.addEventListener('click', async function(e) {
                     e.preventDefault();
                     
-                    // টাইমার ক্যান্সেল করি, কারণ পেমেন্ট সম্পন্ন হয়েছে
                     if (paymentTimer) {
                         clearTimeout(paymentTimer);
                         paymentTimer = null;
@@ -840,7 +885,7 @@
                 });
             }
 
-            // ---------- রেডিও বাটনের ইভেন্ট হ্যান্ডলিং (সংশোধিত) ----------
+            // রেডিও বাটনের ইভেন্ট
             const radios = document.querySelectorAll('input[name="payment_method"]');
             const bkashBox = document.getElementById('box-bkash');
             const nagadBox = document.getElementById('box-nagad');
@@ -848,14 +893,11 @@
             const methodItems = document.querySelectorAll('.wc_payment_method');
 
             function updatePaymentBoxes(selectedValue) {
-                console.log('Selected method:', selectedValue); // ডিবাগিং
-                // সব বক্স লুকাও
                 bkashBox.classList.remove('active-box');
                 nagadBox.classList.remove('active-box');
                 rocketBox.classList.remove('active-box');
                 methodItems.forEach(item => item.classList.remove('selected-method'));
 
-                // নির্বাচিত বক্স দেখাও
                 if (selectedValue === 'woo_bkash') {
                     bkashBox.classList.add('active-box');
                     document.getElementById('method-bkash').classList.add('selected-method');
@@ -867,14 +909,10 @@
                     document.getElementById('method-rocket').classList.add('selected-method');
                 }
             }
-
-            // প্রথমবার সেট করুন (bKash সিলেক্টেড)
             updatePaymentBoxes('woo_bkash');
-
-            // রেডিও বাটনে ইভেন্ট লিসেনার
+            
             radios.forEach(radio => {
-                radio.addEventListener('change', function(e) {
-                    console.log('Radio changed to:', this.value);
+                radio.addEventListener('change', function() {
                     updatePaymentBoxes(this.value);
                 });
             });
@@ -929,9 +967,27 @@
                             ২। টাকা পাঠানোর পর, bKash Number বক্সে যে Number থেকে টাকা পাঠিয়েছেন সেই Number লিখুন।<br>
                             ৩। bKash Transaction ID বক্সে Transaction ID লিখুন। (যেমন: 9EV2G0PDE9)
                         </div>
+                        
+                        <!-- মূল্য ও সার্ভিস চার্জের ব্রেকডাউন -->
+                        <div class="price-breakdown">
+                            <div class="breakdown-row">
+                                <span class="breakdown-label">পণ্যের মূল্য:</span>
+                                <span class="breakdown-value product-price-value">0</span> ৳
+                            </div>
+                            <div class="breakdown-row">
+                                <span class="breakdown-label">সার্ভিস চার্জ:</span>
+                                <span class="breakdown-value service-charge-value">0</span> ৳
+                            </div>
+                            <div class="breakdown-row total">
+                                <span class="breakdown-label">সর্বমোট:</span>
+                                <span class="breakdown-value total-amount-value">0</span> ৳
+                            </div>
+                        </div>
+                        
                         <div class="bdpg-total-amount">
                             You need to send us <b>৳ 154</b>
                         </div>
+                        
                         <div class="bdpg-available-accounts">
                             <div class="bdpg-s__acc">
                                 <p>
@@ -968,9 +1024,26 @@
                             ২। টাকা পাঠানোর পর, Nagad Number বক্সে যে Number থেকে টাকা পাঠিয়েছেন সেই Number লিখুন।<br>
                             ৩। Nagad Transaction ID বক্সে Transaction ID লিখুন। (যেমন: 719AQ34C)
                         </div>
+                        
+                        <div class="price-breakdown">
+                            <div class="breakdown-row">
+                                <span class="breakdown-label">পণ্যের মূল্য:</span>
+                                <span class="breakdown-value product-price-value">0</span> ৳
+                            </div>
+                            <div class="breakdown-row">
+                                <span class="breakdown-label">সার্ভিস চার্জ:</span>
+                                <span class="breakdown-value service-charge-value">0</span> ৳
+                            </div>
+                            <div class="breakdown-row total">
+                                <span class="breakdown-label">সর্বমোট:</span>
+                                <span class="breakdown-value total-amount-value">0</span> ৳
+                            </div>
+                        </div>
+                        
                         <div class="bdpg-total-amount">
                             You need to send us <b>৳ 154</b>
                         </div>
+                        
                         <div class="bdpg-available-accounts">
                             <div class="bdpg-s__acc">
                                 <p>
@@ -1007,9 +1080,26 @@
                             ২। টাকা পাঠানোর পর, Rocket Number বক্সে যে Number থেকে টাকা পাঠিয়েছেন সেই Number লিখুন।<br>
                             ৩। Rocket Transaction ID বক্সে Transaction ID লিখুন। (যেমন: 2988708467)
                         </div>
+                        
+                        <div class="price-breakdown">
+                            <div class="breakdown-row">
+                                <span class="breakdown-label">পণ্যের মূল্য:</span>
+                                <span class="breakdown-value product-price-value">0</span> ৳
+                            </div>
+                            <div class="breakdown-row">
+                                <span class="breakdown-label">সার্ভিস চার্জ:</span>
+                                <span class="breakdown-value service-charge-value">0</span> ৳
+                            </div>
+                            <div class="breakdown-row total">
+                                <span class="breakdown-label">সর্বমোট:</span>
+                                <span class="breakdown-value total-amount-value">0</span> ৳
+                            </div>
+                        </div>
+                        
                         <div class="bdpg-total-amount">
                             You need to send us <b>৳ 154</b>
                         </div>
+                        
                         <div class="bdpg-available-accounts">
                             <div class="bdpg-s__acc">
                                 <p>
