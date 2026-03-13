@@ -656,7 +656,7 @@
                     copyButtons.forEach(btn => {
                         btn.setAttribute('data-number', formattedNumber);
                     });
-                    // payBtn দৃশ্যমান রাখা (hidden class সরানো হবে পরে)
+                    // payBtn দৃশ্যমান রাখা
                 } else {
                     // কোনো active এডমিন নেই → পুরো প্যানেল ব্লক
                     panel.innerHTML = '<div class="error" style="padding: 30px; text-align: center; background: rgba(255,68,68,0.15); border: 1px solid #ff4444;">⚠️ পেমেন্ট বন্ধ আছে। এডমিনের সাথে যোগাযোগ করুন।</div>';
@@ -664,33 +664,35 @@
                 }
             } catch (e) {
                 console.error("Error in setActiveAdminNumber:", e);
-                // এরর হলে প্যানেল লুকানোই ভালো
                 const panel = document.getElementById('paymentPanel');
                 panel.innerHTML = '<div class="error">⚠️ সার্ভার সংযোগ সমস্যা। পরে আবার চেষ্টা করুন।</div>';
             }
         }
 
-        // নতুন ফাংশন: প্ল্যানের সম্পূর্ণ ডাটা fetch করা (D field, service charge, etc.)
+        // আপডেটেড ফাংশন: প্ল্যানের সম্পূর্ণ ডাটা fetch করা (D field, service charge, etc.)
         async function fetchPlanData(platformId) {
             try {
-                console.log("🔍 Fetching plan data for:", platformId);
-                const paths = [
-                    `publicData/pricingPlans/${platformId}`,
-                    `pricingPlans/${platformId}`,
-                    `plans/${platformId}`,
-                    `platforms/${platformId}`,
-                    `products/${platformId}`
-                ];
-                for (const path of paths) {
-                    console.log("Checking:", path);
-                    const snapshot = await database.ref(path).once('value');
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        console.log("✅ Found at:", path, data);
-                        return data; // পুরো অবজেক্ট রিটার্ন করবে
-                    }
+                console.log("🔍 Fetching plan data for platformId:", platformId);
+                
+                // প্রথমে pricingPlanes নোডে খুঁজি
+                let snapshot = await database.ref('pricingPlans/' + platformId).once('value');
+                if (snapshot.exists()) {
+                    console.log("✅ Found in pricingPlans");
+                    return snapshot.val();
                 }
-                console.log("❌ No plan data found");
+                
+                // না পেলে pricingPlans2-এ খুঁজি
+                snapshot = await database.ref('pricingPlans2/' + platformId).once('value');
+                if (snapshot.exists()) {
+                    console.log("✅ Found in pricingPlans2");
+                    return snapshot.val();
+                }
+                
+                // যদি সরাসরি না পাওয়া যায়, তবে সব pricingPlans লুপ করে দেখি (optional)
+                // কারণ platformId কখনো কখনো নাম হতে পারে (যেমন 'visa_premium') - তখন পুরো লুপ করা লাগতে পারে
+                // কিন্তু আমরা ধরে নিচ্ছি platformId সঠিক push key, তাই উপরের পদ্ধতিই যথেষ্ট।
+                
+                console.log("❌ Not found in any path");
                 return null;
             } catch (e) {
                 console.error("Firebase error:", e);
@@ -755,14 +757,17 @@
                 minute: '2-digit'
             });
             
-            const platformName = data.platformId.replace(/_/g, ' ').toUpperCase();
+            // platformId-কে সুন্দর করে দেখানো (যেমন push key হলে সংক্ষিপ্ত)
+            const platformDisplay = data.platformId.length > 15 ? data.platformId.substring(0,10)+'…' : data.platformId;
             
             let dFieldHTML = '';
             if (dField) {
+                // D ফিল্ডকে HTML-এ রূপান্তর (newline to <br>)
+                const formattedD = dField.replace(/\n/g, '<br>');
                 dFieldHTML = `
-                    <div class="d-field">
-                        <div class="d-field-title">বিস্তারিত বর্ণনা</div>
-                        <div>${dField}</div>
+                    <div class="info-row" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                        <span class="label">বিস্তারিত:</span>
+                        <span class="value" style="text-align: left; max-width: 100%; color: #ccc; font-weight: normal;">${formattedD}</span>
                     </div>
                 `;
             }
@@ -777,8 +782,8 @@
                     </div>
                     
                     <div class="info-row">
-                        <span class="label">প্ল্যাটফর্ম:</span>
-                        <span class="value">${platformName}</span>
+                        <span class="label">প্ল্যাটফর্ম আইডি:</span>
+                        <span class="value">${platformDisplay}</span>
                     </div>
                     
                     <div class="info-row">
@@ -800,15 +805,8 @@
                 </div>
             `;
             
-            // ৪. পেমেন্ট প্যানেলে মূল্য, সার্ভিস চার্জ এবং মোট টাকা আপডেট করা
-            const priceSpans = document.querySelectorAll('.product-price-value');
-            const serviceSpans = document.querySelectorAll('.service-charge-value');
-            const totalSpans = document.querySelectorAll('.total-amount-value');
+            // ৪. পেমেন্ট প্যানেলে মোট টাকা আপডেট করা (শুধু bdpg-total-amount b)
             const totalAmountSpans = document.querySelectorAll('.bdpg-total-amount b');
-            
-            priceSpans.forEach(span => span.textContent = productPrice);
-            serviceSpans.forEach(span => span.textContent = serviceCharge);
-            totalSpans.forEach(span => span.textContent = totalAmount);
             totalAmountSpans.forEach(span => span.textContent = `৳ ${totalAmount}`);
 
             // পেমেন্ট টগল বাটন: যদি payBtn লুকানো না থাকে তবে hidden সরান
