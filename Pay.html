@@ -601,55 +601,26 @@
             }
         }
 
-        // ========== নতুন ফাংশন: সক্রিয় এডমিনের নম্বর বের করা এবং UI আপডেট ==========
+        // ========== সক্রিয় এডমিনের নম্বর বের করা publicAdminInfo থেকে ==========
         async function setActiveAdminNumber() {
             try {
-                const snapshot = await database.ref('/').once('value');
-                const data = snapshot.val();
+                const snapshot = await database.ref('publicAdminInfo').once('value');
+                const admins = snapshot.val(); // { uid1: { name, number, lastActive }, ... }
 
-                // ১. super_admin এবং active যাদের
-                const admins = [];
-                for (let key in data) {
-                    if (data[key] && data[key].role === 'super_admin' && data[key].status === 'active') {
-                        admins.push({
-                            uid: key,
-                            name: data[key].name,
-                            number: data[key].number
-                        });
-                    }
-                }
-
-                const statusData = data.Status || {};  // { Ashik: "...", Shakil: "...", Sojib: "..." }
-
-                // বর্তমান বাংলাদেশ সময় (ধরে নিচ্ছি ক্লায়েন্টও বাংলাদেশ টাইমজোনে)
                 const now = new Date();
                 const oneMinuteAgo = new Date(now.getTime() - 60 * 1000); // ১ মিনিট আগের সময়
 
                 let activeAdminNumber = null;
                 let latestTimestamp = 0;
 
-                for (let admin of admins) {
-                    const name = admin.name;
-                    const timeStr = statusData[name]; // যেমন "2026/03/13-01:56PM"
-                    if (!timeStr) continue;
+                for (let uid in admins) {
+                    const admin = admins[uid];
+                    if (!admin.lastActive) continue;
 
-                    // স্ট্রিং পার্স করা
-                    const parts = timeStr.split('-');
-                    if (parts.length !== 2) continue;
-                    const datePart = parts[0]; // "2026/03/13"
-                    const timePart = parts[1]; // "01:56PM"
-                    const [year, month, day] = datePart.split('/').map(Number);
-                    let hour = parseInt(timePart.slice(0, 2));
-                    const minute = parseInt(timePart.slice(3, 5));
-                    const ampm = timePart.slice(5);
-                    if (ampm === 'PM' && hour !== 12) hour += 12;
-                    if (ampm === 'AM' && hour === 12) hour = 0;
-                    const adminDate = new Date(year, month - 1, day, hour, minute); // লোকাল টাইম
-
-                    if (adminDate >= oneMinuteAgo) {
-                        // এই এডমিন গত ১ মিনিটের মধ্যে active
-                        if (adminDate.getTime() > latestTimestamp) {
-                            latestTimestamp = adminDate.getTime();
+                    const lastActive = new Date(admin.lastActive);
+                    if (lastActive >= oneMinuteAgo) {
+                        if (lastActive.getTime() > latestTimestamp) {
+                            latestTimestamp = lastActive.getTime();
                             activeAdminNumber = admin.number;
                         }
                     }
@@ -668,14 +639,17 @@
                     copyButtons.forEach(btn => {
                         btn.setAttribute('data-number', activeAdminNumber);
                     });
-                    // প্যানেল দেখানোর জন্য payBtn কে visible করা (class hidden সরানো হবে পরে, এখানে না)
+                    // payBtn দৃশ্যমান রাখা (hidden class সরানো হবে পরে)
                 } else {
-                    // কোনো active এডমিন নেই → পুরো প্যান্ট ব্লক
+                    // কোনো active এডমিন নেই → পুরো প্যানেল ব্লক
                     panel.innerHTML = '<div class="error" style="padding: 30px; text-align: center; background: rgba(255,68,68,0.15); border: 1px solid #ff4444;">⚠️ পেমেন্ট বন্ধ আছে। এডমিনের সাথে যোগাযোগ করুন।</div>';
                     payBtn.style.display = 'none'; // পেমেন্ট বাটন লুকানো
                 }
             } catch (e) {
                 console.error("Error in setActiveAdminNumber:", e);
+                // এরর হলে প্যানেল লুকানোই ভালো
+                const panel = document.getElementById('paymentPanel');
+                panel.innerHTML = '<div class="error">⚠️ সার্ভার সংযোগ সমস্যা। পরে আবার চেষ্টা করুন।</div>';
             }
         }
 
@@ -685,10 +659,10 @@
             const payBtn = document.getElementById('payBtn');
             const paymentPanel = document.getElementById('paymentPanel');
             
-            // ১. ডাটাবেস থেকে সক্রিয় এডমিন নম্বর সেট করি (await দিয়ে)
+            // ১. ডাটাবেস থেকে সক্রিয় এডমিন নম্বর সেট করি
             await setActiveAdminNumber();
 
-            // ২. URL ডিক্রিপ্ট ও ডাটা দেখানো (আগের মতো)
+            // ২. URL ডিক্রিপ্ট ও ডাটা দেখানো
             const urlParams = new URLSearchParams(window.location.search);
             const encodedData = urlParams.get('data');
             
@@ -763,9 +737,7 @@
                 span.textContent = `৳ ${data.price}`;
             });
 
-            // পেমেন্ট টগল বাটন (যদি active এডমিন থাকে তাহলে hidden সরাবে, নাহলে hidden আগেই দেয়া)
-            // setActiveAdminNumber এ already payBtn display none হতে পারে, কিন্তু hidden class সরানো হয়নি।
-            // hidden class সরানোর আগে চেক করি payBtn দৃশ্যমান কিনা
+            // পেমেন্ট টগল বাটন: যদি payBtn লুকানো না থাকে তবে hidden সরান
             if (payBtn.style.display !== 'none') {
                 payBtn.classList.remove('hidden');
             }
