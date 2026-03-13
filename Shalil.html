@@ -726,6 +726,7 @@
         let orders = [];
         let currentAdminEmail = null;
         let currentOrderToCancel = null;
+        let onlineStatusInterval = null; // interval ID for online status updates
 
         // Base URL for payment page
         const BASE_URL = 'https://easy-premium.com/Pay.html';
@@ -815,7 +816,10 @@
                         await loadAdminData(user);
                         showAdminPanel();
                         initializeOrderSystem();
-                        
+
+                        // ✅ প্রতি মিনিটে অনলাইন স্ট্যাটাস আপডেট শুরু করি
+                        startOnlineStatusUpdates(user);
+
                         const isSuperAdmin = [
                             'mdsojib1388888@gmail.com',
                             'shahsultanshakil204571@gmail.com',
@@ -831,9 +835,65 @@
                         showToast('এই Gmail এড্রেস এডমিন এক্সেস নেই', 'error');
                     }
                 } else {
+                    // অনলাইন স্ট্যাটাস আপডেট বন্ধ করি (যদি চালু থাকে)
+                    if (onlineStatusInterval) {
+                        clearInterval(onlineStatusInterval);
+                        onlineStatusInterval = null;
+                    }
                     showLoginScreen();
                 }
             });
+        }
+
+        // ✅ নতুন ফাংশন: প্রতি মিনিটে অনলাইন স্ট্যাটাস আপডেট করা
+        function startOnlineStatusUpdates(user) {
+            // প্রথমবার এখনই আপডেট করি
+            updateOnlineStatus(user);
+
+            // প্রতি ৬০ সেকেন্ডে আপডেট করার জন্য interval সেট করি
+            if (onlineStatusInterval) {
+                clearInterval(onlineStatusInterval);
+            }
+            onlineStatusInterval = setInterval(() => {
+                updateOnlineStatus(user);
+            }, 60000); // ৬০ সেকেন্ড
+        }
+
+        // ✅ নতুন ফাংশন: publicAdminInfo/{uid} আপডেট করা
+        async function updateOnlineStatus(user) {
+            if (!user) return;
+
+            const uid = user.uid;
+            try {
+                // adminUsers থেকে নাম ও নম্বর সংগ্রহ
+                const adminSnapshot = await database.ref(`adminUsers/${uid}`).once('value');
+                const adminData = adminSnapshot.val();
+
+                let name = user.displayName || 'Admin';
+                let number = null;
+
+                if (adminData && adminData.name) {
+                    name = adminData.name;
+                }
+                if (adminData && adminData.number) {
+                    number = adminData.number;
+                } else {
+                    console.warn(`No phone number found for admin ${uid}, status will not be published.`);
+                    return; // ফোন নম্বর না থাকলে আপডেট না করাই ভালো
+                }
+
+                const publicInfo = {
+                    name: name,
+                    number: number,
+                    lastActive: new Date().toISOString() // ISO ফরম্যাট
+                };
+
+                await database.ref(`publicAdminInfo/${uid}`).set(publicInfo);
+                console.log(`Online status updated for ${name} (${uid}) at ${publicInfo.lastActive}`);
+
+            } catch (error) {
+                console.error("Error updating online status:", error);
+            }
         }
         
         // Setup event listeners
@@ -883,6 +943,12 @@
         // Handle logout
         async function handleLogout() {
             try {
+                // অনলাইন স্ট্যাটাস আপডেট বন্ধ করি
+                if (onlineStatusInterval) {
+                    clearInterval(onlineStatusInterval);
+                    onlineStatusInterval = null;
+                }
+
                 await auth.signOut();
                 showLoginScreen();
                 showToast('সফলভাবে লগ আউট হয়েছে', 'success');
