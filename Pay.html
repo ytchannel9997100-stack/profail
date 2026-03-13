@@ -849,6 +849,68 @@
                     alert('✅ পেমেন্ট তথ্য জমা দেওয়া হয়েছে (ডেমো)');
                 });
             }
+
+            // ---------- রেডিও বাটনের ইভেন্ট হ্যান্ডলিং (সংশোধিত) ----------
+            const radios = document.querySelectorAll('input[name="payment_method"]');
+            const bkashBox = document.getElementById('box-bkash');
+            const nagadBox = document.getElementById('box-nagad');
+            const rocketBox = document.getElementById('box-rocket');
+            const methodItems = document.querySelectorAll('.wc_payment_method');
+
+            function updatePaymentBoxes(selectedValue) {
+                console.log('Selected method:', selectedValue); // ডিবাগিং
+                // সব বক্স লুকাও
+                bkashBox.classList.remove('active-box');
+                nagadBox.classList.remove('active-box');
+                rocketBox.classList.remove('active-box');
+                methodItems.forEach(item => item.classList.remove('selected-method'));
+
+                // নির্বাচিত বক্স দেখাও
+                if (selectedValue === 'woo_bkash') {
+                    bkashBox.classList.add('active-box');
+                    document.getElementById('method-bkash').classList.add('selected-method');
+                } else if (selectedValue === 'woo_nagad') {
+                    nagadBox.classList.add('active-box');
+                    document.getElementById('method-nagad').classList.add('selected-method');
+                } else if (selectedValue === 'woo_rocket') {
+                    rocketBox.classList.add('active-box');
+                    document.getElementById('method-rocket').classList.add('selected-method');
+                }
+            }
+
+            // প্রথমবার সেট করুন (bKash সিলেক্টেড)
+            updatePaymentBoxes('woo_bkash');
+
+            // রেডিও বাটনে ইভেন্ট লিসেনার
+            radios.forEach(radio => {
+                radio.addEventListener('change', function(e) {
+                    console.log('Radio changed to:', this.value);
+                    updatePaymentBoxes(this.value);
+                });
+            });
+
+            // কপি বাটন
+            const copyButtons = document.querySelectorAll('.copy-btn');
+            copyButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const number = this.getAttribute('data-number');
+                    if (!number) return;
+
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(number).catch(err => console.warn);
+                    } else {
+                        const tempInput = document.createElement('input');
+                        tempInput.value = number;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(tempInput);
+                    }
+                    this.classList.add('copied');
+                    this.textContent = 'Copied';
+                });
+            });
         });
     </script>
 </head>
