@@ -2974,7 +2974,7 @@
                         hour: '2-digit',
                         minute: '2-digit'
                     }),
-                    payment_link: orderData.paymentLink || `https://easy-premium.com/Pay.html?order=${orderData.orderId}&v=2`
+                    payment_link: orderData.paymentLink || `https://easy-premium.com/pay.html?order=${orderData.orderId}&v=2`
                 };
                 
                 console.log("Sending email with params:", templateParams);
@@ -3057,11 +3057,11 @@
                     encodedData
                 });
                 
-                return `https://easy-premium.com/Pay.html?data=${encodedData}&v=2`;
+                return `https://easy-premium.com/pay.html?data=${encodedData}&v=2`;
                 
             } catch (error) {
                 console.error("Payment link generation error:", error);
-                return `https://easy-premium.com/Pay.html?order=${orderId}&v=2`;
+                return `https://easy-premium.com/pay.html?order=${orderId}&v=2`;
             }
         }
 
