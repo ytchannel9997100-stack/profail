@@ -721,7 +721,7 @@
         .canva { color: #00C4CC; }
         .google { color: #4285F4; }
         .linkedin { color: #0077B5; }
-        .visa { color: #1A1F71; } /* ভিসার জন্য নতুন রঙ যোগ করা হলো */
+        .visa { color: #1A1F71; }
     </style>
 </head>
 <body>
@@ -841,12 +841,17 @@
                         
                         <div class="form-group">
                             <label class="form-label">প্ল্যাটফর্মের নাম *</label>
-                            <input type="text" id="platformName" class="form-input" placeholder="যেমন: YouTube Premium" required>
+                            <input type="text" id="platformName" class="form-input" placeholder="যেমন: Rewarble VISA Card 5 USD" required>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">দাম *</label>
-                            <input type="text" id="platformPrice" class="form-input" placeholder="যেমন: ৳ 299 / মাস" required>
+                            <label class="form-label">দাম (শুধু সংখ্যা) *</label>
+                            <input type="text" id="platformPrice" class="form-input" placeholder="যেমন: 614" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">সার্ভিস চার্জ (শুধু সংখ্যা) *</label>
+                            <input type="number" id="platformServiceCharge" class="form-input" placeholder="যেমন: 200" value="0" required>
                         </div>
                         
                         <div class="form-group">
@@ -881,7 +886,29 @@
                             </select>
                         </div>
                         
-                        <!-- আইকন সিলেক্ট অপশন সরানো হয়েছে -->
+                        <div class="form-group">
+                            <label class="form-label">আইকন</label>
+                            <select id="platformIcon" class="form-select">
+                                <option value="visa">ভিসা</option>
+                                <option value="youtube">ইউটিউব</option>
+                                <option value="facebook">ফেসবুক</option>
+                                <option value="instagram">ইনস্টাগ্রাম</option>
+                                <option value="tiktok">টিকটক</option>
+                                <option value="whatsapp">হোয়াটসঅ্যাপ</option>
+                                <option value="telegram">টেলিগ্রাম</option>
+                                <option value="freefire">ফ্রি ফায়ার</option>
+                                <option value="netflix">নেটফ্লিক্স</option>
+                                <option value="spotify">স্পটিফাই</option>
+                                <option value="pubg">পাবজি</option>
+                                <option value="discord">ডিসকর্ড</option>
+                                <option value="amazon">অ্যামাজন</option>
+                                <option value="microsoft">মাইক্রোসফট</option>
+                                <option value="adobe">অ্যাডোবি</option>
+                                <option value="canva">ক্যানভা</option>
+                                <option value="google">গুগল</option>
+                                <option value="linkedin">লিঙ্কডইন</option>
+                            </select>
+                        </div>
                         
                         <div class="form-group">
                             <label class="form-label">অর্ডার নম্বর (ছোট থেকে বড় সাজাতে)</label>
@@ -1097,12 +1124,14 @@
         const platformId = document.getElementById('platformId');
         const platformName = document.getElementById('platformName');
         const platformPrice = document.getElementById('platformPrice');
+        const platformServiceCharge = document.getElementById('platformServiceCharge');
         const platformDField = document.getElementById('platformDField');
         const platformDescription = document.getElementById('platformDescription');
         const platformFeatures = document.getElementById('platformFeatures');
         const platformCategory = document.getElementById('platformCategory');
         const platformOrder = document.getElementById('platformOrder');
         const platformStatus = document.getElementById('platformStatus');
+        const platformIcon = document.getElementById('platformIcon');
         
         // Orders Management Elements
         const ordersTable = document.getElementById('ordersTable');
@@ -1151,7 +1180,7 @@
             'admin@easy-premium.com'
         ];
         
-        // Available icons (ভিসা যোগ করা হলো)
+        // Available icons
         const platformIcons = [
             { id: 'visa', name: 'Visa', icon: 'fab fa-cc-visa', color: '#1A1F71' },
             { id: 'youtube', name: 'YouTube', icon: 'fab fa-youtube', color: '#FF0000' },
@@ -1181,7 +1210,6 @@
         function initializeApp() {
             checkAdminAuth();
             setupEventListeners();
-            // iconGrid initialization সরানো হয়েছে
         }
         
         // Check admin authentication
@@ -1395,7 +1423,6 @@
             }
             
             platforms.forEach(platform => {
-                // যদি আইকন না থাকে বা পাওয়া না যায়, তাহলে ভিসা দেখাবে
                 const iconInfo = platformIcons.find(icon => icon.id === (platform.icon || 'visa')) || platformIcons[0];
                 const featuresList = platform.features ? platform.features.join(', ') : 'কোন ফিচার নেই';
                 
@@ -1405,16 +1432,19 @@
                     ? dFieldContent.substring(0, 150) + '...' 
                     : dFieldContent;
                 
+                // Service charge display
+                const serviceCharge = platform.ServicCharge || 0;
+                
                 const platformCard = document.createElement('div');
                 platformCard.className = 'platform-card';
                 platformCard.innerHTML = `
                     <div class="platform-header">
                         <div class="platform-icon">
-                            <i class="${iconInfo.icon} ${platform.icon || 'visa'}" style="color: ${iconInfo.color};"></i>
+                            <i class="${iconInfo.icon}" style="color: ${iconInfo.color};"></i>
                         </div>
                         <div>
                             <div class="platform-name">${platform.name}</div>
-                            <div class="platform-price">${platform.price}</div>
+                            <div class="platform-price">${platform.price} ৳ + ${serviceCharge} ৳ (সার্ভিস চার্জ)</div>
                         </div>
                     </div>
                     <div class="platform-body">
@@ -1473,6 +1503,7 @@
             platformId.value = platform.id;
             platformName.value = platform.name || '';
             platformPrice.value = platform.price || '';
+            platformServiceCharge.value = platform.ServicCharge || 0;
             platformDescription.value = platform.description || '';
             // For D field, use the field "D" (preferred)
             platformDField.value = platform.D || platform.d || platform.details || '';
@@ -1480,9 +1511,7 @@
             platformCategory.value = platform.category || 'streaming';
             platformOrder.value = platform.order || 1;
             platformStatus.value = platform.status || 'active';
-            // আইকন সিলেক্ট করা নেই, তাই icon ফিল্ড এডিট করার সময় কিছু করা হচ্ছে না
-            // ডিফল্ট হিসেবে যা আছে তাই থাকবে, পরিবর্তন করতে চাইলে ডাটাবেসে আপডেট করতে হবে আলাদাভাবে
-            // কিন্তু আমরা চাইলে icon ফিল্ড না দেখিয়ে দিতে পারি, তাই এখানে কিছু করছি না
+            platformIcon.value = platform.icon || 'visa';
             
             document.getElementById('formTitle').textContent = 'প্ল্যাটফর্ম এডিট করুন (pricingPlans2)';
             document.getElementById('platformsSection').scrollIntoView({ behavior: 'smooth' });
@@ -1517,14 +1546,16 @@
                 ? platformFeatures.value.trim().split('\n').filter(f => f.trim())
                 : [];
             
-            // আইকন হিসেবে 'visa' ডিফল্টভাবে পাঠানো হচ্ছে
+            // Service charge value (number)
+            const serviceCharge = parseInt(platformServiceCharge.value) || 0;
+            
             const platformData = {
                 name: platformName.value.trim(),
                 price: platformPrice.value.trim(),
-                icon: 'visa',   // সবসময় ভিসা আইকন
+                icon: platformIcon.value,
                 description: platformDescription.value.trim(),
-                // Save D field as "D" (capital D) - consistent with new requirement
                 D: platformDField.value.trim(),
+                ServicCharge: serviceCharge,
                 features: featuresArray,
                 category: platformCategory.value,
                 order: parseInt(platformOrder.value) || 1,
@@ -1560,6 +1591,7 @@
             platformStatus.value = 'active';
             platformCategory.value = 'streaming';
             platformDField.value = '';
+            platformServiceCharge.value = 0;
             
             document.getElementById('formTitle').textContent = 'নতুন প্ল্যাটফর্ম যোগ করুন (pricingPlans2)';
         }
@@ -2037,7 +2069,7 @@
                 <p><strong>ফায়ারবেস প্রজেক্ট:</strong> Easy Premium</p>
                 <p><strong>ডাটাবেস URL:</strong> ${firebaseConfig.databaseURL}</p>
                 <p><strong>অ্যাকটিভ ডাটাবেস পাথ:</strong> publicData/pricingPlans2</p>
-                <p><strong>আইকন সিলেক্ট:</strong> সরানো হয়েছে (সব প্ল্যাটফর্মে ভিসা আইকন)</p>
+                <p><strong>সার্ভিস চার্জ:</strong> যুক্ত করা হয়েছে (ServicCharge ফিল্ড)</p>
             `;
             
             systemInfo.innerHTML = info;
