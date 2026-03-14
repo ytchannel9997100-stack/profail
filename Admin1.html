@@ -1335,15 +1335,17 @@
             }
         }
         
-        // Load platforms from pricingPlans1
+        // Load platforms from pricingPlans1 (with error handling)
         function loadPlatforms() {
             platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে (pricingPlans1)...</p></div>';
             
             database.ref('publicData/pricingPlans1').on('value', (snapshot) => {
+                console.log("🔥 Data received from pricingPlans1:", snapshot.val());
                 const data = snapshot.val();
                 platforms = [];
                 
                 if (!data) {
+                    console.warn("⚠️ No data found in pricingPlans1");
                     platformsGrid.innerHTML = '<p style="text-align: center; color: #b0bec5; padding: 40px;">কোন প্ল্যাটফর্ম পাওয়া যায়নি (pricingPlans1)</p>';
                     updatePlatformCount(0);
                     return;
@@ -1359,6 +1361,9 @@
                 platforms.sort((a, b) => (a.order || 0) - (b.order || 0));
                 displayPlatforms();
                 updatePlatformCount(platforms.length);
+            }, (error) => {
+                console.error("🔥 Database error:", error);
+                platformsGrid.innerHTML = `<p style="color: red; text-align: center;">ডাটাবেস ত্রুটি: ${error.message}</p>`;
             });
         }
         
