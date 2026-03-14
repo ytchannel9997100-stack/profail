@@ -3066,15 +3066,15 @@
             }
         }
 
-        // ===================== প্ল্যাটফর্ম লোড ফাংশন (ডাটাবেস লোকেশন পরিবর্তন করা হয়েছে) =====================
+        // ===================== প্ল্যাটফর্ম লোড ফাংশন (ডাটাবেস লোকেশন পরিবর্তন করা হয়েছে publicData/pricingPlans1) =====================
         function loadPlatformsFromFirebase() {
             const platformsGrid = document.getElementById('platforms-grid');
             if (!platformsGrid) return;
             
             platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে...</p></div>';
 
-            // *** ডাটাবেস রেফারেন্স পরিবর্তন করা হয়েছে publicData/pricingPlans2 এ ***
-            const platformsRef = database.ref('publicData/pricingPlans2');
+            // *** ডাটাবেস রেফারেন্স পরিবর্তন করা হয়েছে publicData/pricingPlans1 এ ***
+            const platformsRef = database.ref('publicData/pricingPlans1');
             
             platformsRef.on('value', (snapshot) => {
                 const platformsData = snapshot.val();
