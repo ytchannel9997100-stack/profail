@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Easy Premium - Admin Panel (pricingPlans1)</title>
+    <title>Easy Premium - Admin Panel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <style>
+        /* আপনার আগের CSS একই রাখুন - নতুন শুধু কিছু CSS যোগ করা হয়েছে */
         * {
             margin: 0;
             padding: 0;
@@ -271,7 +272,7 @@
         /* Platforms Management */
         .platforms-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -327,16 +328,6 @@
             margin-bottom: 10px;
         }
         
-        .service-charge-badge {
-            display: inline-block;
-            background: rgba(0, 188, 212, 0.2);
-            color: #00bcd4;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            margin-left: 10px;
-        }
-        
         /* D Field Preview */
         .d-field-preview {
             background: rgba(0, 188, 212, 0.1);
@@ -345,7 +336,7 @@
             margin: 10px 0;
             border-radius: 5px;
             font-size: 0.85rem;
-            max-height: 80px;
+            max-height: 100px;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
@@ -370,7 +361,6 @@
             display: flex;
             gap: 10px;
             margin-top: 15px;
-            flex-wrap: wrap;
         }
         
         .btn-sm {
@@ -450,6 +440,7 @@
             resize: vertical;
         }
         
+        /* D Field Textarea */
         .d-field-textarea {
             min-height: 150px;
             font-family: 'Courier New', monospace;
@@ -712,10 +703,25 @@
             }
         }
         
-        /* Visa Icon Color */
-        .visa-icon {
-            color: #1A1F71 !important;
-        }
+        /* Platform Specific Colors */
+        .youtube { color: #FF0000; }
+        .facebook { color: #1877F2; }
+        .instagram { color: #E4405F; }
+        .tiktok { color: #000000; }
+        .whatsapp { color: #25D366; }
+        .telegram { color: #0088cc; }
+        .freefire { color: #FF8800; }
+        .netflix { color: #E50914; }
+        .spotify { color: #1DB954; }
+        .pubg { color: #F9A602; }
+        .discord { color: #5865F2; }
+        .amazon { color: #FF9900; }
+        .microsoft { color: #00A4EF; }
+        .adobe { color: #FF0000; }
+        .canva { color: #00C4CC; }
+        .google { color: #4285F4; }
+        .linkedin { color: #0077B5; }
+        .visa { color: #1A1F71; }
     </style>
 </head>
 <body>
@@ -728,7 +734,7 @@
                 </div>
                 <div class="logo-text">
                     <h1>Easy Premium</h1>
-                    <p>Admin Panel (pricingPlans1)</p>
+                    <p>Admin Panel</p>
                 </div>
             </div>
             
@@ -839,12 +845,12 @@
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">দাম (price) *</label>
+                            <label class="form-label">দাম (শুধু সংখ্যা) *</label>
                             <input type="text" id="platformPrice" class="form-input" placeholder="যেমন: 614" required>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">সার্ভিস চার্জ (ServiceCharge) *</label>
+                            <label class="form-label">সার্ভিস চার্জ (শুধু সংখ্যা) *</label>
                             <input type="number" id="platformServiceCharge" class="form-input" placeholder="যেমন: 200" value="0" required>
                         </div>
                         
@@ -856,9 +862,9 @@
                         <div class="form-group">
                             <label class="form-label">ডিটেইলস (D ফিল্ড) *</label>
                             <p style="color: #b0bec5; font-size: 0.85rem; margin-top: -5px; margin-bottom: 10px;">
-                                বিস্তারিত বর্ণনা - এই তথ্য ইউজারকে দেখানো হবে
+                                বিস্তারিত বর্ণনা - এই তথ্য ইউজারকে দেখানো হবে (বাংলা বা হিন্দিতে লিখুন)
                             </p>
-                            <textarea id="platformDField" class="form-textarea d-field-textarea" placeholder="প্ল্যাটফর্মের সম্পূর্ণ বিস্তারিত বর্ণনা লিখুন..." required></textarea>
+                            <textarea id="platformDField" class="form-textarea d-field-textarea" placeholder="প্ল্যাটফর্মের সম্পূর্ণ বিস্তারিত বর্ণনা লিখুন... (হিন্দি বা বাংলায়)" required></textarea>
                         </div>
                         
                         <div class="form-group">
@@ -869,7 +875,6 @@
                         <div class="form-group">
                             <label class="form-label">ক্যাটাগরি *</label>
                             <select id="platformCategory" class="form-select" required>
-                                <option value="professional">প্রফেশনাল</option>
                                 <option value="streaming">স্ট্রিমিং</option>
                                 <option value="social-media">সোশ্যাল মিডিয়া</option>
                                 <option value="messaging">মেসেজিং</option>
@@ -877,10 +882,33 @@
                                 <option value="gaming">গেমিং</option>
                                 <option value="productivity">প্রোডাক্টিভিটি</option>
                                 <option value="storage">স্টোরেজ</option>
+                                <option value="professional">প্রফেশনাল</option>
                             </select>
                         </div>
                         
-                        <!-- Icon always Visa, no selection -->
+                        <div class="form-group">
+                            <label class="form-label">আইকন</label>
+                            <select id="platformIcon" class="form-select">
+                                <option value="visa">ভিসা</option>
+                                <option value="youtube">ইউটিউব</option>
+                                <option value="facebook">ফেসবুক</option>
+                                <option value="instagram">ইনস্টাগ্রাম</option>
+                                <option value="tiktok">টিকটক</option>
+                                <option value="whatsapp">হোয়াটসঅ্যাপ</option>
+                                <option value="telegram">টেলিগ্রাম</option>
+                                <option value="freefire">ফ্রি ফায়ার</option>
+                                <option value="netflix">নেটফ্লিক্স</option>
+                                <option value="spotify">স্পটিফাই</option>
+                                <option value="pubg">পাবজি</option>
+                                <option value="discord">ডিসকর্ড</option>
+                                <option value="amazon">অ্যামাজন</option>
+                                <option value="microsoft">মাইক্রোসফট</option>
+                                <option value="adobe">অ্যাডোবি</option>
+                                <option value="canva">ক্যানভা</option>
+                                <option value="google">গুগল</option>
+                                <option value="linkedin">লিঙ্কডইন</option>
+                            </select>
+                        </div>
                         
                         <div class="form-group">
                             <label class="form-label">অর্ডার নম্বর (ছোট থেকে বড় সাজাতে)</label>
@@ -1103,6 +1131,7 @@
         const platformCategory = document.getElementById('platformCategory');
         const platformOrder = document.getElementById('platformOrder');
         const platformStatus = document.getElementById('platformStatus');
+        const platformIcon = document.getElementById('platformIcon');
         
         // Orders Management Elements
         const ordersTable = document.getElementById('ordersTable');
@@ -1149,6 +1178,28 @@
             'mdashikislam017705@gmail.com',
             'mdsojib1388888@gmail.com',
             'admin@easy-premium.com'
+        ];
+        
+        // Available icons
+        const platformIcons = [
+            { id: 'visa', name: 'Visa', icon: 'fab fa-cc-visa', color: '#1A1F71' },
+            { id: 'youtube', name: 'YouTube', icon: 'fab fa-youtube', color: '#FF0000' },
+            { id: 'facebook', name: 'Facebook', icon: 'fab fa-facebook-f', color: '#1877F2' },
+            { id: 'instagram', name: 'Instagram', icon: 'fab fa-instagram', color: '#E4405F' },
+            { id: 'tiktok', name: 'TikTok', icon: 'fab fa-tiktok', color: '#000000' },
+            { id: 'whatsapp', name: 'WhatsApp', icon: 'fab fa-whatsapp', color: '#25D366' },
+            { id: 'telegram', name: 'Telegram', icon: 'fab fa-telegram', color: '#0088cc' },
+            { id: 'freefire', name: 'Free Fire', icon: 'fas fa-fire', color: '#FF4500' },
+            { id: 'netflix', name: 'Netflix', icon: 'fab fa-netflix', color: '#E50914' },
+            { id: 'spotify', name: 'Spotify', icon: 'fab fa-spotify', color: '#1DB954' },
+            { id: 'pubg', name: 'PUBG', icon: 'fas fa-gamepad', color: '#FFA500' },
+            { id: 'discord', name: 'Discord', icon: 'fab fa-discord', color: '#5865F2' },
+            { id: 'amazon', name: 'Amazon', icon: 'fab fa-amazon', color: '#FF9900' },
+            { id: 'microsoft', name: 'Microsoft', icon: 'fab fa-microsoft', color: '#00A4EF' },
+            { id: 'adobe', name: 'Adobe', icon: 'fab fa-adobe', color: '#FF0000' },
+            { id: 'canva', name: 'Canva', icon: 'fas fa-paint-brush', color: '#00C4CC' },
+            { id: 'google', name: 'Google', icon: 'fab fa-google', color: '#4285F4' },
+            { id: 'linkedin', name: 'LinkedIn', icon: 'fab fa-linkedin', color: '#0077B5' }
         ];
 
         // Initialize on page load
@@ -1335,17 +1386,15 @@
             }
         }
         
-        // Load platforms from pricingPlans1 (with error handling)
+        // Load platforms from pricingPlans1
         function loadPlatforms() {
             platformsGrid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>প্ল্যাটফর্ম লোড হচ্ছে (pricingPlans1)...</p></div>';
             
             database.ref('publicData/pricingPlans1').on('value', (snapshot) => {
-                console.log("🔥 Data received from pricingPlans1:", snapshot.val());
                 const data = snapshot.val();
                 platforms = [];
                 
                 if (!data) {
-                    console.warn("⚠️ No data found in pricingPlans1");
                     platformsGrid.innerHTML = '<p style="text-align: center; color: #b0bec5; padding: 40px;">কোন প্ল্যাটফর্ম পাওয়া যায়নি (pricingPlans1)</p>';
                     updatePlatformCount(0);
                     return;
@@ -1361,9 +1410,6 @@
                 platforms.sort((a, b) => (a.order || 0) - (b.order || 0));
                 displayPlatforms();
                 updatePlatformCount(platforms.length);
-            }, (error) => {
-                console.error("🔥 Database error:", error);
-                platformsGrid.innerHTML = `<p style="color: red; text-align: center;">ডাটাবেস ত্রুটি: ${error.message}</p>`;
             });
         }
         
@@ -1377,6 +1423,7 @@
             }
             
             platforms.forEach(platform => {
+                const iconInfo = platformIcons.find(icon => icon.id === (platform.icon || 'visa')) || platformIcons[0];
                 const featuresList = platform.features ? platform.features.join(', ') : 'কোন ফিচার নেই';
                 
                 // Get D field content with preview - use the field "D" as per new requirement
@@ -1385,16 +1432,19 @@
                     ? dFieldContent.substring(0, 150) + '...' 
                     : dFieldContent;
                 
+                // Service charge display
+                const serviceCharge = platform.ServicCharge || 0;
+                
                 const platformCard = document.createElement('div');
                 platformCard.className = 'platform-card';
                 platformCard.innerHTML = `
                     <div class="platform-header">
                         <div class="platform-icon">
-                            <i class="fab fa-cc-visa visa-icon" style="color: #1A1F71;"></i>
+                            <i class="${iconInfo.icon}" style="color: ${iconInfo.color};"></i>
                         </div>
                         <div>
                             <div class="platform-name">${platform.name}</div>
-                            <div class="platform-price">${platform.price} টাকা <span class="service-charge-badge">সার্ভিস চার্জ: ${platform.ServiceCharge || 0}</span></div>
+                            <div class="platform-price">${platform.price} ৳ + ${serviceCharge} ৳ (সার্ভিস চার্জ)</div>
                         </div>
                     </div>
                     <div class="platform-body">
@@ -1453,14 +1503,15 @@
             platformId.value = platform.id;
             platformName.value = platform.name || '';
             platformPrice.value = platform.price || '';
-            platformServiceCharge.value = platform.ServiceCharge || 0;
+            platformServiceCharge.value = platform.ServicCharge || 0;
             platformDescription.value = platform.description || '';
             // For D field, use the field "D" (preferred)
             platformDField.value = platform.D || platform.d || platform.details || '';
             platformFeatures.value = platform.features ? platform.features.join('\n') : '';
-            platformCategory.value = platform.category || 'professional';
+            platformCategory.value = platform.category || 'streaming';
             platformOrder.value = platform.order || 1;
             platformStatus.value = platform.status || 'active';
+            platformIcon.value = platform.icon || 'visa';
             
             document.getElementById('formTitle').textContent = 'প্ল্যাটফর্ম এডিট করুন (pricingPlans1)';
             document.getElementById('platformsSection').scrollIntoView({ behavior: 'smooth' });
@@ -1495,15 +1546,16 @@
                 ? platformFeatures.value.trim().split('\n').filter(f => f.trim())
                 : [];
             
-            // Icon always 'visa'
+            // Service charge value (number)
+            const serviceCharge = parseInt(platformServiceCharge.value) || 0;
+            
             const platformData = {
                 name: platformName.value.trim(),
                 price: platformPrice.value.trim(),
-                ServiceCharge: Number(platformServiceCharge.value) || 0,
-                icon: 'visa',
+                icon: platformIcon.value,
                 description: platformDescription.value.trim(),
-                // Save D field as "D" (capital D) - consistent with new requirement
                 D: platformDField.value.trim(),
+                ServicCharge: serviceCharge,
                 features: featuresArray,
                 category: platformCategory.value,
                 order: parseInt(platformOrder.value) || 1,
@@ -1537,7 +1589,7 @@
             platformId.value = '';
             platformOrder.value = 1;
             platformStatus.value = 'active';
-            platformCategory.value = 'professional';
+            platformCategory.value = 'streaming';
             platformDField.value = '';
             platformServiceCharge.value = 0;
             
@@ -2017,7 +2069,7 @@
                 <p><strong>ফায়ারবেস প্রজেক্ট:</strong> Easy Premium</p>
                 <p><strong>ডাটাবেস URL:</strong> ${firebaseConfig.databaseURL}</p>
                 <p><strong>অ্যাকটিভ ডাটাবেস পাথ:</strong> publicData/pricingPlans1</p>
-                <p><strong>আইকন:</strong> ভিসা (সব প্ল্যাটফর্মে)</p>
+                <p><strong>সার্ভিস চার্জ:</strong> যুক্ত করা হয়েছে (ServicCharge ফিল্ড)</p>
             `;
             
             systemInfo.innerHTML = info;
