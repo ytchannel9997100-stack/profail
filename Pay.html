@@ -151,7 +151,7 @@
             transition: all 0.15s;
         }
         .wc_payment_method.selected-method {
-            border-color: #ff9800;
+            border: 2px solid #ff9800;
         }
         .wc_payment_method input[type="radio"] {
             margin: 0 12px 0 16px;
@@ -616,7 +616,7 @@
         }
 
         // ========== সক্রিয় এডমিনের নম্বর বের করা publicAdminInfo থেকে ==========
-        async function setActiveAdminNumber() {
+        async function getActiveAdminNumber() {
             try {
                 const snapshot = await database.ref('publicAdminInfo').once('value');
                 const admins = snapshot.val(); // { uid1: { name, number, lastActive }, ... }
@@ -641,32 +641,10 @@
                 }
 
                 // নম্বর ফরম্যাট করে 0 যোগ করা
-                const formattedNumber = activeAdminNumber ? formatPhoneNumber(activeAdminNumber) : null;
-
-                const numberSpans = document.querySelectorAll('.account-number-text');
-                const copyButtons = document.querySelectorAll('.copy-btn');
-                const panel = document.getElementById('paymentPanel');
-                const payBtn = document.getElementById('payBtn');
-
-                if (formattedNumber) {
-                    // নম্বর আপডেট
-                    numberSpans.forEach(span => {
-                        span.textContent = formattedNumber;
-                    });
-                    copyButtons.forEach(btn => {
-                        btn.setAttribute('data-number', formattedNumber);
-                    });
-                    // payBtn দৃশ্যমান রাখা (hidden class সরানো হবে পরে)
-                } else {
-                    // কোনো active এডমিন নেই → পুরো প্যানেল ব্লক
-                    panel.innerHTML = '<div class="error" style="padding: 30px; text-align: center; background: rgba(255,68,68,0.15); border: 1px solid #ff4444;">⚠️ পেমেন্ট বন্ধ আছে। এডমিনের সাথে যোগাযোগ করুন।</div>';
-                    payBtn.style.display = 'none'; // পেমেন্ট বাটন লুকানো
-                }
+                return activeAdminNumber ? formatPhoneNumber(activeAdminNumber) : null;
             } catch (e) {
-                console.error("Error in setActiveAdminNumber:", e);
-                // এরর হলে প্যানেল লুকানোই ভালো
-                const panel = document.getElementById('paymentPanel');
-                panel.innerHTML = '<div class="error">⚠️ সার্ভার সংযোগ সমস্যা। পরে আবার চেষ্টা করুন।</div>';
+                console.error("Error in getActiveAdminNumber:", e);
+                return null;
             }
         }
 
@@ -707,10 +685,30 @@
             // টাইমার আইডি সংরক্ষণের জন্য ভেরিয়েবল
             let paymentTimer = null;
 
-            // ১. ডাটাবেস থেকে সক্রিয় এডমিন নম্বর সেট করি
-            await setActiveAdminNumber();
+            // ১. ডাটাবেস থেকে সক্রিয় এডমিন নম্বর বের করি
+            const activeNumber = await getActiveAdminNumber();
+            
+            // নম্বর পাওয়া গেলে প্যানেলের নম্বর আপডেট করি, না হলে প্যানেল লুকাই
+            if (activeNumber) {
+                // নম্বর আপডেট
+                const numberSpans = document.querySelectorAll('.account-number-text');
+                const copyButtons = document.querySelectorAll('.copy-btn');
+                numberSpans.forEach(span => {
+                    span.textContent = activeNumber;
+                });
+                copyButtons.forEach(btn => {
+                    btn.setAttribute('data-number', activeNumber);
+                });
+                // payBtn দৃশ্যমান রাখা
+                payBtn.style.display = 'block';
+            } else {
+                // কোনো active এডমিন নেই → পুরো প্যানেল ব্লক
+                paymentPanel.innerHTML = '<div class="error" style="padding: 30px; text-align: center; background: rgba(255,68,68,0.15); border: 1px solid #ff4444;">⚠️ পেমেন্ট বন্ধ আছে। এডমিনের সাথে যোগাযোগ করুন।</div>';
+                payBtn.style.display = 'none';
+                // আর বাকি কোড চালানোর দরকার নেই, তবে URL ডিক্রিপ্ট করে তথ্য দেখাতে হবে
+            }
 
-            // ২. URL ডিক্রিপ্ট ও ডাটা দেখানো
+            // ২. URL ডিক্রিপ্ট ও ডাটা দেখানো (সবসময় দেখাব)
             const urlParams = new URLSearchParams(window.location.search);
             const encodedData = urlParams.get('data');
             
@@ -801,22 +799,13 @@
             `;
             
             // ৪. পেমেন্ট প্যানেলে মূল্য, সার্ভিস চার্জ এবং মোট টাকা আপডেট করা
-            const priceSpans = document.querySelectorAll('.product-price-value');
-            const serviceSpans = document.querySelectorAll('.service-charge-value');
-            const totalSpans = document.querySelectorAll('.total-amount-value');
             const totalAmountSpans = document.querySelectorAll('.bdpg-total-amount b');
-            
-            priceSpans.forEach(span => span.textContent = productPrice);
-            serviceSpans.forEach(span => span.textContent = serviceCharge);
-            totalSpans.forEach(span => span.textContent = totalAmount);
             totalAmountSpans.forEach(span => span.textContent = `৳ ${totalAmount}`);
 
-            // পেমেন্ট টগল বাটন: যদি payBtn লুকানো না থাকে তবে hidden সরান
-            if (payBtn.style.display !== 'none') {
-                payBtn.classList.remove('hidden');
-            }
-            
-            // পুনরায় ক্লিক ইভেন্ট যাতে একাধিক লিসেনার না জুড়ে যায়
+            // যদি সক্রিয় এডমিন না থাকে, তাহলে আর বাটন ইভেন্ট লাগানোর দরকার নেই
+            if (!activeNumber) return;
+
+            // পেমেন্ট টগল বাটন: যদি payBtn লুকানো না থাকে তবে ক্লিক ইভেন্ট লাগাই
             payBtn.replaceWith(payBtn.cloneNode(true));
             const newPayBtn = document.getElementById('payBtn');
             
@@ -828,8 +817,10 @@
                 paymentPanel.style.display = 'block';
                 paymentTimer = setTimeout(() => {
                     paymentPanel.style.display = 'none';
+                    output.style.display = 'block';
+                    newPayBtn.style.display = 'block';
                     paymentTimer = null;
-                }, 5 * 60 * 1000);
+                }, 5 * 60 * 1000); // ৫ মিনিট
             });
 
             // ভেরিফাই বাটন
@@ -874,14 +865,20 @@
 
                     const originalText = newVerify.textContent;
                     newVerify.disabled = true;
-                    newVerify.innerHTML = '<span class="button-loader"><span class="spinner"></span> Processing...</span>';
+                    newVerify.innerHTML = '<span class="button-loader"><span class="spinner"></span> প্রক্রিয়াকরণ...</span>';
 
-                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    // এখানে ওয়েবহুক পাঠানোর লজিক যোগ করতে পারেন (ঐচ্ছিক)
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // সিমুলেটেড ডেলে
 
                     newVerify.innerHTML = originalText;
                     newVerify.disabled = false;
 
-                    alert('✅ পেমেন্ট তথ্য জমা দেওয়া হয়েছে (ডেমো)');
+                    alert('✅ পেমেন্ট তথ্য জমা দেওয়া হয়েছে। এডমিন যাচাই করবেন।');
+
+                    // পেমেন্ট প্যানেল বন্ধ করে আবার মূল স্ক্রিন দেখানো
+                    paymentPanel.style.display = 'none';
+                    output.style.display = 'block';
+                    newPayBtn.style.display = 'block';
                 });
             }
 
@@ -937,6 +934,10 @@
                     }
                     this.classList.add('copied');
                     this.textContent = 'Copied';
+                    setTimeout(() => {
+                        this.classList.remove('copied');
+                        this.textContent = 'Copy';
+                    }, 2000);
                 });
             });
         });
@@ -1087,6 +1088,6 @@
     </div>
     
     <!-- ফিক্সড পেমেন্ট টগল বাটন (মূল) -->
-    <button id="payBtn" class="pay-btn hidden">পেমেন্ট কনফার্ম করুন</button>
+    <button id="payBtn" class="pay-btn">পেমেন্ট কনফার্ম করুন</button>
 </body>
 </html>
