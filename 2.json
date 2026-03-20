@@ -27,7 +27,7 @@
       "role": "super_admin",
       "status": "active"
     }
-  ],
+  },
   "emailServiceConfig": {
     "publicKey": "U1I0SVkI_0R1gRFVn",
     "serviceId": "service_uknjs0j",
@@ -52,7 +52,7 @@
       "number": 1321782961,
       "lastActive": "2026-03-20T09:27:16.489Z"
     }
-  ],
+  ,
   "publicData": {
     "pricingPlans1": [
       {
