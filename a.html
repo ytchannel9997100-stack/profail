@@ -2,101 +2,123 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>ভিডিও প্লেয়ার - ডায়নামিক লাইব্রেরি</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ভিডিও রিলস - টিকটক স্টাইল</title>
     <style>
-        /* ===== 原有样式完全保留，未做任何视觉改动 ===== */
-        body {
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #000;
+            overflow: hidden;
+            height: 100vh;
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        }
+        /* স্ক্রোল স্ন্যাপ কন্টেইনার */
+        .reels-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        /* প্রতিটি ভিডিও কন্টেইনার ফুলস্ক্রিন */
+        .video-reel {
+            scroll-snap-align: start;
+            height: 100vh;
+            width: 100%;
+            position: relative;
             background: #000;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            font-family: sans-serif;
-            padding: 20px 0;
         }
-        .video-container {
+        /* iframe ভিডিও পুরো স্ক্রিন কভার করবে */
+        .video-reel iframe {
             width: 100%;
-            max-width: 900px;
-            margin: 20px auto;
-        }
-        iframe {
-            width: 100%;
-            height: auto;
-            aspect-ratio: 16 / 9;
+            height: 100%;
             border: none;
-            border-radius: 8px;
+            object-fit: cover;
+            background: #000;
         }
-        .download-btn {
-            display: inline-block;
+        /* ডাউনলোড বাটন (ওভারলে) - আগের স্টাইল অপরিবর্তিত */
+        .download-btn-overlay {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            z-index: 10;
             background: #1e88e5;
             color: white;
-            padding: 12px 30px;
+            padding: 12px 20px;
             border-radius: 40px;
             text-decoration: none;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
-            margin-top: 20px;
             transition: background 0.3s;
-            border: none;
-            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(4px);
+            background-color: rgba(30,136,229,0.9);
         }
-        .download-btn:hover {
+        .download-btn-overlay:hover {
             background: #1565c0;
         }
-        /* 额外辅助样式：保证动态内容容器与原始结构一致，且不干扰原有设计 */
-        #dynamic-videos {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .load-more-btn {
-            display: inline-block;
-            background: #2c3e50;
+        /* লোডিং ইন্ডিকেটর */
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             color: white;
-            padding: 12px 30px;
+            background: rgba(0,0,0,0.7);
+            padding: 12px 24px;
             border-radius: 40px;
-            font-size: 18px;
-            font-weight: bold;
-            margin: 30px auto 20px;
-            transition: background 0.3s;
-            border: none;
-            cursor: pointer;
-            text-align: center;
+            font-size: 16px;
+            z-index: 1000;
+            white-space: nowrap;
         }
-        .load-more-btn:hover {
-            background: #1e2a36;
-        }
-        .loading-msg, .no-videos-msg {
-            text-align: center;
-            color: #ccc;
-            font-size: 18px;
-            margin: 40px auto;
+        /* কোনো ভিডিও না থাকলে মেসেজ */
+        .no-videos-msg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            background: rgba(0,0,0,0.8);
             padding: 20px;
-            background: #111;
-            border-radius: 12px;
-            max-width: 500px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 1000;
         }
-        /* 完全保留原有下载按钮样式，同时保持间距统一 */
-        .video-container .download-btn {
-            margin-top: 20px;
+        /* স্ক্রোলবার কাস্টমাইজ (ঐচ্ছিক) */
+        .reels-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        .reels-container::-webkit-scrollbar-track {
+            background: #111;
+        }
+        .reels-container::-webkit-scrollbar-thumb {
+            background: #1e88e5;
+            border-radius: 4px;
         }
     </style>
-    <!-- Firebase SDK (Compat版本，稳定且易于使用，无需改动构建工具) -->
+    <!-- Firebase SDK (কম্প্যাট ভার্সন) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
 </head>
 <body>
 
-<!-- 视频内容将动态注入到此容器中，完全保留原始 .video-container 结构及样式 -->
-<div id="dynamic-videos"></div>
+<div class="reels-container" id="reelsContainer">
+    <!-- ডায়নামিক ভিডিও এখানে লোড হবে -->
+</div>
 
 <script>
-    // ======================= Firebase 配置（您提供的原始配置） =======================
+    // ======================= Firebase কনফিগারেশন (অপরিবর্তিত) =======================
     const firebaseConfig = {
         apiKey: "AIzaSyD8d6iSvrdAxeoukIo8fZtbPVVC0mKwIxQ",
         authDomain: "fb-hack-fd91b.firebaseapp.com",
@@ -108,249 +130,19 @@
         measurementId: "G-KYTNW2QVW5"
     };
 
-    // 初始化 Firebase
+    // ফায়ারবেস ইনিশিয়ালাইজ
     const app = firebase.initializeApp(firebaseConfig);
     const analytics = firebase.analytics(app);
     const database = firebase.database();
 
-    // ------------------- 全局变量 -------------------
-    let allVideos = [];            // 存储从 Firebase 拉取的所有视频链接（字符串数组）
-    let currentDisplayCount = 0;   // 当前已渲染的视频数量
-    const PAGE_SIZE = 6;           // 每次加载更多时增加 6 个视频（保持页面轻量，同时避免过多iframe）
-    let isLoading = false;          // 防止重复加载/并发
-    let loadMoreBtn = null;         // 动态加载按钮的引用
+    // ---------- গ্লোবাল ভেরিয়েবল ----------
+    let allVideos = [];          // স্ট্রিং অ্যারে: সব ভিডিও লিংক
+    let isLoading = false;       // লোডিং স্টেট
+    const DEFAULT_DOWNLOAD_LINK = "https://www.facebook.com/share/1DNpPPLw3u/"; // আগের মতোই
 
-    // 固定下载按钮链接（完全遵守原有设计：跳转至指定 Facebook 分享链接）
-    const DEFAULT_DOWNLOAD_LINK = "https://www.facebook.com/share/1DNpPPLw3u/";
+    const container = document.getElementById("reelsContainer");
 
-    // DOM 容器
-    const dynamicContainer = document.getElementById("dynamic-videos");
-
-    // ------------------- 辅助函数：创建单个视频卡片（结构与原始完全一致）--------------------
-    function createVideoCard(videoUrl, index) {
-        // 创建外层 .video-container div
-        const containerDiv = document.createElement("div");
-        containerDiv.className = "video-container";
-        // 可选添加 data-id 方便调试
-        containerDiv.setAttribute("data-video-index", index);
-
-        // 创建 iframe 元素 (属性与原始完全一致: allowfullscreen, frameborder)
-        const iframe = document.createElement("iframe");
-        iframe.setAttribute("allowfullscreen", "allowfullscreen");
-        iframe.setAttribute("frameborder", "0");
-        iframe.src = videoUrl;
-        // 保证视频加载体验：添加 loading="lazy" 提升性能（不影响外观）
-        iframe.loading = "lazy";
-        
-        // 创建按钮容器 (为了保持结构，直接追加)
-        const btnWrapper = document.createElement("div");
-        btnWrapper.style.textAlign = "center";
-        
-        // 创建下载按钮 (样式、行为与原始完全一致)
-        const downloadLink = document.createElement("a");
-        downloadLink.href = DEFAULT_DOWNLOAD_LINK;
-        downloadLink.target = "_blank";
-        downloadLink.className = "download-btn";
-        // 按钮文字保持原样: 📥 ডাউনলোড
-        downloadLink.textContent = "📥 ডাউনলোড";
-        
-        // 组装
-        btnWrapper.appendChild(downloadLink);
-        containerDiv.appendChild(iframe);
-        containerDiv.appendChild(btnWrapper);
-        
-        return containerDiv;
-    }
-
-    // ------------------- 渲染指定范围的视频（追加模式）------------------
-    function renderVideosBatch(startIndex, count) {
-        if (!allVideos.length) return;
-        const endIndex = Math.min(startIndex + count, allVideos.length);
-        const fragment = document.createDocumentFragment();
-        
-        for (let i = startIndex; i < endIndex; i++) {
-            const videoUrl = allVideos[i];
-            // 基本校验：确保是有效的 https/http 链接，避免无效 src
-            if (videoUrl && (videoUrl.startsWith("http://") || videoUrl.startsWith("https://"))) {
-                const card = createVideoCard(videoUrl, i);
-                fragment.appendChild(card);
-            } else {
-                console.warn(`无效视频链接，已跳过: ${videoUrl}`);
-            }
-        }
-        dynamicContainer.appendChild(fragment);
-        currentDisplayCount = endIndex;
-        
-        // 控制“加载更多”按钮的显示/隐藏
-        updateLoadMoreButton();
-    }
-
-    // ------------------- 更新“加载更多”按钮状态 -------------------
-    function updateLoadMoreButton() {
-        if (allVideos.length === 0) return;
-        
-        if (currentDisplayCount >= allVideos.length) {
-            // 所有视频已加载完毕：如果按钮存在则移除
-            if (loadMoreBtn && loadMoreBtn.parentNode) {
-                loadMoreBtn.remove();
-                loadMoreBtn = null;
-            }
-            // 可选：显示结束提示（不破坏设计，在底部添加一个小提示，但不强制，保持清爽）
-            if (!document.querySelector('.end-of-list-msg') && allVideos.length > 0) {
-                const endMsg = document.createElement("div");
-                endMsg.className = "loading-msg";
-                endMsg.style.background = "transparent";
-                endMsg.style.color = "#888";
-                endMsg.style.fontSize = "14px";
-                endMsg.style.padding = "10px";
-                endMsg.innerText = "✨ সব ভিডিও দেখানো হয়েছে ✨";
-                endMsg.classList.add("end-of-list-msg");
-                dynamicContainer.parentNode.insertBefore(endMsg, dynamicContainer.nextSibling);
-                // 10秒后自动淡出保留体验但不影响UI布局
-                setTimeout(() => {
-                    if (endMsg && endMsg.parentNode) endMsg.style.opacity = "0.6";
-                }, 3000);
-            }
-        } else {
-            // 如果还没有加载更多按钮，则创建/确保存在
-            if (!loadMoreBtn || !loadMoreBtn.parentNode) {
-                createLoadMoreButton();
-            }
-        }
-    }
-    
-    // ------------------- 创建“加载更多”按钮（风格接近下载按钮，保持整体和谐）------------------
-    function createLoadMoreButton() {
-        // 避免重复创建
-        if (loadMoreBtn && loadMoreBtn.parentNode) return;
-        // 创建一个包装容器，使按钮居中且不影响现有样式
-        const btnWrapper = document.createElement("div");
-        btnWrapper.style.textAlign = "center";
-        btnWrapper.style.margin = "20px auto 30px";
-        btnWrapper.style.width = "100%";
-        
-        const moreBtn = document.createElement("button");
-        moreBtn.textContent = "➕ আরও ভিডিও লোড করুন";
-        moreBtn.className = "load-more-btn";
-        moreBtn.style.background = "#1e88e5";   // 与下载按钮同色系，但不改动原设计精神
-        moreBtn.style.cursor = "pointer";
-        moreBtn.onclick = () => {
-            if (isLoading) return;
-            isLoading = true;
-            moreBtn.textContent = "⏳ লোড হচ্ছে...";
-            moreBtn.disabled = true;
-            
-            // 模拟微延迟以保证体验，实际渲染很快，但仍做异步
-            setTimeout(() => {
-                // 加载下一批
-                renderVideosBatch(currentDisplayCount, PAGE_SIZE);
-                isLoading = false;
-                moreBtn.textContent = "➕ আরও ভিডিও লোড করুন";
-                moreBtn.disabled = false;
-                // 如果全部加载完毕，按钮会被移除；否则保持
-                if (currentDisplayCount >= allVideos.length && loadMoreBtn) {
-                    if (loadMoreBtn.parentNode) loadMoreBtn.parentNode.remove();
-                    loadMoreBtn = null;
-                }
-            }, 50);
-        };
-        btnWrapper.appendChild(moreBtn);
-        dynamicContainer.parentNode.insertBefore(btnWrapper, dynamicContainer.nextSibling);
-        loadMoreBtn = moreBtn;
-        // 存储包装容器以便后续移除，我们存储按钮本身即可；但移除时需要清理父级
-        // 更新引用
-        window.loadMoreWrapper = btnWrapper;
-    }
-    
-    // 清理加载更多按钮及包装器
-    function removeLoadMoreButton() {
-        if (loadMoreBtn && loadMoreBtn.parentNode) {
-            const wrapper = loadMoreBtn.parentNode;
-            if (wrapper && wrapper.parentNode) wrapper.remove();
-        }
-        loadMoreBtn = null;
-        if (window.loadMoreWrapper && window.loadMoreWrapper.parentNode) window.loadMoreWrapper.remove();
-    }
-    
-    // ------------------- 显示加载提示（不破坏UI结构）------------------
-    function showLoadingMessage() {
-        const loaderDiv = document.createElement("div");
-        loaderDiv.id = "firebase-loading-indicator";
-        loaderDiv.className = "loading-msg";
-        loaderDiv.innerText = "📡 ফায়ারবেস থেকে ভিডিও আনা হচ্ছে...";
-        dynamicContainer.appendChild(loaderDiv);
-        return loaderDiv;
-    }
-    
-    function hideLoadingMessage(loaderElem) {
-        if (loaderElem && loaderElem.parentNode) loaderElem.remove();
-    }
-    
-    function showNoVideosMessage() {
-        const noVideoMsg = document.createElement("div");
-        noVideoMsg.className = "no-videos-msg";
-        noVideoMsg.innerText = "⚠️ কোনো ভিডিও লিংক পাওয়া যায়নি। ফায়ারবেস ডেটাবেজে ভিডিও যোগ করুন।";
-        dynamicContainer.appendChild(noVideoMsg);
-    }
-    
-    // ------------------- 从 Firebase Realtime Database 获取所有视频链接 -------------------
-    async function fetchVideosFromFirebase() {
-        // 数据库参考路径：根节点下的 "videos" 节点
-        // 灵活支持多种数据结构:
-        // 1. 每个子节点包含 "url" 或 "videoUrl" 或 "src" 字段的字符串视频地址
-        // 2. 子节点直接是字符串视频链接
-        // 3. 支持列表形式
-        const videosRef = database.ref("videos");
-        
-        try {
-            const snapshot = await videosRef.once("value");
-            const data = snapshot.val();
-            if (!data) {
-                console.warn("Firebase 'videos' 节点下没有数据");
-                return [];
-            }
-            
-            const videoUrls = [];
-            
-            // 处理不同类型的数据结构
-            if (Array.isArray(data)) {
-                // 如果数据是数组格式: [{url: "https://..."}, ...] 或字符串数组
-                for (let idx = 0; idx < data.length; idx++) {
-                    const item = data[idx];
-                    if (typeof item === "string" && isValidUrl(item)) {
-                        videoUrls.push(item);
-                    } else if (item && typeof item === "object") {
-                        // 常见字段: url, videoUrl, src, mp4, link
-                        const url = item.url || item.videoUrl || item.src || item.mp4 || item.link;
-                        if (url && isValidUrl(url)) videoUrls.push(url);
-                    }
-                }
-            } else if (typeof data === "object") {
-                // 对象结构: 每个 key 对应一个视频对象或字符串
-                for (const key in data) {
-                    if (data.hasOwnProperty(key)) {
-                        const entry = data[key];
-                        if (typeof entry === "string" && isValidUrl(entry)) {
-                            videoUrls.push(entry);
-                        } else if (entry && typeof entry === "object") {
-                            const url = entry.url || entry.videoUrl || entry.src || entry.mp4 || entry.link;
-                            if (url && isValidUrl(url)) videoUrls.push(url);
-                        }
-                    }
-                }
-            }
-            
-            // 去重 (基于链接去重，避免重复加载)
-            const uniqueUrls = [...new Map(videoUrls.map(url => [url, url])).values()];
-            console.log(`🔥 Firebase 加载完成: 找到 ${uniqueUrls.length} 个有效视频链接`);
-            return uniqueUrls;
-        } catch (error) {
-            console.error("Firebase 读取失败:", error);
-            return [];
-        }
-    }
-    
-    // 辅助: 简单URL有效性检测
+    // ---------- হেল্পার ফাংশন: URL বৈধতা ----------
     function isValidUrl(string) {
         try {
             const url = new URL(string);
@@ -359,53 +151,162 @@
             return false;
         }
     }
-    
-    // ------------------- 初始化整个页面: 清除原有占位内容，动态渲染第一批视频 -------------------
-    async function initVideoPlayer() {
-        // 清空容器以及可能遗留的任何多余按钮或提示（保证干净的初始状态）
-        dynamicContainer.innerHTML = "";
-        if (loadMoreBtn && loadMoreBtn.parentNode) {
-            removeLoadMoreButton();
+
+    // ---------- লোডিং ইন্ডিকেটর ----------
+    function showLoading(message = "📡 ভিডিও লোড হচ্ছে...") {
+        let loader = document.querySelector('.loading-indicator');
+        if (!loader) {
+            loader = document.createElement('div');
+            loader.className = 'loading-indicator';
+            document.body.appendChild(loader);
         }
-        // 移除任何残留的结束语
-        const existingEndMsg = document.querySelector('.end-of-list-msg');
-        if (existingEndMsg) existingEndMsg.remove();
+        loader.textContent = message;
+        loader.style.display = 'block';
+    }
+
+    function hideLoading() {
+        const loader = document.querySelector('.loading-indicator');
+        if (loader) loader.style.display = 'none';
+    }
+
+    function showNoVideos() {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'no-videos-msg';
+        msgDiv.innerText = '⚠️ কোনো ভিডিও পাওয়া যায়নি। ফায়ারবেসে ভিডিও যোগ করুন।';
+        document.body.appendChild(msgDiv);
+        setTimeout(() => msgDiv.remove(), 4000);
+    }
+
+    // ---------- ভিডিও এলিমেন্ট তৈরি (টিকটক স্টাইল) ----------
+    function createVideoReel(videoUrl, index) {
+        const reelDiv = document.createElement('div');
+        reelDiv.className = 'video-reel';
+        reelDiv.setAttribute('data-video-index', index);
         
-        // 显示加载提示
-        const loadingElem = showLoadingMessage();
+        // iframe তৈরি (ঠিক আগের মতোই, শুধু লেআউট আলাদা)
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('allowfullscreen', 'allowfullscreen');
+        iframe.setAttribute('frameborder', '0');
+        // ল্যাজি লোড: src শুরুতে খালি রাখব, পরে ভিউতে এলে সেট করব
+        iframe.loading = 'lazy';
         
-        // 拉取视频数据
+        // ডাউনলোড বাটন (ওভারলে) – আগের স্টাইল, শুধু পজিশন ভিন্ন
+        const downloadBtn = document.createElement('a');
+        downloadBtn.href = DEFAULT_DOWNLOAD_LINK;
+        downloadBtn.target = '_blank';
+        downloadBtn.className = 'download-btn-overlay';
+        downloadBtn.textContent = '📥 ডাউনলোড';
+        
+        reelDiv.appendChild(iframe);
+        reelDiv.appendChild(downloadBtn);
+        
+        // ল্যাজি লোড: ইন্টারসেকশন অবজার্ভার দিয়ে src সেট করব
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !iframe.src) {
+                    iframe.src = videoUrl;
+                    observer.unobserve(reelDiv);
+                }
+            });
+        }, { threshold: 0.1 });
+        observer.observe(reelDiv);
+        
+        return reelDiv;
+    }
+
+    // ---------- সব ভিডিও রেন্ডার (স্ক্রোল স্ন্যাপ সহ) ----------
+    function renderAllVideos() {
+        if (!allVideos.length) return;
+        container.innerHTML = ''; // পুরনো ক্লিয়ার
+        const fragment = document.createDocumentFragment();
+        allVideos.forEach((url, idx) => {
+            if (url && isValidUrl(url)) {
+                const reel = createVideoReel(url, idx);
+                fragment.appendChild(reel);
+            } else {
+                console.warn(`Invalid video URL skipped: ${url}`);
+            }
+        });
+        container.appendChild(fragment);
+        
+        // প্রথম ভিডিওতে স্ক্রোল পজিশন ঠিক রাখা (optional)
+        if (container.children.length) {
+            container.scrollTop = 0;
+        }
+    }
+
+    // ---------- Firebase থেকে ডাটা আনা (অপরিবর্তিত লজিক) ----------
+    async function fetchVideosFromFirebase() {
+        const videosRef = database.ref("videos");
+        try {
+            const snapshot = await videosRef.once("value");
+            const data = snapshot.val();
+            if (!data) return [];
+            
+            const videoUrls = [];
+            
+            // আগের মতো ডাটা স্ট্রাকচার হ্যান্ডলিং
+            if (Array.isArray(data)) {
+                for (let item of data) {
+                    if (typeof item === "string" && isValidUrl(item)) videoUrls.push(item);
+                    else if (item && typeof item === "object") {
+                        const url = item.url || item.videoUrl || item.src || item.mp4 || item.link;
+                        if (url && isValidUrl(url)) videoUrls.push(url);
+                    }
+                }
+            } else if (typeof data === "object") {
+                for (const key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        const entry = data[key];
+                        if (typeof entry === "string" && isValidUrl(entry)) videoUrls.push(entry);
+                        else if (entry && typeof entry === "object") {
+                            const url = entry.url || entry.videoUrl || entry.src || entry.mp4 || entry.link;
+                            if (url && isValidUrl(url)) videoUrls.push(url);
+                        }
+                    }
+                }
+            }
+            
+            // ডুপ্লিকেট রিমুভ
+            const uniqueUrls = [...new Map(videoUrls.map(url => [url, url])).values()];
+            console.log(`🔥 Firebase থেকে ${uniqueUrls.length}টি ভিডিও লিংক পাওয়া গেছে`);
+            return uniqueUrls;
+        } catch (error) {
+            console.error("Firebase error:", error);
+            return [];
+        }
+    }
+
+    // ---------- ইনিশিয়ালাইজেশন ----------
+    async function initReels() {
+        showLoading("📡 ফায়ারবেস থেকে ভিডিও আনা হচ্ছে...");
+        
         const videos = await fetchVideosFromFirebase();
-        hideLoadingMessage(loadingElem);
+        hideLoading();
         
         if (!videos || videos.length === 0) {
-            showNoVideosMessage();
+            showNoVideos();
             return;
         }
         
-        // 保存全局视频数组
         allVideos = videos;
-        currentDisplayCount = 0;
+        renderAllVideos();
         
-        // 首次渲染第一批 (PAGE_SIZE 个)
-        renderVideosBatch(0, PAGE_SIZE);
-        
-        // 若总视频数量少于或等于 PAGE_SIZE，不需要加载更多按钮，但 updateLoadMoreButton 会处理移除或隐藏
-        updateLoadMoreButton();
+        // টিপ: যদি ভিডিও সংখ্যা খুব বেশি হয়, তাও ল্যাজি লোডিং কাজ করবে
     }
     
-    // 页面完全加载后启动
-    window.addEventListener("DOMContentLoaded", () => {
-        initVideoPlayer().catch(err => {
-            console.error("初始化失败:", err);
-            if (dynamicContainer) {
-                dynamicContainer.innerHTML = `<div class="no-videos-msg" style="background:#330000;">⚠️ ডেটাবেস সংযোগ ত্রুটি। আবার চেষ্টা করুন।</div>`;
-            }
+    // পৃষ্ঠা লোড হলে শুরু
+    window.addEventListener('DOMContentLoaded', () => {
+        initReels().catch(err => {
+            console.error("Init failed:", err);
+            hideLoading();
+            const errMsg = document.createElement('div');
+            errMsg.className = 'no-videos-msg';
+            errMsg.innerText = '🔥 সংযোগ ত্রুটি। পুনরায় চেষ্টা করুন।';
+            document.body.appendChild(errMsg);
+            setTimeout(() => errMsg.remove(), 5000);
         });
     });
-    
-    // 可选: 如果由于网络原因希望提供重试按钮，但未改变设计核心，不过可以增加一个优雅的静默重试逻辑（不干扰UI）
-    // 只添加后台失败后控制台记录即可，无需额外UI改动
 </script>
 </body>
 </html>
