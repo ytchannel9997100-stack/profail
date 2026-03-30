@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ভিডিও রিলস - টিকটক স্টাইল</title>
+    <title>ভিডিও রিলস - টিকটক স্টাইল (অটোপ্লে)</title>
     <style>
         * {
             margin: 0;
@@ -141,7 +141,11 @@
     const DEFAULT_DOWNLOAD_LINK = "https://www.facebook.com/share/1DNpPPLw3u/"; // আগের মতোই
 
     const container = document.getElementById("reelsContainer");
-
+    
+    // অটোপ্লে ব্যবস্থাপনার জন্য ভেরিয়েবল
+    let currentActiveReel = null;        // বর্তমানে অটোপ্লে চলছে এমন রিল এলিমেন্ট
+    let visibilityObserver = null;        // ইন্টারসেকশন অবজারভার
+    
     // ---------- হেল্পার ফাংশন: URL বৈধতা ----------
     function isValidUrl(string) {
         try {
@@ -151,7 +155,127 @@
             return false;
         }
     }
-
+    
+    // ---------- ইউআরএল থেকে অটোপ্লে প্যারামিটার যুক্ত করা ----------
+    function addAutoplayToUrl(url) {
+        if (!url) return url;
+        try {
+            const urlObj = new URL(url);
+            // ইউটিউব ভিডিও: youtube.com বা youtu.be
+            if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
+                // YouTube autoplay parameter
+                urlObj.searchParams.set('autoplay', '1');
+                urlObj.searchParams.set('mute', '0'); // unmuted by default, can be 1 if needed but better 0
+                urlObj.searchParams.set('loop', '1');
+                urlObj.searchParams.set('playlist', urlObj.searchParams.get('v') || '');
+                return urlObj.toString();
+            }
+            // ফেসবুক ভিডিও: facebook.com
+            else if (urlObj.hostname.includes('facebook.com') || urlObj.hostname.includes('fb.watch')) {
+                // Facebook autoplay via parameter
+                urlObj.searchParams.set('autoplay', '1');
+                return urlObj.toString();
+            }
+            // অন্যান্য ভিডিও হোস্টের জন্য সাধারণ autoplay প্যারামিটার
+            else {
+                urlObj.searchParams.set('autoplay', '1');
+                return urlObj.toString();
+            }
+        } catch (e) {
+            // URL পার্স না হলে original ফেরত
+            return url;
+        }
+    }
+    
+    // ---------- অটোপ্লে অপসারণ (শুধু বেস ইউআরএল ফেরত) ----------
+    function removeAutoplayFromUrl(url) {
+        if (!url) return url;
+        try {
+            const urlObj = new URL(url);
+            urlObj.searchParams.delete('autoplay');
+            urlObj.searchParams.delete('mute');
+            urlObj.searchParams.delete('loop');
+            urlObj.searchParams.delete('playlist');
+            return urlObj.toString();
+        } catch (e) {
+            return url;
+        }
+    }
+    
+    // ---------- একটি নির্দিষ্ট ভিডিওকে অটোপ্লে করা (রিলোড করে) ----------
+    function activateVideoAutoplay(reelElement) {
+        if (!reelElement) return;
+        
+        const iframe = reelElement.querySelector('iframe');
+        const originalUrl = reelElement.getAttribute('data-original-url');
+        if (!iframe || !originalUrl) return;
+        
+        // যদি আগের একটাই অ্যাক্টিভ থাকে এবং সেটাই হয়, তাহলে কিছু করো না
+        if (currentActiveReel === reelElement && iframe.src && iframe.src.includes('autoplay=1')) {
+            return;
+        }
+        
+        // অন্য ভিডিও থামানো
+        if (currentActiveReel && currentActiveReel !== reelElement) {
+            pauseVideoReel(currentActiveReel);
+        }
+        
+        // বর্তমান রিলের জন্য অটোপ্লে URL তৈরি
+        const autoplayUrl = addAutoplayToUrl(originalUrl);
+        
+        // iframe এ allow="autoplay" নিশ্চিত করা (ইতিমধ্যে আছে, কিন্তু ডাবল চেক)
+        iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
+        
+        // যদি src ইতিমধ্যে অটোপ্লে না থাকে তবে সেট করুন
+        if (!iframe.src || !iframe.src.includes('autoplay=1')) {
+            iframe.src = autoplayUrl;
+        }
+        
+        currentActiveReel = reelElement;
+    }
+    
+    // ---------- একটি ভিডিও পজ/স্টপ করা (অটোপ্লে সরানো) ----------
+    function pauseVideoReel(reelElement) {
+        if (!reelElement) return;
+        const iframe = reelElement.querySelector('iframe');
+        const originalUrl = reelElement.getAttribute('data-original-url');
+        if (!iframe || !originalUrl) return;
+        
+        // অটোপ্লে প্যারামিটার ছাড়া URL তৈরি (বেস ইউআরএল)
+        const plainUrl = removeAutoplayFromUrl(originalUrl);
+        // src রিসেট করলে ভিডিও থামে (reload হয়, কিন্তু এটি কার্যকরী পদ্ধতি)
+        // তবে currentActiveReel আপডেট করার আগে src পরিবর্তন করলে ভিডিও বন্ধ হবে
+        if (iframe.src !== plainUrl) {
+            iframe.src = plainUrl;
+        }
+    }
+    
+    // ---------- ভিজিবিলিটি অবজারভার সেটআপ (স্ক্রল করলেই অটোপ্লে) ----------
+    function setupAutoplayObserver() {
+        if (visibilityObserver) {
+            visibilityObserver.disconnect();
+        }
+        
+        visibilityObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // ভিডিওটি ভিউতে এসেছে -> অটোপ্লে শুরু করো
+                    const reel = entry.target;
+                    activateVideoAutoplay(reel);
+                }
+            });
+        }, { threshold: 0.6 }); // 60% দৃশ্যমান হলে ট্রিগার, টিকটক স্টাইলের জন্য ভালো
+    }
+    
+    // ---------- সব রিলের উপর অবজারভার অ্যাটাচ করা ----------
+    function attachObserversToReels() {
+        if (!visibilityObserver) setupAutoplayObserver();
+        const reels = document.querySelectorAll('.video-reel');
+        reels.forEach(reel => {
+            visibilityObserver.observe(reel);
+        });
+    }
+    
     // ---------- লোডিং ইন্ডিকেটর ----------
     function showLoading(message = "📡 ভিডিও লোড হচ্ছে...") {
         let loader = document.querySelector('.loading-indicator');
@@ -177,20 +301,26 @@
         setTimeout(() => msgDiv.remove(), 4000);
     }
 
-    // ---------- ভিডিও এলিমেন্ট তৈরি (টিকটক স্টাইল) ----------
+    // ---------- ভিডিও এলিমেন্ট তৈরি (টিকটক স্টাইল + অটোপ্লে সাপোর্ট) ----------
     function createVideoReel(videoUrl, index) {
         const reelDiv = document.createElement('div');
         reelDiv.className = 'video-reel';
         reelDiv.setAttribute('data-video-index', index);
+        reelDiv.setAttribute('data-original-url', videoUrl);   // অটোপ্লে ম্যানেজমেন্টের জন্য
         
-        // iframe তৈরি (ঠিক আগের মতোই, শুধু লেআউট আলাদা)
+        // iframe তৈরি
         const iframe = document.createElement('iframe');
-        iframe.setAttribute('allowfullscreen', 'allowfullscreen');
         iframe.setAttribute('frameborder', '0');
-        // ল্যাজি লোড: src শুরুতে খালি রাখব, পরে ভিউতে এলে সেট করব
+        iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');  // অটোপ্লে অনুমতি
+        iframe.setAttribute('allowfullscreen', 'true');
         iframe.loading = 'lazy';
         
-        // ডাউনলোড বাটন (ওভারলে) – আগের স্টাইল, শুধু পজিশন ভিন্ন
+        // প্রাথমিক src অটোপ্লে ছাড়া (লোডিং দ্রুত এবং ব্যান্ডউইথ সাশ্রয়)
+        // তবে শুধু বেস URL সেট করব
+        const plainUrl = removeAutoplayFromUrl(videoUrl);
+        iframe.src = plainUrl;
+        
+        // ডাউনলোড বাটন (ওভারলে) – আগের স্টাইল
         const downloadBtn = document.createElement('a');
         downloadBtn.href = DEFAULT_DOWNLOAD_LINK;
         downloadBtn.target = '_blank';
@@ -199,17 +329,6 @@
         
         reelDiv.appendChild(iframe);
         reelDiv.appendChild(downloadBtn);
-        
-        // ল্যাজি লোড: ইন্টারসেকশন অবজার্ভার দিয়ে src সেট করব
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !iframe.src) {
-                    iframe.src = videoUrl;
-                    observer.unobserve(reelDiv);
-                }
-            });
-        }, { threshold: 0.1 });
-        observer.observe(reelDiv);
         
         return reelDiv;
     }
@@ -229,12 +348,24 @@
         });
         container.appendChild(fragment);
         
-        // প্রথম ভিডিওতে স্ক্রোল পজিশন ঠিক রাখা (optional)
+        // প্রথম ভিডিওতে স্ক্রোল পজিশন ঠিক রাখা
         if (container.children.length) {
             container.scrollTop = 0;
         }
+        
+        // অবজারভার সেটআপ (স্ক্রল অটোপ্লে)
+        setupAutoplayObserver();
+        attachObserversToReels();
+        
+        // প্রথম ভিডিওতে দ্রুত অটোপ্লে শুরু (ইউজার এক্সপেরিয়েন্স)
+        setTimeout(() => {
+            const firstReel = container.querySelector('.video-reel');
+            if (firstReel) {
+                activateVideoAutoplay(firstReel);
+            }
+        }, 300);
     }
-
+    
     // ---------- Firebase থেকে ডাটা আনা (অপরিবর্তিত লজিক) ----------
     async function fetchVideosFromFirebase() {
         const videosRef = database.ref("videos");
@@ -276,7 +407,33 @@
             return [];
         }
     }
-
+    
+    // ---------- স্ক্রোল শেষে ভিডিও চেঞ্জ হলে পারফরম্যান্স ----------
+    // স্ক্রোল ইভেন্টে কোনো অতিরিক্ত কাজ না করে, IntersectionObserver নিজেই কাজ করবে
+    // তবে স্ন্যাপ শেষে সক্রিয় ভিডিও নিশ্চিত করতে স্ক্রোল শেষে একবার চেক করা যেতে পারে
+    let scrollTimeout;
+    function onScrollEnd() {
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            // স্ক্রোল থামার পরে দৃশ্যমান ভিডিওটি নিশ্চিত করা
+            const reels = document.querySelectorAll('.video-reel');
+            let bestReel = null;
+            let maxRatio = 0;
+            reels.forEach(reel => {
+                const rect = reel.getBoundingClientRect();
+                const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+                const ratio = visibleHeight / window.innerHeight;
+                if (ratio > maxRatio && ratio > 0.4) {
+                    maxRatio = ratio;
+                    bestReel = reel;
+                }
+            });
+            if (bestReel && currentActiveReel !== bestReel) {
+                activateVideoAutoplay(bestReel);
+            }
+        }, 100);
+    }
+    
     // ---------- ইনিশিয়ালাইজেশন ----------
     async function initReels() {
         showLoading("📡 ফায়ারবেস থেকে ভিডিও আনা হচ্ছে...");
@@ -292,7 +449,22 @@
         allVideos = videos;
         renderAllVideos();
         
-        // টিপ: যদি ভিডিও সংখ্যা খুব বেশি হয়, তাও ল্যাজি লোডিং কাজ করবে
+        // স্ক্রোল ইভেন্ট লিসেনার (ইউজার ম্যানুয়ালি স্ক্রোল করলে অটোপ্লে আরও নিশ্চিত)
+        container.addEventListener('scroll', () => {
+            onScrollEnd();
+        });
+        
+        // উইন্ডো রিসাইজ করলেও অবজারভার ঠিক থাকে, তবে পুনরায় চেক করা যেতে পারে
+        window.addEventListener('resize', () => {
+            if (currentActiveReel) {
+                const rect = currentActiveReel.getBoundingClientRect();
+                const visible = rect.top < window.innerHeight && rect.bottom > 0;
+                if (!visible) {
+                    // যদি সক্রিয় রিল আর দৃশ্যমান না থাকে, তাহলে নতুনটি সক্রিয় করতে হবে
+                    onScrollEnd();
+                }
+            }
+        });
     }
     
     // পৃষ্ঠা লোড হলে শুরু
@@ -306,6 +478,19 @@
             document.body.appendChild(errMsg);
             setTimeout(() => errMsg.remove(), 5000);
         });
+    });
+    
+    // অতিরিক্ত: ব্রাউজার ব্যাকগ্রাউন্ডে চলে গেলে ভিডিও থামানো (ব্যাটারি সেভ)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            // পেজ invisible হলে চলমান ভিডিও পজ করাই ভালো
+            if (currentActiveReel) {
+                pauseVideoReel(currentActiveReel);
+            }
+        } else {
+            // ফিরে আসলে দৃশ্যমান ভিডিও আবার চালু
+            onScrollEnd();
+        }
     });
 </script>
 </body>
