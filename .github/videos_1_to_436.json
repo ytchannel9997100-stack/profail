@@ -1,0 +1,18 @@
+(function() {
+  const videos = {};
+  for (let i = 1; i <= 436; i++) {
+    videos[i] = { url: `https://fuck-date-app.com/video_app/videos/1/${i}.mp4` };
+  }
+  const data = { videos };
+  const jsonStr = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'videos_1_to_436.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  console.log('✅ JSON ফাইল ডাউনলোড শুরু হয়েছে!');
+})();
