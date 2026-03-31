@@ -36,7 +36,8 @@
             justify-content: center;
         }
         /* iframe ভিডিও পুরো স্ক্রিন কভার করবে */
-        .video-reel iframe {
+        .video-reel iframe,
+        .video-reel .youtube-player {
             width: 100%;
             height: 100%;
             border: none;
@@ -110,13 +111,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
-    <!-- YouTube Iframe API (শুধুমাত্র অটো-অ্যাডভান্সের জন্য যোগ করা হয়েছে) -->
-    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
+
 <div class="reels-container" id="reelsContainer">
     <!-- ডায়নামিক ভিডিও এখানে লোড হবে -->
 </div>
+
 <script>
     // ======================= Firebase কনফিগারেশন (অপরিবর্তিত) =======================
     const firebaseConfig = {
@@ -129,95 +130,28 @@
         appId: "1:691841510443:web:7bb9b5da462b1f14068e6e",
         measurementId: "G-KYTNW2QVW5"
     };
+
     // ফায়ারবেস ইনিশিয়ালাইজ
     const app = firebase.initializeApp(firebaseConfig);
     const analytics = firebase.analytics(app);
     const database = firebase.database();
+
     // ---------- গ্লোবাল ভেরিয়েবল ----------
-    let allVideos = []; // স্ট্রিং অ্যারে: সব ভিডিও লিংক
-    let isLoading = false; // লোডিং স্টেট
+    let allVideos = [];          // স্ট্রিং অ্যারে: সব ভিডিও লিংক
+    let isLoading = false;       // লোডিং স্টেট
     const DEFAULT_DOWNLOAD_LINK = "https://www.easy-premium.com"; // আগের মতোই
+
     const container = document.getElementById("reelsContainer");
-   
+    
     // অটোপ্লে ব্যবস্থাপনার জন্য ভেরিয়েবল
-    let currentActiveReel = null; // বর্তমানে অটোপ্লে চলছে এমন রিল এলিমেন্ট
-    let visibilityObserver = null; // ইন্টারসেকশন অবজারভার
-
-    // ==================== নতুন যোগ করা অংশ: YouTube অটো-অ্যাডভান্সের জন্য ====================
-    let ytPlayers = {};                    // index → YT.Player অবজেক্ট
-    let pendingYTReels = [];               // YT ভিডিওর জন্য pending queue
-    let YT_API_READY = false;
-
-    function isYoutubeUrl(url) {
-        if (!url) return false;
-        return url.includes('youtube.com') || url.includes('youtu.be');
-    }
-
-    function extractYoutubeVideoId(url) {
-        if (!url) return null;
-        // youtu.be
-        if (url.includes('youtu.be')) {
-            const match = url.match(/youtu\.be\/([^?&]+)/);
-            return match ? match[1] : null;
-        }
-        // youtube.com
-        const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2].length === 11) ? match[2] : null;
-    }
-
-    function initYTPlayer({index, videoUrl, containerId}) {
-        if (typeof YT === 'undefined' || !YT.Player) return;
-        const player = new YT.Player(containerId, {
-            videoId: extractYoutubeVideoId(videoUrl),
-            playerVars: {
-                autoplay: 0,
-                controls: 1,
-                modestbranding: 1,
-                rel: 0,
-                playsinline: 1,
-                fs: 1
-                // loop বা playlist সরানো হয়েছে যাতে ভিডিও শেষ হলে ENDED ইভেন্ট আসে
-            },
-            events: {
-                'onReady': (event) => onPlayerReady(event, index),
-                'onStateChange': (event) => onPlayerStateChange(event, index)
-            }
-        });
-        ytPlayers[index] = player;
-    }
-
-    function onPlayerReady(event, index) {
-        console.log(`YouTube Player ${index} ready`);
-        const reel = document.querySelector(`.video-reel[data-video-index="${index}"]`);
-        if (reel && currentActiveReel === reel) {
-            event.target.playVideo();
-        }
-    }
-
-    function onPlayerStateChange(event, index) {
-        if (event.data === YT.PlayerState.ENDED) {
-            const reel = document.querySelector(`.video-reel[data-video-index="${index}"]`);
-            if (reel) {
-                autoAdvanceToNext(reel);
-            }
-        }
-    }
-
-    function autoAdvanceToNext(currentReel) {
-        const nextReel = currentReel.nextElementSibling;
-        if (nextReel && nextReel.classList.contains('video-reel')) {
-            nextReel.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-            setTimeout(() => {
-                activateVideoAutoplay(nextReel);
-            }, 1200);
-        }
-    }
-    // ==================== নতুন অংশ শেষ ====================
-
+    let currentActiveReel = null;        // বর্তমানে অটোপ্লে চলছে এমন রিল এলিমেন্ট
+    let visibilityObserver = null;        // ইন্টারসেকশন অবজারভার
+    
+    // YouTube API স্টেট
+    let youtubeAPIReady = false;
+    let youtubeAPILoaded = false;
+    let pendingYouTubePlayers = []; // যখন API লোড না থাকলে পরে তৈরি করার জন্য
+    
     // ---------- হেল্পার ফাংশন: URL বৈধতা ----------
     function isValidUrl(string) {
         try {
@@ -227,8 +161,38 @@
             return false;
         }
     }
-   
-    // ---------- ইউআরএল থেকে অটোপ্লে প্যারামিটার যুক্ত করা ----------
+    
+    // YouTube URL চেনার ফাংশন
+    function isYouTubeUrl(url) {
+        if (!url) return false;
+        try {
+            const urlObj = new URL(url);
+            return urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be');
+        } catch(e) {
+            return false;
+        }
+    }
+    
+    // YouTube ভিডিও আইডি বের করা
+    function getYouTubeVideoId(url) {
+        try {
+            const urlObj = new URL(url);
+            if (urlObj.hostname.includes('youtu.be')) {
+                return urlObj.pathname.slice(1);
+            }
+            if (urlObj.hostname.includes('youtube.com')) {
+                const v = urlObj.searchParams.get('v');
+                if (v) return v;
+                // শর্টস লিংক
+                if (urlObj.pathname.includes('/shorts/')) {
+                    return urlObj.pathname.split('/shorts/')[1].split('?')[0];
+                }
+            }
+        } catch(e) {}
+        return null;
+    }
+    
+    // ---------- ইউআরএল থেকে অটোপ্লে প্যারামিটার যুক্ত করা (iframe এর জন্য) ----------
     function addAutoplayToUrl(url) {
         if (!url) return url;
         try {
@@ -236,6 +200,8 @@
             if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
                 urlObj.searchParams.set('autoplay', '1');
                 urlObj.searchParams.set('mute', '0');
+                urlObj.searchParams.set('loop', '1');
+                urlObj.searchParams.set('playlist', urlObj.searchParams.get('v') || '');
                 return urlObj.toString();
             } else if (urlObj.hostname.includes('facebook.com') || urlObj.hostname.includes('fb.watch')) {
                 urlObj.searchParams.set('autoplay', '1');
@@ -248,8 +214,7 @@
             return url;
         }
     }
-   
-    // ---------- অটোপ্লে অপসারণ ----------
+    
     function removeAutoplayFromUrl(url) {
         if (!url) return url;
         try {
@@ -263,93 +228,147 @@
             return url;
         }
     }
-   
-    // ---------- একটি নির্দিষ্ট ভিডিওকে অটোপ্লে করা (রিলোড করে) ----------
+    
+    // ---------- YouTube API লোড করা ----------
+    function loadYouTubeAPI() {
+        if (youtubeAPILoaded) return;
+        youtubeAPILoaded = true;
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        
+        window.onYouTubeIframeAPIReady = function() {
+            youtubeAPIReady = true;
+            // পেন্ডিং প্লেয়ার তৈরি করা
+            for (let item of pendingYouTubePlayers) {
+                createYouTubePlayer(item.reel, item.videoId, item.elementId);
+            }
+            pendingYouTubePlayers = [];
+        };
+    }
+    
+    // YouTube প্লেয়ার তৈরি (রিলে সংরক্ষণ)
+    function createYouTubePlayer(reelElement, videoId, elementId) {
+        const player = new YT.Player(elementId, {
+            videoId: videoId,
+            playerVars: {
+                autoplay: 0,        // প্রথমে অটোপ্লে নয়, observer অ্যাক্টিভ করবে
+                controls: 1,
+                modestbranding: 1,
+                rel: 0,
+                fs: 1,
+                playsinline: 1
+            },
+            events: {
+                onReady: (event) => {
+                    reelElement.youtubePlayer = event.target;
+                    // ভিডিও শেষ হলে পরবর্তীতে স্ক্রল
+                    event.target.addEventListener('onStateChange', (e) => {
+                        if (e.data === YT.PlayerState.ENDED) {
+                            onVideoEnded(reelElement);
+                        }
+                    });
+                },
+                onError: (err) => {
+                    console.warn("YouTube player error", err);
+                }
+            }
+        });
+        reelElement.youtubePlayer = player;
+    }
+    
+    // ভিডিও শেষ হলে পরবর্তী ভিডিওতে স্ক্রল
+    let isAutoScrolling = false;
+    function onVideoEnded(currentReel) {
+        if (isAutoScrolling) return;
+        // বর্তমান রিলের ইনডেক্স বের করে পরবর্তীতে স্ক্রল
+        const allReels = Array.from(document.querySelectorAll('.video-reel'));
+        const currentIndex = allReels.indexOf(currentReel);
+        if (currentIndex !== -1 && currentIndex + 1 < allReels.length) {
+            isAutoScrolling = true;
+            const nextReel = allReels[currentIndex + 1];
+            nextReel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // স্ক্রোল শেষে observer কাজ করবে, কিন্তু কিছুক্ষণ পর ফ্ল্যাগ রিসেট
+            setTimeout(() => {
+                isAutoScrolling = false;
+            }, 800);
+        } else {
+            // শেষ ভিডিও: লুপ করতে চাইলে প্রথমে যেতে পারেন, তবে এখানে কিছু না করাই ভালো
+            console.log("শেষ ভিডিও শেষ হয়েছে");
+        }
+    }
+    
+    // ---------- ভিডিও অটোপ্লে/পজ ফাংশন (হাইব্রিড: YouTube ও iframe) ----------
     function activateVideoAutoplay(reelElement) {
         if (!reelElement) return;
-       
-        const isYT = reelElement.getAttribute('data-is-youtube') === 'true';
-        const index = parseInt(reelElement.getAttribute('data-video-index'));
-       
-        if (isYT) {
-            const player = ytPlayers[index];
-            if (!player) {
-                console.log(`Player ${index} এখনো তৈরি হয়নি`);
-                return;
-            }
-            if (currentActiveReel === reelElement) return;
-            if (currentActiveReel && currentActiveReel !== reelElement) {
-                pauseVideoReel(currentActiveReel);
-            }
-            player.playVideo();
-            currentActiveReel = reelElement;
-            return;
-        }
-       
-        // নন-YouTube (আগের লজিক অপরিবর্তিত)
-        const iframe = reelElement.querySelector('iframe');
-        const originalUrl = reelElement.getAttribute('data-original-url');
-        if (!iframe || !originalUrl) return;
-       
-        if (currentActiveReel === reelElement && iframe.src && iframe.src.includes('autoplay=1')) {
-            return;
-        }
-       
-        if (currentActiveReel && currentActiveReel !== reelElement) {
+        
+        // যদি আগের অ্যাক্টিভ একই রিল হয় তাহলে পুনরায় কিছু করবেন না
+        if (currentActiveReel === reelElement) return;
+        
+        // অন্য ভিডিও থামানো
+        if (currentActiveReel) {
             pauseVideoReel(currentActiveReel);
         }
-       
-        const autoplayUrl = addAutoplayToUrl(originalUrl);
-        iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
-       
-        if (!iframe.src || !iframe.src.includes('autoplay=1')) {
-            iframe.src = autoplayUrl;
+        
+        // YouTube প্লেয়ার থাকলে
+        if (reelElement.youtubePlayer && typeof reelElement.youtubePlayer.playVideo === 'function') {
+            reelElement.youtubePlayer.playVideo();
+            currentActiveReel = reelElement;
+        } 
+        // iframe ভিত্তিক ভিডিও
+        else {
+            const iframe = reelElement.querySelector('iframe');
+            const originalUrl = reelElement.getAttribute('data-original-url');
+            if (iframe && originalUrl) {
+                const autoplayUrl = addAutoplayToUrl(originalUrl);
+                iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
+                if (!iframe.src || !iframe.src.includes('autoplay=1')) {
+                    iframe.src = autoplayUrl;
+                }
+                currentActiveReel = reelElement;
+            }
         }
-       
-        currentActiveReel = reelElement;
     }
-   
-    // ---------- একটি ভিডিও পজ/স্টপ করা ----------
+    
     function pauseVideoReel(reelElement) {
         if (!reelElement) return;
-       
-        const isYT = reelElement.getAttribute('data-is-youtube') === 'true';
-        const index = parseInt(reelElement.getAttribute('data-video-index'));
-       
-        if (isYT) {
-            const player = ytPlayers[index];
-            if (player) player.pauseVideo();
-            return;
+        
+        // YouTube প্লেয়ার পজ
+        if (reelElement.youtubePlayer && typeof reelElement.youtubePlayer.pauseVideo === 'function') {
+            reelElement.youtubePlayer.pauseVideo();
+        } 
+        // iframe পজ: src রিসেট করে
+        else {
+            const iframe = reelElement.querySelector('iframe');
+            const originalUrl = reelElement.getAttribute('data-original-url');
+            if (iframe && originalUrl) {
+                const plainUrl = removeAutoplayFromUrl(originalUrl);
+                if (iframe.src !== plainUrl) {
+                    iframe.src = plainUrl;
+                }
+            }
         }
-       
-        // নন-YouTube (আগের লজিক অপরিবর্তিত)
-        const iframe = reelElement.querySelector('iframe');
-        const originalUrl = reelElement.getAttribute('data-original-url');
-        if (!iframe || !originalUrl) return;
-       
-        const plainUrl = removeAutoplayFromUrl(originalUrl);
-        if (iframe.src !== plainUrl) {
-            iframe.src = plainUrl;
-        }
+        if (currentActiveReel === reelElement) currentActiveReel = null;
     }
-   
-    // ---------- ভিজিবিলিটি অবজারভার সেটআপ (স্ক্রল করলেই অটোপ্লে) ----------
+    
+    // ---------- ভিজিবিলিটি অবজারভার সেটআপ ----------
     function setupAutoplayObserver() {
         if (visibilityObserver) {
             visibilityObserver.disconnect();
         }
-       
+        
         visibilityObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    const reel = entry.target;
-                    activateVideoAutoplay(reel);
+                    // অটোস্ক্রল চললে ডাবল অ্যাক্টিভেশন আটকাতে
+                    if (isAutoScrolling) return;
+                    activateVideoAutoplay(entry.target);
                 }
             });
         }, { threshold: 0.6 });
     }
-   
-    // ---------- সব রিলের উপর অবজারভার অ্যাটাচ করা ----------
+    
     function attachObserversToReels() {
         if (!visibilityObserver) setupAutoplayObserver();
         const reels = document.querySelectorAll('.video-reel');
@@ -357,7 +376,7 @@
             visibilityObserver.observe(reel);
         });
     }
-   
+    
     // ---------- লোডিং ইন্ডিকেটর ----------
     function showLoading(message = "মিঠু ডাক্তর অপক্ষা কর লোড হচ্ছে...") {
         let loader = document.querySelector('.loading-indicator');
@@ -369,10 +388,12 @@
         loader.textContent = message;
         loader.style.display = 'block';
     }
+
     function hideLoading() {
         const loader = document.querySelector('.loading-indicator');
         if (loader) loader.style.display = 'none';
     }
+
     function showNoVideos() {
         const msgDiv = document.createElement('div');
         msgDiv.className = 'no-videos-msg';
@@ -380,30 +401,46 @@
         document.body.appendChild(msgDiv);
         setTimeout(() => msgDiv.remove(), 4000);
     }
-    // ---------- ভিডিও এলিমেন্ট তৈরি (টিকটক স্টাইল + অটোপ্লে সাপোর্ট + নতুন YT সাপোর্ট) ----------
+
+    // ---------- ভিডিও এলিমেন্ট তৈরি (হাইব্রিড: YouTube বা iframe) ----------
     function createVideoReel(videoUrl, index) {
         const reelDiv = document.createElement('div');
         reelDiv.className = 'video-reel';
         reelDiv.setAttribute('data-video-index', index);
         reelDiv.setAttribute('data-original-url', videoUrl);
-        reelDiv.setAttribute('data-is-youtube', isYoutubeUrl(videoUrl) ? 'true' : 'false');
-       
-        if (isYoutubeUrl(videoUrl)) {
-            // YouTube এর জন্য div (player) তৈরি
-            const playerDiv = document.createElement('div');
-            playerDiv.id = `yt-player-${index}`;
-            playerDiv.style.width = '100%';
-            playerDiv.style.height = '100%';
-            reelDiv.appendChild(playerDiv);
-           
-            // পরে initialize করার জন্য queue-এ রাখা
-            pendingYTReels.push({
-                index: index,
-                videoUrl: videoUrl,
-                containerId: `yt-player-${index}`
-            });
+        
+        // YouTube URL চেক
+        if (isYouTubeUrl(videoUrl)) {
+            const videoId = getYouTubeVideoId(videoUrl);
+            if (videoId) {
+                // YouTube প্লেয়ারের জন্য একটি div তৈরি
+                const playerDiv = document.createElement('div');
+                playerDiv.id = `youtube-player-${index}`;
+                playerDiv.className = 'youtube-player';
+                playerDiv.style.width = '100%';
+                playerDiv.style.height = '100%';
+                reelDiv.appendChild(playerDiv);
+                
+                // API প্রস্তুত না থাকলে পেন্ডিং তালিকায় রাখি
+                if (youtubeAPIReady) {
+                    createYouTubePlayer(reelDiv, videoId, playerDiv.id);
+                } else {
+                    pendingYouTubePlayers.push({ reel: reelDiv, videoId: videoId, elementId: playerDiv.id });
+                    loadYouTubeAPI(); // API লোড শুরু
+                }
+            } else {
+                // ভিডিও আইডি না পেলে ফ্যালব্যাক iframe
+                const iframe = document.createElement('iframe');
+                iframe.setAttribute('frameborder', '0');
+                iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
+                iframe.setAttribute('allowfullscreen', 'true');
+                iframe.loading = 'lazy';
+                const plainUrl = removeAutoplayFromUrl(videoUrl);
+                iframe.src = plainUrl;
+                reelDiv.appendChild(iframe);
+            }
         } else {
-            // নন-YouTube → আগের iframe (একদম অপরিবর্তিত)
+            // সাধারণ iframe (Facebook, অন্যান্য)
             const iframe = document.createElement('iframe');
             iframe.setAttribute('frameborder', '0');
             iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
@@ -413,18 +450,18 @@
             iframe.src = plainUrl;
             reelDiv.appendChild(iframe);
         }
-       
-        // ডাউনলোড বাটন (একদম আগের মতো)
+        
+        // ডাউনলোড বাটন (অপরিবর্তিত)
         const downloadBtn = document.createElement('a');
         downloadBtn.href = DEFAULT_DOWNLOAD_LINK;
         downloadBtn.target = '_blank';
         downloadBtn.className = 'download-btn-overlay';
-        downloadBtn.textContent = '📥FULL VIDEO';
-       
+        downloadBtn.textContent = '📥 FULL VIDEO';
         reelDiv.appendChild(downloadBtn);
-       
+        
         return reelDiv;
     }
+    
     // ---------- সব ভিডিও রেন্ডার ----------
     function renderAllVideos() {
         if (!allVideos.length) return;
@@ -439,39 +476,33 @@
             }
         });
         container.appendChild(fragment);
-       
+        
         if (container.children.length) {
             container.scrollTop = 0;
         }
-       
+        
         setupAutoplayObserver();
         attachObserversToReels();
-       
-        // YouTube API ইতিমধ্যে ready থাকলে pending player গুলো initialize করা
-        if (typeof YT !== 'undefined' && YT.Player && pendingYTReels.length > 0) {
-            pendingYTReels.forEach(initYTPlayer);
-            pendingYTReels = [];
-        }
-       
-        // প্রথম ভিডিওতে দ্রুত অটোপ্লে
+        
+        // প্রথম ভিডিও অটোপ্লে
         setTimeout(() => {
             const firstReel = container.querySelector('.video-reel');
             if (firstReel) {
                 activateVideoAutoplay(firstReel);
             }
-        }, 300);
+        }, 500);
     }
-   
-    // ---------- Firebase থেকে ডাটা আনা (অপরিবর্তিত) ----------
+    
+    // ---------- Firebase থেকে ডাটা আনা (অপরিবর্তিত লজিক) ----------
     async function fetchVideosFromFirebase() {
         const videosRef = database.ref("videos");
         try {
             const snapshot = await videosRef.once("value");
             const data = snapshot.val();
             if (!data) return [];
-           
+            
             const videoUrls = [];
-           
+            
             if (Array.isArray(data)) {
                 for (let item of data) {
                     if (typeof item === "string" && isValidUrl(item)) videoUrls.push(item);
@@ -492,7 +523,7 @@
                     }
                 }
             }
-           
+            
             const uniqueUrls = [...new Map(videoUrls.map(url => [url, url])).values()];
             console.log(`🔥 Firebase থেকে ${uniqueUrls.length}টি ভিডিও লিংক পাওয়া গেছে`);
             return uniqueUrls;
@@ -501,8 +532,8 @@
             return [];
         }
     }
-   
-    // ---------- স্ক্রোল শেষে ভিডিও চেঞ্জ হলে পারফরম্যান্স ----------
+    
+    // ---------- স্ক্রোল শেষে অ্যাক্টিভ ভিডিও নিশ্চিত ----------
     let scrollTimeout;
     function onScrollEnd() {
         if (scrollTimeout) clearTimeout(scrollTimeout);
@@ -519,31 +550,31 @@
                     bestReel = reel;
                 }
             });
-            if (bestReel && currentActiveReel !== bestReel) {
+            if (bestReel && currentActiveReel !== bestReel && !isAutoScrolling) {
                 activateVideoAutoplay(bestReel);
             }
         }, 100);
     }
-   
+    
     // ---------- ইনিশিয়ালাইজেশন ----------
     async function initReels() {
         showLoading("মিঠু ডাক্তর অপক্ষা কর লোড হচ্ছে...");
-       
+        
         const videos = await fetchVideosFromFirebase();
         hideLoading();
-       
+        
         if (!videos || videos.length === 0) {
             showNoVideos();
             return;
         }
-       
+        
         allVideos = videos;
         renderAllVideos();
-       
+        
         container.addEventListener('scroll', () => {
             onScrollEnd();
         });
-       
+        
         window.addEventListener('resize', () => {
             if (currentActiveReel) {
                 const rect = currentActiveReel.getBoundingClientRect();
@@ -554,18 +585,9 @@
             }
         });
     }
-   
+    
     // পৃষ্ঠা লোড হলে শুরু
     window.addEventListener('DOMContentLoaded', () => {
-        // YouTube API ready callback (API script লোড হলে কল হয়)
-        window.onYouTubeIframeAPIReady = function() {
-            YT_API_READY = true;
-            if (pendingYTReels.length > 0) {
-                pendingYTReels.forEach(initYTPlayer);
-                pendingYTReels = [];
-            }
-        };
-       
         initReels().catch(err => {
             console.error("Init failed:", err);
             hideLoading();
@@ -576,8 +598,8 @@
             setTimeout(() => errMsg.remove(), 5000);
         });
     });
-   
-    // অতিরিক্ত: ব্রাউজার ব্যাকগ্রাউন্ডে চলে গেলে ভিডিও থামানো
+    
+    // ব্যাকগ্রাউন্ডে চলে গেলে ভিডিও থামানো
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             if (currentActiveReel) {
