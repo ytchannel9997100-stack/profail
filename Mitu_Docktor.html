@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>মিঠু ডাক্তর এর জন্য গিফট - অটো স্ক্রল রিলস</title>
+    <title>মিঠু ডাক্তর - অটো স্ক্রল রিলস (ক্যাশ+অটো)</title>
     <style>
         * {
             margin: 0;
@@ -16,7 +16,6 @@
             height: 100vh;
             font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
         }
-        /* স্ক্রোল স্ন্যাপ কন্টেইনার */
         .reels-container {
             height: 100vh;
             overflow-y: scroll;
@@ -24,7 +23,6 @@
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
         }
-        /* প্রতিটি ভিডিও কন্টেইনার ফুলস্ক্রিন */
         .video-reel {
             scroll-snap-align: start;
             height: 100vh;
@@ -35,7 +33,6 @@
             align-items: center;
             justify-content: center;
         }
-        /* iframe ভিডিও পুরো স্ক্রিন কভার করবে */
         .video-reel iframe {
             width: 100%;
             height: 100%;
@@ -43,7 +40,6 @@
             object-fit: cover;
             background: #000;
         }
-        /* ডাউনলোড বাটন (ওভারলে) */
         .download-btn-overlay {
             position: absolute;
             bottom: 30px;
@@ -67,7 +63,6 @@
         .download-btn-overlay:hover {
             background: #1565c0;
         }
-        /* লোডিং ইন্ডিকেটর */
         .loading-indicator {
             position: fixed;
             top: 50%;
@@ -81,7 +76,6 @@
             z-index: 1000;
             white-space: nowrap;
         }
-        /* কোনো ভিডিও না থাকলে মেসেজ */
         .no-videos-msg {
             position: fixed;
             top: 50%;
@@ -94,7 +88,6 @@
             text-align: center;
             z-index: 1000;
         }
-        /* স্ক্রোলবার কাস্টমাইজ */
         .reels-container::-webkit-scrollbar {
             width: 4px;
         }
@@ -106,180 +99,88 @@
             border-radius: 4px;
         }
 
-        /* ========== অটো স্ক্রল সেটিংস UI ========== */
-        /* ফ্লোটিং সেটিংস বাটন */
-        .floating-settings-btn {
+        /* সার্কুলার বাটন */
+        .auto-scroll-buttons {
             position: fixed;
-            bottom: 30px;
-            left: 20px;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
             z-index: 200;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(8px);
-            width: 50px;
-            height: 50px;
+            background: transparent;
+        }
+        .circle-btn {
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            border: 1.5px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s ease;
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-family: monospace;
         }
-        .floating-settings-btn:hover {
-            background: rgba(30,136,229,0.9);
+        .circle-btn.off-btn {
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .circle-btn.active {
+            background: #e53935 !important;
+            border-color: #ffcdd2;
             transform: scale(1.05);
+            box-shadow: 0 0 12px rgba(229,57,53,0.6);
         }
-        .floating-settings-btn svg {
-            width: 26px;
-            height: 26px;
-            stroke: white;
-            stroke-width: 1.8;
-            fill: none;
+        .circle-btn:active {
+            transform: scale(0.95);
         }
-        /* টাইমার ইন্ডিকেটর (ছোট ব্যাজ) */
-        .timer-badge {
+        /* টাইমার ব্যাজ + ক্যাশ স্ট্যাটাস */
+        .status-badge {
             position: fixed;
             bottom: 30px;
-            left: 90px;
+            left: 20px;
             background: rgba(0,0,0,0.6);
             backdrop-filter: blur(6px);
             color: #ffd966;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 40px;
             z-index: 200;
             font-family: monospace;
             pointer-events: none;
             border-left: 3px solid #ffd966;
-            letter-spacing: 0.5px;
-        }
-        /* মোডাল (সেটিংস প্যানেল) */
-        .settings-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(12px);
-            z-index: 1000;
+            letter-spacing: 0.3px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            visibility: hidden;
-            opacity: 0;
-            transition: visibility 0.2s, opacity 0.2s;
+            flex-direction: column;
+            gap: 4px;
         }
-        .settings-modal.active {
-            visibility: visible;
-            opacity: 1;
+        .cache-status {
+            font-size: 11px;
+            opacity: 0.8;
+            color: #aaffdd;
         }
-        .settings-card {
-            background: #1e1e2f;
-            border-radius: 32px;
-            width: 90%;
-            max-width: 340px;
-            padding: 24px 20px 30px;
-            color: white;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .settings-card h3 {
-            font-size: 1.6rem;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 600;
-            letter-spacing: -0.3px;
-            color: #fff;
-        }
-        .delay-input-group {
-            margin-bottom: 24px;
-        }
-        .delay-input-group label {
-            display: block;
-            font-size: 14px;
-            margin-bottom: 8px;
-            color: #aaa;
-        }
-        .delay-input-group input {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 18px;
-            background: #2c2c3a;
-            border: 1px solid #444;
-            border-radius: 28px;
-            color: white;
-            text-align: center;
-            font-weight: 600;
-            outline: none;
-            transition: 0.2s;
-        }
-        .delay-input-group input:focus {
-            border-color: #1e88e5;
-            box-shadow: 0 0 0 2px rgba(30,136,229,0.3);
-        }
-        .preset-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 28px;
-        }
-        .preset-btn {
-            background: #2c2c3a;
-            border: none;
-            color: white;
-            padding: 8px 18px;
-            border-radius: 40px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .preset-btn:hover {
-            background: #1e88e5;
-        }
-        .save-btn {
-            background: #1e88e5;
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 40px;
-            font-size: 18px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            transition: 0.2s;
-            margin-top: 8px;
-        }
-        .save-btn:hover {
-            background: #0b5ea0;
-        }
-        .close-modal {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            cursor: pointer;
-            backdrop-filter: blur(4px);
-        }
-        .info-text {
-            font-size: 12px;
-            text-align: center;
-            margin-top: 18px;
-            color: #aaa;
-        }
-        input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button {
-            opacity: 0.5;
+        @media (max-width: 560px) {
+            .circle-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 16px;
+            }
+            .circle-btn.off-btn {
+                font-size: 13px;
+            }
+            .auto-scroll-buttons {
+                right: 12px;
+                gap: 10px;
+            }
         }
     </style>
     <!-- Firebase SDK -->
@@ -291,33 +192,21 @@
 
 <div class="reels-container" id="reelsContainer"></div>
 
-<!-- ফ্লোটিং সেটিংস বাটন + টাইমার ব্যাজ -->
-<div class="floating-settings-btn" id="settingsBtn">
-    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H5.78a1.65 1.65 0 0 0-1.51 1 1.65 1.65 0 0 0 .33 1.82l.04.04A10 10 0 0 0 12 17.66a10 10 0 0 0 6.36-2.62l.04-.04Z" />
-        <path d="M16.5 9.4a10 10 0 0 0-9 0" />
-    </svg>
+<!-- সার্কুলার বাটন -->
+<div class="auto-scroll-buttons" id="autoScrollButtons">
+    <div class="circle-btn" data-seconds="10">10</div>
+    <div class="circle-btn" data-seconds="20">20</div>
+    <div class="circle-btn" data-seconds="30">30</div>
+    <div class="circle-btn" data-seconds="40">40</div>
+    <div class="circle-btn" data-seconds="50">50</div>
+    <div class="circle-btn" data-seconds="60">60</div>
+    <div class="circle-btn off-btn" data-seconds="off">OFF</div>
 </div>
-<div class="timer-badge" id="timerBadge">⏱️ অটো: বন্ধ</div>
 
-<!-- সেটিংস মোডাল -->
-<div class="settings-modal" id="settingsModal">
-    <div class="close-modal" id="closeModalBtn">✕</div>
-    <div class="settings-card">
-        <h3>⏲️ অটো স্ক্রল</h3>
-        <div class="delay-input-group">
-            <label>সেকেন্ড পর পরবর্তী ভিডিও</label>
-            <input type="number" id="delaySecondsInput" min="0" step="1" placeholder="0 = বন্ধ">
-        </div>
-        <div class="preset-buttons">
-            <button class="preset-btn" data-preset="5">৫ সেকেন্ড</button>
-            <button class="preset-btn" data-preset="20">২০ সেকেন্ড</button>
-            <button class="preset-btn" data-preset="100">১০০ সেকেন্ড</button>
-        </div>
-        <button class="save-btn" id="saveSettingsBtn">সংরক্ষণ করুন</button>
-        <div class="info-text">✨ ম্যানুয়াল স্ক্রোল করলে টাইমার রিসেট হবে</div>
-    </div>
+<!-- স্ট্যাটাস ব্যাজ (টাইমার + ক্যাশ তথ্য) -->
+<div class="status-badge" id="statusBadge">
+    <span id="timerBadge">⏱️ অটো: বন্ধ</span>
+    <span id="cacheBadge" class="cache-status">📀 ক্যাশ: লোড হচ্ছে...</span>
 </div>
 
 <script>
@@ -340,95 +229,123 @@
     let allVideos = [];
     let currentActiveReel = null;
     let visibilityObserver = null;
-    let autoScrollDelay = 0;        // সেকেন্ডে, 0 = বন্ধ
+    let autoScrollDelay = 0;
     let autoScrollTimer = null;
-    let isScrollingProgrammatically = false;   // প্রোগ্রাম্যাটিক স্ক্রোল চিহ্নিত করতে
+    let isScrollingProgrammatically = false;
     
     const container = document.getElementById("reelsContainer");
-    const settingsBtn = document.getElementById("settingsBtn");
-    const settingsModal = document.getElementById("settingsModal");
-    const closeModalBtn = document.getElementById("closeModalBtn");
-    const delayInput = document.getElementById("delaySecondsInput");
-    const saveSettingsBtn = document.getElementById("saveSettingsBtn");
-    const timerBadge = document.getElementById("timerBadge");
-    const presetBtns = document.querySelectorAll(".preset-btn");
-    
+    const timerBadgeSpan = document.getElementById("timerBadge");
+    const cacheBadgeSpan = document.getElementById("cacheBadge");
+    const allBtns = document.querySelectorAll(".circle-btn");
     const DEFAULT_DOWNLOAD_LINK = "https://www.easy-premium.com";
     
-    // ---------- localStorage থেকে সেভ করা ডিলে লোড ----------
-    function loadStoredDelay() {
-        const stored = localStorage.getItem("autoScrollDelay");
-        if (stored !== null && !isNaN(parseInt(stored))) {
-            autoScrollDelay = parseInt(stored);
-        } else {
-            autoScrollDelay = 0;   // ডিফল্ট বন্ধ
-        }
-        delayInput.value = autoScrollDelay;
-        updateTimerBadge();
-    }
+    // ======================= ক্যাশ ম্যানেজমেন্ট =======================
+    const CACHE_KEY = "mithu_videos_cache";
+    const CACHE_TIMESTAMP_KEY = "mithu_cache_timestamp";
+    const CACHE_MAX_AGE_DAYS = 30;  // 30 দিন পর ক্যাশ রিফ্রেশ
     
-    function saveDelayToStorage(delay) {
-        localStorage.setItem("autoScrollDelay", delay);
-        autoScrollDelay = delay;
-        updateTimerBadge();
-    }
-    
-    function updateTimerBadge() {
-        if (autoScrollDelay > 0) {
-            timerBadge.innerHTML = `⏱️ ${autoScrollDelay} সেকেন্ড পরে অটো স্ক্রল`;
-            timerBadge.style.borderLeftColor = "#4caf50";
-            timerBadge.style.color = "#d4ffb0";
-        } else {
-            timerBadge.innerHTML = `⏱️ অটো: বন্ধ`;
-            timerBadge.style.borderLeftColor = "#ff8888";
-            timerBadge.style.color = "#ffb3b3";
+    // ক্যাশে ভিডিও লিস্ট সংরক্ষণ
+    function saveVideosToCache(videos) {
+        try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(videos));
+            localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+            console.log("✅ ভিডিও ক্যাশে সংরক্ষিত:", videos.length);
+            cacheBadgeSpan.innerHTML = "📀 ক্যাশ: সেভ করা হয়েছে";
+            setTimeout(() => {
+                if (cacheBadgeSpan) cacheBadgeSpan.innerHTML = "📀 ক্যাশ: ব্যবহারযোগ্য";
+            }, 2000);
+        } catch (e) {
+            console.warn("ক্যাশ সংরক্ষণ ব্যর্থ:", e);
+            cacheBadgeSpan.innerHTML = "⚠️ ক্যাশ ব্যর্থ";
         }
     }
     
-    // ---------- টাইমার কন্ট্রোল ----------
-    function stopAutoScrollTimer() {
-        if (autoScrollTimer) {
-            clearTimeout(autoScrollTimer);
-            autoScrollTimer = null;
+    // ক্যাশ থেকে ভিডিও লোড (যদি বৈধ থাকে)
+    function loadVideosFromCache() {
+        const cached = localStorage.getItem(CACHE_KEY);
+        const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+        if (!cached || !timestamp) return null;
+        
+        const age = Date.now() - parseInt(timestamp);
+        const maxAgeMs = CACHE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+        if (age > maxAgeMs) {
+            console.log("⏰ ক্যাশের বয়স ৩০ দিনের বেশি, রিফ্রেশ প্রয়োজন");
+            return null;
         }
+        
+        try {
+            const videos = JSON.parse(cached);
+            if (Array.isArray(videos) && videos.length > 0) {
+                console.log(`📀 ক্যাশ থেকে ${videos.length}টি ভিডিও লোড হয়েছে (বয়স: ${Math.floor(age/86400000)} দিন)`);
+                cacheBadgeSpan.innerHTML = `📀 ক্যাশ: ${videos.length}টি ভিডিও (${Math.floor(age/86400000)} দিন আগে)`;
+                return videos;
+            }
+        } catch(e) {}
+        return null;
     }
     
-    // পরবর্তী ভিডিওতে স্ক্রোল (অটো স্ক্রল ফাংশন)
-    function scrollToNextReel() {
-        if (!currentActiveReel) return;
-        const allReels = Array.from(document.querySelectorAll('.video-reel'));
-        const currentIndex = allReels.indexOf(currentActiveReel);
-        if (currentIndex === -1) return;
-        const nextReel = allReels[currentIndex + 1];
-        if (!nextReel) {
-            // শেষ ভিডিও: টাইমার থামাও, কোনো অ্যাকশন নাই
-            stopAutoScrollTimer();
-            return;
+    // Firebase থেকে ডাটা আনা (ক্যাশ আপডেট সহ)
+    async function fetchVideosFromFirebase(forceRefresh = false) {
+        // যদি forceRefresh না করা হয় এবং ক্যাশ বৈধ থাকে, ক্যাশ ফেরত দিন
+        if (!forceRefresh) {
+            const cachedVideos = loadVideosFromCache();
+            if (cachedVideos) {
+                return cachedVideos;
+            }
         }
-        // প্রোগ্রাম্যাটিক স্ক্রোল ফ্ল্যাগ সেট করুন
-        isScrollingProgrammatically = true;
-        nextReel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        // স্ক্রোল শেষে ফ্ল্যাগ রিসেট করবো, কিন্তু স্ক্রোল ইভেন্টের মাধ্যমে রিসেট করা যাবে
-        setTimeout(() => {
-            isScrollingProgrammatically = false;
-        }, 800);
-    }
-    
-    // বর্তমান এক্টিভ রিলের জন্য টাইমার স্টার্ট (যদি অটোস্ক্রল চালু থাকে)
-    function startAutoScrollTimerForCurrentReel() {
-        stopAutoScrollTimer();
-        if (!currentActiveReel) return;
-        if (autoScrollDelay > 0) {
-            autoScrollTimer = setTimeout(() => {
-                // টাইমার ফায়ার হলে অটো স্ক্রল ট্রিগার
-                if (currentActiveReel && autoScrollDelay > 0) {
-                    scrollToNextReel();
+        
+        // ক্যাশ নেই বা পুরনো, Firebase থেকে নিয়ে আসি
+        cacheBadgeSpan.innerHTML = "🔄 ক্যাশ আপডেট হচ্ছে...";
+        const videosRef = database.ref("videos");
+        try {
+            const snapshot = await videosRef.once("value");
+            const data = snapshot.val();
+            if (!data) return [];
+            
+            const videoUrls = [];
+            if (Array.isArray(data)) {
+                for (let item of data) {
+                    if (typeof item === "string" && isValidUrl(item)) videoUrls.push(item);
+                    else if (item && typeof item === "object") {
+                        const url = item.url || item.videoUrl || item.src || item.mp4 || item.link;
+                        if (url && isValidUrl(url)) videoUrls.push(url);
+                    }
                 }
-            }, autoScrollDelay * 1000);
+            } else if (typeof data === "object") {
+                for (const key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        const entry = data[key];
+                        if (typeof entry === "string" && isValidUrl(entry)) videoUrls.push(entry);
+                        else if (entry && typeof entry === "object") {
+                            const url = entry.url || entry.videoUrl || entry.src || entry.mp4 || entry.link;
+                            if (url && isValidUrl(url)) videoUrls.push(url);
+                        }
+                    }
+                }
+            }
+            const uniqueUrls = [...new Map(videoUrls.map(url => [url, url])).values()];
+            console.log(`🔥 Firebase থেকে ${uniqueUrls.length}টি ভিডিও লিংক পাওয়া গেছে`);
+            // ক্যাশে সংরক্ষণ
+            if (uniqueUrls.length > 0) {
+                saveVideosToCache(uniqueUrls);
+            } else {
+                cacheBadgeSpan.innerHTML = "⚠️ কোনো ভিডিও নেই";
+            }
+            return uniqueUrls;
+        } catch (error) {
+            console.error("Firebase error:", error);
+            cacheBadgeSpan.innerHTML = "❌ ক্যাশ আপডেট ব্যর্থ";
+            // ব্যর্থ হলে পুরনো ক্যাশ ফেরত দেওয়ার চেষ্টা (যদি থাকে)
+            const oldCache = loadVideosFromCache();
+            if (oldCache) {
+                cacheBadgeSpan.innerHTML = "📀 পুরনো ক্যাশ ব্যবহার করা হচ্ছে";
+                return oldCache;
+            }
+            return [];
         }
     }
     
-    // ---------- ইউটিলিটি ফাংশন ----------
+    // ---------- ইউটিলিটি ----------
     function isValidUrl(string) {
         try {
             const url = new URL(string);
@@ -474,25 +391,21 @@
         }
     }
     
+    // ---------- অটোপ্লে এবং স্ক্রোল লজিক ----------
     function activateVideoAutoplay(reelElement) {
         if (!reelElement) return;
         const iframe = reelElement.querySelector('iframe');
         const originalUrl = reelElement.getAttribute('data-original-url');
         if (!iframe || !originalUrl) return;
         
-        // যদি সক্রিয় রিল পরিবর্তন হয়, টাইমার রিসেট করো
         const wasDifferent = (currentActiveReel !== reelElement);
-        if (wasDifferent) {
-            stopAutoScrollTimer();
-        }
+        if (wasDifferent) stopAutoScrollTimer();
         
         if (currentActiveReel === reelElement && iframe.src && iframe.src.includes('autoplay=1')) {
-            // একই ভিডিও, টাইমার চালু থাকলে কিছু না, নাহলে স্টার্ট
             if (autoScrollDelay > 0 && !autoScrollTimer) startAutoScrollTimerForCurrentReel();
             return;
         }
         
-        // অন্য ভিডিও থামানো
         if (currentActiveReel && currentActiveReel !== reelElement) {
             pauseVideoReel(currentActiveReel);
         }
@@ -504,10 +417,7 @@
         }
         currentActiveReel = reelElement;
         
-        // নতুন ভিডিও এক্টিভ -> টাইমার শুরু করো (যদি ডিলে >0)
-        if (autoScrollDelay > 0) {
-            startAutoScrollTimerForCurrentReel();
-        }
+        if (autoScrollDelay > 0) startAutoScrollTimerForCurrentReel();
     }
     
     function pauseVideoReel(reelElement) {
@@ -516,19 +426,81 @@
         const originalUrl = reelElement.getAttribute('data-original-url');
         if (!iframe || !originalUrl) return;
         const plainUrl = removeAutoplayFromUrl(originalUrl);
-        if (iframe.src !== plainUrl) {
-            iframe.src = plainUrl;
+        if (iframe.src !== plainUrl) iframe.src = plainUrl;
+    }
+    
+    function stopAutoScrollTimer() {
+        if (autoScrollTimer) {
+            clearTimeout(autoScrollTimer);
+            autoScrollTimer = null;
         }
     }
     
-    // ইন্টারসেকশন অবজারভার সেটআপ
+    function startAutoScrollTimerForCurrentReel() {
+        stopAutoScrollTimer();
+        if (!currentActiveReel) return;
+        if (autoScrollDelay > 0) {
+            autoScrollTimer = setTimeout(() => {
+                if (currentActiveReel && autoScrollDelay > 0) scrollToNextReel();
+            }, autoScrollDelay * 1000);
+        }
+    }
+    
+    function scrollToNextReel() {
+        if (!currentActiveReel) return;
+        const allReels = Array.from(document.querySelectorAll('.video-reel'));
+        const currentIndex = allReels.indexOf(currentActiveReel);
+        if (currentIndex === -1) return;
+        const nextReel = allReels[currentIndex + 1];
+        if (!nextReel) {
+            stopAutoScrollTimer();
+            return;
+        }
+        isScrollingProgrammatically = true;
+        nextReel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(() => { isScrollingProgrammatically = false; }, 800);
+    }
+    
+    function setAutoScrollDelay(seconds) {
+        let newDelay = seconds;
+        if (newDelay < 0) newDelay = 0;
+        if (newDelay === autoScrollDelay) return;
+        autoScrollDelay = newDelay;
+        localStorage.setItem("autoScrollDelay", autoScrollDelay);
+        updateButtonsHighlight();
+        updateTimerBadge();
+        stopAutoScrollTimer();
+        if (autoScrollDelay > 0 && currentActiveReel) startAutoScrollTimerForCurrentReel();
+    }
+    
+    function updateButtonsHighlight() {
+        allBtns.forEach(btn => btn.classList.remove("active"));
+        if (autoScrollDelay === 0) {
+            const offBtn = document.querySelector(".circle-btn.off-btn");
+            if (offBtn) offBtn.classList.add("active");
+        } else {
+            const targetBtn = Array.from(allBtns).find(btn => {
+                const secs = parseInt(btn.getAttribute("data-seconds"));
+                return !isNaN(secs) && secs === autoScrollDelay;
+            });
+            if (targetBtn) targetBtn.classList.add("active");
+        }
+    }
+    
+    function updateTimerBadge() {
+        if (autoScrollDelay > 0) {
+            timerBadgeSpan.innerHTML = `⏱️ ${autoScrollDelay} সেকেন্ড পরে অটো স্ক্রল`;
+        } else {
+            timerBadgeSpan.innerHTML = `⏱️ অটো: বন্ধ`;
+        }
+    }
+    
+    // ---------- ইন্টারসেকশন অবজারভার ----------
     function setupAutoplayObserver() {
         if (visibilityObserver) visibilityObserver.disconnect();
         visibilityObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    activateVideoAutoplay(entry.target);
-                }
+                if (entry.isIntersecting) activateVideoAutoplay(entry.target);
             });
         }, { threshold: 0.6 });
     }
@@ -539,41 +511,7 @@
         reels.forEach(reel => visibilityObserver.observe(reel));
     }
     
-    // স্ক্রোল ইভেন্ট হ্যান্ডলিং: ম্যানুয়াল স্ক্রোল শনাক্ত করে টাইমার রিসেট
-    let scrollEndTimer = null;
-    function onScrollHandler() {
-        // স্ক্রোল শুরু হলে টাইমার বাতিল (ম্যানুয়াল ইন্টারাপ্ট)
-        if (!isScrollingProgrammatically) {
-            stopAutoScrollTimer();
-        }
-        if (scrollEndTimer) clearTimeout(scrollEndTimer);
-        scrollEndTimer = setTimeout(() => {
-            // স্ক্রোল থামার পর দৃশ্যমান ভিডিও খুঁজে সক্রিয় করো
-            const reels = document.querySelectorAll('.video-reel');
-            let bestReel = null;
-            let maxRatio = 0;
-            reels.forEach(reel => {
-                const rect = reel.getBoundingClientRect();
-                const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
-                const ratio = visibleHeight / window.innerHeight;
-                if (ratio > maxRatio && ratio > 0.4) {
-                    maxRatio = ratio;
-                    bestReel = reel;
-                }
-            });
-            if (bestReel && currentActiveReel !== bestReel) {
-                activateVideoAutoplay(bestReel);
-            } else if (bestReel && currentActiveReel === bestReel && autoScrollDelay > 0 && !autoScrollTimer) {
-                // যদি একই রিল থাকে কিন্তু টাইমার বন্ধ হয়ে যায় (যেমন ম্যানুয়াল স্ক্রোলের কারণে), পুনরায় চালু করো
-                startAutoScrollTimerForCurrentReel();
-            } else if (bestReel && autoScrollDelay > 0 && !autoScrollTimer) {
-                startAutoScrollTimerForCurrentReel();
-            }
-            isScrollingProgrammatically = false;
-        }, 100);
-    }
-    
-    // ----- ভিডিও রেন্ডার -----
+    // ---------- ভিডিও রেন্ডার ----------
     function createVideoReel(videoUrl, index) {
         const reelDiv = document.createElement('div');
         reelDiv.className = 'video-reel';
@@ -599,16 +537,12 @@
         return reelDiv;
     }
     
-    function renderAllVideos() {
-        if (!allVideos.length) return;
+    function renderAllVideos(videos) {
+        if (!videos.length) return;
         container.innerHTML = '';
         const fragment = document.createDocumentFragment();
-        allVideos.forEach((url, idx) => {
-            if (url && isValidUrl(url)) {
-                fragment.appendChild(createVideoReel(url, idx));
-            } else {
-                console.warn(`Invalid video URL: ${url}`);
-            }
+        videos.forEach((url, idx) => {
+            if (url && isValidUrl(url)) fragment.appendChild(createVideoReel(url, idx));
         });
         container.appendChild(fragment);
         if (container.children.length) container.scrollTop = 0;
@@ -620,98 +554,78 @@
         }, 300);
     }
     
-    // ----- ফায়ারবেস থেকে ডাটা আনা -----
-    async function fetchVideosFromFirebase() {
-        const videosRef = database.ref("videos");
-        try {
-            const snapshot = await videosRef.once("value");
-            const data = snapshot.val();
-            if (!data) return [];
-            const videoUrls = [];
-            if (Array.isArray(data)) {
-                for (let item of data) {
-                    if (typeof item === "string" && isValidUrl(item)) videoUrls.push(item);
-                    else if (item && typeof item === "object") {
-                        const url = item.url || item.videoUrl || item.src || item.mp4 || item.link;
-                        if (url && isValidUrl(url)) videoUrls.push(url);
-                    }
+    // ---------- স্ক্রোল ইভেন্ট ----------
+    let scrollEndTimer = null;
+    function onScrollHandler() {
+        if (!isScrollingProgrammatically) stopAutoScrollTimer();
+        if (scrollEndTimer) clearTimeout(scrollEndTimer);
+        scrollEndTimer = setTimeout(() => {
+            const reels = document.querySelectorAll('.video-reel');
+            let bestReel = null;
+            let maxRatio = 0;
+            reels.forEach(reel => {
+                const rect = reel.getBoundingClientRect();
+                const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+                const ratio = visibleHeight / window.innerHeight;
+                if (ratio > maxRatio && ratio > 0.4) {
+                    maxRatio = ratio;
+                    bestReel = reel;
                 }
-            } else if (typeof data === "object") {
-                for (const key in data) {
-                    if (data.hasOwnProperty(key)) {
-                        const entry = data[key];
-                        if (typeof entry === "string" && isValidUrl(entry)) videoUrls.push(entry);
-                        else if (entry && typeof entry === "object") {
-                            const url = entry.url || entry.videoUrl || entry.src || entry.mp4 || entry.link;
-                            if (url && isValidUrl(url)) videoUrls.push(url);
-                        }
-                    }
+            });
+            if (bestReel && currentActiveReel !== bestReel) {
+                activateVideoAutoplay(bestReel);
+            } else if (bestReel && currentActiveReel === bestReel && autoScrollDelay > 0 && !autoScrollTimer) {
+                startAutoScrollTimerForCurrentReel();
+            }
+            isScrollingProgrammatically = false;
+        }, 100);
+    }
+    
+    // ---------- বাটন ইভেন্ট ----------
+    function initButtons() {
+        allBtns.forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const secAttr = btn.getAttribute("data-seconds");
+                if (secAttr === "off") setAutoScrollDelay(0);
+                else {
+                    const secs = parseInt(secAttr);
+                    if (!isNaN(secs) && secs > 0) setAutoScrollDelay(secs);
                 }
-            }
-            return [...new Map(videoUrls.map(url => [url, url])).values()];
-        } catch (error) {
-            console.error("Firebase error:", error);
-            return [];
-        }
-    }
-    
-    // ----- সেটিংস UI লজিক -----
-    function openSettingsModal() {
-        settingsModal.classList.add('active');
-        delayInput.value = autoScrollDelay;
-    }
-    function closeSettingsModal() {
-        settingsModal.classList.remove('active');
-    }
-    
-    function applyNewDelay(delay) {
-        let newDelay = parseInt(delay);
-        if (isNaN(newDelay)) newDelay = 0;
-        if (newDelay < 0) newDelay = 0;
-        saveDelayToStorage(newDelay);
-        // টাইমার রিস্টার্ট: বর্তমান ভিডিওর জন্য নতুন ডিলে সেট করে টাইমার চালু/বন্ধ
-        stopAutoScrollTimer();
-        if (newDelay > 0 && currentActiveReel) {
-            startAutoScrollTimerForCurrentReel();
-        } else if (newDelay === 0) {
-            // কিছু করো না, টাইমার বন্ধ
-        }
-    }
-    
-    // ---- ইভেন্ট লিসেনার ----
-    settingsBtn.addEventListener('click', openSettingsModal);
-    closeModalBtn.addEventListener('click', closeSettingsModal);
-    settingsModal.addEventListener('click', (e) => {
-        if (e.target === settingsModal) closeSettingsModal();
-    });
-    
-    saveSettingsBtn.addEventListener('click', () => {
-        const val = delayInput.value.trim();
-        let delayNum = parseInt(val);
-        if (isNaN(delayNum)) delayNum = 0;
-        if (delayNum < 0) delayNum = 0;
-        applyNewDelay(delayNum);
-        closeSettingsModal();
-    });
-    
-    presetBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const preset = parseInt(btn.getAttribute('data-preset'));
-            if (!isNaN(preset)) {
-                delayInput.value = preset;
-            }
+            });
         });
-    });
+    }
     
-    // ---------- ইনিশিয়ালাইজ ----------
-    async function initReels() {
-        // লোডিং ইন্ডিকেটর দেখানো
+    // ---------- ইনিশিয়ালাইজেশন (ক্যাশ ফার্স্ট) ----------
+    async function init() {
+        // লোডিং ইন্ডিকেটর
         let loader = document.createElement('div');
         loader.className = 'loading-indicator';
         loader.textContent = "মিঠু ডাক্তর অপেক্ষা কর লোড হচ্ছে...";
         document.body.appendChild(loader);
         
-        const videos = await fetchVideosFromFirebase();
+        // প্রথমে ক্যাশ চেক করে ভিডিও পাওয়ার চেষ্টা
+        let videos = loadVideosFromCache();
+        let fromCache = true;
+        if (!videos) {
+            fromCache = false;
+            videos = await fetchVideosFromFirebase(true);
+        } else {
+            // ক্যাশ থাকলেও ব্যাকগ্রাউন্ডে Firebase আপডেট চেক করুন (নীরবে)
+            fetchVideosFromFirebase(true).then(freshVideos => {
+                if (freshVideos && freshVideos.length > 0 && JSON.stringify(freshVideos) !== JSON.stringify(videos)) {
+                    console.log("🔄 নতুন ভিডিও পাওয়া গেছে, ক্যাশ আপডেট করা হচ্ছে");
+                    saveVideosToCache(freshVideos);
+                    // যদি ইউজার এখনও পেজে থাকে এবং কন্টেন্ট পরিবর্তন করতে চাইলে রিলোড করতে পারেন, কিন্তু আমরা অটো রিলোড না করাই ভালো
+                    // ব্যবহারকারীকে জানানোর জন্য ব্যাজ আপডেট
+                    cacheBadgeSpan.innerHTML = "🆕 নতুন কন্টেন্ট উপলব্ধ (পৃষ্ঠা রিফ্রেশ করলে দেখাবে)";
+                    setTimeout(() => {
+                        if (cacheBadgeSpan) cacheBadgeSpan.innerHTML = "📀 ক্যাশ আপডেটেড";
+                    }, 3000);
+                }
+            }).catch(e => console.warn("ব্যাকগ্রাউন্ড আপডেট ব্যর্থ", e));
+        }
+        
         loader.remove();
         
         if (!videos || videos.length === 0) {
@@ -722,39 +636,44 @@
             setTimeout(() => noMsg.remove(), 4000);
             return;
         }
-        allVideos = videos;
-        renderAllVideos();
         
-        // স্ক্রোল ইভেন্ট (ম্যানুয়াল স্ক্রোল ট্র্যাক)
+        allVideos = videos;
+        renderAllVideos(allVideos);
+        
+        if (fromCache) {
+            cacheBadgeSpan.innerHTML = `📀 ক্যাশ: ${allVideos.length}টি ভিডিও (দ্রুত লোড)`;
+        } else {
+            cacheBadgeSpan.innerHTML = `🌐 লাইভ: ${allVideos.length}টি ভিডিও`;
+        }
+        
+        // অটোস্ক্রল ডিলে লোড
+        const storedDelay = localStorage.getItem("autoScrollDelay");
+        if (storedDelay !== null && !isNaN(parseInt(storedDelay))) {
+            autoScrollDelay = parseInt(storedDelay);
+        } else {
+            autoScrollDelay = 0;
+        }
+        updateButtonsHighlight();
+        updateTimerBadge();
+        
         container.addEventListener('scroll', onScrollHandler);
-        // উইন্ডো রিসাইজে সক্রিয় ভিডিও ঠিক রাখা
         window.addEventListener('resize', () => {
             if (currentActiveReel) {
                 const rect = currentActiveReel.getBoundingClientRect();
-                const visible = rect.top < window.innerHeight && rect.bottom > 0;
-                if (!visible) onScrollHandler();
+                if (rect.bottom < 0 || rect.top > window.innerHeight) onScrollHandler();
             }
         });
-        
-        // ব্যাকগ্রাউন্ডে চলে গেলে টাইমার থামানো
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                stopAutoScrollTimer();
-            } else {
-                if (autoScrollDelay > 0 && currentActiveReel) {
-                    startAutoScrollTimerForCurrentReel();
-                }
-            }
+            if (document.hidden) stopAutoScrollTimer();
+            else if (autoScrollDelay > 0 && currentActiveReel) startAutoScrollTimerForCurrentReel();
         });
     }
     
-    // স্টোরেজ থেকে ডিলে লোড ও অ্যাপ্লাই
-    loadStoredDelay();
-    // শুরু
-    initReels().catch(err => {
+    initButtons();
+    init().catch(err => {
         console.error("Init failed:", err);
         const loader = document.querySelector('.loading-indicator');
-        if(loader) loader.remove();
+        if (loader) loader.remove();
         const errMsg = document.createElement('div');
         errMsg.className = 'no-videos-msg';
         errMsg.innerText = '🔥 সংযোগ ত্রুটি। পুনরায় চেষ্টা করুন।';
