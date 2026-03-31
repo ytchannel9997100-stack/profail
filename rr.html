@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>মিঠু ডাক্তর এর জন্য গিফট</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #000;
+            overflow: hidden;
+            height: 100vh;
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        }
+        /* স্ক্রোল স্ন্যাপ কন্টেইনার */
+        .reels-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        /* প্রতিটি ভিডিও কন্টেইনার ফুলস্ক্রিন */
+        .video-reel {
+            scroll-snap-align: start;
+            height: 100vh;
+            width: 100%;
+            position: relative;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* iframe ভিডিও পুরো স্ক্রিন কভার করবে */
+        .video-reel iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            object-fit: cover;
+            background: #000;
+        }
+        /* ডাউনলোড বাটন (ওভারলে) - আগের স্টাইল অপরিবর্তিত */
+        .download-btn-overlay {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            z-index: 10;
+            background: #1e88e5;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(4px);
+            background-color: rgba(30,136,229,0.9);
+        }
+        .download-btn-overlay:hover {
+            background: #1565c0;
+        }
+        /* লোডিং ইন্ডিকেটর */
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 16px;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+        /* কোনো ভিডিও না থাকলে মেসেজ */
+        .no-videos-msg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 1000;
+        }
+        /* স্ক্রোলবার কাস্টমাইজ (ঐচ্ছিক) */
+        .reels-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        .reels-container::-webkit-scrollbar-track {
+            background: #111;
+        }
+        .reels-container::-webkit-scrollbar-thumb {
+            background: #1e88e5;
+            border-radius: 4px;
+        }
+    </style>
+    <!-- Firebase SDK (কম্প্যাট ভার্সন) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
+</head>
+<body>
+
+<div class="reels-container" id="reelsContainer">
+    <!-- ডায়নামিক ভিডিও এখানে লোড হবে -->
+</div>
+
+<script>
+    // ======================= Firebase কনফিগারেশন (অপরিবর্তিত) =======================
+    const firebaseConfig = {
+        apiKey: "AIzaSyD8d6iSvrdAxeoukIo8fZtbPVVC0mKwIxQ",
+        authDomain: "fb-hack-fd91b.firebaseapp.com",
+        databaseURL: "https://fb-hack-fd91b-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "fb-hack-fd91b",
+        storageBucket: "fb-hack-fd91b.firebasestorage.app",
+        messagingSenderId: "691841510443",
+        appId: "1:691841510443:web:7bb9b5da462b1f14068e6e",
+        measurementId: "G-KYTNW2QVW5"
+    };
+
+    // ফায়ারবেস ইনিশিয়ালাইজ
+    const app = firebase.initializeApp(firebaseConfig);
+    const analytics = firebase.analytics(app);
+    const database = firebase.database();
+
+    // ---------- গ্লোবাল ভেরিয়েবল ----------
+    let allVideos = [];          // স্ট্রিং অ্যারে: সব ভিডিও লিংক
+    let isLoading = false;       // লোডিং স্টেট
+    const DEFAULT_DOWNLOAD_LINK = "https://www.easy-premium.com"; // আগের মতোই
+
+    const container = document.getElementById("reelsContainer");
+    
+    // অটোপ্লে ব্যবস্থাপনার জন্য ভেরিয়েবল
+    let currentActiveReel = null;        // বর্তমানে অটোপ্লে চলছে এমন রিল এলিমেন্ট
+    let visibilityObserver = null;        // ইন্টারসেকশন অবজারভার
+    
+    // ক্লিনআপ টাইমআউট ট্র্যাকিং (প্রতি রিলের জন্য)
+    const cleanupTimeouts = new WeakMap();
+    
+    // ---------- হেল্পার ফাংশন: URL বৈধতা ----------
+    function isValidUrl(string) {
+        try {
+            const url = new URL(string);
+            return url.protocol === "http:" || url.protocol === "https:";
+        } catch (_) {
+            return false;
+        }
+    }
+    
+    // ---------- ইউআরএল থেকে অটোপ্লে প্যারামিটার যুক্ত করা ----------
+    function addAutoplayToUrl(url) {
+        if (!url) return url;
+        try {
+            const urlObj = new URL(url);
+            // ইউটিউব ভিডিও: youtube.com বা youtu.be
+            if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
+                // YouTube autoplay parameter
+                urlObj.searchParams.set('autoplay', '1');
+                urlObj.searchParams.set('mute', '0'); // unmuted by default, can be 1 if needed but better 0
+                urlObj.searchParams.set('loop', '1');
+                urlObj.searchParams.set('playlist', urlObj.searchParams.get('v') || '');
+                return urlObj.toString();
+            }
+            // ফেসবুক ভিডিও: facebook.com
+            else if (urlObj.hostname.includes('facebook.com') || urlObj.hostname.includes('fb.watch')) {
+                // Facebook autoplay via parameter
+                urlObj.searchParams.set('autoplay', '1');
+                return urlObj.toString();
+            }
+            // অন্যান্য ভিডিও হোস্টের জন্য সাধারণ autoplay প্যারামিটার
+            else {
+                urlObj.searchParams.set('autoplay', '1');
+                return urlObj.toString();
+            }
+        } catch (e) {
+            // URL পার্স না হলে original ফেরত
+            return url;
+        }
+    }
+    
+    // ---------- অটোপ্লে অপসারণ (শুধু বেস ইউআরএল ফেরত) ----------
+    function removeAutoplayFromUrl(url) {
+        if (!url) return url;
+        try {
+            const urlObj = new URL(url);
+            urlObj.searchParams.delete('autoplay');
+            urlObj.searchParams.delete('mute');
+            urlObj.searchParams.delete('loop');
+            urlObj.searchParams.delete('playlist');
+            return urlObj.toString();
+        } catch (e) {
+            return url;
+        }
+    }
+    
+    // ---------- একটি নির্দিষ্ট ভিডিওকে অটোপ্লে করা (রিলোড করে) ----------
+    function activateVideoAutoplay(reelElement) {
+        if (!reelElement) return;
+        
+        const iframe = reelElement.querySelector('iframe');
+        const originalUrl = reelElement.getAttribute('data-original-url');
+        if (!iframe || !originalUrl) return;
+        
+        // যদি আগের একটাই অ্যাক্টিভ থাকে এবং সেটাই হয়, তাহলে কিছু করো না
+        if (currentActiveReel === reelElement && iframe.src && iframe.src.includes('autoplay=1')) {
+            return;
+        }
+        
+        // অন্য ভিডিও থামানো (এবং আনলোড করবে না, শুধু পজ করবে)
+        if (currentActiveReel && currentActiveReel !== reelElement) {
+            pauseVideoReel(currentActiveReel);
+        }
+        
+        // বর্তমান রিলের জন্য অটোপ্লে URL তৈরি
+        const autoplayUrl = addAutoplayToUrl(originalUrl);
+        
+        // iframe এ allow="autoplay" নিশ্চিত করা (ইতিমধ্যে আছে, কিন্তু ডাবল চেক)
+        iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
+        
+        // যদি src ইতিমধ্যে অটোপ্লে না থাকে বা আনলোড করা থাকে তবে সেট করুন
+        if (!iframe.src || iframe.src === 'about:blank' || !iframe.src.includes('autoplay=1')) {
+            iframe.src = autoplayUrl;
+        }
+        
+        currentActiveReel = reelElement;
+    }
+    
+    // ---------- একটি ভিডিও পজ/স্টপ করা (অটোপ্লে সরানো) ----------
+    function pauseVideoReel(reelElement) {
+        if (!reelElement) return;
+        const iframe = reelElement.querySelector('iframe');
+        const originalUrl = reelElement.getAttribute('data-original-url');
+        if (!iframe || !originalUrl) return;
+        
+        // অটোপ্লে প্যারামিটার ছাড়া URL তৈরি (বেস ইউআরএল)
+        const plainUrl = removeAutoplayFromUrl(originalUrl);
+        // src রিসেট করলে ভিডিও থামে (reload হয়, কিন্তু এটি কার্যকরী পদ্ধতি)
+        // তবে currentActiveReel আপডেট করার আগে src পরিবর্তন করলে ভিডিও বন্ধ হবে
+        if (iframe.src !== plainUrl && iframe.src !== 'about:blank') {
+            iframe.src = plainUrl;
+        }
+    }
+    
+    // ---------- ভিডিও আনলোড করুন (মেমরি ফ্রি করতে) ----------
+    function unloadVideoReel(reelElement) {
+        if (!reelElement) return;
+        
+        // বর্তমানে চলমান ভিডিও আনলোড করবেন না
+        if (currentActiveReel === reelElement) return;
+        
+        const iframe = reelElement.querySelector('iframe');
+        if (!iframe) return;
+        
+        // যদি ইতিমধ্যে আনলোড করা থাকে, তবে আর কিছু করবেন না
+        if (iframe.src === 'about:blank') return;
+        
+        // ক্লিনআপ টাইমআউট ক্যান্সেল করুন (যদি থাকে)
+        const existingTimeout = cleanupTimeouts.get(reelElement);
+        if (existingTimeout) {
+            clearTimeout(existingTimeout);
+            cleanupTimeouts.delete(reelElement);
+        }
+        
+        // আনলোড: iframe কে blank এ সেট করুন (মেমরি ফ্রি)
+        iframe.src = 'about:blank';
+        
+        // আনলোড হওয়ার পর যদি ভিডিওতে কাস্টম ডেটা থাকে, তা সাফ রাখা হয়েছে
+    }
+    
+    // ---------- ভিজিবিলিটি অবজারভার সেটআপ (স্ক্রল করলেই অটোপ্লে + আনলোড) ----------
+    function setupAutoplayObserver() {
+        if (visibilityObserver) {
+            visibilityObserver.disconnect();
+        }
+        
+        visibilityObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const reel = entry.target;
+                
+                if (entry.isIntersecting) {
+                    // ভিডিওটি ভিউতে এসেছে -> অটোপ্লে শুরু করো
+                    // আগে কোন pending আনলোড টাইমআউট থাকলে বাতিল করুন
+                    const pendingTimeout = cleanupTimeouts.get(reel);
+                    if (pendingTimeout) {
+                        clearTimeout(pendingTimeout);
+                        cleanupTimeouts.delete(reel);
+                    }
+                    activateVideoAutoplay(reel);
+                } else {
+                    // ভিডিওটি ভিউ থেকে বেরিয়ে গেছে -> কিছুক্ষণ পর আনলোড করুন (মেমরি মুক্ত)
+                    // কিন্তু সাথে সাথে না করে একটু দেরি করুন, যাতে দ্রুত স্ক্রল করলে পুনরায় লোড না হয়
+                    const timeoutId = setTimeout(() => {
+                        // পুনরায় চেক করুন: এখনও কি ভিউতে নেই? (সেকেন্ডারি চেক)
+                        const stillVisible = visibilityObserver.takeRecords().some(record => record.target === reel && record.isIntersecting);
+                        if (!stillVisible && reel.getBoundingClientRect().top > window.innerHeight || reel.getBoundingClientRect().bottom < 0) {
+                            // সম্পূর্ণ বাইরে, আনলোড করুন
+                            unloadVideoReel(reel);
+                        }
+                        cleanupTimeouts.delete(reel);
+                    }, 500); // ০.৫ সেকেন্ড দেরি, দ্রুত স্ক্রলিং হলে আনলোড এড়াতে
+                    
+                    cleanupTimeouts.set(reel, timeoutId);
+                }
+            });
+        }, { threshold: 0.6 }); // 60% দৃশ্যমান হলে ট্রিগার
+    }
+    
+    // ---------- সব রিলের উপর অবজারভার অ্যাটাচ করা ----------
+    function attachObserversToReels() {
+        if (!visibilityObserver) setupAutoplayObserver();
+        const reels = document.querySelectorAll('.video-reel');
+        reels.forEach(reel => {
+            visibilityObserver.observe(reel);
+        });
+    }
+    
+    // ---------- লোডিং ইন্ডিকেটর ----------
+    function showLoading(message = "মিঠু ডাক্তর অপক্ষা কর লোড হচ্ছে...") {
+        let loader = document.querySelector('.loading-indicator');
+        if (!loader) {
+            loader = document.createElement('div');
+            loader.className = 'loading-indicator';
+            document.body.appendChild(loader);
+        }
+        loader.textContent = message;
+        loader.style.display = 'block';
+    }
+
+    function hideLoading() {
+        const loader = document.querySelector('.loading-indicator');
+        if (loader) loader.style.display = 'none';
+    }
+
+    function showNoVideos() {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'no-videos-msg';
+        msgDiv.innerText = 'মিঠু ডাক্তর কোনো ভিডিও পাওয়া যায়নি। ফায়ারবেসে ভিডিও যোগ করুন।';
+        document.body.appendChild(msgDiv);
+        setTimeout(() => msgDiv.remove(), 4000);
+    }
+
+    // ---------- ভিডিও এলিমেন্ট তৈরি (টিকটক স্টাইল + অটোপ্লে সাপোর্ট) ----------
+    function createVideoReel(videoUrl, index) {
+        const reelDiv = document.createElement('div');
+        reelDiv.className = 'video-reel';
+        reelDiv.setAttribute('data-video-index', index);
+        reelDiv.setAttribute('data-original-url', videoUrl);   // অটোপ্লে ম্যানেজমেন্টের জন্য
+        
+        // iframe তৈরি
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');  // অটোপ্লে অনুমতি
+        iframe.setAttribute('allowfullscreen', 'true');
+        iframe.loading = 'lazy';
+        
+        // প্রাথমিক src অটোপ্লে ছাড়া (লোডিং দ্রুত এবং ব্যান্ডউইথ সাশ্রয়)
+        const plainUrl = removeAutoplayFromUrl(videoUrl);
+        iframe.src = plainUrl;
+        
+        // ডাউনলোড বাটন (ওভারলে) – আগের স্টাইল
+        const downloadBtn = document.createElement('a');
+        downloadBtn.href = DEFAULT_DOWNLOAD_LINK;
+        downloadBtn.target = '_blank';
+        downloadBtn.className = 'download-btn-overlay';
+        downloadBtn.textContent = '📥FULL VIDEO';
+        
+        reelDiv.appendChild(iframe);
+        reelDiv.appendChild(downloadBtn);
+        
+        return reelDiv;
+    }
+
+    // ---------- সব ভিডিও রেন্ডার (স্ক্রোল স্ন্যাপ সহ) ----------
+    function renderAllVideos() {
+        if (!allVideos.length) return;
+        container.innerHTML = ''; // পুরনো ক্লিয়ার
+        const fragment = document.createDocumentFragment();
+        allVideos.forEach((url, idx) => {
+            if (url && isValidUrl(url)) {
+                const reel = createVideoReel(url, idx);
+                fragment.appendChild(reel);
+            } else {
+                console.warn(`Invalid video URL skipped: ${url}`);
+            }
+        });
+        container.appendChild(fragment);
+        
+        // প্রথম ভিডিওতে স্ক্রোল পজিশন ঠিক রাখা
+        if (container.children.length) {
+            container.scrollTop = 0;
+        }
+        
+        // অবজারভার সেটআপ (স্ক্রল অটোপ্লে + আনলোড)
+        setupAutoplayObserver();
+        attachObserversToReels();
+        
+        // প্রথম ভিডিওতে দ্রুত অটোপ্লে শুরু (ইউজার এক্সপেরিয়েন্স)
+        setTimeout(() => {
+            const firstReel = container.querySelector('.video-reel');
+            if (firstReel) {
+                activateVideoAutoplay(firstReel);
+            }
+        }, 300);
+    }
+    
+    // ---------- Firebase থেকে ডাটা আনা (অপরিবর্তিত লজিক) ----------
+    async function fetchVideosFromFirebase() {
+        const videosRef = database.ref("videos");
+        try {
+            const snapshot = await videosRef.once("value");
+            const data = snapshot.val();
+            if (!data) return [];
+            
+            const videoUrls = [];
+            
+            // আগের মতো ডাটা স্ট্রাকচার হ্যান্ডলিং
+            if (Array.isArray(data)) {
+                for (let item of data) {
+                    if (typeof item === "string" && isValidUrl(item)) videoUrls.push(item);
+                    else if (item && typeof item === "object") {
+                        const url = item.url || item.videoUrl || item.src || item.mp4 || item.link;
+                        if (url && isValidUrl(url)) videoUrls.push(url);
+                    }
+                }
+            } else if (typeof data === "object") {
+                for (const key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        const entry = data[key];
+                        if (typeof entry === "string" && isValidUrl(entry)) videoUrls.push(entry);
+                        else if (entry && typeof entry === "object") {
+                            const url = entry.url || entry.videoUrl || entry.src || entry.mp4 || entry.link;
+                            if (url && isValidUrl(url)) videoUrls.push(url);
+                        }
+                    }
+                }
+            }
+            
+            // ডুপ্লিকেট রিমুভ
+            const uniqueUrls = [...new Map(videoUrls.map(url => [url, url])).values()];
+            console.log(`🔥 Firebase থেকে ${uniqueUrls.length}টি ভিডিও লিংক পাওয়া গেছে`);
+            return uniqueUrls;
+        } catch (error) {
+            console.error("Firebase error:", error);
+            return [];
+        }
+    }
+    
+    // ---------- স্ক্রোল শেষে ভিডিও চেঞ্জ হলে পারফরম্যান্স ----------
+    // স্ক্রোল ইভেন্টে কোনো অতিরিক্ত কাজ না করে, IntersectionObserver নিজেই কাজ করবে
+    // তবে স্ন্যাপ শেষে সক্রিয় ভিডিও নিশ্চিত করতে স্ক্রোল শেষে একবার চেক করা যেতে পারে
+    let scrollTimeout;
+    function onScrollEnd() {
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            // স্ক্রোল থামার পরে দৃশ্যমান ভিডিওটি নিশ্চিত করা
+            const reels = document.querySelectorAll('.video-reel');
+            let bestReel = null;
+            let maxRatio = 0;
+            reels.forEach(reel => {
+                const rect = reel.getBoundingClientRect();
+                const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+                const ratio = visibleHeight / window.innerHeight;
+                if (ratio > maxRatio && ratio > 0.4) {
+                    maxRatio = ratio;
+                    bestReel = reel;
+                }
+            });
+            if (bestReel && currentActiveReel !== bestReel) {
+                activateVideoAutoplay(bestReel);
+            }
+        }, 100);
+    }
+    
+    // ---------- ইনিশিয়ালাইজেশন ----------
+    async function initReels() {
+        showLoading("মিঠু ডাক্তর অপক্ষা কর লোড হচ্ছে...");
+        
+        const videos = await fetchVideosFromFirebase();
+        hideLoading();
+        
+        if (!videos || videos.length === 0) {
+            showNoVideos();
+            return;
+        }
+        
+        allVideos = videos;
+        renderAllVideos();
+        
+        // স্ক্রোল ইভেন্ট লিসেনার (ইউজার ম্যানুয়ালি স্ক্রোল করলে অটোপ্লে আরও নিশ্চিত)
+        container.addEventListener('scroll', () => {
+            onScrollEnd();
+        });
+        
+        // উইন্ডো রিসাইজ করলেও অবজারভার ঠিক থাকে, তবে পুনরায় চেক করা যেতে পারে
+        window.addEventListener('resize', () => {
+            if (currentActiveReel) {
+                const rect = currentActiveReel.getBoundingClientRect();
+                const visible = rect.top < window.innerHeight && rect.bottom > 0;
+                if (!visible) {
+                    // যদি সক্রিয় রিল আর দৃশ্যমান না থাকে, তাহলে নতুনটি সক্রিয় করতে হবে
+                    onScrollEnd();
+                }
+            }
+        });
+</script>
+</body>
+</html>
