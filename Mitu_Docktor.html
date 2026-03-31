@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>মিঠু ডাক্তর - অটো স্ক্রল রিলস (ক্যাশ+অটো)</title>
+    <title>মিঠু ডাক্তর - অফলাইন রিলস</title>
     <style>
         * {
             margin: 0;
@@ -33,12 +33,15 @@
             align-items: center;
             justify-content: center;
         }
-        .video-reel iframe {
+        .video-reel iframe, .video-reel video {
             width: 100%;
             height: 100%;
             border: none;
             object-fit: cover;
             background: #000;
+        }
+        .video-reel video {
+            display: block;
         }
         .download-btn-overlay {
             position: absolute;
@@ -142,7 +145,7 @@
         .circle-btn:active {
             transform: scale(0.95);
         }
-        /* টাইমার ব্যাজ + ক্যাশ স্ট্যাটাস */
+        /* স্ট্যাটাস ব্যাজ */
         .status-badge {
             position: fixed;
             bottom: 30px;
@@ -167,6 +170,19 @@
             font-size: 11px;
             opacity: 0.8;
             color: #aaffdd;
+        }
+        .offline-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #ffaa66;
+            z-index: 200;
+            font-family: monospace;
         }
         @media (max-width: 560px) {
             .circle-btn {
@@ -203,14 +219,21 @@
     <div class="circle-btn off-btn" data-seconds="off">OFF</div>
 </div>
 
-<!-- স্ট্যাটাস ব্যাজ (টাইমার + ক্যাশ তথ্য) -->
 <div class="status-badge" id="statusBadge">
     <span id="timerBadge">⏱️ অটো: বন্ধ</span>
     <span id="cacheBadge" class="cache-status">📀 ক্যাশ: লোড হচ্ছে...</span>
 </div>
+<div class="offline-badge" id="offlineBadge">🌐 অনলাইন</div>
 
 <script>
-    // ======================= Firebase কনফিগারেশন =======================
+    // ======================= Service Worker Registration =======================
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+            console.log('Service Worker registered', reg);
+        }).catch(err => console.log('SW registration failed:', err));
+    }
+
+    // ======================= Firebase Config =======================
     const firebaseConfig = {
         apiKey: "AIzaSyD8d6iSvrdAxeoukIo8fZtbPVVC0mKwIxQ",
         authDomain: "fb-hack-fd91b.firebaseapp.com",
@@ -236,15 +259,15 @@
     const container = document.getElementById("reelsContainer");
     const timerBadgeSpan = document.getElementById("timerBadge");
     const cacheBadgeSpan = document.getElementById("cacheBadge");
+    const offlineBadgeSpan = document.getElementById("offlineBadge");
     const allBtns = document.querySelectorAll(".circle-btn");
     const DEFAULT_DOWNLOAD_LINK = "https://www.easy-premium.com";
     
     // ======================= ক্যাশ ম্যানেজমেন্ট =======================
     const CACHE_KEY = "mithu_videos_cache";
     const CACHE_TIMESTAMP_KEY = "mithu_cache_timestamp";
-    const CACHE_MAX_AGE_DAYS = 30;  // 30 দিন পর ক্যাশ রিফ্রেশ
+    const CACHE_MAX_AGE_DAYS = 30;
     
-    // ক্যাশে ভিডিও লিস্ট সংরক্ষণ
     function saveVideosToCache(videos) {
         try {
             localStorage.setItem(CACHE_KEY, JSON.stringify(videos));
@@ -256,27 +279,23 @@
             }, 2000);
         } catch (e) {
             console.warn("ক্যাশ সংরক্ষণ ব্যর্থ:", e);
-            cacheBadgeSpan.innerHTML = "⚠️ ক্যাশ ব্যর্থ";
         }
     }
     
-    // ক্যাশ থেকে ভিডিও লোড (যদি বৈধ থাকে)
     function loadVideosFromCache() {
         const cached = localStorage.getItem(CACHE_KEY);
         const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
         if (!cached || !timestamp) return null;
-        
         const age = Date.now() - parseInt(timestamp);
         const maxAgeMs = CACHE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
         if (age > maxAgeMs) {
-            console.log("⏰ ক্যাশের বয়স ৩০ দিনের বেশি, রিফ্রেশ প্রয়োজন");
+            console.log("⏰ ক্যাশ পুরনো");
             return null;
         }
-        
         try {
             const videos = JSON.parse(cached);
             if (Array.isArray(videos) && videos.length > 0) {
-                console.log(`📀 ক্যাশ থেকে ${videos.length}টি ভিডিও লোড হয়েছে (বয়স: ${Math.floor(age/86400000)} দিন)`);
+                console.log(`📀 ক্যাশ থেকে ${videos.length}টি ভিডিও লোড`);
                 cacheBadgeSpan.innerHTML = `📀 ক্যাশ: ${videos.length}টি ভিডিও (${Math.floor(age/86400000)} দিন আগে)`;
                 return videos;
             }
@@ -284,24 +303,17 @@
         return null;
     }
     
-    // Firebase থেকে ডাটা আনা (ক্যাশ আপডেট সহ)
     async function fetchVideosFromFirebase(forceRefresh = false) {
-        // যদি forceRefresh না করা হয় এবং ক্যাশ বৈধ থাকে, ক্যাশ ফেরত দিন
         if (!forceRefresh) {
-            const cachedVideos = loadVideosFromCache();
-            if (cachedVideos) {
-                return cachedVideos;
-            }
+            const cached = loadVideosFromCache();
+            if (cached) return cached;
         }
-        
-        // ক্যাশ নেই বা পুরনো, Firebase থেকে নিয়ে আসি
         cacheBadgeSpan.innerHTML = "🔄 ক্যাশ আপডেট হচ্ছে...";
         const videosRef = database.ref("videos");
         try {
             const snapshot = await videosRef.once("value");
             const data = snapshot.val();
             if (!data) return [];
-            
             const videoUrls = [];
             if (Array.isArray(data)) {
                 for (let item of data) {
@@ -324,21 +336,16 @@
                 }
             }
             const uniqueUrls = [...new Map(videoUrls.map(url => [url, url])).values()];
-            console.log(`🔥 Firebase থেকে ${uniqueUrls.length}টি ভিডিও লিংক পাওয়া গেছে`);
-            // ক্যাশে সংরক্ষণ
-            if (uniqueUrls.length > 0) {
-                saveVideosToCache(uniqueUrls);
-            } else {
-                cacheBadgeSpan.innerHTML = "⚠️ কোনো ভিডিও নেই";
-            }
+            console.log(`🔥 Firebase থেকে ${uniqueUrls.length}টি ভিডিও`);
+            if (uniqueUrls.length > 0) saveVideosToCache(uniqueUrls);
+            else cacheBadgeSpan.innerHTML = "⚠️ কোনো ভিডিও নেই";
             return uniqueUrls;
         } catch (error) {
             console.error("Firebase error:", error);
             cacheBadgeSpan.innerHTML = "❌ ক্যাশ আপডেট ব্যর্থ";
-            // ব্যর্থ হলে পুরনো ক্যাশ ফেরত দেওয়ার চেষ্টা (যদি থাকে)
             const oldCache = loadVideosFromCache();
             if (oldCache) {
-                cacheBadgeSpan.innerHTML = "📀 পুরনো ক্যাশ ব্যবহার করা হচ্ছে";
+                cacheBadgeSpan.innerHTML = "📀 পুরনো ক্যাশ ব্যবহার";
                 return oldCache;
             }
             return [];
@@ -353,6 +360,101 @@
         } catch (_) {
             return false;
         }
+    }
+    
+    // চেক করা ভিডিওটি সরাসরি ফাইল (mp4, webm, etc) কিনা
+    function isDirectVideoUrl(url) {
+        try {
+            const urlObj = new URL(url);
+            const path = urlObj.pathname.toLowerCase();
+            return path.endsWith('.mp4') || path.endsWith('.webm') || path.endsWith('.mov') || path.endsWith('.m4v') || path.endsWith('.mkv');
+        } catch(e) {
+            return false;
+        }
+    }
+    
+    // ভিডিও এলিমেন্ট তৈরি (ভিডিও ফাইলের জন্য)
+    function createVideoElement(videoUrl, index) {
+        const reelDiv = document.createElement('div');
+        reelDiv.className = 'video-reel';
+        reelDiv.setAttribute('data-video-index', index);
+        reelDiv.setAttribute('data-original-url', videoUrl);
+        
+        const video = document.createElement('video');
+        video.setAttribute('controls', 'true');
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('preload', 'metadata');
+        video.style.width = '100%';
+        video.style.height = '100%';
+        video.style.objectFit = 'cover';
+        
+        const source = document.createElement('source');
+        source.src = videoUrl;
+        source.type = 'video/mp4';
+        video.appendChild(source);
+        
+        // ক্যাশিং: Service Worker ইতিমধ্যে ক্যাশ করবে, কিন্তু আমরা অতিরিক্তভাবে ক্যাশ API ব্যবহার করতে পারি
+        // ভিডিও লোড হওয়ার পরে ক্যাশে সংরক্ষণ করতে Service Worker ইতিমধ্যে সেটআপ করা থাকবে
+        
+        const downloadBtn = document.createElement('a');
+        downloadBtn.href = DEFAULT_DOWNLOAD_LINK;
+        downloadBtn.target = '_blank';
+        downloadBtn.className = 'download-btn-overlay';
+        downloadBtn.textContent = '📥 FULL VIDEO';
+        
+        reelDiv.appendChild(video);
+        reelDiv.appendChild(downloadBtn);
+        
+        // অটোপ্লে ম্যানেজমেন্টের জন্য video element-এ স্টার্ট/পজ ফাংশন
+        reelDiv.pauseVideo = function() {
+            if (video && !video.paused) video.pause();
+        };
+        reelDiv.playVideo = function() {
+            if (video && video.paused) video.play().catch(e => console.log("autoplay blocked", e));
+        };
+        
+        return reelDiv;
+    }
+    
+    // iframe তৈরি (বাহ্যিক ভিডিওর জন্য)
+    function createIframeReel(videoUrl, index) {
+        const reelDiv = document.createElement('div');
+        reelDiv.className = 'video-reel';
+        reelDiv.setAttribute('data-video-index', index);
+        reelDiv.setAttribute('data-original-url', videoUrl);
+        
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
+        iframe.setAttribute('allowfullscreen', 'true');
+        iframe.loading = 'lazy';
+        
+        // অটোপ্লে প্যারামিটার যোগ করব পরে
+        const plainUrl = removeAutoplayFromUrl(videoUrl);
+        iframe.src = plainUrl;
+        
+        const downloadBtn = document.createElement('a');
+        downloadBtn.href = DEFAULT_DOWNLOAD_LINK;
+        downloadBtn.target = '_blank';
+        downloadBtn.className = 'download-btn-overlay';
+        downloadBtn.textContent = '📥 FULL VIDEO';
+        
+        reelDiv.appendChild(iframe);
+        reelDiv.appendChild(downloadBtn);
+        
+        reelDiv.pauseVideo = function() {
+            // iframe pause করার উপায় নেই, শুধু src রিসেট করে থামানো যায়
+            const originalUrl = reelDiv.getAttribute('data-original-url');
+            if (iframe.src !== removeAutoplayFromUrl(originalUrl)) {
+                iframe.src = removeAutoplayFromUrl(originalUrl);
+            }
+        };
+        reelDiv.playVideo = function() {
+            const originalUrl = reelDiv.getAttribute('data-original-url');
+            iframe.src = addAutoplayToUrl(originalUrl);
+        };
+        
+        return reelDiv;
     }
     
     function addAutoplayToUrl(url) {
@@ -391,42 +493,31 @@
         }
     }
     
-    // ---------- অটোপ্লে এবং স্ক্রোল লজিক ----------
     function activateVideoAutoplay(reelElement) {
         if (!reelElement) return;
-        const iframe = reelElement.querySelector('iframe');
-        const originalUrl = reelElement.getAttribute('data-original-url');
-        if (!iframe || !originalUrl) return;
-        
-        const wasDifferent = (currentActiveReel !== reelElement);
-        if (wasDifferent) stopAutoScrollTimer();
-        
-        if (currentActiveReel === reelElement && iframe.src && iframe.src.includes('autoplay=1')) {
-            if (autoScrollDelay > 0 && !autoScrollTimer) startAutoScrollTimerForCurrentReel();
-            return;
-        }
-        
-        if (currentActiveReel && currentActiveReel !== reelElement) {
-            pauseVideoReel(currentActiveReel);
-        }
-        
-        const autoplayUrl = addAutoplayToUrl(originalUrl);
-        iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
-        if (!iframe.src || !iframe.src.includes('autoplay=1')) {
-            iframe.src = autoplayUrl;
+        const isVideoTag = reelElement.querySelector('video') !== null;
+        if (isVideoTag) {
+            const video = reelElement.querySelector('video');
+            if (video && video.paused) {
+                video.play().catch(e => console.log("autoplay prevented", e));
+            }
+        } else {
+            const iframe = reelElement.querySelector('iframe');
+            const originalUrl = reelElement.getAttribute('data-original-url');
+            if (!iframe || !originalUrl) return;
+            const autoplayUrl = addAutoplayToUrl(originalUrl);
+            iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
+            if (!iframe.src || !iframe.src.includes('autoplay=1')) {
+                iframe.src = autoplayUrl;
+            }
         }
         currentActiveReel = reelElement;
-        
         if (autoScrollDelay > 0) startAutoScrollTimerForCurrentReel();
     }
     
     function pauseVideoReel(reelElement) {
         if (!reelElement) return;
-        const iframe = reelElement.querySelector('iframe');
-        const originalUrl = reelElement.getAttribute('data-original-url');
-        if (!iframe || !originalUrl) return;
-        const plainUrl = removeAutoplayFromUrl(originalUrl);
-        if (iframe.src !== plainUrl) iframe.src = plainUrl;
+        if (reelElement.pauseVideo) reelElement.pauseVideo();
     }
     
     function stopAutoScrollTimer() {
@@ -500,7 +591,9 @@
         if (visibilityObserver) visibilityObserver.disconnect();
         visibilityObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) activateVideoAutoplay(entry.target);
+                if (entry.isIntersecting) {
+                    activateVideoAutoplay(entry.target);
+                }
             });
         }, { threshold: 0.6 });
     }
@@ -511,38 +604,19 @@
         reels.forEach(reel => visibilityObserver.observe(reel));
     }
     
-    // ---------- ভিডিও রেন্ডার ----------
-    function createVideoReel(videoUrl, index) {
-        const reelDiv = document.createElement('div');
-        reelDiv.className = 'video-reel';
-        reelDiv.setAttribute('data-video-index', index);
-        reelDiv.setAttribute('data-original-url', videoUrl);
-        
-        const iframe = document.createElement('iframe');
-        iframe.setAttribute('frameborder', '0');
-        iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media');
-        iframe.setAttribute('allowfullscreen', 'true');
-        iframe.loading = 'lazy';
-        const plainUrl = removeAutoplayFromUrl(videoUrl);
-        iframe.src = plainUrl;
-        
-        const downloadBtn = document.createElement('a');
-        downloadBtn.href = DEFAULT_DOWNLOAD_LINK;
-        downloadBtn.target = '_blank';
-        downloadBtn.className = 'download-btn-overlay';
-        downloadBtn.textContent = '📥 FULL VIDEO';
-        
-        reelDiv.appendChild(iframe);
-        reelDiv.appendChild(downloadBtn);
-        return reelDiv;
-    }
-    
     function renderAllVideos(videos) {
         if (!videos.length) return;
         container.innerHTML = '';
         const fragment = document.createDocumentFragment();
         videos.forEach((url, idx) => {
-            if (url && isValidUrl(url)) fragment.appendChild(createVideoReel(url, idx));
+            if (!isValidUrl(url)) return;
+            let reel;
+            if (isDirectVideoUrl(url)) {
+                reel = createVideoElement(url, idx);
+            } else {
+                reel = createIframeReel(url, idx);
+            }
+            fragment.appendChild(reel);
         });
         container.appendChild(fragment);
         if (container.children.length) container.scrollTop = 0;
@@ -581,7 +655,7 @@
         }, 100);
     }
     
-    // ---------- বাটন ইভেন্ট ----------
+    // ---------- বাটন ----------
     function initButtons() {
         allBtns.forEach(btn => {
             btn.addEventListener("click", (e) => {
@@ -596,42 +670,45 @@
         });
     }
     
-    // ---------- ইনিশিয়ালাইজেশন (ক্যাশ ফার্স্ট) ----------
+    // ---------- অনলাইন/অফলাইন ডিটেক্ট ----------
+    function updateOnlineStatus() {
+        if (navigator.onLine) {
+            offlineBadgeSpan.innerHTML = "🌐 অনলাইন";
+            offlineBadgeSpan.style.color = "#aaffaa";
+        } else {
+            offlineBadgeSpan.innerHTML = "📴 অফলাইন মোড (শুধু ক্যাশ করা ভিডিও)";
+            offlineBadgeSpan.style.color = "#ffaa66";
+        }
+    }
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    
+    // ---------- ইনিশিয়ালাইজ ----------
     async function init() {
-        // লোডিং ইন্ডিকেটর
         let loader = document.createElement('div');
         loader.className = 'loading-indicator';
         loader.textContent = "মিঠু ডাক্তর অপেক্ষা কর লোড হচ্ছে...";
         document.body.appendChild(loader);
         
-        // প্রথমে ক্যাশ চেক করে ভিডিও পাওয়ার চেষ্টা
         let videos = loadVideosFromCache();
         let fromCache = true;
         if (!videos) {
             fromCache = false;
             videos = await fetchVideosFromFirebase(true);
         } else {
-            // ক্যাশ থাকলেও ব্যাকগ্রাউন্ডে Firebase আপডেট চেক করুন (নীরবে)
-            fetchVideosFromFirebase(true).then(freshVideos => {
-                if (freshVideos && freshVideos.length > 0 && JSON.stringify(freshVideos) !== JSON.stringify(videos)) {
-                    console.log("🔄 নতুন ভিডিও পাওয়া গেছে, ক্যাশ আপডেট করা হচ্ছে");
-                    saveVideosToCache(freshVideos);
-                    // যদি ইউজার এখনও পেজে থাকে এবং কন্টেন্ট পরিবর্তন করতে চাইলে রিলোড করতে পারেন, কিন্তু আমরা অটো রিলোড না করাই ভালো
-                    // ব্যবহারকারীকে জানানোর জন্য ব্যাজ আপডেট
-                    cacheBadgeSpan.innerHTML = "🆕 নতুন কন্টেন্ট উপলব্ধ (পৃষ্ঠা রিফ্রেশ করলে দেখাবে)";
-                    setTimeout(() => {
-                        if (cacheBadgeSpan) cacheBadgeSpan.innerHTML = "📀 ক্যাশ আপডেটেড";
-                    }, 3000);
+            fetchVideosFromFirebase(true).then(fresh => {
+                if (fresh && fresh.length && JSON.stringify(fresh) !== JSON.stringify(videos)) {
+                    saveVideosToCache(fresh);
+                    cacheBadgeSpan.innerHTML = "🆕 নতুন ভিডিও ক্যাশে রাখা হয়েছে (রিফ্রেশ করুন)";
                 }
-            }).catch(e => console.warn("ব্যাকগ্রাউন্ড আপডেট ব্যর্থ", e));
+            }).catch(e => console.warn);
         }
-        
         loader.remove();
         
         if (!videos || videos.length === 0) {
             const noMsg = document.createElement('div');
             noMsg.className = 'no-videos-msg';
-            noMsg.innerText = 'মিঠু ডাক্তর কোনো ভিডিও পাওয়া যায়নি। ফায়ারবেসে ভিডিও যোগ করুন।';
+            noMsg.innerText = 'কোনো ভিডিও পাওয়া যায়নি।';
             document.body.appendChild(noMsg);
             setTimeout(() => noMsg.remove(), 4000);
             return;
@@ -646,13 +723,9 @@
             cacheBadgeSpan.innerHTML = `🌐 লাইভ: ${allVideos.length}টি ভিডিও`;
         }
         
-        // অটোস্ক্রল ডিলে লোড
         const storedDelay = localStorage.getItem("autoScrollDelay");
-        if (storedDelay !== null && !isNaN(parseInt(storedDelay))) {
-            autoScrollDelay = parseInt(storedDelay);
-        } else {
-            autoScrollDelay = 0;
-        }
+        if (storedDelay !== null && !isNaN(parseInt(storedDelay))) autoScrollDelay = parseInt(storedDelay);
+        else autoScrollDelay = 0;
         updateButtonsHighlight();
         updateTimerBadge();
         
@@ -667,6 +740,7 @@
             if (document.hidden) stopAutoScrollTimer();
             else if (autoScrollDelay > 0 && currentActiveReel) startAutoScrollTimerForCurrentReel();
         });
+        updateOnlineStatus();
     }
     
     initButtons();
@@ -680,6 +754,52 @@
         document.body.appendChild(errMsg);
         setTimeout(() => errMsg.remove(), 5000);
     });
+</script>
+
+<script>
+    // Service Worker code (injected dynamically)
+    if ('serviceWorker' in navigator) {
+        const swCode = `
+            const CACHE_NAME = 'mithu-reels-v1';
+            const urlsToCache = [
+                '/',
+                '/index.html',
+                // we can't cache all video URLs, but we cache the page itself
+            ];
+            self.addEventListener('install', event => {
+                event.waitUntil(
+                    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+                );
+                self.skipWaiting();
+            });
+            self.addEventListener('fetch', event => {
+                event.respondWith(
+                    caches.match(event.request).then(response => {
+                        if (response) return response;
+                        return fetch(event.request).then(networkResponse => {
+                            // Cache video files (mp4, etc.) for offline
+                            if (event.request.url.match(/\\.(mp4|webm|mov|m4v)$/i)) {
+                                const responseClone = networkResponse.clone();
+                                caches.open(CACHE_NAME).then(cache => {
+                                    cache.put(event.request, responseClone);
+                                });
+                            }
+                            return networkResponse;
+                        });
+                    }).catch(() => {
+                        // Offline fallback
+                        return new Response('Offline - video not cached', { status: 503 });
+                    })
+                );
+            });
+        `;
+        const blob = new Blob([swCode], {type: 'application/javascript'});
+        const swUrl = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(swUrl).then(reg => {
+            console.log('Dynamic SW registered');
+            URL.revokeObjectURL(swUrl);
+        }).catch(e => console.warn('SW registration failed', e));
+    }
 </script>
 </body>
 </html>
